@@ -9,10 +9,10 @@ import java.util.Optional;
 
 @Configuration
 @ComponentScan()
-public class Config {
+public class InstanceConfig {
     private final Long localInstanceId;
 
-    public Config(@Value("${fedilinks.settings.local_instance_id:1}") Long localInstanceId) {
+    public InstanceConfig(@Value("${fedilinks.settings.local_instance_id:1}") Long localInstanceId) {
         this.localInstanceId = localInstanceId;
     }
 

@@ -1,4 +1,4 @@
-package com.fedilinks.fedilinksapi.person.metadata;
+package com.fedilinks.fedilinksapi.person;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,10 +11,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -22,8 +18,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "person_metadata")
-public class Metadata {
+@Table(name = "person_aggregates")
+public class PersonAggregates {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,17 +27,15 @@ public class Metadata {
     @Column(nullable = false, name = "person_id")
     private Long personId;
 
-    @Column(nullable = false)
-    private String key;
+    @Column(nullable = false, name = "post_count")
+    private int postCount;
 
-    @Column(nullable = false)
-    private String value;
+    @Column(nullable = false, name = "comment_count")
+    private int commentCount;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date created_at;
+    @Column(nullable = false, name = "post_score")
+    private int postScore;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updated_at;
+    @Column(nullable = false, name = "comment_score")
+    private int commentScore;
 }

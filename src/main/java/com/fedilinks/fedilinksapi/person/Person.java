@@ -1,5 +1,7 @@
 package com.fedilinks.fedilinksapi.person;
 
+import com.fedilinks.fedilinksapi.enums.ListingType;
+import com.fedilinks.fedilinksapi.enums.SortType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -32,11 +34,38 @@ public class Person implements UserDetails, Principal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, name = "instance_id")
+    private Long instanceId;
+
+    @Column(nullable = false, name = "is_local")
+    private boolean isLocal;
+
+    @Column(nullable = false, name = "is_bot_account")
+    private boolean isBotAccount;
+
+    @Column(nullable = false, name = "is_banned")
+    private boolean isBanned;
+
+    @Column(nullable = false, name = "is_deleted")
+    private boolean isDeleted;
+
     @Column(nullable = false, name = "activity_pub_id")
     private String activityPubId;
 
     @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false, name = "display_name")
+    private String displayName;
+
+    @Column(nullable = true)
+    private String email;
+
+    @Column(nullable = false, name = "is_email_verified")
+    private boolean isEmailVerified;
+
+    @Column(nullable = false)
+    private String password;
 
     @Column(nullable = false)
     private String avatarImageUrl;
@@ -47,11 +76,41 @@ public class Person implements UserDetails, Principal {
     @Column(nullable = false)
     private String biography;
 
-    @Column(nullable = false, name = "is_banned")
-    private boolean isBanned;
+    @Column(nullable = false, name = "interface_language")
+    private String interfaceLanguage;
 
-    @Column(nullable = false, name = "is_local")
-    private boolean isLocal;
+    @Column(nullable = false, name = "default_theme")
+    private String defaultTheme;
+
+    @Column(nullable = false, name = "default_listing_type")
+    private ListingType defaultListingType;
+
+    @Column(nullable = false, name = "default_sort_type")
+    private SortType defaultSortType;
+
+    @Column(nullable = false, name = "is_show_scores")
+    private boolean isShowScores;
+
+    @Column(nullable = false, name = "is_show_read_posts")
+    private boolean isShowReadPosts;
+
+    @Column(nullable = false, name = "is_show_nsfw")
+    private boolean isShowNsfw;
+
+    @Column(nullable = false, name = "is_show_new_post_notifications")
+    private boolean isShowNewPostNotifications;
+
+    @Column(nullable = false, name = "is_show_bot_accounts")
+    private boolean isShowBotAccounts;
+
+    @Column(nullable = false, name = "is_show_avatars")
+    private boolean isShowAvatars;
+
+    @Column(nullable = false, name = "is_send_notifications_to_email")
+    private boolean isSendNotificationsToEmail;
+
+    @Column(nullable = false, name = "is_open_links_in_new_tab")
+    private boolean isOpenLinksInNewTab;
 
     @Column(nullable = false, name = "public_key")
     private String publicKey;
@@ -74,7 +133,7 @@ public class Person implements UserDetails, Principal {
 
     @Override
     public String getPassword() {
-        return null;
+        return this.password;
     }
 
     @Override

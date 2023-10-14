@@ -20,6 +20,9 @@ public class PersonService {
         KeyStore keys = keyService.generate();
         return Person.builder()
                 .name(name)
+                .password("")
+                .instanceId((long)1)
+                .displayName("")
                 .activityPubId("")
                 .avatarImageUrl("")
                 .bannerImageUrl("")

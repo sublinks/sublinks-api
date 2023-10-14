@@ -4,4 +4,5 @@ public enum ListingType {
     All,
     Local,
     Subscribed,
+    ModeratorView,
 }

@@ -118,63 +118,48 @@ create table languages
  */
 create table people
 (
-    `id`               bigint auto_increment primary key,
-    `activity_pub_id`  text         not null,
-    `name`             varchar(255) not null,
-    `avatar_image_url` text         not null,
-    `banner_image_url` text         not null,
-    `biography`        text         not null,
-    `is_banned`        tinyint      not null default 0,
-    `is_local`         tinyint      not null default 0,
-    `public_key`       text         not null,
-    `private_key`      text null,
-    `created_at`       timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`       timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3)
+    `id`                             bigint auto_increment primary key,
+    `instance_id`                    bigint       not null,
+    `is_local`                       tinyint      not null default 0,
+    `is_bot_account`                 tinyint      not null default 0,
+    `is_banned`                      tinyint      not null default 0,
+    `is_deleted`                     tinyint      not null default 0,
+    `activity_pub_id`                text         not null,
+    `name`                           varchar(255) not null,
+    `display_name`                   varchar(255) not null,
+    `email`                          varchar(255) null,
+    `is_email_verified`              tinyint      not null default 0,
+    `password`                       varchar(255) not null,
+    `avatar_image_url`               text         not null,
+    `banner_image_url`               text         not null,
+    `biography`                      text         not null,
+    `interface_language`             varchar(20) null,
+    `default_theme`                  varchar(255) null,
+    `default_listing_type`           enum ('All', 'Local', 'Subscribed', 'ModeratorView'),
+    `default_sort_type`              enum ('Active', 'Hot', 'New', 'Old', 'TopDay', 'TopWeek',
+        'TopMonth', 'TopYear', 'TopAll', 'MostComments', 'NewComments', 'TopHour', 'TopSixHour',
+        'TopTwelveHour', 'TopThreeMonths', 'TopSixMonths', 'TopNineMonths', 'Controversial', 'Scaled'),
+    `is_show_scores`                 tinyint      not null default 0,
+    `is_show_read_posts`             tinyint      not null default 0,
+    `is_show_nsfw`                   tinyint      not null default 0,
+    `is_show_new_post_notifications` tinyint      not null default 0,
+    `is_show_bot_accounts`           tinyint      not null default 0,
+    `is_show_avatars`                tinyint      not null default 0,
+    `is_send_notifications_to_email` tinyint      not null default 0,
+    `is_open_links_in_new_tab`       tinyint      not null default 0,
+    `public_key`                     text         not null,
+    `private_key`                    text null,
+    `created_at`                     timestamp(3)          default current_timestamp(3) not null,
+    `updated_at`                     timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3)
 
 ) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    default charset `utf8mb4`
+    collate = 'utf8mb4_unicode_ci';
 
 create index `IDX_PEOPLE_NAME` on `people` (`name`);
+create index `IDX_PEOPLE_EMAIL` on `people` (`email`);
 create index `IDX_PEOPLE_IS_BANNED` on `people` (`is_banned`);
 create index `IDX_PEOPLE_IS_LOCAL` on `people` (`is_local`);
-
-/**
-  Person Passwords table
- */
-create table person_passwords
-(
-    `id`         bigint auto_increment primary key,
-    `person_id`  bigint                                    not null,
-    `password`   varchar(255)                              not null,
-    `is_active`  tinyint                                   not null,
-    `created_at` timestamp(3) default current_timestamp(3) not null,
-    `updated_at` timestamp(3) default current_timestamp(3) not null on update current_timestamp (3)
-
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
-
-create index `IDX_PERSON_PASSWORDS_PERSON_ID` on `person_passwords` (`person_id`);
-
-/**
-  Person Metadata table
- */
-create table person_metadata
-(
-    `id`         bigint auto_increment primary key,
-    `person_id`  bigint                                    not null,
-    `key`        varchar(255)                              not null,
-    `value`      varchar(255)                              not null,
-    `created_at` timestamp(3) default current_timestamp(3) not null,
-    `updated_at` timestamp(3) default current_timestamp(3) not null on update current_timestamp (3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
-
-create index `IDX_PERSON_METADATA_PERSON_ID` on `person_metadata` (`person_id`);
-create index `IDX_PERSON_METADATA_PERSON_ID_KEY` on `person_metadata` (`person_id`, `key`);
-
 
 /**
   Posts table

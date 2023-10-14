@@ -2,8 +2,9 @@ package com.fedilinks.fedilinksapi.api.lemmy.v3.builders;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.Language;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CustomEmojiView;
-import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.PersonView;
 import com.fedilinks.fedilinksapi.language.LanguageRepository;
+import com.fedilinks.fedilinksapi.person.Person;
+import com.fedilinks.fedilinksapi.person.PersonRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -15,9 +16,14 @@ import java.util.List;
 @Component
 public class SiteBuilder {
 
-    public Collection<PersonView> admins() {
-        final Collection<PersonView> personViews = new HashSet<>();
-        return personViews;
+    private PersonRepository personRepository;
+
+    public SiteBuilder(PersonRepository personRepository) {
+        this.personRepository = personRepository;
+    }
+
+    public Collection<Person> admins() {
+        return personRepository.findAll();
     }
 
     public Collection<Language> allLanguages(final LanguageRepository languageRepository) {

@@ -33,18 +33,15 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.2'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.2'
 
+    implementation "org.mapstruct:mapstruct:1.5.5.Final"
     compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-
     compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-
-    annotationProcessor 'org.projectlombok:lombok'
-    compileOnly 'org.projectlombok:lombok'
-
     compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+    annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
-
     testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

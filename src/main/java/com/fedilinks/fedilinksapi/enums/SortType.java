@@ -1,4 +1,4 @@
-package com.fedilinks.fedilinksapi.api.lemmy.v3.enums;
+package com.fedilinks.fedilinksapi.enums;
 
 public enum SortType {
     Active,

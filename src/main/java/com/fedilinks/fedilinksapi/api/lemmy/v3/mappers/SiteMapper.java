@@ -5,9 +5,9 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.Language;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetSiteResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.SiteResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CustomEmojiView;
-import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.PersonView;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
 import com.fedilinks.fedilinksapi.person.Person;
+import com.fedilinks.fedilinksapi.person.SignedInUserContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -25,22 +25,17 @@ public interface SiteMapper {
 
     @Mapping(target = "version", constant = "0.1.0")
     @Mapping(target = "taglines", source = "announcements")
-    @Mapping(target = "tagline", ignore = true)
     @Mapping(target = "site_view", source = "context")
-    @Mapping(target = "my_user", source = "loggedInPerson")
+    @Mapping(target = "my_user", source = "userContext", conditionExpression = "java(userContext.getPerson() != null)")
     @Mapping(target = "discussion_languages", source = "discussionLanguages")
-    @Mapping(target = "discussion_language", ignore = true)
     @Mapping(target = "custom_emojis", source = "customEmojis")
-    @Mapping(target = "custom_emoji", ignore = true)
     @Mapping(target = "all_languages", source = "languages")
-    @Mapping(target = "all_language", ignore = true)
     @Mapping(target = "admins", source = "admins")
-    @Mapping(target = "admin", ignore = true)
     GetSiteResponse toGetSiteResponse(
             LocalInstanceContext context,
-            Person loggedInPerson,
+            SignedInUserContext userContext,
             Collection<Announcement> announcements,
-            Collection<PersonView> admins,
+            Collection<Person> admins,
             Collection<Language> languages,
             Collection<CustomEmojiView> customEmojis,
             Collection<Integer> discussionLanguages

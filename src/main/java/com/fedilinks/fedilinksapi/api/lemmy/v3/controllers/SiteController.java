@@ -13,11 +13,10 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.SiteResponse;
 import com.fedilinks.fedilinksapi.instance.Instance;
 import com.fedilinks.fedilinksapi.instance.InstanceRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
-import com.fedilinks.fedilinksapi.person.Person;
+import com.fedilinks.fedilinksapi.person.SignedInUserContext;
 import com.fedilinks.fedilinksapi.util.KeyService;
 import com.fedilinks.fedilinksapi.util.KeyStore;
 import jakarta.validation.Valid;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -43,13 +42,16 @@ public class SiteController {
 
     private final SiteMapper siteMapper;
 
+    private final SignedInUserContext userContext;
+
     public SiteController(
             LocalInstanceContext localInstanceContext,
             SiteBuilder siteBuilder,
             InstanceRepository instanceRepository,
             KeyService keyService,
             CreateSiteRequestMapper createSiteRequestMapper,
-            SiteMapper siteMapper
+            SiteMapper siteMapper,
+            SignedInUserContext userContext
     ) {
         this.localInstanceContext = localInstanceContext;
         this.siteBuilder = siteBuilder;
@@ -57,14 +59,15 @@ public class SiteController {
         this.keyService = keyService;
         this.createSiteRequestMapper = createSiteRequestMapper;
         this.siteMapper = siteMapper;
+        this.userContext = userContext;
     }
 
     @GetMapping
-    GetSiteResponse getSite(@AuthenticationPrincipal Person loggedInPerson) {
+    GetSiteResponse getSite() {
         Collection<Announcement> announcements = new HashSet<>();
         return siteMapper.toGetSiteResponse(
                 localInstanceContext,
-                loggedInPerson,
+                userContext,
                 announcements,
                 siteBuilder.admins(),
                 siteBuilder.allLanguages(localInstanceContext.languageRepository()),
