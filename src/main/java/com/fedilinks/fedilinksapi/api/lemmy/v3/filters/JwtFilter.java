@@ -3,6 +3,7 @@ package com.fedilinks.fedilinksapi.api.lemmy.v3.filters;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.util.JwtUtil;
 import com.fedilinks.fedilinksapi.person.Person;
 import com.fedilinks.fedilinksapi.person.PersonRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,11 +38,13 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = null;
         String userName = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            token = authorizationHeader.substring(7);
-            userName = jwtUtil.extractUsername(token);
-        } else if (request.getContentType() == "application/json") {
-            // @todo check body for auth
+        try {
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                token = authorizationHeader.substring(7);
+                userName = jwtUtil.extractUsername(token);
+            }
+        } catch (ExpiredJwtException ex) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
 
         if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -62,6 +65,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        return false;// @todo filter on lemmy api only
+        return !request.getServletPath().startsWith("/api/v3");
     }
 }

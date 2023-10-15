@@ -1,6 +1,7 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.controllers;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.builders.PersonBuilder;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.GetPersonDetails;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.Login;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.Register;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.BanPersonResponse;
@@ -80,8 +81,19 @@ public class UserController {
     }
 
     @GetMapping()
-    GetPersonDetailsResponse show() {
-        return personBuilder.getPersonDetailsResponse();
+    GetPersonDetailsResponse show(@Valid GetPersonDetails getPersonDetailsForm) {
+        Long userId = null;
+        Person person = null;
+        if (getPersonDetailsForm.person_id() != null) {
+            userId = (long)getPersonDetailsForm.person_id();
+            person = personRepository.findById(userId).orElseThrow();
+        } else if (getPersonDetailsForm.username() != null) {
+            person = personRepository.findOneByName(getPersonDetailsForm.username());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
+        }
+
+        return null;
     }
 
     @GetMapping("mention")
