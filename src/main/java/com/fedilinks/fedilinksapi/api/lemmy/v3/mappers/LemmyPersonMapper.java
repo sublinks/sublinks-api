@@ -2,7 +2,6 @@ package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.LocalUser;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.MyUserInfo;
-import com.fedilinks.fedilinksapi.api.lemmy.v3.models.aggregates.PersonAggregates;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityBlockView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityFollowerView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityModeratorView;
@@ -11,13 +10,13 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.PersonBlockView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.PersonView;
 import com.fedilinks.fedilinksapi.community.Community;
 import com.fedilinks.fedilinksapi.person.Person;
-import com.fedilinks.fedilinksapi.person.SignedInUserContext;
+import com.fedilinks.fedilinksapi.person.PersonContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SortTypeMapper.class, ListTypeMapper.class, PersonMapper.class})
-public interface PersonMapper {
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SortTypeMapper.class, ListTypeMapper.class})
+public interface LemmyPersonMapper {
 
     @Mapping(target = "person", source = "person")
     @Mapping(target = "community", source = "community")
@@ -38,7 +37,7 @@ public interface PersonMapper {
     @Mapping(target = "person_id", source = "person.id")
     @Mapping(target = "email", source = "person.email")
     @Mapping(target = "theme", source = "person.defaultTheme")
-    @Mapping(target = "validator_time", constant = "")
+    @Mapping(target = "validator_time", constant = "2023-06-09T02:35:26.397746Z", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "totp_2fa_url", constant = "")
     @Mapping(target = "interface_language", source = "person.interfaceLanguage")
     @Mapping(target = "default_sort_type", source = "person.defaultSortType")
@@ -55,30 +54,30 @@ public interface PersonMapper {
     @Mapping(target = "accepted_application", constant = "true")
     LocalUser personToLocalUser(Person person);
 
-    @Mapping(target = "person", source = "userContext.person")
-    @Mapping(target = "local_user", source = "userContext.person")
-    @Mapping(target = "counts", source = "userContext.personAggregates")
-    LocalUserView personToLocalUserView(SignedInUserContext userContext);
+    @Mapping(target = "person", source = "personContext.person")
+    @Mapping(target = "local_user", source = "personContext.person")
+    @Mapping(target = "counts", source = "personContext.personAggregates")
+    LocalUserView personToLocalUserView(PersonContext personContext);
 
-    @Mapping(target = "local_user_view", source = "userContext")
-    @Mapping(target = "discussion_languages", source = "userContext.discussLanguages")
-    @Mapping(target = "moderates", source = "userContext.moderates")
-    @Mapping(target = "follows", source = "userContext.follows")
-    @Mapping(target = "community_blocks", source = "userContext.communityBlocks")
-    @Mapping(target = "person_blocks", source = "userContext.personBlocks")
-    MyUserInfo personToMyUserInfo(SignedInUserContext userContext);
+    @Mapping(target = "local_user_view", source = "personContext")
+    @Mapping(target = "discussion_languages", source = "personContext.discussLanguages")
+    @Mapping(target = "moderates", source = "personContext.moderates")
+    @Mapping(target = "follows", source = "personContext.follows")
+    @Mapping(target = "community_blocks", source = "personContext.communityBlocks")
+    @Mapping(target = "person_blocks", source = "personContext.personBlocks")
+    MyUserInfo personToMyUserInfo(PersonContext personContext);
 
-    @Mapping(target = "person", source = "person")
-    @Mapping(target = "counts", source = "personAggregates")
-    PersonView personToPersonView(Person person, PersonAggregates personAggregates);
+    @Mapping(target = "person", source = "personContext.person")
+    @Mapping(target = "counts", source = "personContext.personAggregates")
+    PersonView personToPersonView(PersonContext personContext);
 
     @Mapping(target = "id", source = "person.id")
     @Mapping(target = "name", source = "person.name")
     @Mapping(target = "display_name", source = "person.displayName", conditionExpression = "java(!person.getDisplayName().isEmpty())")
     @Mapping(target = "avatar", source = "person.avatarImageUrl")
     @Mapping(target = "banned", source = "person.banned")
-    @Mapping(target = "published", source = "person.createdAt")
-    @Mapping(target = "updated", source = "person.updatedAt")
+    @Mapping(target = "published", source = "person.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+    @Mapping(target = "updated", source = "person.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "actor_id", constant = "")
     @Mapping(target = "bio", source = "person.biography")
     @Mapping(target = "local", source = "person.local")

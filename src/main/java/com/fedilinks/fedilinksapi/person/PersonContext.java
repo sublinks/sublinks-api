@@ -1,6 +1,8 @@
 package com.fedilinks.fedilinksapi.person;
 
+import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.community.Community;
+import com.fedilinks.fedilinksapi.post.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,8 +16,10 @@ import java.util.Collection;
 @AllArgsConstructor
 @Setter
 @Getter
-public class SignedInUserContext {
+public class PersonContext {
     private Person person;
+    private Collection<Post> posts;
+    private Collection<Comment> comments;
     private PersonAggregates personAggregates;
     private Collection<Integer> discussLanguages;
     private Collection<Community> moderates;

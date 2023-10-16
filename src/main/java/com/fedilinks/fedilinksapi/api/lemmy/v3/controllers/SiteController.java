@@ -13,7 +13,7 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.SiteResponse;
 import com.fedilinks.fedilinksapi.instance.Instance;
 import com.fedilinks.fedilinksapi.instance.InstanceRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
-import com.fedilinks.fedilinksapi.person.SignedInUserContext;
+import com.fedilinks.fedilinksapi.person.PersonContext;
 import com.fedilinks.fedilinksapi.util.KeyService;
 import com.fedilinks.fedilinksapi.util.KeyStore;
 import jakarta.validation.Valid;
@@ -42,7 +42,7 @@ public class SiteController {
 
     private final SiteMapper siteMapper;
 
-    private final SignedInUserContext userContext;
+    private final PersonContext personContext;
 
     public SiteController(
             LocalInstanceContext localInstanceContext,
@@ -51,7 +51,7 @@ public class SiteController {
             KeyService keyService,
             CreateSiteRequestMapper createSiteRequestMapper,
             SiteMapper siteMapper,
-            SignedInUserContext userContext
+            PersonContext personContext
     ) {
         this.localInstanceContext = localInstanceContext;
         this.siteBuilder = siteBuilder;
@@ -59,7 +59,7 @@ public class SiteController {
         this.keyService = keyService;
         this.createSiteRequestMapper = createSiteRequestMapper;
         this.siteMapper = siteMapper;
-        this.userContext = userContext;
+        this.personContext = personContext;
     }
 
     @GetMapping
@@ -67,7 +67,7 @@ public class SiteController {
         Collection<Announcement> announcements = new HashSet<>();
         return siteMapper.toGetSiteResponse(
                 localInstanceContext,
-                userContext,
+                personContext,
                 announcements,
                 siteBuilder.admins(),
                 siteBuilder.allLanguages(localInstanceContext.languageRepository()),

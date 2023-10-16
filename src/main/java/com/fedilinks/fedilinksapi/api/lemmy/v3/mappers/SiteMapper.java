@@ -7,14 +7,14 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.SiteResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CustomEmojiView;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
 import com.fedilinks.fedilinksapi.person.Person;
-import com.fedilinks.fedilinksapi.person.SignedInUserContext;
+import com.fedilinks.fedilinksapi.person.PersonContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 import java.util.Collection;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LocalInstanceContextMapper.class, TaglineMapper.class, PersonMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LocalInstanceContextMapper.class, TaglineMapper.class, LemmyPersonMapper.class})
 public interface SiteMapper {
 
     @Mapping(target = "tag_line", ignore = true)
@@ -26,14 +26,14 @@ public interface SiteMapper {
     @Mapping(target = "version", constant = "0.1.0")
     @Mapping(target = "taglines", source = "announcements")
     @Mapping(target = "site_view", source = "context")
-    @Mapping(target = "my_user", source = "userContext", conditionExpression = "java(userContext.getPerson() != null)")
+    @Mapping(target = "my_user", source = "personContext", conditionExpression = "java(personContext.getPerson() != null)")
     @Mapping(target = "discussion_languages", source = "discussionLanguages")
     @Mapping(target = "custom_emojis", source = "customEmojis")
     @Mapping(target = "all_languages", source = "languages")
     @Mapping(target = "admins", source = "admins")
     GetSiteResponse toGetSiteResponse(
             LocalInstanceContext context,
-            SignedInUserContext userContext,
+            PersonContext personContext,
             Collection<Announcement> announcements,
             Collection<Person> admins,
             Collection<Language> languages,

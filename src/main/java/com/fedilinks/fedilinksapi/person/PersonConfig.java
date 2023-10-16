@@ -16,21 +16,21 @@ import java.util.List;
 public class PersonConfig {
     @Bean
     @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    SignedInUserContext signedInUserContext() {
+    PersonContext signedInUserContext() {
         Object principal = SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
-        SignedInUserContext signedInUserContext = new SignedInUserContext();
+        PersonContext personContext = new PersonContext();
         if (principal instanceof Person) {
             Person person = (Person)principal;
-            signedInUserContext.setPerson(person);
-            signedInUserContext.setPersonAggregates(aggregates(person));
-            signedInUserContext.setDiscussLanguages(discussionLanguages(person));
-            signedInUserContext.setFollows(follows(person));
-            signedInUserContext.setModerates(moderates(person));
-            signedInUserContext.setPersonBlocks(personBlocks(person));
-            signedInUserContext.setCommunityBlocks(communityBlocks(person));
+            personContext.setPerson(person);
+            personContext.setPersonAggregates(aggregates(person));
+            personContext.setDiscussLanguages(discussionLanguages(person));
+            personContext.setFollows(follows(person));
+            personContext.setModerates(moderates(person));
+            personContext.setPersonBlocks(personBlocks(person));
+            personContext.setCommunityBlocks(communityBlocks(person));
         }
-        return signedInUserContext;
+        return personContext;
     }
 
     private PersonAggregates aggregates(Person person) {

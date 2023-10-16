@@ -1,6 +1,6 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.controllers;
 
-import com.fedilinks.fedilinksapi.api.lemmy.v3.builders.PersonBuilder;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.GetPersonDetailsResponseMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.GetPersonDetails;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.Login;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.Register;
@@ -21,6 +21,7 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.PasswordResetRes
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.PersonMentionResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.UpdateTotpResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.VerifyEmailResponse;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.PersonView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.util.JwtUtil;
 import com.fedilinks.fedilinksapi.person.Person;
 import com.fedilinks.fedilinksapi.person.PersonRepository;
@@ -36,29 +37,29 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
+import java.util.HashSet;
 
 @RestController
 @RequestMapping(path = "/api/v3/user")
 public class UserController {
-
-    private final PersonBuilder personBuilder;
-
     private final JwtUtil jwtUtil;
 
     private final PersonService personService;
 
     private final PersonRepository personRepository;
 
+    private final GetPersonDetailsResponseMapper getPersonDetailsResponseMapper;
+
     public UserController(
             JwtUtil jwtUtil,
-            PersonBuilder personBuilder,
             PersonService personService,
-            PersonRepository personRepository
-    ) {
+            PersonRepository personRepository,
+            GetPersonDetailsResponseMapper getPersonDetailsResponseMapper) {
         this.jwtUtil = jwtUtil;
-        this.personBuilder = personBuilder;
         this.personService = personService;
         this.personRepository = personRepository;
+        this.getPersonDetailsResponseMapper = getPersonDetailsResponseMapper;
     }
 
     @PostMapping("register")
@@ -85,7 +86,7 @@ public class UserController {
         Long userId = null;
         Person person = null;
         if (getPersonDetailsForm.person_id() != null) {
-            userId = (long)getPersonDetailsForm.person_id();
+            userId = (long) getPersonDetailsForm.person_id();
             person = personRepository.findById(userId).orElseThrow();
         } else if (getPersonDetailsForm.username() != null) {
             person = personRepository.findOneByName(getPersonDetailsForm.username());
@@ -93,37 +94,42 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
         }
 
-        return null;
+        return getPersonDetailsResponseMapper.PersonToGetPersonDetailsResponse(
+                personService.getPersonContext(person)
+        );
     }
 
     @GetMapping("mention")
     GetPersonMentionsResponse mention() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return GetPersonMentionsResponse.builder().build();
     }
 
     @PostMapping("mention/mark_as_read")
     PersonMentionResponse mentionMarkAsRead() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return PersonMentionResponse.builder().build();
     }
 
     @GetMapping("replies")
     GetRepliesResponse replies() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return GetRepliesResponse.builder().build();
     }
 
     @PostMapping("ban")
     BanPersonResponse ban() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return BanPersonResponse.builder().build();
     }
 
     @GetMapping("banned")
     BannedPersonsResponse bannedList() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        Collection<PersonView> bannedPersons = new HashSet<>();
+        return BannedPersonsResponse.builder()
+                .banned(bannedPersons)
+                .build();
     }
 
     @PostMapping("block")
     BlockPersonResponse block() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return BlockPersonResponse.builder().build();
     }
 
     @PostMapping("login")
@@ -169,7 +175,7 @@ public class UserController {
 
     @GetMapping("report_count")
     GetReportCountResponse reportCount() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return GetReportCountResponse.builder().build();
     }
 
     @GetMapping("unread_count")
