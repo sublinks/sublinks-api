@@ -1,4 +1,4 @@
-package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers;
+package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.request;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.CreateSite;
 import com.fedilinks.fedilinksapi.instance.Instance;
@@ -10,7 +10,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface CreateSiteRequestMapper {
+public interface CreateSiteFormMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

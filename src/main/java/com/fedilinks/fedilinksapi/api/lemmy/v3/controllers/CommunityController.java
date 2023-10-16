@@ -1,8 +1,10 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.controllers;
 
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.request.CreateCommunityFormMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.AddModToCommunity;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BanPerson;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BlockCommunity;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.CreateCommunity;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.DeleteCommunity;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.EditCommunity;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.FollowCommunity;
@@ -18,11 +20,13 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.CommunityRespons
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetCommunityResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.ListCommunitiesResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
+import com.fedilinks.fedilinksapi.community.Community;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -33,6 +37,20 @@ import java.util.HashSet;
 @RestController
 @RequestMapping(path = "/api/v3/community")
 public class CommunityController {
+    private CreateCommunityFormMapper createCommunityFormMapper;
+
+    public CommunityController(CreateCommunityFormMapper createCommunityFormMapper) {
+        this.createCommunityFormMapper = createCommunityFormMapper;
+    }
+
+    @PostMapping
+    CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm) {
+
+        Community community = createCommunityFormMapper.createCommunityFormToCommunity(createCommunityForm);
+
+        return CommunityResponse.builder().build();
+    }
+
     @GetMapping
     GetCommunityResponse show(@Valid GetCommunity getCommunityForm) {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);

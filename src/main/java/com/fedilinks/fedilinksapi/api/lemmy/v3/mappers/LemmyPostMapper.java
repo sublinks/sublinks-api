@@ -19,7 +19,6 @@ public interface LemmyPostMapper {
     @Mapping(target = "embed_video_url", source = "post.linkVideoUrl")
     @Mapping(target = "embed_title", source = "post.linkTitle")
     @Mapping(target = "embed_description", source = "post.linkDescription")
-    @Mapping(target = "creator_id", source = "post.creatorId")
     @Mapping(target = "community_id", source = "post.communityId")
     @Mapping(target = "body", source = "post.postBody")
     @Mapping(target = "updated", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")

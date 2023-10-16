@@ -1,11 +1,15 @@
 package com.fedilinks.fedilinksapi.community;
 
 import com.fedilinks.fedilinksapi.enums.NsfwType;
+import com.fedilinks.fedilinksapi.instance.Instance;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +30,16 @@ import java.util.Date;
 @Entity
 @Table(name = "communities")
 public class Community implements Serializable {
+    /**
+     * Relationships
+     */
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "instance_id")
+    private Instance instance;
+
+    /**
+     * Attributes
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,7 +47,7 @@ public class Community implements Serializable {
     @Column(nullable = false, name = "activity_pub_id")
     private String activityPubId;
 
-    @Column(nullable = false, name = "instance_id")
+    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
     private Long instanceId;
 
     @Column(nullable = false)

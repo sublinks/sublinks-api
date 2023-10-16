@@ -1,10 +1,13 @@
 package com.fedilinks.fedilinksapi.instance;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,11 +23,21 @@ import lombok.Setter;
 @Entity
 @Table(name = "instance_aggregates")
 public class InstanceAggregate {
+    /**
+     * Relationships
+     */
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "instance_id")
+    private Instance instance;
+
+    /**
+     * Attributes
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "instance_id")
+    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
     private Long instanceId;
 
     @Column(nullable = false, name = "user_count")

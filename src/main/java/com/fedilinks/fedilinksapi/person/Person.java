@@ -1,12 +1,22 @@
 package com.fedilinks.fedilinksapi.person;
 
+import com.fedilinks.fedilinksapi.comment.Comment;
+import com.fedilinks.fedilinksapi.comment.like.CommentLike;
 import com.fedilinks.fedilinksapi.enums.ListingType;
 import com.fedilinks.fedilinksapi.enums.SortType;
+import com.fedilinks.fedilinksapi.instance.Instance;
+import com.fedilinks.fedilinksapi.post.Post;
+import com.fedilinks.fedilinksapi.post.like.PostLike;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +31,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,11 +41,36 @@ import java.util.Date;
 @Entity
 @Table(name = "people")
 public class Person implements UserDetails, Principal {
+    /**
+     * Relationships
+     */
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "instance_id")
+    private Instance instance;
+
+    @OneToMany
+    private List<Comment> comments;
+
+    @OneToMany
+    private List<Post> posts;
+
+    @OneToMany
+    private List<CommentLike> commentLikes;
+
+    @OneToMany
+    private List<PostLike> postLikes;
+
+    @OneToOne
+    private PersonAggregates personAggregates;
+
+    /**
+     * Attributes
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "instance_id")
+    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
     private Long instanceId;
 
     @Column(nullable = false, name = "is_local")

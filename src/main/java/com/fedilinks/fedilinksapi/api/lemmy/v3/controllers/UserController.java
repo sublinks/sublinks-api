@@ -1,6 +1,6 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.controllers;
 
-import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.GetPersonDetailsResponseMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response.GetPersonDetailsResponseMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.GetPersonDetails;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.Login;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.Register;

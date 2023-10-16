@@ -1,5 +1,9 @@
-package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers;
+package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response;
 
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyCommentMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyPersonMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyPostMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetPersonDetailsResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommentView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityModeratorView;

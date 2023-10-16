@@ -2,8 +2,8 @@ package com.fedilinks.fedilinksapi.api.lemmy.v3.controllers;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.announcment.Announcement;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.builders.SiteBuilder;
-import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.CreateSiteRequestMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.SiteMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.request.CreateSiteFormMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BlockInstance;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.CreateSite;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.EditSite;
@@ -38,7 +38,7 @@ public class SiteController {
 
     private final KeyService keyService;
 
-    private final CreateSiteRequestMapper createSiteRequestMapper;
+    private final CreateSiteFormMapper createSiteFormMapper;
 
     private final SiteMapper siteMapper;
 
@@ -49,7 +49,7 @@ public class SiteController {
             SiteBuilder siteBuilder,
             InstanceRepository instanceRepository,
             KeyService keyService,
-            CreateSiteRequestMapper createSiteRequestMapper,
+            CreateSiteFormMapper createSiteFormMapper,
             SiteMapper siteMapper,
             PersonContext personContext
     ) {
@@ -57,7 +57,7 @@ public class SiteController {
         this.siteBuilder = siteBuilder;
         this.instanceRepository = instanceRepository;
         this.keyService = keyService;
-        this.createSiteRequestMapper = createSiteRequestMapper;
+        this.createSiteFormMapper = createSiteFormMapper;
         this.siteMapper = siteMapper;
         this.personContext = personContext;
     }
@@ -80,7 +80,7 @@ public class SiteController {
     SiteResponse createSite(@Valid @RequestBody CreateSite createSiteForm) {
         KeyStore keys = keyService.generate();
         Instance instance = localInstanceContext.instance();
-        createSiteRequestMapper.CreateSiteToInstance(
+        createSiteFormMapper.CreateSiteToInstance(
                 createSiteForm,
                 localInstanceContext,
                 keys,

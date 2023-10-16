@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,11 +22,21 @@ import lombok.Setter;
 @Entity
 @Table(name = "person_aggregates")
 public class PersonAggregates {
+    /**
+     * Relationships
+     */
+    @OneToOne
+    @JoinColumn(name = "person_id")
+    private Person person;
+
+    /**
+     * Attributes
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "person_id")
+    @Column(nullable = false, name = "person_id", insertable = false, updatable = false)
     private Long personId;
 
     @Column(nullable = false, name = "post_count")

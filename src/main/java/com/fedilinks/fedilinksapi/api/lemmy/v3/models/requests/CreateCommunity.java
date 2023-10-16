@@ -11,8 +11,8 @@ public record CreateCommunity(
         String description,
         String icon,
         String banner,
-        boolean nsfw,
-        boolean posting_restricted_to_mods,
+        Boolean nsfw,
+        Boolean posting_restricted_to_mods,
         Collection<String> discussion_languages,
         String auth
 ) {

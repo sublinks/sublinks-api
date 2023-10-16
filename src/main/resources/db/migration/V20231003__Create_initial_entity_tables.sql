@@ -8,7 +8,7 @@ create table comments
     `language_id`     bigint  not null,
     `is_deleted`      tinyint not null default 0,
     `is_removed`      tinyint not null default 0,
-    `creator_id`      bigint  not null,
+    `person_id`       bigint  not null,
     `community_id`    bigint  not null,
     `post_id`         bigint  not null,
     `is_featured`     tinyint not null default 0,
@@ -21,7 +21,7 @@ create table comments
   collate = 'utf8mb4_unicode_ci';
 
 create index `IDX_COMMENTS_LANGUAGE_ID` on `comments` (`language_id`);
-create index `IDX_COMMENTS_CREATOR_ID` on `comments` (`creator_id`);
+create index `IDX_COMMENTS_PERSON_ID` on `comments` (`person_id`);
 create index `IDX_COMMENTS_COMMUNITY_ID` on `comments` (`community_id`);
 create index `IDX_COMMENTS_POST_ID` on `comments` (`post_id`);
 
@@ -32,6 +32,7 @@ create table comment_likes
 (
     `id`              bigint auto_increment primary key,
     `activity_pub_id` text    not null,
+    `person_id`       bigint  not null,
     `comment_id`      bigint  not null,
     `is_up_vote`      tinyint not null default 0,
     `is_down_vote`    tinyint not null default 0,
@@ -42,6 +43,7 @@ create table comment_likes
   collate = 'utf8mb4_unicode_ci';
 
 create index `IDX_COMMENT_ID` on `comment_likes` (`comment_id`);
+create index `IDX_PERSON_ID` on `comment_likes` (`person_id`);
 
 /**
   Communities table
@@ -167,11 +169,11 @@ create index `IDX_PEOPLE_IS_LOCAL` on `people` (`is_local`);
 create table posts
 (
     `id`                       bigint auto_increment primary key,
+    `instance_id`              bigint       not null,
     `activity_pub_id`          text         not null,
     `language_id`              bigint       not null,
     `is_deleted`               tinyint      not null default 0,
     `is_removed`               tinyint      not null default 0,
-    `creator_id`               bigint       not null,
     `community_id`             bigint       not null,
     `is_featured`              tinyint      not null default 0,
     `is_featured_in_community` tinyint      not null default 0,
@@ -196,7 +198,6 @@ create table posts
   collate = 'utf8mb4_unicode_ci';
 
 create index `IDX_POSTS_LANGUAGE_ID` on `posts` (`language_id`);
-create index `IDX_POSTS_CREATOR_ID` on `posts` (`creator_id`);
 create index `IDX_POSTS_COMMUNITY_ID` on `posts` (`community_id`);
 create index `IDX_POSTS_IS_NSFW` on `posts` (`is_nsfw`);
 create index `IDX_POSTS_IS_NSFW_NSFW_TYPE` on `posts` (`is_nsfw`, `nsfw_type`);

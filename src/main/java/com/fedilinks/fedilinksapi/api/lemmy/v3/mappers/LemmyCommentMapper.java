@@ -13,7 +13,7 @@ public interface LemmyCommentMapper {
     @Mapping(target = "local", constant = "true")
     @Mapping(target = "language_id", source = "comment.languageId")
     @Mapping(target = "distinguished", source = "comment.featured")
-    @Mapping(target = "creator_id", source = "comment.creatorId")
+    @Mapping(target = "creator_id", source = "comment.personId")
     @Mapping(target = "content", source = "comment.commentBody")
     @Mapping(target = "ap_id", source = "comment.activityPubId")
     Comment commentToComment(com.fedilinks.fedilinksapi.comment.Comment comment);

@@ -1,10 +1,18 @@
 package com.fedilinks.fedilinksapi.comment;
 
+import com.fedilinks.fedilinksapi.comment.like.CommentLike;
+import com.fedilinks.fedilinksapi.community.Community;
+import com.fedilinks.fedilinksapi.person.Person;
+import com.fedilinks.fedilinksapi.post.Post;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +24,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,6 +34,27 @@ import java.util.Date;
 @Entity
 @Table(name = "comments")
 public class Comment implements Serializable {
+    /**
+     * Relationships
+     */
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "person_id")
+    private Person person;
+
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "community_id")
+    private Community community;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<CommentLike> likes;
+
+    /**
+     * Attributes
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,13 +71,13 @@ public class Comment implements Serializable {
     @Column(nullable = false, name = "is_removed")
     private boolean isRemoved;
 
-    @Column(nullable = false, name = "creator_id")
-    private Long creatorId;
+    @Column(nullable = false, name = "person_id", insertable = false, updatable = false)
+    private Long personId;
 
-    @Column(nullable = false, name = "community_id")
+    @Column(nullable = false, name = "community_id", insertable = false, updatable = false)
     private Long communityId;
 
-    @Column(nullable = false, name = "post_id")
+    @Column(nullable = false, name = "post_id", insertable = false, updatable = false)
     private Long postId;
 
     @Column(nullable = false, name = "is_featured")
