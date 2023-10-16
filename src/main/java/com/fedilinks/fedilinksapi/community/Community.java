@@ -57,8 +57,8 @@ public class Community implements Serializable {
     @Column(nullable = false, name = "is_nsfw")
     private boolean isNsfw;
 
-    @Column(nullable = false, name = "is_post_restricted_to_mods")
-    private boolean isPostRestrictedToMods;
+    @Column(nullable = false, name = "is_posting_restricted_to_mods")
+    private boolean isPostingRestrictedToMods;
 
     @Column(nullable = false, name = "nsfw_type")
     private NsfwType nsfwType;

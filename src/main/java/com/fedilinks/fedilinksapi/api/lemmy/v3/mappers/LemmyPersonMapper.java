@@ -2,6 +2,7 @@ package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.LocalUser;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.MyUserInfo;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.aggregates.PersonAggregates;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityBlockView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityFollowerView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityModeratorView;
@@ -15,7 +16,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SortTypeMapper.class, ListTypeMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SortTypeMapper.class, ListTypeMapper.class, LemmyCommunityMapper.class})
 public interface LemmyPersonMapper {
 
     @Mapping(target = "person", source = "person")
@@ -53,6 +54,14 @@ public interface LemmyPersonMapper {
     @Mapping(target = "email_verified", source = "person.emailVerified")
     @Mapping(target = "accepted_application", constant = "true")
     LocalUser personToLocalUser(Person person);
+
+
+    @Mapping(target = "post_score", source = "personAggregates.postScore")
+    @Mapping(target = "post_count", source = "personAggregates.postCount")
+    @Mapping(target = "person_id", source = "personAggregates.personId")
+    @Mapping(target = "comment_score", source = "personAggregates.commentScore")
+    @Mapping(target = "comment_count", source = "personAggregates.commentCount")
+    PersonAggregates personAggregatesToPersonAggregates(com.fedilinks.fedilinksapi.person.PersonAggregates personAggregates);
 
     @Mapping(target = "person", source = "personContext.person")
     @Mapping(target = "local_user", source = "personContext.person")

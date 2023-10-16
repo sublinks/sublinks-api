@@ -48,24 +48,24 @@ create index `IDX_COMMENT_ID` on `comment_likes` (`comment_id`);
  */
 create table communities
 (
-    `id`                         bigint auto_increment primary key,
-    `activity_pub_id`            text         not null,
-    `instance_id`                bigint       not null,
-    `title`                      varchar(255) not null,
-    `title_slug`                 varchar(255) not null,
-    `description`                text         not null,
-    `is_deleted`                 tinyint      not null default 0,
-    `is_removed`                 tinyint      not null default 0,
-    `is_local`                   tinyint      not null default 0,
-    `is_nsfw`                    tinyint      not null default 0,
-    `is_post_restricted_to_mods` tinyint      not null default 0,
-    `nsfw_type`                  enum('nsfw', 'nsfl', 'cw') not null default 'nsfw',
-    `icon_image_url`             text         not null,
-    `banner_image_url`           text         not null,
-    `public_key`                 text         not null,
-    `private_key`                text null,
-    `created_at`                 timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`                 timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3)
+    `id`                            bigint auto_increment primary key,
+    `activity_pub_id`               text         not null,
+    `instance_id`                   bigint       not null,
+    `title`                         varchar(255) not null,
+    `title_slug`                    varchar(255) not null,
+    `description`                   text         not null,
+    `is_deleted`                    tinyint      not null default 0,
+    `is_removed`                    tinyint      not null default 0,
+    `is_local`                      tinyint      not null default 0,
+    `is_nsfw`                       tinyint      not null default 0,
+    `is_posting_restricted_to_mods` tinyint      not null default 0,
+    `nsfw_type`                     enum('nsfw', 'nsfl', 'cw') not null default 'nsfw',
+    `icon_image_url`                text         not null,
+    `banner_image_url`              text         not null,
+    `public_key`                    text         not null,
+    `private_key`                   text null,
+    `created_at`                    timestamp(3)          default current_timestamp(3) not null,
+    `updated_at`                    timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -76,7 +76,7 @@ create index `IDX_COMMUNITIES_IS_DELETED` on `communities` (`is_deleted`);
 create index `IDX_COMMUNITIES_IS_REMOVED` on `communities` (`is_removed`);
 create index `IDX_COMMUNITIES_IS_LOCAL` on `communities` (`is_local`);
 create index `IDX_COMMUNITIES_IS_NSFW` on `communities` (`is_nsfw`);
-create index `IDX_COMMUNITIES_IS_POST_RESTRICTED_TO_MODS` on `communities` (`is_post_restricted_to_mods`);
+create index `IDX_COMMUNITIES_IS_POSTING_RESTRICTED_TO_MODS` on `communities` (`is_posting_restricted_to_mods`);
 
 /**
   Instances table

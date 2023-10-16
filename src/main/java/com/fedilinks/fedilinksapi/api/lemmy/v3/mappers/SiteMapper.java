@@ -35,7 +35,7 @@ public interface SiteMapper {
             LocalInstanceContext context,
             PersonContext personContext,
             Collection<Announcement> announcements,
-            Collection<Person> admins,
+            Collection<Person> admins,// todo collection of PersonContext
             Collection<Language> languages,
             Collection<CustomEmojiView> customEmojis,
             Collection<Integer> discussionLanguages
