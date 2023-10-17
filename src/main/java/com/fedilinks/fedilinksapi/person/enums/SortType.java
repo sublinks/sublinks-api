@@ -1,4 +1,4 @@
-package com.fedilinks.fedilinksapi.enums;
+package com.fedilinks.fedilinksapi.person.enums;
 
 public enum SortType {
     Active,

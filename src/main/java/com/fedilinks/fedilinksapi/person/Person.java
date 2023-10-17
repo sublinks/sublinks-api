@@ -2,9 +2,9 @@ package com.fedilinks.fedilinksapi.person;
 
 import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.comment.CommentLike;
-import com.fedilinks.fedilinksapi.enums.ListingType;
-import com.fedilinks.fedilinksapi.enums.SortType;
 import com.fedilinks.fedilinksapi.instance.Instance;
+import com.fedilinks.fedilinksapi.person.enums.ListingType;
+import com.fedilinks.fedilinksapi.person.enums.SortType;
 import com.fedilinks.fedilinksapi.post.Post;
 import com.fedilinks.fedilinksapi.post.PostLike;
 import jakarta.persistence.CascadeType;

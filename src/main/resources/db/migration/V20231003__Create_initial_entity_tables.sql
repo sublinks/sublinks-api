@@ -163,6 +163,19 @@ create index `IDX_PEOPLE_IS_BANNED` on `people` (`is_banned`);
 create index `IDX_PEOPLE_IS_LOCAL` on `people` (`is_local`);
 
 /**
+  Person Communities table
+ */
+create table link_person_communities
+(
+    `id`           bigint auto_increment primary key,
+    `person_id`    bigint                                    not null,
+    `community_id` bigint                                    not null,
+    `created_at`   timestamp(3) default current_timestamp(3) not null,
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
+
+/**
   Posts table
  */
 create table posts
@@ -218,3 +231,35 @@ create table post_likes
   collate = 'utf8mb4_unicode_ci';
 
 create index `IDX_POST_LIKES_POST_ID` on `post_likes` (`post_id`);
+
+/**
+  Person Posts table
+ */
+create table link_person_posts
+(
+    `id`         bigint auto_increment primary key,
+    `person_id`  bigint                                    not null,
+    `post_id`    bigint                                    not null,
+    `created_at` timestamp(3) default current_timestamp(3) not null,
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
+
+/**
+  Person Access Control List table
+ */
+create table link_person_acl
+(
+    `id`          bigint auto_increment primary key,
+    `person_id`   bigint  not null,
+    `entity_type` enum("community", "post", "comment", "report", "message", "instance") not null,
+    `entity_id`   bigint null default null,
+    `can_create`  tinyint not null default 0,
+    `can_read`    tinyint not null default 0,
+    `can_update`  tinyint not null default 0,
+    `can_delete`  tinyint not null default 0,
+    `created_at`  timestamp(3)     default current_timestamp(3) not null,
+    `updated_at`  timestamp(3)     default current_timestamp(3) not null on update current_timestamp (3)
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';

@@ -7,5 +7,5 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ListTypeMapper {
 
-    ListingType listingTypeToListingType(com.fedilinks.fedilinksapi.enums.ListingType listingType);
+    ListingType listingTypeToListingType(com.fedilinks.fedilinksapi.person.enums.ListingType listingType);
 }
