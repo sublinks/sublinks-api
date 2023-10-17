@@ -21,6 +21,10 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetCommunityResp
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.ListCommunitiesResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
 import com.fedilinks.fedilinksapi.community.Community;
+import com.fedilinks.fedilinksapi.community.CommunityRepository;
+import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
+import com.fedilinks.fedilinksapi.util.KeyService;
+import com.fedilinks.fedilinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,16 +41,34 @@ import java.util.HashSet;
 @RestController
 @RequestMapping(path = "/api/v3/community")
 public class CommunityController {
-    private CreateCommunityFormMapper createCommunityFormMapper;
+    private final LocalInstanceContext localInstanceContext;
 
-    public CommunityController(CreateCommunityFormMapper createCommunityFormMapper) {
+    private final CommunityRepository communityRepository;
+
+    private final CreateCommunityFormMapper createCommunityFormMapper;
+
+    private final KeyService keyService;
+
+    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService) {
+        this.localInstanceContext = localInstanceContext;
+        this.communityRepository = communityRepository;
         this.createCommunityFormMapper = createCommunityFormMapper;
+        this.keyService = keyService;
     }
 
     @PostMapping
     CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm) {
 
-        Community community = createCommunityFormMapper.createCommunityFormToCommunity(createCommunityForm);
+        KeyStore keys = keyService.generate();
+
+        // @todo add keys
+        Community community = createCommunityFormMapper.createCommunityFormToCommunity(
+                createCommunityForm,
+                localInstanceContext.instance(),
+                keys
+        );
+
+        communityRepository.saveAndFlush(community);
 
         return CommunityResponse.builder().build();
     }

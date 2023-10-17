@@ -16,7 +16,7 @@ import java.util.List;
 @Component
 public class SiteBuilder {
 
-    private PersonRepository personRepository;
+    private final PersonRepository personRepository;
 
     public SiteBuilder(PersonRepository personRepository) {
         this.personRepository = personRepository;

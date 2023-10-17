@@ -14,5 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ModlogController {
     @GetMapping
     GetModlogResponse index(@Valid GetModLog getModLogForm) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);}
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
 }

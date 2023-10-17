@@ -10,7 +10,7 @@ public interface LemmyCommunityMapper {
 
     @Mapping(target = "posting_restricted_to_mods", source = "community.postingRestrictedToMods")
     @Mapping(target = "name", source = "community.title")
-    @Mapping(target = "instance_id", source = "community.instanceId")
+    @Mapping(target = "instance_id", source = "community.instance.id")
     @Mapping(target = "inbox_url", constant = "")
     @Mapping(target = "icon", source = "community.iconImageUrl")
     @Mapping(target = "hidden", constant = "false")
@@ -19,5 +19,5 @@ public interface LemmyCommunityMapper {
     @Mapping(target = "actor_id", constant = "")
     @Mapping(target = "updated", source = "community.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "published", source = "community.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-    Community communityToCommunity(com.fedilinks.fedilinksapi.community.Community community);
+    Community communityToLemmyCommunity(com.fedilinks.fedilinksapi.community.Community community);
 }

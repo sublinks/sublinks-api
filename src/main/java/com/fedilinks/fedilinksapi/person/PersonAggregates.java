@@ -36,9 +36,6 @@ public class PersonAggregates {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "person_id", insertable = false, updatable = false)
-    private Long personId;
-
     @Column(nullable = false, name = "post_count")
     private int postCount;
 

@@ -1,14 +1,13 @@
-package com.fedilinks.fedilinksapi.post.like;
+package com.fedilinks.fedilinksapi.comment;
 
-import com.fedilinks.fedilinksapi.post.Post;
-import jakarta.persistence.CascadeType;
+import com.fedilinks.fedilinksapi.person.Person;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +17,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Getter
@@ -26,14 +26,18 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "post_likes")
-public class PostLike {
+@Table(name = "comment_likes")
+public class CommentLike implements Serializable {
     /**
      * Relationships
      */
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @OneToOne
+    @JoinColumn(name = "person_id")
+    private Person person;
+
+    @OneToOne
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
     /**
      * Attributes
@@ -41,9 +45,6 @@ public class PostLike {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, name = "post_id", insertable = false, updatable = false)
-    private Long postId;
 
     @Column(nullable = false, name = "is_up_vote")
     private boolean isUpVote;

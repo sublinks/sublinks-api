@@ -20,8 +20,7 @@ public class PersonConfig {
         Object principal = SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         PersonContext personContext = new PersonContext();
-        if (principal instanceof Person) {
-            Person person = (Person)principal;
+        if (principal instanceof Person person) {
             personContext.setPerson(person);
             personContext.setPersonAggregates(aggregates(person));
             personContext.setDiscussLanguages(discussionLanguages(person));

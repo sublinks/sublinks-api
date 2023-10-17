@@ -1,6 +1,5 @@
 package com.fedilinks.fedilinksapi.instance;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,7 +25,7 @@ public class InstanceAggregate {
     /**
      * Relationships
      */
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "instance_id")
     private Instance instance;
 
@@ -36,9 +35,6 @@ public class InstanceAggregate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
-    private Long instanceId;
 
     @Column(nullable = false, name = "user_count")
     private int userCount;

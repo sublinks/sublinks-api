@@ -10,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,13 +36,20 @@ public class Instance {
      * Relationships
      */
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "instance")
+    @PrimaryKeyJoinColumn
     private List<Community> communities;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "instance")
+    @PrimaryKeyJoinColumn
     private List<Person> people;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "instance")
+    @PrimaryKeyJoinColumn
     private List<Post> posts;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private InstanceAggregate instanceAggregate;
 
     /**
      * Attributes

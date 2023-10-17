@@ -61,7 +61,6 @@ create table communities
     `is_local`                      tinyint      not null default 0,
     `is_nsfw`                       tinyint      not null default 0,
     `is_posting_restricted_to_mods` tinyint      not null default 0,
-    `nsfw_type`                     enum('nsfw', 'nsfl', 'cw') not null default 'nsfw',
     `icon_image_url`                text         not null,
     `banner_image_url`              text         not null,
     `public_key`                    text         not null,
@@ -183,7 +182,6 @@ create table posts
     `link_thumbnail_url`       text null,
     `link_video_url`           text null,
     `is_nsfw`                  tinyint      not null default 0,
-    `nsfw_type`                enum('nsfw', 'nsfl', 'cw') not null default 'nsfw',
     `title`                    varchar(255) not null,
     `title_slug`               varchar(255) not null,
     `post_body`                text,
@@ -200,7 +198,6 @@ create table posts
 create index `IDX_POSTS_LANGUAGE_ID` on `posts` (`language_id`);
 create index `IDX_POSTS_COMMUNITY_ID` on `posts` (`community_id`);
 create index `IDX_POSTS_IS_NSFW` on `posts` (`is_nsfw`);
-create index `IDX_POSTS_IS_NSFW_NSFW_TYPE` on `posts` (`is_nsfw`, `nsfw_type`);
 create index `IDX_POSTS_IS_FEATURED` on `posts` (`is_featured`);
 create index `IDX_POSTS_IS_FEATURED_IN_COMMUNITY` on `posts` (`is_featured_in_community`);
 create index `IDX_POSTS_TITLE_SLUG` on `posts` (`title_slug`);

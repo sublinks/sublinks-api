@@ -1,7 +1,7 @@
 package com.fedilinks.fedilinksapi.comment;
 
-import com.fedilinks.fedilinksapi.comment.like.CommentLike;
 import com.fedilinks.fedilinksapi.community.Community;
+import com.fedilinks.fedilinksapi.language.Language;
 import com.fedilinks.fedilinksapi.person.Person;
 import com.fedilinks.fedilinksapi.post.Post;
 import jakarta.persistence.CascadeType;
@@ -37,20 +37,24 @@ public class Comment implements Serializable {
     /**
      * Relationships
      */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "person_id")
     private Person person;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "community_id")
     private Community community;
 
     @OneToMany(cascade = CascadeType.ALL)
     private List<CommentLike> likes;
+
+    @ManyToOne
+    @JoinColumn(name = "language_id")
+    private Language language;
 
     /**
      * Attributes
@@ -62,23 +66,11 @@ public class Comment implements Serializable {
     @Column(nullable = false, name = "activity_pub_id")
     private String activityPubId;
 
-    @Column(nullable = false, name = "language_id")
-    private Long languageId;
-
     @Column(nullable = false, name = "is_deleted")
     private boolean isDeleted;
 
     @Column(nullable = false, name = "is_removed")
     private boolean isRemoved;
-
-    @Column(nullable = false, name = "person_id", insertable = false, updatable = false)
-    private Long personId;
-
-    @Column(nullable = false, name = "community_id", insertable = false, updatable = false)
-    private Long communityId;
-
-    @Column(nullable = false, name = "post_id", insertable = false, updatable = false)
-    private Long postId;
 
     @Column(nullable = false, name = "is_featured")
     private boolean isFeatured;

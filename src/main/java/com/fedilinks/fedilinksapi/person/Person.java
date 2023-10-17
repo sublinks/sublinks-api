@@ -1,12 +1,12 @@
 package com.fedilinks.fedilinksapi.person;
 
 import com.fedilinks.fedilinksapi.comment.Comment;
-import com.fedilinks.fedilinksapi.comment.like.CommentLike;
+import com.fedilinks.fedilinksapi.comment.CommentLike;
 import com.fedilinks.fedilinksapi.enums.ListingType;
 import com.fedilinks.fedilinksapi.enums.SortType;
 import com.fedilinks.fedilinksapi.instance.Instance;
 import com.fedilinks.fedilinksapi.post.Post;
-import com.fedilinks.fedilinksapi.post.like.PostLike;
+import com.fedilinks.fedilinksapi.post.PostLike;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,23 +45,28 @@ public class Person implements UserDetails, Principal {
     /**
      * Relationships
      */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "instance_id")
     private Instance instance;
 
     @OneToMany
+    @PrimaryKeyJoinColumn
     private List<Comment> comments;
 
     @OneToMany
+    @PrimaryKeyJoinColumn
     private List<Post> posts;
 
     @OneToMany
+    @PrimaryKeyJoinColumn
     private List<CommentLike> commentLikes;
 
     @OneToMany
+    @PrimaryKeyJoinColumn
     private List<PostLike> postLikes;
 
-    @OneToOne
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     private PersonAggregates personAggregates;
 
     /**
@@ -69,9 +75,6 @@ public class Person implements UserDetails, Principal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
-    private Long instanceId;
 
     @Column(nullable = false, name = "is_local")
     private boolean isLocal;

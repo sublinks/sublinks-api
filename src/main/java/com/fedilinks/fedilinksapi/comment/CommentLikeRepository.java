@@ -1,4 +1,4 @@
-package com.fedilinks.fedilinksapi.comment.like;
+package com.fedilinks.fedilinksapi.comment;
 
 import com.fedilinks.fedilinksapi.instance.Instance;
 import org.springframework.data.jpa.repository.JpaRepository;

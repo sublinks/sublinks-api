@@ -58,7 +58,7 @@ public interface LemmyPersonMapper {
 
     @Mapping(target = "post_score", source = "personAggregates.postScore")
     @Mapping(target = "post_count", source = "personAggregates.postCount")
-    @Mapping(target = "person_id", source = "personAggregates.personId")
+    @Mapping(target = "person_id", source = "personAggregates.person.id")
     @Mapping(target = "comment_score", source = "personAggregates.commentScore")
     @Mapping(target = "comment_count", source = "personAggregates.commentCount")
     PersonAggregates personAggregatesToPersonAggregates(com.fedilinks.fedilinksapi.person.PersonAggregates personAggregates);
@@ -98,6 +98,6 @@ public interface LemmyPersonMapper {
     @Mapping(target = "admin", constant = "true")
     @Mapping(target = "bot_account", source = "person.botAccount")
     @Mapping(target = "ban_expires", constant = "")
-    @Mapping(target = "instance_id", source = "person.instanceId")
+    @Mapping(target = "instance_id", source = "person.instance.id")
     com.fedilinks.fedilinksapi.api.lemmy.v3.models.Person PersonToPerson(Person person);
 }

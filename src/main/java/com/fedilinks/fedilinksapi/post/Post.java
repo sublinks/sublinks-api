@@ -2,8 +2,8 @@ package com.fedilinks.fedilinksapi.post;
 
 import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.community.Community;
-import com.fedilinks.fedilinksapi.enums.NsfwType;
 import com.fedilinks.fedilinksapi.instance.Instance;
+import com.fedilinks.fedilinksapi.language.Language;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,15 +37,20 @@ public class Post {
     /**
      * Relationships
      */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "community_id")
     private Community community;
 
     @OneToMany(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
     private List<Comment> comments;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     private Instance instance;
+
+    @ManyToOne
+    @JoinColumn(name = "language_id")
+    private Language language;
 
     /**
      * Attributes
@@ -53,23 +59,14 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
-    private Long instanceId;
-
     @Column(nullable = false, name = "activity_pub_id")
     private String activityPubId;
-
-    @Column(nullable = false, name = "language_id")
-    private Long languageId;
 
     @Column(nullable = false, name = "is_deleted")
     private boolean isDeleted;
 
     @Column(nullable = false, name = "is_removed")
     private boolean isRemoved;
-
-    @Column(nullable = false, name = "community_id", insertable = false, updatable = false)
-    private Long communityId;
 
     @Column(nullable = false, name = "is_featured")
     private boolean isFeatured;
@@ -94,9 +91,6 @@ public class Post {
 
     @Column(nullable = false, name = "is_nsfw")
     private boolean isNsfw;
-
-    @Column(nullable = false, name = "nsfw_type")
-    private NsfwType nsfwType;
 
     private String title;
 

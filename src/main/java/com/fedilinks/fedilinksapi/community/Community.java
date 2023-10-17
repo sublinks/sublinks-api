@@ -1,6 +1,6 @@
 package com.fedilinks.fedilinksapi.community;
 
-import com.fedilinks.fedilinksapi.enums.NsfwType;
+import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.instance.Instance;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -10,6 +10,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +23,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,9 +36,13 @@ public class Community implements Serializable {
     /**
      * Relationships
      */
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "instance_id")
     private Instance instance;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private List<Comment> comments;
 
     /**
      * Attributes
@@ -46,9 +53,6 @@ public class Community implements Serializable {
 
     @Column(nullable = false, name = "activity_pub_id")
     private String activityPubId;
-
-    @Column(nullable = false, name = "instance_id", insertable = false, updatable = false)
-    private Long instanceId;
 
     @Column(nullable = false)
     private String title;
@@ -74,14 +78,17 @@ public class Community implements Serializable {
     @Column(nullable = false, name = "is_posting_restricted_to_mods")
     private boolean isPostingRestrictedToMods;
 
-    @Column(nullable = false, name = "nsfw_type")
-    private NsfwType nsfwType;
-
     @Column(nullable = false, name = "icon_image_url")
     private String iconImageUrl;
 
     @Column(nullable = false, name = "banner_image_url")
     private String bannerImageUrl;
+
+    @Column(nullable = false, name = "public_key")
+    private String publicKey;
+
+    @Column(nullable = true, name = "private_key")
+    private String privateKey;
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false, name = "created_at")

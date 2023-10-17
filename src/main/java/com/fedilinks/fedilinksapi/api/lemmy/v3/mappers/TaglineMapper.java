@@ -9,7 +9,7 @@ import org.mapstruct.MappingConstants;
 import java.util.Collection;
 import java.util.Set;
 
-@Mapper(componentModel =  MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface TaglineMapper {
 
     @Mapping(target = "local_site_id", constant = "")

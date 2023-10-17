@@ -11,4 +11,5 @@ public record InstanceSettings(
         @Value("${fedilinks.settings.hide_modlog_mod_names}") Boolean hideModlogModNames,
         @Value("${fedilinks.settings.actor_name_max_length}") Integer actorNameMaxLength,
         @Value("${fedilinks.settings.private_instance}") Boolean isPrivateInstance
-) { }
+) {
+}

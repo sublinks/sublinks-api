@@ -2,6 +2,7 @@ package com.fedilinks.fedilinksapi.person;
 
 import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.community.Community;
+import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
 import com.fedilinks.fedilinksapi.post.Post;
 import com.fedilinks.fedilinksapi.util.KeyService;
 import com.fedilinks.fedilinksapi.util.KeyStore;
@@ -21,10 +22,13 @@ public class PersonService {
 
     private final PersonAggregatesRepository personAggregatesRepository;
 
-    public PersonService(KeyService keyService, PersonMapper personMapper, PersonAggregatesRepository personAggregatesRepository) {
+    private final LocalInstanceContext localInstanceContext;
+
+    public PersonService(KeyService keyService, PersonMapper personMapper, PersonAggregatesRepository personAggregatesRepository, LocalInstanceContext localInstanceContext) {
         this.keyService = keyService;
         this.personMapper = personMapper;
         this.personAggregatesRepository = personAggregatesRepository;
+        this.localInstanceContext = localInstanceContext;
     }
 
     public PersonContext getPersonContext(Person person) {
@@ -42,7 +46,7 @@ public class PersonService {
                 person,
                 emptyPostList,
                 emptyCommentList,
-                personAggregates.orElse(PersonAggregates.builder().personId(person.getId()).build()),
+                personAggregates.orElse(PersonAggregates.builder().person(person).build()),
                 discussLanguages,
                 emptyCommunityList,
                 emptyCommunityList,
@@ -58,7 +62,7 @@ public class PersonService {
         return Person.builder()
                 .name(name)
                 .password("")
-                .instanceId((long) 1)
+                .instance(localInstanceContext.instance())
                 .displayName("")
                 .activityPubId("")
                 .avatarImageUrl("")

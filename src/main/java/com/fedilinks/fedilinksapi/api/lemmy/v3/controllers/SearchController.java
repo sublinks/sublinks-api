@@ -14,5 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class SearchController {
     @GetMapping
     GetModlogResponse index(@Valid Search searchForm) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);}
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
 }

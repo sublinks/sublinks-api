@@ -14,5 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class ResolveObjectController {
     @GetMapping
     GetModlogResponse index(@Valid ResolveObject resolveObjectForm) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);}
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    }
 }
