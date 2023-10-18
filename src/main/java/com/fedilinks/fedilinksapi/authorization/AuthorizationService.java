@@ -59,6 +59,7 @@ public class AuthorizationService {
             acl.setCanRead(isRead);
             acl.setCanUpdate(isUpdate);
             acl.setCanDelete(isDelete);
+            aclRepository.saveAndFlush(acl);
         }
 
         EntityPolicy create() {
