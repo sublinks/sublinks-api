@@ -222,6 +222,7 @@ create table post_likes
 (
     `id`           bigint auto_increment primary key,
     `post_id`      bigint  not null,
+    `person_id`    bigint  not null,
     `is_up_vote`   tinyint not null default 0,
     `is_down_vote` tinyint not null default 0,
     `created_at`   timestamp(3)     default current_timestamp(3) not null,
@@ -248,7 +249,7 @@ create table link_person_posts
 /**
   Person Access Control List table
  */
-create table link_person_acl
+create table acl
 (
     `id`          bigint auto_increment primary key,
     `person_id`   bigint  not null,
@@ -263,3 +264,5 @@ create table link_person_acl
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
+
+create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` on `acl` (`person_id`, `entity_type`, `entity_id`);

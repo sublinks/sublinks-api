@@ -1,14 +1,11 @@
-package com.fedilinks.fedilinksapi.post;
+package com.fedilinks.fedilinksapi.authorization;
 
-import com.fedilinks.fedilinksapi.person.Person;
+import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,31 +23,32 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "post_likes")
-public class PostLike {
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    @OneToOne
-    @JoinColumn(name = "person_id")
-    private Person person;
-
-    /**
-     * Attributes
-     */
+@Table(name = "acl")
+public class Acl {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "is_up_vote")
-    private boolean isUpVote;
+    @Column(updatable = false, nullable = false, name = "person_id")
+    private Long personId;
 
-    @Column(nullable = false, name = "is_down_vote")
-    private boolean isDownVote;
+    @Column(updatable = false, nullable = false, name = "entity_type")
+    private EntityType entityType;
+
+    @Column(updatable = false, nullable = false, name = "entity_id")
+    private Long entityId;
+
+    @Column(updatable = false, nullable = false, name = "can_create")
+    private boolean canCreate;
+
+    @Column(updatable = false, nullable = false, name = "can_read")
+    private boolean canRead;
+
+    @Column(updatable = false, nullable = false, name = "can_update")
+    private boolean canUpdate;
+
+    @Column(updatable = false, nullable = false, name = "can_delete")
+    private boolean canDelete;
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false, name = "created_at")
