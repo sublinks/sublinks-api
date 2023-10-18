@@ -1,9 +1,9 @@
 package com.fedilinks.fedilinksapi.authorization;
 
-import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 
 public interface AuthorizationEntity {
     public Long getId();
 
-    public EntityType entityType();
+    public AuthorizedEntityType entityType();
 }

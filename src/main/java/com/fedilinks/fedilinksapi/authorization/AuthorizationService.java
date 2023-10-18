@@ -1,10 +1,13 @@
 package com.fedilinks.fedilinksapi.authorization;
 
-import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedAction;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import com.fedilinks.fedilinksapi.person.Person;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 @Service
 public class AuthorizationService {
@@ -22,19 +25,32 @@ public class AuthorizationService {
         return new EntityPolicy(person, ActionType.allow, aclRepository);
     }
 
+    public EntityPolicy revokePerson(Person person) {
+        return new EntityPolicy(person, ActionType.revoke, aclRepository);
+    }
+
     public enum ActionType {
         check,
-        allow
+        allow,
+        revoke,
+    }
+
+    public enum ResponseType {
+        allow,
+        decline
     }
 
     public static class EntityPolicy {
         private final Person person;
         private final ActionType actionType;
         private final AclRepository aclRepository;
-        private boolean isCreate = false;
-        private boolean isRead = false;
-        private boolean isUpdate = false;
-        private boolean isDelete = false;
+        private final List<AuthorizedAction> authorizedActions = new ArrayList<>();
+        private ResponseType defaultResponse = ResponseType.allow;
+
+        private boolean isPermitted = true;
+
+        private AuthorizedEntityType entityType;
+        private Long entityId;
 
         public EntityPolicy(Person person, ActionType actionType, AclRepository aclRepository) {
             this.person = person;
@@ -42,91 +58,127 @@ public class AuthorizationService {
             this.aclRepository = aclRepository;
         }
 
-        private void check(Acl acl) throws Exception {
-            if (isCreate && !acl.isCanCreate()) {
-                throw new Exception("You cannot create this entity");
-            }
-            if (isRead && !acl.isCanRead()) {
-                throw new Exception("You cannot read this entity");
-            }
-            if (isUpdate && !acl.isCanUpdate()) {
-                throw new Exception("You cannot update this entity");
-            }
-            if (isDelete && !acl.isCanDelete()) {
-                throw new Exception("You cannot delete this entity");
-            }
-        }
-
-        private void allow(Acl acl) {
-            acl.setCanCreate(isCreate);
-            acl.setCanRead(isRead);
-            acl.setCanUpdate(isUpdate);
-            acl.setCanDelete(isDelete);
-            aclRepository.saveAndFlush(acl);
-        }
-
-        public EntityPolicy create() {
-            this.isCreate = true;
+        public EntityPolicy performTheAction(AuthorizedAction authorizedAction) {
+            this.authorizedActions.add(authorizedAction);
             return this;
         }
 
-        public EntityPolicy read() {
-            this.isRead = true;
+        public EntityPolicy defaultResponse(ResponseType responseType) {
+            this.defaultResponse = responseType;
             return this;
         }
 
-        public EntityPolicy update() {
-            this.isUpdate = true;
+        public EntityPolicy defaultingToAllow() {
+            defaultResponse(ResponseType.allow);
             return this;
         }
 
-        public EntityPolicy delete() {
-            this.isDelete = true;
+        public EntityPolicy defaultingToDecline() {
+            defaultResponse(ResponseType.decline);
             return this;
         }
 
-        public Optional<Boolean> onEntityType(EntityType entityType) throws RuntimeException {
-            try {
-                Acl acl = Optional.ofNullable(
-                        aclRepository.findAclByPersonIdAndEntityTypeAndEntityId(
-                                person.getId(),
-                                entityType,
-                                null)
-                ).orElse(new Acl());
-                switch (this.actionType) {
-                    case allow -> allow(acl);
-                    case check -> check(acl);
-                    default -> throw new RuntimeException("Invalid action type for authorization service.");
+        public EntityPolicy onEntity(AuthorizedEntityType entityType) {
+            this.entityType = entityType;
+            execute();
+            return this;
+        }
+
+        public EntityPolicy onEntity(AuthorizationEntity entity) {
+            this.entityType = entity.entityType();
+            this.entityId = entity.getId();
+            execute();
+            return this;
+        }
+
+        public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+            if (!isPermitted) {
+                throw exceptionSupplier.get();
+            }
+        }
+
+        private void execute() {
+            switch (actionType) {
+                case allow -> createAclRules();
+                case revoke -> revokeAclRules();
+                default -> checkAclRules();
+            }
+            ;
+        }
+
+        private void checkAclRules() {
+            for (AuthorizedAction authorizedAction : authorizedActions) {
+                Acl acl;
+                if (entityId != null) {
+                    acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(
+                            person.getId(), entityType, entityId, authorizedAction
+                    );
+                } else {
+                    acl = aclRepository.findAclByPersonIdAndEntityTypeAndAuthorizedAction(
+                            person.getId(), entityType, authorizedAction
+                    );
                 }
-                return Optional.of(true);
-            } catch (RuntimeException exception) {
-                throw exception;
-            } catch (Exception exception) {
-                // Create a special throwable to catch and allow other exceptions to pass through
+                if (acl != null && !acl.isPermitted()) {
+                    isPermitted = false;
+                }
+                if (acl == null && defaultResponse == ResponseType.decline) {
+                    isPermitted = false;
+                }
             }
-            return Optional.empty();
         }
 
-        public Optional<Boolean> onEntity(AuthorizationEntity entity) throws RuntimeException {
-            try {
-                Acl acl = Optional.ofNullable(
-                        aclRepository.findAclByPersonIdAndEntityTypeAndEntityId(
-                                person.getId(),
-                                entity.entityType(),
-                                entity.getId())
-                ).orElse(new Acl());
-                switch (this.actionType) {
-                    case allow -> allow(acl);
-                    case check -> check(acl);
-                    default -> throw new RuntimeException("Invalid action type for authorization service.");
+        private void revokeAclRules() {
+            for (AuthorizedAction authorizedAction : authorizedActions) {
+                Acl acl;
+                if (entityId != null) {
+                    acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
+                            person.getId(), entityType, entityId, authorizedAction, true
+                    );
+                } else {
+                    acl = aclRepository.findAclByPersonIdAndEntityTypeAndAuthorizedActionAndPermitted(
+                            person.getId(), entityType, authorizedAction, true
+                    );
                 }
-                return Optional.of(true);
-            } catch (RuntimeException exception) {
-                throw exception;
-            } catch (Exception exception) {
-                // Create a special throwable to catch and allow other exceptions to pass through
+                if (acl == null) {
+                    aclRepository.saveAndFlush(Acl.builder()
+                            .personId(person.getId())
+                            .entityType(entityType)
+                            .entityId(entityId)
+                            .authorizedAction(authorizedAction)
+                            .permitted(false)
+                            .build());
+                } else {
+                    acl.setPermitted(false);
+                    aclRepository.saveAndFlush(acl);
+                }
             }
-            return Optional.empty();
+        }
+
+        private void createAclRules() {
+            for (AuthorizedAction authorizedAction : authorizedActions) {
+                Acl acl;
+                if (entityId != null) {
+                    acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
+                            person.getId(), entityType, entityId, authorizedAction, false
+                    );
+                } else {
+                    acl = aclRepository.findAclByPersonIdAndEntityTypeAndAuthorizedActionAndPermitted(
+                            person.getId(), entityType, authorizedAction, false
+                    );
+                }
+                if (acl == null) {
+                    aclRepository.saveAndFlush(Acl.builder()
+                            .personId(person.getId())
+                            .entityType(entityType)
+                            .entityId(entityId)
+                            .authorizedAction(authorizedAction)
+                            .permitted(true)
+                            .build());
+                } else {
+                    acl.setPermitted(true);
+                    aclRepository.saveAndFlush(acl);
+                }
+            }
         }
     }
 }

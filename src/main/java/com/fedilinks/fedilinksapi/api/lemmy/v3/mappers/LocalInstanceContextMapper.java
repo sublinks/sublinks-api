@@ -68,7 +68,7 @@ public interface LocalInstanceContextMapper {
 
     @Mapping(target = "id", source = "context.instance.id")
     @Mapping(target = "site_id", source = "context.instance.id")
-    @Mapping(target = "site_setup", expression = "java(context.instance().getId() != null)")
+    @Mapping(target = "site_setup", expression = "java(!context.instance().getDomain().isEmpty())")
     @Mapping(target = "enable_downvotes", source = "context.settings.enableDownVotes")
     @Mapping(target = "enable_nsfw", source = "context.settings.enableNsfw")
     @Mapping(target = "published", source = "context.instance.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")

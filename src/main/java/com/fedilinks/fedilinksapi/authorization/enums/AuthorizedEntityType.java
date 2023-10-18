@@ -1,6 +1,6 @@
 package com.fedilinks.fedilinksapi.authorization.enums;
 
-public enum EntityType {
+public enum AuthorizedEntityType {
     instance,
     community,
     post,

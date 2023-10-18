@@ -251,18 +251,22 @@ create table link_person_posts
  */
 create table acl
 (
-    `id`          bigint auto_increment primary key,
-    `person_id`   bigint  not null,
-    `entity_type` enum("community", "post", "comment", "report", "message", "instance") not null,
-    `entity_id`   bigint null default null,
-    `can_create`  tinyint not null default 0,
-    `can_read`    tinyint not null default 0,
-    `can_update`  tinyint not null default 0,
-    `can_delete`  tinyint not null default 0,
-    `created_at`  timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`  timestamp(3)     default current_timestamp(3) not null on update current_timestamp (3)
+    `id`                bigint auto_increment primary key,
+    `person_id`         bigint                                    not null,
+    `entity_type`       enum("community", "post", "comment", "report", "message", "instance") not null,
+    `entity_id`         bigint null default null,
+    `authorized_action` enum("create", "read", "update", "delete") not null,
+    `is_permitted`      tinyint                                   not null default 0,
+    `created_at`        timestamp(3) default current_timestamp(3) not null,
+    `updated_at`        timestamp(3) default current_timestamp(3) not null on update current_timestamp (3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
 
 create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` on `acl` (`person_id`, `entity_type`, `entity_id`);
+create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` on `acl` (`person_id`, `entity_type`, `entity_id`, `authorized_action`);
+create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_EID_AUTH_ACTION_IS_PERMITTED` on `acl` (`person_id`,
+                                                                                                       `entity_type`,
+                                                                                                       `entity_id`,
+                                                                                                       `authorized_action`,
+                                                                                                       `is_permitted`);

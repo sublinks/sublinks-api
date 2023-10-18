@@ -1,6 +1,7 @@
 package com.fedilinks.fedilinksapi.authorization;
 
-import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedAction;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -36,22 +37,17 @@ public class Acl {
 
     @Column(updatable = false, nullable = false, name = "entity_type")
     @Enumerated(EnumType.STRING)
-    private EntityType entityType;
+    private AuthorizedEntityType entityType;
 
     @Column(updatable = true, nullable = false, name = "entity_id")
     private Long entityId;
 
-    @Column(updatable = true, nullable = false, name = "can_create")
-    private boolean canCreate;
+    @Column(updatable = true, nullable = false, name = "authorized_action")
+    @Enumerated(EnumType.STRING)
+    private AuthorizedAction authorizedAction;
 
-    @Column(updatable = true, nullable = false, name = "can_read")
-    private boolean canRead;
-
-    @Column(updatable = true, nullable = false, name = "can_update")
-    private boolean canUpdate;
-
-    @Column(updatable = true, nullable = false, name = "can_delete")
-    private boolean canDelete;
+    @Column(updatable = true, nullable = false, name = "is_permitted")
+    private boolean permitted;
 
     @CreationTimestamp
     @Column(updatable = false, nullable = false, name = "created_at")
