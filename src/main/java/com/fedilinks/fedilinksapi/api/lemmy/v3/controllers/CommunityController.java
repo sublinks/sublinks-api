@@ -20,13 +20,17 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.CommunityRespons
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetCommunityResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.ListCommunitiesResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
+import com.fedilinks.fedilinksapi.authorization.AuthorizationService;
+import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
 import com.fedilinks.fedilinksapi.community.Community;
 import com.fedilinks.fedilinksapi.community.CommunityRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
+import com.fedilinks.fedilinksapi.person.Person;
 import com.fedilinks.fedilinksapi.util.KeyService;
 import com.fedilinks.fedilinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -49,19 +53,25 @@ public class CommunityController {
 
     private final KeyService keyService;
 
-    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService) {
+    private final AuthorizationService authorizationService;
+
+    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService) {
         this.localInstanceContext = localInstanceContext;
         this.communityRepository = communityRepository;
         this.createCommunityFormMapper = createCommunityFormMapper;
         this.keyService = keyService;
+        this.authorizationService = authorizationService;
     }
 
     @PostMapping
-    CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm) {
+    CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm, UsernamePasswordAuthenticationToken principal) {
+        authorizationService.
+                canPerson((Person)principal.getPrincipal())
+                .create()
+                .onEntityType(EntityType.community)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         KeyStore keys = keyService.generate();
-
-        // @todo add keys
         Community community = createCommunityFormMapper.createCommunityFormToCommunity(
                 createCommunityForm,
                 localInstanceContext.instance(),

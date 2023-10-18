@@ -3,6 +3,8 @@ package com.fedilinks.fedilinksapi.authorization;
 import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,21 +35,22 @@ public class Acl {
     private Long personId;
 
     @Column(updatable = false, nullable = false, name = "entity_type")
+    @Enumerated(EnumType.STRING)
     private EntityType entityType;
 
-    @Column(updatable = false, nullable = false, name = "entity_id")
+    @Column(updatable = true, nullable = false, name = "entity_id")
     private Long entityId;
 
-    @Column(updatable = false, nullable = false, name = "can_create")
+    @Column(updatable = true, nullable = false, name = "can_create")
     private boolean canCreate;
 
-    @Column(updatable = false, nullable = false, name = "can_read")
+    @Column(updatable = true, nullable = false, name = "can_read")
     private boolean canRead;
 
-    @Column(updatable = false, nullable = false, name = "can_update")
+    @Column(updatable = true, nullable = false, name = "can_update")
     private boolean canUpdate;
 
-    @Column(updatable = false, nullable = false, name = "can_delete")
+    @Column(updatable = true, nullable = false, name = "can_delete")
     private boolean canDelete;
 
     @CreationTimestamp

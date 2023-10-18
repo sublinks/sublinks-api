@@ -1,7 +1,10 @@
 package com.fedilinks.fedilinksapi.authorization;
 
+import com.fedilinks.fedilinksapi.authorization.enums.EntityType;
 import com.fedilinks.fedilinksapi.person.Person;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class AuthorizationService {
@@ -11,11 +14,11 @@ public class AuthorizationService {
         this.aclRepository = aclRepository;
     }
 
-    EntityPolicy canPerson(Person person) {
+    public EntityPolicy canPerson(Person person) {
         return new EntityPolicy(person, ActionType.check, aclRepository);
     }
 
-    EntityPolicy allowPerson(Person person) {
+    public EntityPolicy allowPerson(Person person) {
         return new EntityPolicy(person, ActionType.allow, aclRepository);
     }
 
@@ -62,45 +65,68 @@ public class AuthorizationService {
             aclRepository.saveAndFlush(acl);
         }
 
-        EntityPolicy create() {
+        public EntityPolicy create() {
             this.isCreate = true;
             return this;
         }
 
-        EntityPolicy read() {
+        public EntityPolicy read() {
             this.isRead = true;
             return this;
         }
 
-        EntityPolicy update() {
+        public EntityPolicy update() {
             this.isUpdate = true;
             return this;
         }
 
-        EntityPolicy delete() {
+        public EntityPolicy delete() {
             this.isDelete = true;
             return this;
         }
 
-        boolean entity(AuthorizationEntity entity) {
+        public Optional<Boolean> onEntityType(EntityType entityType) throws RuntimeException {
             try {
-                Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityId(person.getId(), entity.entityType(), entity.getId());
+                Acl acl = Optional.ofNullable(
+                        aclRepository.findAclByPersonIdAndEntityTypeAndEntityId(
+                                person.getId(),
+                                entityType,
+                                null)
+                ).orElse(new Acl());
                 switch (this.actionType) {
-                    case allow:
-                        allow(acl);
-                        break;
-                    case check:
-                        check(acl);
-                        break;
-                    default:
-                        throw new RuntimeException("Invalid action type for authorization service.");
+                    case allow -> allow(acl);
+                    case check -> check(acl);
+                    default -> throw new RuntimeException("Invalid action type for authorization service.");
                 }
-                return true;
+                return Optional.of(true);
             } catch (RuntimeException exception) {
                 throw exception;
             } catch (Exception exception) {
-                return false;
+                // Create a special throwable to catch and allow other exceptions to pass through
             }
+            return Optional.empty();
+        }
+
+        public Optional<Boolean> onEntity(AuthorizationEntity entity) throws RuntimeException {
+            try {
+                Acl acl = Optional.ofNullable(
+                        aclRepository.findAclByPersonIdAndEntityTypeAndEntityId(
+                                person.getId(),
+                                entity.entityType(),
+                                entity.getId())
+                ).orElse(new Acl());
+                switch (this.actionType) {
+                    case allow -> allow(acl);
+                    case check -> check(acl);
+                    default -> throw new RuntimeException("Invalid action type for authorization service.");
+                }
+                return Optional.of(true);
+            } catch (RuntimeException exception) {
+                throw exception;
+            } catch (Exception exception) {
+                // Create a special throwable to catch and allow other exceptions to pass through
+            }
+            return Optional.empty();
         }
     }
 }
