@@ -1,7 +1,6 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.controllers;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.announcment.Announcement;
-import com.fedilinks.fedilinksapi.api.lemmy.v3.builders.SiteBuilder;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.SiteMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.request.CreateSiteFormMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BlockInstance;
@@ -10,6 +9,7 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.EditSite;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.BlockInstanceResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetSiteResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.SiteResponse;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.services.SiteService;
 import com.fedilinks.fedilinksapi.instance.Instance;
 import com.fedilinks.fedilinksapi.instance.InstanceRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
@@ -32,7 +32,7 @@ import java.util.HashSet;
 public class SiteController {
     private final LocalInstanceContext localInstanceContext;
 
-    private final SiteBuilder siteBuilder;
+    private final SiteService siteService;
 
     private final InstanceRepository instanceRepository;
 
@@ -46,7 +46,7 @@ public class SiteController {
 
     public SiteController(
             LocalInstanceContext localInstanceContext,
-            SiteBuilder siteBuilder,
+            SiteService siteService,
             InstanceRepository instanceRepository,
             KeyService keyService,
             CreateSiteFormMapper createSiteFormMapper,
@@ -54,7 +54,7 @@ public class SiteController {
             PersonContext personContext
     ) {
         this.localInstanceContext = localInstanceContext;
-        this.siteBuilder = siteBuilder;
+        this.siteService = siteService;
         this.instanceRepository = instanceRepository;
         this.keyService = keyService;
         this.createSiteFormMapper = createSiteFormMapper;
@@ -69,10 +69,10 @@ public class SiteController {
                 localInstanceContext,
                 personContext,
                 announcements,
-                siteBuilder.admins(),
-                siteBuilder.allLanguages(localInstanceContext.languageRepository()),
-                siteBuilder.customEmojis(),
-                siteBuilder.discussionLanguages()
+                siteService.admins(),
+                siteService.allLanguages(localInstanceContext.languageRepository()),
+                siteService.customEmojis(),
+                siteService.discussionLanguages()
         );
     }
 

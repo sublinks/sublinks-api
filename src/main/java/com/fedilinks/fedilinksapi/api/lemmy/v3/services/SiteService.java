@@ -1,11 +1,11 @@
-package com.fedilinks.fedilinksapi.api.lemmy.v3.builders;
+package com.fedilinks.fedilinksapi.api.lemmy.v3.services;
 
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.Language;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CustomEmojiView;
 import com.fedilinks.fedilinksapi.language.LanguageRepository;
 import com.fedilinks.fedilinksapi.person.Person;
 import com.fedilinks.fedilinksapi.person.PersonRepository;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,12 +13,12 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-@Component
-public class SiteBuilder {
+@Service
+public class SiteService {
 
     private final PersonRepository personRepository;
 
-    public SiteBuilder(PersonRepository personRepository) {
+    public SiteService(PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 

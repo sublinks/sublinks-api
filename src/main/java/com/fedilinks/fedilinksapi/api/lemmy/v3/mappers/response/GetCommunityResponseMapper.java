@@ -3,9 +3,9 @@ package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.SiteMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetCommunityResponse;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityModeratorView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
-import com.fedilinks.fedilinksapi.person.Person;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -20,8 +20,8 @@ public interface GetCommunityResponseMapper {
     @Mapping(target = "discussion_languages", source = "languages")
     @Mapping(target = "community_view", source = "communityView")
     GetCommunityResponse map(CommunityView communityView,
-                             List<String> languages,
-                             Set<Person> moderators,
+                             Set<String> languages,
+                             List<CommunityModeratorView> moderators,
                              LocalInstanceContext site
     );
 }

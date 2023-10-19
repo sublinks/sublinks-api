@@ -74,7 +74,7 @@ public class Person implements UserDetails, Principal {
     @PrimaryKeyJoinColumn
     private PersonAggregates personAggregates;
 
-    @OneToMany(mappedBy = "person")
+    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
     Set<LinkPersonCommunity> linkPersonCommunity;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)

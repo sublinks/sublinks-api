@@ -12,7 +12,7 @@ import org.mapstruct.MappingConstants;
 public interface LemmyCommunityMapper {
 
     @Mapping(target = "posting_restricted_to_mods", source = "community.postingRestrictedToMods")
-    @Mapping(target = "name", source = "community.title")
+    @Mapping(target = "name", source = "community.titleSlug")
     @Mapping(target = "instance_id", source = "community.instance.id")
     @Mapping(target = "hidden", constant = "false")
     @Mapping(target = "updated", source = "community.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")

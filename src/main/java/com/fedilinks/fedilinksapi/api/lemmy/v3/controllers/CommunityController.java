@@ -5,6 +5,7 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.request.CreateCommunityFormMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response.CommunityResponseMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response.GetCommunityResponseMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.views.CommunityModeratorViewMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.AddModToCommunity;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BanPerson;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BlockCommunity;
@@ -23,12 +24,13 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.BlockCommunityRe
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.CommunityResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetCommunityResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.ListCommunitiesResponse;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityModeratorView;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.services.LemmyCommunityService;
 import com.fedilinks.fedilinksapi.authorization.AuthorizationService;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizeAction;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import com.fedilinks.fedilinksapi.community.Community;
-import com.fedilinks.fedilinksapi.community.CommunityAggregates;
 import com.fedilinks.fedilinksapi.community.CommunityRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
 import com.fedilinks.fedilinksapi.language.Language;
@@ -72,19 +74,23 @@ public class CommunityController {
 
     private final AuthorizationService authorizationService;
 
+    private final LemmyCommunityService lemmyCommunityService;
+
     private final CommunityResponseMapper communityResponseMapper;
 
     private final LemmyCommunityMapper lemmyCommunityMapper;
 
     private final GetCommunityResponseMapper getCommunityResponseMapper;
 
-    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, LinkPersonCommunityRepository linkPersonCommunityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService, CommunityResponseMapper communityResponseMapper, LemmyCommunityMapper lemmyCommunityMapper, GetCommunityResponseMapper getCommunityResponseMapper) {
+
+    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, LinkPersonCommunityRepository linkPersonCommunityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService, LemmyCommunityService lemmyCommunityService, CommunityResponseMapper communityResponseMapper, LemmyCommunityMapper lemmyCommunityMapper, GetCommunityResponseMapper getCommunityResponseMapper, CommunityModeratorViewMapper communityModeratorViewMapper) {
         this.localInstanceContext = localInstanceContext;
         this.communityRepository = communityRepository;
         this.linkPersonCommunityRepository = linkPersonCommunityRepository;
         this.createCommunityFormMapper = createCommunityFormMapper;
         this.keyService = keyService;
         this.authorizationService = authorizationService;
+        this.lemmyCommunityService = lemmyCommunityService;
         this.communityResponseMapper = communityResponseMapper;
         this.lemmyCommunityMapper = lemmyCommunityMapper;
         this.getCommunityResponseMapper = getCommunityResponseMapper;
@@ -149,33 +155,23 @@ public class CommunityController {
     }
 
     @GetMapping
-    public GetCommunityResponse show(@Valid  GetCommunity getCommunityForm, UsernamePasswordAuthenticationToken principal) {
-        Person person = (Person) principal.getPrincipal();
-
+    public GetCommunityResponse show(@Valid GetCommunity getCommunityForm, UsernamePasswordAuthenticationToken principal) {
         Community community = communityRepository.findCommunityByIdOrTitleSlug(
                 getCommunityForm.id(), getCommunityForm.name()
         );
-
-        List<String> languageCodes = new ArrayList<>();
-        for (Language language : community.getLanguages()) {
-            languageCodes.add(language.getCode());
+        CommunityView communityView;
+        if (principal != null) {
+            Person person = (Person) principal.getPrincipal();
+            communityView = lemmyCommunityService.communityViewFromCommunity(community, person);
+        } else {
+            communityView = lemmyCommunityService.communityViewFromCommunity(community);
         }
-
-        Set<Person> moderators = new HashSet<>();
-
-        CommunityAggregates communityAggregates = Optional.ofNullable(community.getCommunityAggregates())
-                .orElse(CommunityAggregates.builder().community(community).build());
-
-        CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
-                community,
-                SubscribedType.Subscribed,
-                false,
-                communityAggregates
-        );
+        Set<String> languageCodes = lemmyCommunityService.communityLanguageCodes(community);
+        List<CommunityModeratorView> moderatorViews = lemmyCommunityService.communityModeratorViewList(community);
         return getCommunityResponseMapper.map(
                 communityView,
                 languageCodes,
-                moderators,
+                moderatorViews,
                 localInstanceContext
         );
     }
@@ -191,10 +187,24 @@ public class CommunityController {
     }
 
     @GetMapping("list")
-    ListCommunitiesResponse list(@Valid ListCommunities listCommunitiesForm) {
-        Collection<CommunityView> communities = new HashSet<>();
+    @Transactional
+    public ListCommunitiesResponse list(@Valid ListCommunities listCommunitiesForm, UsernamePasswordAuthenticationToken principal) {
+        Collection<CommunityView> communityViews = new HashSet<>();
+
+        Collection<Community> communities = communityRepository.findAll(); // @todo apply filters
+        for (Community community : communities) {
+            CommunityView communityView;
+            if (principal != null) {
+                Person person = (Person) principal.getPrincipal();
+                communityView = lemmyCommunityService.communityViewFromCommunity(community, person);
+            } else {
+                communityView = lemmyCommunityService.communityViewFromCommunity(community);
+            }
+            communityViews.add(communityView);
+        }
+
         return ListCommunitiesResponse.builder()
-                .communities(communities)
+                .communities(communityViews)
                 .build();
     }
 
