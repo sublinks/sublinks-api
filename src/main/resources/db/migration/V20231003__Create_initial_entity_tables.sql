@@ -197,17 +197,21 @@ create table person_languages
   collate = 'utf8mb4_unicode_ci';
 
 /**
-  Person Communities table
+  Link Person Communities table
  */
 create table link_person_communities
 (
     `id`           bigint auto_increment primary key,
     `person_id`    bigint                                    not null,
     `community_id` bigint                                    not null,
+    `link_type`    enum ('owner', 'moderator', 'follower')   not null,
     `created_at`   timestamp(3) default current_timestamp(3) not null
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
+
+create index `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID` on `link_person_communities` (`person_id`, `community_id`);
+create unique index `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID_LINK_TYPE` on `link_person_communities` (`person_id`, `community_id`, `link_type`);
 
 /**
   Posts table
@@ -286,13 +290,16 @@ create table link_person_posts
 create table acl
 (
     `id`                bigint auto_increment primary key,
-    `person_id`         bigint                                                                                              not null,
-    `entity_type`       enum ("community", "post", "comment", "report", "message", "instance")                              not null,
-    `entity_id`         bigint                                                                                              null     default null,
-    `authorized_action` enum ("create", "read", "update", "delete", "post", "comment", "message", "ban", "purge", "follow") not null,
-    `is_permitted`      tinyint                                                                                             not null default 0,
-    `created_at`        timestamp(3)                                                                                                 default current_timestamp(3) not null,
-    `updated_at`        timestamp(3)                                                                                                 default current_timestamp(3) not null on update current_timestamp(3)
+    `person_id`         bigint           not null,
+    `entity_type`       enum ('community', 'post', 'comment',
+        'report', 'message', 'instance') not null,
+    `entity_id`         bigint           null     default null,
+    `authorized_action` enum ('create', 'read', 'update',
+        'delete', 'post', 'comment', 'message',
+        'ban', 'purge', 'follow')        not null,
+    `is_permitted`      tinyint          not null default 0,
+    `created_at`        timestamp(3)              default current_timestamp(3) not null,
+    `updated_at`        timestamp(3)              default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';

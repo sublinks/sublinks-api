@@ -30,7 +30,10 @@ import com.fedilinks.fedilinksapi.community.Community;
 import com.fedilinks.fedilinksapi.community.CommunityRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
 import com.fedilinks.fedilinksapi.language.Language;
+import com.fedilinks.fedilinksapi.person.LinkPersonCommunity;
+import com.fedilinks.fedilinksapi.person.LinkPersonCommunityRepository;
 import com.fedilinks.fedilinksapi.person.Person;
+import com.fedilinks.fedilinksapi.person.enums.LinkPersonCommunityType;
 import com.fedilinks.fedilinksapi.util.KeyService;
 import com.fedilinks.fedilinksapi.util.KeyStore;
 import jakarta.validation.Valid;
@@ -50,6 +53,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/api/v3/community")
@@ -57,6 +61,8 @@ public class CommunityController {
     private final LocalInstanceContext localInstanceContext;
 
     private final CommunityRepository communityRepository;
+
+    private final LinkPersonCommunityRepository linkPersonCommunityRepository;
 
     private final CreateCommunityFormMapper createCommunityFormMapper;
 
@@ -68,9 +74,10 @@ public class CommunityController {
 
     private final LemmyCommunityMapper lemmyCommunityMapper;
 
-    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService, CommunityResponseMapper communityResponseMapper, LemmyCommunityMapper lemmyCommunityMapper) {
+    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, LinkPersonCommunityRepository linkPersonCommunityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService, CommunityResponseMapper communityResponseMapper, LemmyCommunityMapper lemmyCommunityMapper) {
         this.localInstanceContext = localInstanceContext;
         this.communityRepository = communityRepository;
+        this.linkPersonCommunityRepository = linkPersonCommunityRepository;
         this.createCommunityFormMapper = createCommunityFormMapper;
         this.keyService = keyService;
         this.authorizationService = authorizationService;
@@ -81,8 +88,9 @@ public class CommunityController {
     @PostMapping
     @Transactional
     public CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm, UsernamePasswordAuthenticationToken principal) {
+        Person person = (Person) principal.getPrincipal();
         authorizationService
-                .canPerson((Person) principal.getPrincipal())
+                .canPerson(person)
                 .performTheAction(AuthorizeAction.create)
                 .onEntity(AuthorizedEntityType.community)
                 .defaultingToAllow() // @todo use site setting to allow community creation
@@ -101,7 +109,20 @@ public class CommunityController {
         );
         community.setLanguages(languages);
 
+        Set<LinkPersonCommunity> linkPersonCommunities = new HashSet<>();
+        linkPersonCommunities.add(LinkPersonCommunity.builder()
+                .community(community)
+                .person(person)
+                .linkType(LinkPersonCommunityType.owner)
+                .build());
+        linkPersonCommunities.add(LinkPersonCommunity.builder()
+                .community(community)
+                .person(person)
+                .linkType(LinkPersonCommunityType.follower)
+                .build());
+
         communityRepository.saveAndFlush(community);
+        linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
         CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
                 community,
@@ -111,9 +132,9 @@ public class CommunityController {
         );
 
         List<String> languageCodes = new ArrayList<>();
-        for (Language langauge :
+        for (Language language :
                 languages) {
-            languageCodes.add(langauge.getCode());
+            languageCodes.add(language.getCode());
         }
 
         return communityResponseMapper.map(

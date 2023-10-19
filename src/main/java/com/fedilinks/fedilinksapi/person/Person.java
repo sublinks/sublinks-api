@@ -37,6 +37,7 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -72,6 +73,9 @@ public class Person implements UserDetails, Principal {
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PersonAggregates personAggregates;
+
+    @OneToMany(mappedBy = "person")
+    Set<LinkPersonCommunity> linkPersonCommunity;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(

@@ -3,6 +3,7 @@ package com.fedilinks.fedilinksapi.community;
 import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.instance.Instance;
 import com.fedilinks.fedilinksapi.language.Language;
+import com.fedilinks.fedilinksapi.person.LinkPersonCommunity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +30,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -52,6 +54,9 @@ public class Community implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private CommunityAggregates communityAggregates;
+
+    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
+    Set<LinkPersonCommunity> linkPersonCommunity;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
