@@ -15,7 +15,7 @@ create table comments
     `comment_body`    text,
     `path`            varchar(512),
     `created_at`      timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`      timestamp(3)     default current_timestamp(3) not null on update current_timestamp (3)
+    `updated_at`      timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -37,7 +37,7 @@ create table comment_likes
     `is_up_vote`      tinyint not null default 0,
     `is_down_vote`    tinyint not null default 0,
     `created_at`      timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`      timestamp(3)     default current_timestamp(3) not null on update current_timestamp (3)
+    `updated_at`      timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -64,9 +64,9 @@ create table communities
     `icon_image_url`                text         not null,
     `banner_image_url`              text         not null,
     `public_key`                    text         not null,
-    `private_key`                   text null,
+    `private_key`                   text         null,
     `created_at`                    timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`                    timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3)
+    `updated_at`                    timestamp(3)          default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -78,6 +78,19 @@ create index `IDX_COMMUNITIES_IS_REMOVED` on `communities` (`is_removed`);
 create index `IDX_COMMUNITIES_IS_LOCAL` on `communities` (`is_local`);
 create index `IDX_COMMUNITIES_IS_NSFW` on `communities` (`is_nsfw`);
 create index `IDX_COMMUNITIES_IS_POSTING_RESTRICTED_TO_MODS` on `communities` (`is_posting_restricted_to_mods`);
+
+
+/**
+  Community Languages table
+ */
+create table community_languages
+(
+    `community_id` bigint not null,
+    `language_id`  bigint not null,
+    primary key (`community_id`, `language_id`)
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
 
 /**
   Instances table
@@ -95,9 +108,21 @@ create table instances
     `icon_url`        text                                      not null,
     `banner_url`      text                                      not null,
     `public_key`      text                                      not null,
-    `private_key`     text null,
+    `private_key`     text                                      null,
     `created_at`      timestamp(3) default current_timestamp(3) not null,
-    `updated_at`      timestamp(3) default current_timestamp(3) not null on update current_timestamp (3)
+    `updated_at`      timestamp(3) default current_timestamp(3) not null on update current_timestamp(3)
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
+
+/**
+  Instance Languages table
+ */
+create table instance_languages
+(
+    `instance_id` bigint not null,
+    `language_id` bigint not null,
+    primary key (`instance_id`, `language_id`)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -134,7 +159,7 @@ create table people
     `avatar_image_url`               text         not null,
     `banner_image_url`               text         not null,
     `biography`                      text         not null,
-    `interface_language`             varchar(20) null,
+    `interface_language`             varchar(20)  null,
     `default_theme`                  varchar(255) null,
     `default_listing_type`           enum ('All', 'Local', 'Subscribed', 'ModeratorView'),
     `default_sort_type`              enum ('Active', 'Hot', 'New', 'Old', 'TopDay', 'TopWeek',
@@ -149,18 +174,27 @@ create table people
     `is_send_notifications_to_email` tinyint      not null default 0,
     `is_open_links_in_new_tab`       tinyint      not null default 0,
     `public_key`                     text         not null,
-    `private_key`                    text null,
+    `private_key`                    text         null,
     `created_at`                     timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`                     timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3)
+    `updated_at`                     timestamp(3)          default current_timestamp(3) not null on update current_timestamp(3)
 
 ) engine = InnoDB
-    default charset `utf8mb4`
-    collate = 'utf8mb4_unicode_ci';
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
 
 create index `IDX_PEOPLE_NAME` on `people` (`name`);
 create index `IDX_PEOPLE_EMAIL` on `people` (`email`);
 create index `IDX_PEOPLE_IS_BANNED` on `people` (`is_banned`);
 create index `IDX_PEOPLE_IS_LOCAL` on `people` (`is_local`);
+
+create table person_languages
+(
+    `person_id`   bigint not null,
+    `language_id` bigint not null,
+    primary key (`person_id`, `language_id`)
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
 
 /**
   Person Communities table
@@ -189,19 +223,19 @@ create table posts
     `community_id`             bigint       not null,
     `is_featured`              tinyint      not null default 0,
     `is_featured_in_community` tinyint      not null default 0,
-    `link_url`                 text null,
+    `link_url`                 text         null,
     `link_title`               varchar(255) null,
-    `link_description`         text null,
-    `link_thumbnail_url`       text null,
-    `link_video_url`           text null,
+    `link_description`         text         null,
+    `link_thumbnail_url`       text         null,
+    `link_video_url`           text         null,
     `is_nsfw`                  tinyint      not null default 0,
     `title`                    varchar(255) not null,
     `title_slug`               varchar(255) not null,
     `post_body`                text,
     `public_key`               text         not null,
-    `private_key`              text null,
+    `private_key`              text         null,
     `created_at`               timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`               timestamp(3)          default current_timestamp(3) not null on update current_timestamp (3),
+    `updated_at`               timestamp(3)          default current_timestamp(3) not null on update current_timestamp(3),
 
     constraint `UC_TITLE_SLUG` unique (`title_slug`)
 ) engine = InnoDB
@@ -226,7 +260,7 @@ create table post_likes
     `is_up_vote`   tinyint not null default 0,
     `is_down_vote` tinyint not null default 0,
     `created_at`   timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`   timestamp(3)     default current_timestamp(3) not null on update current_timestamp (3)
+    `updated_at`   timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -252,13 +286,13 @@ create table link_person_posts
 create table acl
 (
     `id`                bigint auto_increment primary key,
-    `person_id`         bigint                                    not null,
-    `entity_type`       enum("community", "post", "comment", "report", "message", "instance") not null,
-    `entity_id`         bigint null default null,
-    `authorized_action` enum("create", "read", "update", "delete", "post", "comment", "message", "ban", "purge", "follow") not null,
-    `is_permitted`      tinyint                                   not null default 0,
-    `created_at`        timestamp(3) default current_timestamp(3) not null,
-    `updated_at`        timestamp(3) default current_timestamp(3) not null on update current_timestamp (3)
+    `person_id`         bigint                                                                                              not null,
+    `entity_type`       enum ("community", "post", "comment", "report", "message", "instance")                              not null,
+    `entity_id`         bigint                                                                                              null     default null,
+    `authorized_action` enum ("create", "read", "update", "delete", "post", "comment", "message", "ban", "purge", "follow") not null,
+    `is_permitted`      tinyint                                                                                             not null default 0,
+    `created_at`        timestamp(3)                                                                                                 default current_timestamp(3) not null,
+    `updated_at`        timestamp(3)                                                                                                 default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';

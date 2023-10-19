@@ -27,6 +27,13 @@ alter table communities
     add foreign key (instance_id) references instances (id) on delete cascade;
 
 /**
+  Community Languages table
+ */
+alter table community_languages
+    add foreign key (community_id) references communities(id) on delete cascade,
+    add foreign key (language_id) references languages(id) on delete cascade;
+
+/**
   Community Aggregates table
  */
 alter table community_aggregates
@@ -39,6 +46,14 @@ alter table instance_aggregates
     add foreign key (instance_id) references instances (id) on delete cascade;
 
 /**
+  Instance Languages table
+ */
+alter table instance_languages
+    add foreign key (instance_id) references instances(id) on delete cascade,
+    add foreign key (language_id) references languages(id) on delete cascade;
+
+
+/**
   People table
  */
 alter table people
@@ -49,6 +64,13 @@ alter table people
  */
 alter table person_aggregates
     add foreign key (person_id) references people (id) on delete cascade;
+
+/**
+  Person Languages table
+ */
+alter table person_languages
+    add foreign key (person_id) references people(id) on delete cascade,
+    add foreign key (language_id) references languages(id) on delete cascade;
 
 /**
   Posts table

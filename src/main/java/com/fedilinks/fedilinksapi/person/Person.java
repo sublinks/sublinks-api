@@ -3,6 +3,7 @@ package com.fedilinks.fedilinksapi.person;
 import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.comment.CommentLike;
 import com.fedilinks.fedilinksapi.instance.Instance;
+import com.fedilinks.fedilinksapi.language.Language;
 import com.fedilinks.fedilinksapi.person.enums.ListingType;
 import com.fedilinks.fedilinksapi.person.enums.SortType;
 import com.fedilinks.fedilinksapi.post.Post;
@@ -10,10 +11,13 @@ import com.fedilinks.fedilinksapi.post.PostLike;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -68,6 +72,14 @@ public class Person implements UserDetails, Principal {
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PersonAggregates personAggregates;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "person_languages",
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id")
+    )
+    private List<Language> languages;
 
     /**
      * Attributes

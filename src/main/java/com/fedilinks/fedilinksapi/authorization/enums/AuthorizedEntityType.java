@@ -6,5 +6,7 @@ public enum AuthorizedEntityType {
     post,
     comment,
     report,
-    message
+    message,
+    application,
+    person,
 }

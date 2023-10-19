@@ -2,15 +2,20 @@ package com.fedilinks.fedilinksapi.community;
 
 import com.fedilinks.fedilinksapi.comment.Comment;
 import com.fedilinks.fedilinksapi.instance.Instance;
+import com.fedilinks.fedilinksapi.language.Language;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -43,6 +48,18 @@ public class Community implements Serializable {
     @OneToMany(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private CommunityAggregates communityAggregates;
+
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "community_languages",
+            joinColumns = @JoinColumn(name = "community_id"),
+            inverseJoinColumns = @JoinColumn(name = "language_id")
+    )
+    private List<Language> languages;
 
     /**
      * Attributes

@@ -1,11 +1,20 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response;
 
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.CommunityResponse;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+import java.util.List;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LemmyCommunityMapper.class})
 public interface CommunityResponseMapper {
-    //@Mapping(target = "community_view", source = "community")
-    //@Mapping(target = "discussion_languages", source = "community")
-    //CommunityResponse map(Community community);
+    @Mapping(target = "community_view", source = "communityView")
+    @Mapping(target = "discussion_languages", source = "languages")
+    CommunityResponse map(
+            CommunityView communityView,
+            List<String> languages
+    );
 }

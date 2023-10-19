@@ -1,6 +1,9 @@
 package com.fedilinks.fedilinksapi.api.lemmy.v3.mappers;
 
+import com.fedilinks.fedilinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.Community;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
+import com.fedilinks.fedilinksapi.community.CommunityAggregates;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -20,4 +23,15 @@ public interface LemmyCommunityMapper {
     @Mapping(target = "updated", source = "community.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "published", source = "community.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     Community communityToLemmyCommunity(com.fedilinks.fedilinksapi.community.Community community);
+
+
+    @Mapping(target = "subscribed", source = "subscribedType")
+    @Mapping(target = "counts", source = "counts")
+    @Mapping(target = "community", source = "community")
+    @Mapping(target = "blocked", source = "blocked")
+    CommunityView communityToCommunityView(
+            com.fedilinks.fedilinksapi.community.Community community,
+            SubscribedType subscribedType,
+            boolean blocked,
+            CommunityAggregates counts);
 }
