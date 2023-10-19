@@ -9,8 +9,8 @@ public record CreatePost(
         String url,
         String body,
         String honeypot,
-        boolean nsfw,
-        int language_id,
+        Boolean nsfw,
+        Integer language_id,
         String auth
 ) {
 }
