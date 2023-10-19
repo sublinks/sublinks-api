@@ -202,10 +202,10 @@ create table person_languages
 create table link_person_communities
 (
     `id`           bigint auto_increment primary key,
-    `person_id`    bigint                                    not null,
-    `community_id` bigint                                    not null,
-    `link_type`    enum ('owner', 'moderator', 'follower', 'pending_follow', 'blocked')   not null,
-    `created_at`   timestamp(3) default current_timestamp(3) not null
+    `person_id`    bigint                                                               not null,
+    `community_id` bigint                                                               not null,
+    `link_type`    enum ('owner', 'moderator', 'follower', 'pending_follow', 'blocked') not null,
+    `created_at`   timestamp(3) default current_timestamp(3)                            not null
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
