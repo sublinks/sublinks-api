@@ -4,6 +4,7 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.request.CreateCommunityFormMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response.CommunityResponseMapper;
+import com.fedilinks.fedilinksapi.api.lemmy.v3.mappers.response.GetCommunityResponseMapper;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.AddModToCommunity;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BanPerson;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.requests.BlockCommunity;
@@ -27,6 +28,7 @@ import com.fedilinks.fedilinksapi.authorization.AuthorizationService;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizeAction;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import com.fedilinks.fedilinksapi.community.Community;
+import com.fedilinks.fedilinksapi.community.CommunityAggregates;
 import com.fedilinks.fedilinksapi.community.CommunityRepository;
 import com.fedilinks.fedilinksapi.instance.LocalInstanceContext;
 import com.fedilinks.fedilinksapi.language.Language;
@@ -74,7 +76,9 @@ public class CommunityController {
 
     private final LemmyCommunityMapper lemmyCommunityMapper;
 
-    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, LinkPersonCommunityRepository linkPersonCommunityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService, CommunityResponseMapper communityResponseMapper, LemmyCommunityMapper lemmyCommunityMapper) {
+    private final GetCommunityResponseMapper getCommunityResponseMapper;
+
+    public CommunityController(LocalInstanceContext localInstanceContext, CommunityRepository communityRepository, LinkPersonCommunityRepository linkPersonCommunityRepository, CreateCommunityFormMapper createCommunityFormMapper, KeyService keyService, AuthorizationService authorizationService, CommunityResponseMapper communityResponseMapper, LemmyCommunityMapper lemmyCommunityMapper, GetCommunityResponseMapper getCommunityResponseMapper) {
         this.localInstanceContext = localInstanceContext;
         this.communityRepository = communityRepository;
         this.linkPersonCommunityRepository = linkPersonCommunityRepository;
@@ -83,6 +87,7 @@ public class CommunityController {
         this.authorizationService = authorizationService;
         this.communityResponseMapper = communityResponseMapper;
         this.lemmyCommunityMapper = lemmyCommunityMapper;
+        this.getCommunityResponseMapper = getCommunityResponseMapper;
     }
 
     @PostMapping
@@ -144,8 +149,35 @@ public class CommunityController {
     }
 
     @GetMapping
-    GetCommunityResponse show(@Valid GetCommunity getCommunityForm) {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    public GetCommunityResponse show(@Valid  GetCommunity getCommunityForm, UsernamePasswordAuthenticationToken principal) {
+        Person person = (Person) principal.getPrincipal();
+
+        Community community = communityRepository.findCommunityByIdOrTitleSlug(
+                getCommunityForm.id(), getCommunityForm.name()
+        );
+
+        List<String> languageCodes = new ArrayList<>();
+        for (Language language : community.getLanguages()) {
+            languageCodes.add(language.getCode());
+        }
+
+        Set<Person> moderators = new HashSet<>();
+
+        CommunityAggregates communityAggregates = Optional.ofNullable(community.getCommunityAggregates())
+                .orElse(CommunityAggregates.builder().community(community).build());
+
+        CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
+                community,
+                SubscribedType.Subscribed,
+                false,
+                communityAggregates
+        );
+        return getCommunityResponseMapper.map(
+                communityView,
+                languageCodes,
+                moderators,
+                localInstanceContext
+        );
     }
 
     @PutMapping

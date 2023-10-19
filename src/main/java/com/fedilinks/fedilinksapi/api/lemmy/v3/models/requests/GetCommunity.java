@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetCommunity(
-        int id,
+        Long id,
         String name,
         String auth
 ) {

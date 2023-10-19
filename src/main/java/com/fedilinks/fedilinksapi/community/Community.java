@@ -51,7 +51,7 @@ public class Community implements Serializable {
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn
     private CommunityAggregates communityAggregates;
 
