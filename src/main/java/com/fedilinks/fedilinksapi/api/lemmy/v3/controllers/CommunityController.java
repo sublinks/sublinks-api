@@ -21,7 +21,7 @@ import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.GetCommunityResp
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.responses.ListCommunitiesResponse;
 import com.fedilinks.fedilinksapi.api.lemmy.v3.models.views.CommunityView;
 import com.fedilinks.fedilinksapi.authorization.AuthorizationService;
-import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedAction;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizeAction;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import com.fedilinks.fedilinksapi.community.Community;
 import com.fedilinks.fedilinksapi.community.CommunityRepository;
@@ -68,7 +68,7 @@ public class CommunityController {
     CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm, UsernamePasswordAuthenticationToken principal) {
         authorizationService
                 .canPerson((Person) principal.getPrincipal())
-                .performTheAction(AuthorizedAction.create)
+                .performTheAction(AuthorizeAction.create)
                 .onEntity(AuthorizedEntityType.community)
                 .defaultingToAllow() // @todo use site setting to allow community creation
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));

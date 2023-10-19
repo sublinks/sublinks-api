@@ -1,6 +1,6 @@
 package com.fedilinks.fedilinksapi.authorization;
 
-import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedAction;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizeAction;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import com.fedilinks.fedilinksapi.person.Person;
 import org.springframework.stereotype.Service;
@@ -44,7 +44,7 @@ public class AuthorizationService {
         private final Person person;
         private final ActionType actionType;
         private final AclRepository aclRepository;
-        private final List<AuthorizedAction> authorizedActions = new ArrayList<>();
+        private final List<AuthorizeAction> authorizedActions = new ArrayList<>();
         private ResponseType defaultResponse = ResponseType.allow;
 
         private boolean isPermitted = true;
@@ -58,7 +58,7 @@ public class AuthorizationService {
             this.aclRepository = aclRepository;
         }
 
-        public EntityPolicy performTheAction(AuthorizedAction authorizedAction) {
+        public EntityPolicy performTheAction(AuthorizeAction authorizedAction) {
             this.authorizedActions.add(authorizedAction);
             return this;
         }
@@ -69,13 +69,11 @@ public class AuthorizationService {
         }
 
         public EntityPolicy defaultingToAllow() {
-            defaultResponse(ResponseType.allow);
-            return this;
+            return defaultResponse(ResponseType.allow);
         }
 
         public EntityPolicy defaultingToDecline() {
-            defaultResponse(ResponseType.decline);
-            return this;
+            return defaultResponse(ResponseType.decline);
         }
 
         public EntityPolicy onEntity(AuthorizedEntityType entityType) {
@@ -107,7 +105,7 @@ public class AuthorizationService {
         }
 
         private void checkAclRules() {
-            for (AuthorizedAction authorizedAction : authorizedActions) {
+            for (AuthorizeAction authorizedAction : authorizedActions) {
                 Acl acl;
                 if (entityId != null) {
                     acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(
@@ -128,7 +126,7 @@ public class AuthorizationService {
         }
 
         private void revokeAclRules() {
-            for (AuthorizedAction authorizedAction : authorizedActions) {
+            for (AuthorizeAction authorizedAction : authorizedActions) {
                 Acl acl;
                 if (entityId != null) {
                     acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
@@ -155,7 +153,7 @@ public class AuthorizationService {
         }
 
         private void createAclRules() {
-            for (AuthorizedAction authorizedAction : authorizedActions) {
+            for (AuthorizeAction authorizedAction : authorizedActions) {
                 Acl acl;
                 if (entityId != null) {
                     acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(

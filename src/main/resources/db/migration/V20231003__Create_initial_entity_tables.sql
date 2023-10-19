@@ -255,7 +255,7 @@ create table acl
     `person_id`         bigint                                    not null,
     `entity_type`       enum("community", "post", "comment", "report", "message", "instance") not null,
     `entity_id`         bigint null default null,
-    `authorized_action` enum("create", "read", "update", "delete") not null,
+    `authorized_action` enum("create", "read", "update", "delete", "post", "comment", "message", "ban", "purge", "follow") not null,
     `is_permitted`      tinyint                                   not null default 0,
     `created_at`        timestamp(3) default current_timestamp(3) not null,
     `updated_at`        timestamp(3) default current_timestamp(3) not null on update current_timestamp (3)
@@ -266,7 +266,7 @@ create table acl
 create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` on `acl` (`person_id`, `entity_type`, `entity_id`);
 create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` on `acl` (`person_id`, `entity_type`, `entity_id`, `authorized_action`);
 create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_EID_AUTH_ACTION_IS_PERMITTED` on `acl` (`person_id`,
-                                                                                                       `entity_type`,
-                                                                                                       `entity_id`,
-                                                                                                       `authorized_action`,
-                                                                                                       `is_permitted`);
+                                                                                           `entity_type`,
+                                                                                           `entity_id`,
+                                                                                           `authorized_action`,
+                                                                                           `is_permitted`);

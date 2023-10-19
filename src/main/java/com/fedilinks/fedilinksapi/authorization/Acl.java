@@ -1,6 +1,6 @@
 package com.fedilinks.fedilinksapi.authorization;
 
-import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedAction;
+import com.fedilinks.fedilinksapi.authorization.enums.AuthorizeAction;
 import com.fedilinks.fedilinksapi.authorization.enums.AuthorizedEntityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,7 +44,7 @@ public class Acl {
 
     @Column(updatable = true, nullable = false, name = "authorized_action")
     @Enumerated(EnumType.STRING)
-    private AuthorizedAction authorizedAction;
+    private AuthorizeAction authorizedAction;
 
     @Column(updatable = true, nullable = false, name = "is_permitted")
     private boolean permitted;
