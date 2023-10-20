@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record LockPost(
-        int post_id,
-        boolean locked,
-        String auth
+        Integer post_id,
+        Boolean locked
 ) {
 }

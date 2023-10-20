@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetPost(
-        int id,
-        int comment_id,
-        String auth
+        Integer id,
+        Integer comment_id
 ) {
 }

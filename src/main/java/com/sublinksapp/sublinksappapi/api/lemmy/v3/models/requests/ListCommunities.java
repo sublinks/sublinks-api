@@ -10,7 +10,6 @@ public record ListCommunities(
         SortType sort,
         Boolean show_nsfw,
         Integer page,
-        Integer limit,
-        String auth
+        Integer limit
 ) {
 }

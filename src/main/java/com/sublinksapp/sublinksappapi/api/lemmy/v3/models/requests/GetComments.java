@@ -8,14 +8,13 @@ import lombok.Builder;
 public record GetComments(
         ListingType type_,
         CommentSortType sort,
-        int max_depth,
-        int page,
-        int limit,
-        int community_id,
+        Integer max_depth,
+        Integer page,
+        Integer limit,
+        Integer community_id,
         String community_name,
-        int post_id,
-        int parent_id,
-        boolean saved_only,
-        String auth
+        Integer post_id,
+        Integer parent_id,
+        Boolean saved_only
 ) {
 }

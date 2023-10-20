@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record GetComment(
-        int id,
-        String auth
+        Integer id
 ) {
 }

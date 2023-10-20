@@ -11,7 +11,6 @@ public record GetPersonDetails(
         Integer page,
         Integer limit,
         Integer community_id,
-        Boolean saved_only,
-        String auth
+        Boolean saved_only
 ) {
 }

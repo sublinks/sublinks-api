@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record TransferCommunity(
-        int community_id,
-        int person_id,
-        String auth
+        Integer community_id,
+        Integer person_id
 ) {
 }

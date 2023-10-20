@@ -13,7 +13,6 @@ public record CreateCommunity(
         String banner,
         Boolean nsfw,
         Boolean posting_restricted_to_mods,
-        Collection<String> discussion_languages,
-        String auth
+        Collection<String> discussion_languages
 ) {
 }

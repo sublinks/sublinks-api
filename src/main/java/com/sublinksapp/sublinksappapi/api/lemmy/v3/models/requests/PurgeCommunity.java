@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PurgeCommunity(
-        int community_id,
-        String reason,
-        String auth
+        Integer community_id,
+        String reason
 ) {
 }

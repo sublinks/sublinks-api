@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record AddAdmin(
-        int person_id,
-        boolean added,
-        String auth
+        Integer person_id,
+        Boolean added
 ) {
 }

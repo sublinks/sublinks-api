@@ -4,12 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record EditPost(
-        int post_id,
+        Integer post_id,
         String name,
         String url,
         String body,
-        boolean nsfw,
-        int language_id,
-        String auth
+        Boolean nsfw,
+        Integer language_id
 ) {
 }

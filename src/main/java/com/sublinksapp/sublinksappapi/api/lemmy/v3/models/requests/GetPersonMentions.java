@@ -6,9 +6,8 @@ import lombok.Builder;
 @Builder
 public record GetPersonMentions(
         CommentSortType sort,
-        int page,
-        int limit,
-        boolean unread_only,
-        String auth
+        Integer page,
+        Integer limit,
+        Boolean unread_only
 ) {
 }

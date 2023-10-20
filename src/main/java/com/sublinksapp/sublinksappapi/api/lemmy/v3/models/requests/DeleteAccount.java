@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record DeleteAccount(
-        String password,
-        String auth
+        String password
 ) {
 }

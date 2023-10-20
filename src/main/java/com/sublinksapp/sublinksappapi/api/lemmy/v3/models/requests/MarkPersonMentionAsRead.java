@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record MarkPersonMentionAsRead(
-        int person_mention_id,
-        boolean read,
-        String auth
+        Integer person_mention_id,
+        Boolean read
 ) {
 }

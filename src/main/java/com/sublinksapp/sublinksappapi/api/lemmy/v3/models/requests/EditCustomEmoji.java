@@ -6,11 +6,10 @@ import java.util.Collection;
 
 @Builder
 public record EditCustomEmoji(
-        int id,
+        Integer id,
         String category,
         String image_url,
         String alt_text,
-        Collection<String> keywords,
-        String auth
+        Collection<String> keywords
 ) {
 }

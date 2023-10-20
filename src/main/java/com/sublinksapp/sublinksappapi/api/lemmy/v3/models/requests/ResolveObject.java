@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record ResolveObject(
-        String q,
-        String auth
+        String q
 ) {
 }

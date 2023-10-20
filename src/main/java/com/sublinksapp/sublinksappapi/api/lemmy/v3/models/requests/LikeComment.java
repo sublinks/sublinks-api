@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record LikeComment(
-        int comment_id,
-        int score,
-        String auth
+        Integer comment_id,
+        Integer score
 ) {
 }

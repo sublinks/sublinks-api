@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record MarkCommentReplyAsRead(
-        int comment_reply_id,
-        boolean read,
-        String auth
+        Integer comment_reply_id,
+        Boolean read
 ) {
 }

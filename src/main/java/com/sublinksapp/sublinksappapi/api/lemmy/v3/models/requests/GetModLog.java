@@ -4,12 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record GetModLog(
-        int mod_person_id,
-        int community_id,
-        int page,
-        int limit,
+        Integer mod_person_id,
+        Integer community_id,
+        Integer page,
+        Integer limit,
         String type_,
-        int other_person_id,
-        String auth
+        Integer other_person_id
 ) {
 }

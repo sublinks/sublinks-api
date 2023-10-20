@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record DeleteCommunity(
-        int community_id,
-        boolean deleted,
-        String auth
+        Integer community_id,
+        Boolean deleted
 ) {
 }

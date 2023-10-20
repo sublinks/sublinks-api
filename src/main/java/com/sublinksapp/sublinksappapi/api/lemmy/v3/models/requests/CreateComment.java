@@ -5,10 +5,9 @@ import lombok.Builder;
 @Builder
 public record CreateComment(
         String content,
-        int post_id,
-        int parent_id,
-        int language_id,
-        String form_id,
-        String auth
+        Integer post_id,
+        Integer parent_id,
+        Integer language_id,
+        String form_id
 ) {
 }

@@ -6,14 +6,13 @@ import java.util.Collection;
 
 @Builder
 public record EditCommunity(
-        int community_id,
+        Integer community_id,
         String title,
         String description,
         String icon,
         String banner,
-        boolean nsfw,
-        boolean posting_restricted_to_mods,
-        Collection<String> discussion_languages,
-        String auth
+        Boolean nsfw,
+        Boolean posting_restricted_to_mods,
+        Collection<String> discussion_languages
 ) {
 }

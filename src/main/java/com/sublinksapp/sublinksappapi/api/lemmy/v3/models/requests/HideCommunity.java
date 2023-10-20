@@ -5,7 +5,7 @@ import lombok.Builder;
 @Builder
 public record HideCommunity(
         long community_id,
-        boolean hidden,
+        Boolean hidden,
         String reason
 ) {
 }

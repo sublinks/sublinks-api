@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record BlockInstance(
-        int instance_id,
-        boolean block
+        Integer instance_id,
+        Boolean block
 ) {
 }

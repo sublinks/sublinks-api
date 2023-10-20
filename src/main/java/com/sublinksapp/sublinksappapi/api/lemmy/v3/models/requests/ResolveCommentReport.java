@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ResolveCommentReport(
-        int report_id,
-        boolean resolved,
-        String auth
+        Integer report_id,
+        Boolean resolved
 ) {
 }

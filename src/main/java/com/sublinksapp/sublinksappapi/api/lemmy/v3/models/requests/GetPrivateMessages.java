@@ -4,9 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record GetPrivateMessages(
-        boolean unread_only,
-        int page,
-        int limit,
-        String auth
+        Boolean unread_only,
+        Integer page,
+        Integer limit
 ) {
 }

@@ -6,14 +6,13 @@ import lombok.Builder;
 @Builder
 public record Search(
         String q,
-        int community_id,
+        Integer community_id,
         String community_name,
-        int creator_id,
+        Integer creator_id,
         SearchType type_,
         String sort,
         String listing_type,
         String page,
-        String limit,
-        String auth
+        String limit
 ) {
 }

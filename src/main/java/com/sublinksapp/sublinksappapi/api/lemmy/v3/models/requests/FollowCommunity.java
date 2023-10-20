@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record FollowCommunity(
-        int community_id,
-        boolean follow,
-        String auth
+        Integer community_id,
+        Boolean follow
 ) {
 }

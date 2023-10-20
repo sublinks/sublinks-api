@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record LikePost(
-        int post_id,
-        int score,
-        String auth
+        Integer post_id,
+        Integer score
 ) {
 }

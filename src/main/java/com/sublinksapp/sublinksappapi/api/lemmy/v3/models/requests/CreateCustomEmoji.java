@@ -10,7 +10,6 @@ public record CreateCustomEmoji(
         String shorcode,
         String image_url,
         String alt_text,
-        Collection<String> keywords,
-        String auth
+        Collection<String> keywords
 ) {
 }

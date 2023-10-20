@@ -8,8 +8,8 @@ import java.util.Collection;
 
 @Builder
 public record SaveUserSettings(
-        boolean show_nsfw,
-        boolean show_scores,
+        Boolean show_nsfw,
+        Boolean show_scores,
         String theme,
         SortType default_sort_type,
         ListingType default_listing_type,
@@ -20,15 +20,14 @@ public record SaveUserSettings(
         String email,
         String bio,
         String matrix_user_id,
-        boolean show_avatars,
-        boolean send_notifications_to_email,
-        boolean bot_account,
-        boolean show_bot_accounts,
-        boolean show_read_posts,
-        boolean show_new_post_notifs,
+        Boolean show_avatars,
+        Boolean send_notifications_to_email,
+        Boolean bot_account,
+        Boolean show_bot_accounts,
+        Boolean show_read_posts,
+        Boolean show_new_post_notifs,
         Collection<String> discussion_languages,
-        boolean generate_totp_2fa,
-        String auth,
-        boolean open_links_in_new_tab
+        Boolean generate_totp_2fa,
+        Boolean open_links_in_new_tab
 ) {
 }

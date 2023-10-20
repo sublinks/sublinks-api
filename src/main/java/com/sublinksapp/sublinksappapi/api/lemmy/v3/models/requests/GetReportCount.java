@@ -4,7 +4,6 @@ import lombok.Builder;
 
 @Builder
 public record GetReportCount(
-        int community_id,
-        String auth
+        Integer community_id
 ) {
 }

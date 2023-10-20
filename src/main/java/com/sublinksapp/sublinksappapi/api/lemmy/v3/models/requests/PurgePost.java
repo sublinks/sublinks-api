@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PurgePost(
-        int post_id,
-        String reason,
-        String auth
+        Integer post_id,
+        String reason
 ) {
 }

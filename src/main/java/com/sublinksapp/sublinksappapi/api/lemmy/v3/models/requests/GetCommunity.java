@@ -5,7 +5,6 @@ import lombok.Builder;
 @Builder
 public record GetCommunity(
         Long id,
-        String name,
-        String auth
+        String name
 ) {
 }

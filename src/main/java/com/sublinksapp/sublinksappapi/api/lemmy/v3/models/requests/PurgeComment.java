@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PurgeComment(
-        int comment_id,
-        String reason,
-        String auth
+        Integer comment_id,
+        String reason
 ) {
 }

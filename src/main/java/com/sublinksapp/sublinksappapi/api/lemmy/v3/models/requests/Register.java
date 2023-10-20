@@ -12,7 +12,7 @@ public record Register(
         String password,
         @NotEmpty
         String password_verify,
-        boolean show_nsfw,
+        Boolean show_nsfw,
         @Email
         String email,
         String captcha_answer,

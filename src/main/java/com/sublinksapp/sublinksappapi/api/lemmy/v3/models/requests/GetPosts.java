@@ -8,11 +8,10 @@ import lombok.Builder;
 public record GetPosts(
         ListingType type_,
         SortType sort,
-        int page,
-        int limit,
-        int community_id,
+        Integer page,
+        Integer limit,
+        Integer community_id,
         String community_name,
-        boolean saved_only,
-        String auth
+        Boolean saved_only
 ) {
 }

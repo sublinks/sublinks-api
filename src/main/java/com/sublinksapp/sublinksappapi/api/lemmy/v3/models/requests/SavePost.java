@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record SavePost(
-        int post_id,
-        boolean save,
-        String auth
+        Integer post_id,
+        Boolean save
 ) {
 }

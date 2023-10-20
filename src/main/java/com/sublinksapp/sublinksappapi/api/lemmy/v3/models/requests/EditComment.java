@@ -4,10 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record EditComment(
-        int comment_id,
+        Integer comment_id,
         String content,
-        int language_id,
-        String form_id,
-        String auth
+        Integer language_id,
+        String form_id
 ) {
 }
