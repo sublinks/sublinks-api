@@ -1,6 +1,7 @@
 package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.Post;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.aggregates.PostAggregates;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -24,4 +25,18 @@ public interface LemmyPostMapper {
     @Mapping(target = "updated", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "ap_id", source = "post.activityPubId")
     Post postToPost(com.sublinksapp.sublinksappapi.post.Post post);
+
+    @Mapping(target = "upvotes", source = "postAggregates.upVoteCount")
+    @Mapping(target = "score", source = "postAggregates.score")
+    @Mapping(target = "published", source = "post.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+    @Mapping(target = "post_id", source = "postAggregates.post.id")
+    @Mapping(target = "newest_comment_time_necro", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+    @Mapping(target = "newest_comment_time", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+    @Mapping(target = "hot_rank_active", source = "postAggregates.hotRankActive")
+    @Mapping(target = "hot_rank", source = "postAggregates.hotRank")
+    @Mapping(target = "featured_local", source = "post.featured")
+    @Mapping(target = "featured_community", source = "post.featuredInCommunity")
+    @Mapping(target = "downvotes", source = "postAggregates.downVoteCount")
+    @Mapping(target = "comments", source = "postAggregates.upVoteCount")
+    PostAggregates postAggregatesToPostAggregates(com.sublinksapp.sublinksappapi.post.PostAggregates postAggregates);
 }

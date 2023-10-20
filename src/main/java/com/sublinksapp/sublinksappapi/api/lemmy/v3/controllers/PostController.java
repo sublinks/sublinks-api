@@ -1,6 +1,8 @@
 package com.sublinksapp.sublinksappapi.api.lemmy.v3.controllers;
 
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.post.CreatePostMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.post.PostViewMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.CreatePost;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.GetPostResponse;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.GetPostsResponse;
@@ -9,6 +11,7 @@ import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.ListPostRepo
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.PostReportResponse;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.PostResponse;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.views.PostView;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.services.LemmyCommunityService;
 import com.sublinksapp.sublinksappapi.authorization.AuthorizationService;
 import com.sublinksapp.sublinksappapi.authorization.enums.AuthorizeAction;
 import com.sublinksapp.sublinksappapi.authorization.enums.AuthorizedEntityType;
@@ -42,19 +45,33 @@ public class PostController {
     private final LocalInstanceContext localInstanceContext;
     private final AuthorizationService authorizationService;
     private final KeyService keyService;
+    private final LemmyCommunityService lemmyCommunityService;
     private final LanguageRepository languageRepository;
     private final CommunityRepository communityRepository;
     private final PostRepository postRepository;
     private final CreatePostMapper createPostMapper;
+    private final PostViewMapper postViewMapper;
 
-    public PostController(LocalInstanceContext localInstanceContext, AuthorizationService authorizationService, KeyService keyService, LanguageRepository languageRepository, CommunityRepository communityRepository, PostRepository postRepository, CreatePostMapper createPostMapper) {
+    public PostController(
+            LocalInstanceContext localInstanceContext,
+            AuthorizationService authorizationService,
+            KeyService keyService,
+            LemmyCommunityService lemmyCommunityService,
+            LanguageRepository languageRepository,
+            CommunityRepository communityRepository,
+            PostRepository postRepository,
+            CreatePostMapper createPostMapper,
+            PostViewMapper postViewMapper
+    ) {
         this.localInstanceContext = localInstanceContext;
         this.authorizationService = authorizationService;
         this.keyService = keyService;
+        this.lemmyCommunityService = lemmyCommunityService;
         this.languageRepository = languageRepository;
         this.communityRepository = communityRepository;
         this.postRepository = postRepository;
         this.createPostMapper = createPostMapper;
+        this.postViewMapper = postViewMapper;
     }
 
     @PostMapping
@@ -64,7 +81,6 @@ public class PostController {
             UsernamePasswordAuthenticationToken principal
     ) {
         Community community = communityRepository.findById((long) createPostForm.community_id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-
 
         Person person = (Person) principal.getPrincipal();
         authorizationService
@@ -80,14 +96,23 @@ public class PostController {
                 person,
                 localInstanceContext.instance(),
                 community,
-                languageRepository.findById((long)createPostForm.language_id()).get(),
+                languageRepository.findById((long) createPostForm.language_id()).get(),
                 keys
         );
         post.setCommunity(community);
 
         postRepository.saveAndFlush(post);
 
-        return PostResponse.builder().build();
+        SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
+
+        return PostResponse.builder()
+                .post_view(postViewMapper.map(
+                        post,
+                        community,
+                        subscribedType,
+                        person
+                ))
+                .build();
     }
 
     @GetMapping

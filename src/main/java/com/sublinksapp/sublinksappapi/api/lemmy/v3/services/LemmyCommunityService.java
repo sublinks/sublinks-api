@@ -31,6 +31,20 @@ public class LemmyCommunityService {
         this.communityModeratorViewMapper = communityModeratorViewMapper;
     }
 
+    public SubscribedType getPersonCommunitySubscribeType(Person person, Community community) {
+        for (LinkPersonCommunity link :
+                person.getLinkPersonCommunity()) {
+            if (link.getCommunity() == community) {
+                return switch (link.getLinkType()) {
+                    case owner, follower, moderator -> SubscribedType.Subscribed;
+                    case pending_follow -> SubscribedType.Pending;
+                    default -> SubscribedType.NotSubscribed;
+                };
+            }
+        }
+        return SubscribedType.NotSubscribed;
+    }
+
     public CommunityView communityViewFromCommunity(Community community) {
         CommunityAggregates communityAggregates = communityAggregates(community);
         return lemmyCommunityMapper.communityToCommunityView(

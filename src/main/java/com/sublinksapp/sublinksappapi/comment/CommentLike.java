@@ -1,6 +1,7 @@
 package com.sublinksapp.sublinksappapi.comment;
 
 import com.sublinksapp.sublinksappapi.person.Person;
+import com.sublinksapp.sublinksappapi.post.Post;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -31,6 +32,10 @@ public class CommentLike implements Serializable {
     /**
      * Relationships
      */
+    @OneToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
     @OneToOne
     @JoinColumn(name = "person_id")
     private Person person;

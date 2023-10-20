@@ -64,6 +64,7 @@ create table post_aggregates
     `id`               bigint auto_increment primary key,
     `post_id`          bigint        not null,
     `community_id`     bigint        not null,
+    `comment_count`    int default 0 not null,
     `down_vote_count`  int default 0 not null,
     `up_vote_count`    int default 0 not null,
     `score`            int default 0 not null,

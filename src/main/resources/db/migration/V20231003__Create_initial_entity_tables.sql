@@ -30,14 +30,15 @@ create index `IDX_COMMENTS_POST_ID` on `comments` (`post_id`);
  */
 create table comment_likes
 (
-    `id`              bigint auto_increment primary key,
-    `activity_pub_id` text    not null,
-    `person_id`       bigint  not null,
-    `comment_id`      bigint  not null,
-    `is_up_vote`      tinyint not null default 0,
-    `is_down_vote`    tinyint not null default 0,
-    `created_at`      timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`      timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
+    `id`           bigint auto_increment primary key,
+    `post_id`      bigint  not null,
+    `person_id`    bigint  not null,
+    `comment_id`   bigint  not null,
+    `is_up_vote`   tinyint not null default 0,
+    `is_down_vote` tinyint not null default 0,
+    `score`        tinyint not null default 0,
+    `created_at`   timestamp(3)     default current_timestamp(3) not null,
+    `updated_at`   timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
@@ -263,6 +264,7 @@ create table post_likes
     `person_id`    bigint  not null,
     `is_up_vote`   tinyint not null default 0,
     `is_down_vote` tinyint not null default 0,
+    `score`        tinyint not null default 0,
     `created_at`   timestamp(3)     default current_timestamp(3) not null,
     `updated_at`   timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
 ) engine = InnoDB
