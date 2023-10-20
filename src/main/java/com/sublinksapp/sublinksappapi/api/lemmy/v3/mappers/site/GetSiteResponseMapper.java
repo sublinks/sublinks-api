@@ -6,7 +6,6 @@ import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.LocalInstanceContextM
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.TaglineMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.Language;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.GetSiteResponse;
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.SiteResponse;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.views.CustomEmojiView;
 import com.sublinksapp.sublinksappapi.instance.LocalInstanceContext;
 import com.sublinksapp.sublinksappapi.person.Person;
@@ -18,14 +17,7 @@ import org.mapstruct.MappingConstants;
 import java.util.Collection;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LocalInstanceContextMapper.class, TaglineMapper.class, LemmyPersonMapper.class})
-public interface SiteMapper {
-
-    @Mapping(target = "tag_line", ignore = true)
-    @Mapping(target = "site_view", source = "context")
-    @Mapping(target = "tag_lines", source = "announcements")
-    SiteResponse toSiteResponse(LocalInstanceContext context, Collection<Announcement> announcements);
-
-
+public interface GetSiteResponseMapper {
     @Mapping(target = "version", constant = "0.1.0")
     @Mapping(target = "taglines", source = "announcements")
     @Mapping(target = "site_view", source = "context")
@@ -34,7 +26,7 @@ public interface SiteMapper {
     @Mapping(target = "custom_emojis", source = "customEmojis")
     @Mapping(target = "all_languages", source = "languages")
     @Mapping(target = "admins", source = "admins")
-    GetSiteResponse toGetSiteResponse(
+    public GetSiteResponse map(
             LocalInstanceContext context,
             PersonContext personContext,
             Collection<Announcement> announcements,

@@ -2,7 +2,8 @@ package com.sublinksapp.sublinksappapi.api.lemmy.v3.controllers;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.announcment.Announcement;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site.CreateSiteFormMapper;
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site.SiteMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site.GetSiteResponseMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site.SiteResponseMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.BlockInstance;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.CreateSite;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.EditSite;
@@ -32,41 +33,38 @@ import java.util.HashSet;
 @RequestMapping(path = "/api/v3/site")
 public class SiteController {
     private final LocalInstanceContext localInstanceContext;
-
-    private final SiteService siteService;
-
-    private final InstanceRepository instanceRepository;
-
-    private final KeyService keyService;
-
-    private final CreateSiteFormMapper createSiteFormMapper;
-
-    private final SiteMapper siteMapper;
-
     private final PersonContext personContext;
+    private final SiteService siteService;
+    private final InstanceRepository instanceRepository;
+    private final KeyService keyService;
+    private final GetSiteResponseMapper getSiteResponseMapper;
+    private final CreateSiteFormMapper createSiteFormMapper;
+    private final SiteResponseMapper siteResponseMapper;
+
 
     public SiteController(
             LocalInstanceContext localInstanceContext,
+            PersonContext personContext,
             SiteService siteService,
             InstanceRepository instanceRepository,
             KeyService keyService,
-            CreateSiteFormMapper createSiteFormMapper,
-            SiteMapper siteMapper,
-            PersonContext personContext
+            GetSiteResponseMapper getSiteResponseMapper, CreateSiteFormMapper createSiteFormMapper,
+            SiteResponseMapper siteResponseMapper
     ) {
         this.localInstanceContext = localInstanceContext;
+        this.personContext = personContext;
         this.siteService = siteService;
         this.instanceRepository = instanceRepository;
         this.keyService = keyService;
+        this.getSiteResponseMapper = getSiteResponseMapper;
         this.createSiteFormMapper = createSiteFormMapper;
-        this.siteMapper = siteMapper;
-        this.personContext = personContext;
+        this.siteResponseMapper = siteResponseMapper;
     }
 
     @GetMapping
     public GetSiteResponse getSite() {
         Collection<Announcement> announcements = new HashSet<>();
-        return siteMapper.toGetSiteResponse(
+        return getSiteResponseMapper.map(
                 localInstanceContext,
                 personContext,
                 announcements,
@@ -91,18 +89,20 @@ public class SiteController {
         instanceRepository.save(instance);
 
         Collection<Announcement> announcements = new HashSet<>();
-        return siteMapper.toSiteResponse(localInstanceContext, announcements);
+        return siteResponseMapper.map(localInstanceContext, announcements);
     }
 
     @PutMapping
     @Transactional
     public SiteResponse updateSite(@Valid @RequestBody EditSite editSiteForm) {
         Collection<Announcement> announcements = new HashSet<>();
-        return siteMapper.toSiteResponse(localInstanceContext, announcements);
+        //@todo edit site
+        return siteResponseMapper.map(localInstanceContext, announcements);
     }
 
     @PostMapping("/block")
     public BlockInstanceResponse blockInstance(@Valid BlockInstance blockInstanceForm) {
-        return new BlockInstanceResponse(true);
+        //@todo block instance
+        return new BlockInstanceResponse(false);
     }
 }
