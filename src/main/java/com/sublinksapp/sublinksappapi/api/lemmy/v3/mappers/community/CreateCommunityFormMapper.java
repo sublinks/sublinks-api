@@ -31,7 +31,7 @@ public abstract class CreateCommunityFormMapper {
     @Mapping(target = "comments", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    public abstract Community createCommunityFormToCommunity(CreateCommunity createCommunityForm, Instance instance, KeyStore keys);
+    public abstract Community map(CreateCommunity createCommunityForm, Instance instance, KeyStore keys);
 
     String mapTitleSlug(CreateCommunity createCommunityForm) {
         return createCommunityForm.name()

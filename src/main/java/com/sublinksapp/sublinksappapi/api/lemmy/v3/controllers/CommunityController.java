@@ -113,7 +113,7 @@ public class CommunityController {
             language.ifPresent(languages::add);
         }
         KeyStore keys = keyService.generate();
-        Community community = createCommunityFormMapper.createCommunityFormToCommunity(
+        Community community = createCommunityFormMapper.map(
                 createCommunityForm,
                 localInstanceContext.instance(),
                 keys
