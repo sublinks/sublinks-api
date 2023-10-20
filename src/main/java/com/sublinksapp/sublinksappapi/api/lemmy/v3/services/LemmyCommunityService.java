@@ -2,7 +2,7 @@ package com.sublinksapp.sublinksappapi.api.lemmy.v3.services;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.views.CommunityModeratorViewMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.community.CommunityModeratorViewMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.views.CommunityModeratorView;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.views.CommunityView;
 import com.sublinksapp.sublinksappapi.community.Community;

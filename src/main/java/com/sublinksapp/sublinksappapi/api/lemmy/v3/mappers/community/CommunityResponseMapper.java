@@ -1,4 +1,4 @@
-package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.response;
+package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.community;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.LemmyCommunityMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.CommunityResponse;

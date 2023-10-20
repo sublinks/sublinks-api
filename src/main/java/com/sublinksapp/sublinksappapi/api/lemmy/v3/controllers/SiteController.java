@@ -1,8 +1,8 @@
 package com.sublinksapp.sublinksappapi.api.lemmy.v3.controllers;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.announcment.Announcement;
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.SiteMapper;
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.request.CreateSiteFormMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site.CreateSiteFormMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site.SiteMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.BlockInstance;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.CreateSite;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.EditSite;
@@ -17,6 +17,7 @@ import com.sublinksapp.sublinksappapi.person.PersonContext;
 import com.sublinksapp.sublinksappapi.util.KeyService;
 import com.sublinksapp.sublinksappapi.util.KeyStore;
 import jakarta.validation.Valid;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -63,7 +64,7 @@ public class SiteController {
     }
 
     @GetMapping
-    GetSiteResponse getSite() {
+    public GetSiteResponse getSite() {
         Collection<Announcement> announcements = new HashSet<>();
         return siteMapper.toGetSiteResponse(
                 localInstanceContext,
@@ -77,7 +78,8 @@ public class SiteController {
     }
 
     @PostMapping
-    SiteResponse createSite(@Valid @RequestBody CreateSite createSiteForm) {
+    @Transactional
+    public SiteResponse createSite(@Valid @RequestBody CreateSite createSiteForm) {
         KeyStore keys = keyService.generate();
         Instance instance = localInstanceContext.instance();
         createSiteFormMapper.CreateSiteToInstance(
@@ -93,13 +95,14 @@ public class SiteController {
     }
 
     @PutMapping
-    SiteResponse updateSite(@Valid @RequestBody EditSite editSiteForm) {
+    @Transactional
+    public SiteResponse updateSite(@Valid @RequestBody EditSite editSiteForm) {
         Collection<Announcement> announcements = new HashSet<>();
         return siteMapper.toSiteResponse(localInstanceContext, announcements);
     }
 
     @PostMapping("/block")
-    BlockInstanceResponse blockInstance(@Valid BlockInstance blockInstanceForm) {
+    public BlockInstanceResponse blockInstance(@Valid BlockInstance blockInstanceForm) {
         return new BlockInstanceResponse(true);
     }
 }

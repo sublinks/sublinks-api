@@ -1,6 +1,9 @@
-package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers;
+package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.announcment.Announcement;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.LemmyPersonMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.LocalInstanceContextMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.TaglineMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.Language;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.GetSiteResponse;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.responses.SiteResponse;

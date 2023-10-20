@@ -6,7 +6,7 @@ import java.util.Collection;
 
 @Builder
 public record EditSite(
-        String auth,
+        
         String name,
         String sidebar,
         String description,

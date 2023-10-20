@@ -1,4 +1,4 @@
-package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.request;
+package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.post;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.CreatePost;
 import com.sublinksapp.sublinksappapi.community.Community;

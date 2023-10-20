@@ -1,6 +1,5 @@
-package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.views;
+package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.community;
 
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.response.CommunityResponseMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.views.CommunityModeratorView;
 import com.sublinksapp.sublinksappapi.community.Community;
 import com.sublinksapp.sublinksappapi.person.Person;

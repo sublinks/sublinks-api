@@ -1,4 +1,4 @@
-package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.request;
+package com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.site;
 
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.CreateSite;
 import com.sublinksapp.sublinksappapi.instance.Instance;

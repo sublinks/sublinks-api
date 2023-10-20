@@ -1,6 +1,6 @@
 package com.sublinksapp.sublinksappapi.api.lemmy.v3.controllers;
 
-import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.response.GetPersonDetailsResponseMapper;
+import com.sublinksapp.sublinksappapi.api.lemmy.v3.mappers.user.GetPersonDetailsResponseMapper;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.GetPersonDetails;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.Login;
 import com.sublinksapp.sublinksappapi.api.lemmy.v3.models.requests.Register;
