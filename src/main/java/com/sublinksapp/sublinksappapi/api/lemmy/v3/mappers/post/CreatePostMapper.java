@@ -12,7 +12,8 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface CreatePostMapper {
+public abstract class CreatePostMapper {
+    @Mapping(target = "postAggregates", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
@@ -35,8 +36,8 @@ public interface CreatePostMapper {
     @Mapping(target = "linkTitle", constant = "")
     @Mapping(target = "linkUrl", constant = "")
     @Mapping(target = "linkVideoUrl", constant = "")
-    @Mapping(target = "titleSlug", constant = "")
-    Post map(
+    @Mapping(target = "titleSlug", source = "createPostForm")
+    public abstract Post map(
             CreatePost createPostForm,
             Person person,
             Instance instance,
@@ -44,4 +45,12 @@ public interface CreatePostMapper {
             Language language,
             KeyStore keys
     );
+
+    String mapTitleSlug(CreatePost createPostForm) {
+        return createPostForm.name()
+                .toLowerCase()
+                .replace("\n", " ")
+                .replace("[^a-z\\d\\s]", " ")
+                .replace("/ +/g", "_");
+    }
 }

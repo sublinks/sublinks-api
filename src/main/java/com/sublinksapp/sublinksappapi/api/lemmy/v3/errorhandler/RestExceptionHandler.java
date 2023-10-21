@@ -79,9 +79,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler({ResponseStatusException.class})
-    public ResponseEntity<Object> handleResponseStatusException(
-            ResponseStatusException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request
-    ) {
+    public ResponseEntity<Object> handleResponseStatusException(ResponseStatusException ex) {
         ApiError apiError = new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR, ex.getLocalizedMessage(), "error occurred");
         return new ResponseEntity<Object>(
