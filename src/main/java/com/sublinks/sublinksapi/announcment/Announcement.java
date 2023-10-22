@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.api.lemmy.v3.announcment;
+package com.sublinks.sublinksapi.announcment;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.mappers.site;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.announcment.Announcement;
+import com.sublinks.sublinksapi.announcment.Announcement;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.LemmyPersonMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.LocalInstanceContextMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.TaglineMapper;

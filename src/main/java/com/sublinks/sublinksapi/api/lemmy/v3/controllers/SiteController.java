@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.controllers;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.announcment.Announcement;
+import com.sublinks.sublinksapi.announcment.Announcement;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.site.CreateSiteFormMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.site.GetSiteResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.site.SiteResponseMapper;

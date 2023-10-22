@@ -151,10 +151,23 @@ public class PostController {
     }
 
     @GetMapping("list")
-    GetPostsResponse index() {
-        Collection<PostView> posts = new HashSet<>();
+    GetPostsResponse index(UsernamePasswordAuthenticationToken principal) {
+        Person person = (Person) principal.getPrincipal();
+        Collection<Post> posts = postRepository.findAll();
+        Collection<PostView> postViewCollection = new HashSet<>();
+        for (Post post :
+                posts) {
+            final PostView postView = postViewMapper.map(
+                    post,
+                    post.getCommunity(),
+                    SubscribedType.NotSubscribed,
+                    person
+            );
+            postViewCollection.add(postView);
+        }
+
         return GetPostsResponse.builder()
-                .posts(posts)
+                .posts(postViewCollection)
                 .build();
     }
 
