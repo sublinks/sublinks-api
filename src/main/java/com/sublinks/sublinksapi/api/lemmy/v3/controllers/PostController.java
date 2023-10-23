@@ -2,16 +2,21 @@ package com.sublinks.sublinksapi.api.lemmy.v3.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.post.CreatePostMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.mappers.post.GetPostResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.mappers.post.PostViewMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.requests.CreatePost;
+import com.sublinks.sublinksapi.api.lemmy.v3.models.requests.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.responses.GetPostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.responses.GetPostsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.responses.GetSiteMetadataResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.responses.ListPostReportsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.responses.PostReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.responses.PostResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.models.views.CommunityModeratorView;
+import com.sublinks.sublinksapi.api.lemmy.v3.models.views.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.models.views.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.services.LemmyPostService;
 import com.sublinks.sublinksapi.authorization.AuthorizationService;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
@@ -42,8 +47,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -53,6 +60,7 @@ public class PostController {
     private final AuthorizationService authorizationService;
     private final KeyService keyService;
     private final LemmyCommunityService lemmyCommunityService;
+    private final LemmyPostService lemmyPostService;
     private final PostService postService;
     private final LanguageRepository languageRepository;
     private final CommunityRepository communityRepository;
@@ -61,6 +69,7 @@ public class PostController {
     private final PostRepository postRepository;
     private final CreatePostMapper createPostMapper;
     private final PostViewMapper postViewMapper;
+    private final GetPostResponseMapper getPostResponseMapper;
 
 
     public PostController(
@@ -68,18 +77,21 @@ public class PostController {
             AuthorizationService authorizationService,
             KeyService keyService,
             LemmyCommunityService lemmyCommunityService,
-            PostService postService, LanguageRepository languageRepository,
+            LemmyPostService lemmyPostService,
+            PostService postService,
+            LanguageRepository languageRepository,
             CommunityRepository communityRepository,
             PostAggregatesRepository postAggregatesRepository,
             LinkPersonPostRepository linkPersonPostRepository,
             PostRepository postRepository,
             CreatePostMapper createPostMapper,
-            PostViewMapper postViewMapper
-    ) {
+            PostViewMapper postViewMapper,
+            GetPostResponseMapper getPostResponseMapper) {
         this.localInstanceContext = localInstanceContext;
         this.authorizationService = authorizationService;
         this.keyService = keyService;
         this.lemmyCommunityService = lemmyCommunityService;
+        this.lemmyPostService = lemmyPostService;
         this.postService = postService;
         this.languageRepository = languageRepository;
         this.communityRepository = communityRepository;
@@ -88,6 +100,7 @@ public class PostController {
         this.postRepository = postRepository;
         this.createPostMapper = createPostMapper;
         this.postViewMapper = postViewMapper;
+        this.getPostResponseMapper = getPostResponseMapper;
     }
 
     @PostMapping
@@ -147,8 +160,17 @@ public class PostController {
     }
 
     @GetMapping
-    GetPostResponse show() {
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    GetPostResponse show(@Valid GetPost getPostForm) {
+        Post post = postRepository.findById((long)getPostForm.id()).get();
+        Community community = post.getCommunity();
+
+        PostView postView = lemmyPostService.postViewFromPost(post);
+        CommunityView communityView = lemmyCommunityService.communityViewFromCommunity(community);
+        List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
+        List<PostView> crossPosts = new ArrayList<>();
+
+
+        return getPostResponseMapper.map(postView, communityView, moderators, crossPosts);
     }
 
     @PutMapping

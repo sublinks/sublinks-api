@@ -99,5 +99,5 @@ public interface LemmyPersonMapper {
     @Mapping(target = "bot_account", source = "person.botAccount")
     @Mapping(target = "ban_expires", constant = "")
     @Mapping(target = "instance_id", source = "person.instance.id")
-    com.sublinks.sublinksapi.api.lemmy.v3.models.Person PersonToPerson(Person person);
+    com.sublinks.sublinksapi.api.lemmy.v3.models.Person personToPerson(Person person);
 }
