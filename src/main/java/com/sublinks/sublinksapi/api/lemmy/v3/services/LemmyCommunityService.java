@@ -32,6 +32,9 @@ public class LemmyCommunityService {
     }
 
     public SubscribedType getPersonCommunitySubscribeType(Person person, Community community) {
+        if (person == null || community == null) {
+            return SubscribedType.NotSubscribed;
+        }
         for (LinkPersonCommunity link :
                 person.getLinkPersonCommunity()) {
             if (link.getCommunity() == community) {

@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.comment.Comment;
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.instance.Instance;
 import com.sublinks.sublinksapi.language.Language;
+import com.sublinks.sublinksapi.person.LinkPersonPost;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,6 +28,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -57,6 +59,9 @@ public class Post {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PostAggregates postAggregates;
+
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    Set<LinkPersonPost> linkPersonPost;
 
     /**
      * Attributes

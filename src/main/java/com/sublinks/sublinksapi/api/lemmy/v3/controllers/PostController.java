@@ -19,9 +19,15 @@ import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.community.CommunityRepository;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.LanguageRepository;
+import com.sublinks.sublinksapi.person.LinkPersonPost;
+import com.sublinks.sublinksapi.person.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.post.PostAggregates;
+import com.sublinks.sublinksapi.post.PostAggregatesRepository;
 import com.sublinks.sublinksapi.post.PostRepository;
+import com.sublinks.sublinksapi.post.PostService;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
@@ -38,6 +44,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/api/v3/post")
@@ -46,19 +53,25 @@ public class PostController {
     private final AuthorizationService authorizationService;
     private final KeyService keyService;
     private final LemmyCommunityService lemmyCommunityService;
+    private final PostService postService;
     private final LanguageRepository languageRepository;
     private final CommunityRepository communityRepository;
+    private final PostAggregatesRepository postAggregatesRepository;
+    private final LinkPersonPostRepository linkPersonPostRepository;
     private final PostRepository postRepository;
     private final CreatePostMapper createPostMapper;
     private final PostViewMapper postViewMapper;
+
 
     public PostController(
             LocalInstanceContext localInstanceContext,
             AuthorizationService authorizationService,
             KeyService keyService,
             LemmyCommunityService lemmyCommunityService,
-            LanguageRepository languageRepository,
+            PostService postService, LanguageRepository languageRepository,
             CommunityRepository communityRepository,
+            PostAggregatesRepository postAggregatesRepository,
+            LinkPersonPostRepository linkPersonPostRepository,
             PostRepository postRepository,
             CreatePostMapper createPostMapper,
             PostViewMapper postViewMapper
@@ -67,8 +80,11 @@ public class PostController {
         this.authorizationService = authorizationService;
         this.keyService = keyService;
         this.lemmyCommunityService = lemmyCommunityService;
+        this.postService = postService;
         this.languageRepository = languageRepository;
         this.communityRepository = communityRepository;
+        this.postAggregatesRepository = postAggregatesRepository;
+        this.linkPersonPostRepository = linkPersonPostRepository;
         this.postRepository = postRepository;
         this.createPostMapper = createPostMapper;
         this.postViewMapper = postViewMapper;
@@ -81,8 +97,10 @@ public class PostController {
             UsernamePasswordAuthenticationToken principal
     ) {
         Community community = communityRepository.findById((long) createPostForm.community_id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-
-        Person person = (Person) principal.getPrincipal();
+        Person person = null;
+        if (principal != null) {
+            person = (Person) principal.getPrincipal();
+        }
         authorizationService
                 .canPerson(person)
                 .performTheAction(AuthorizeAction.create)
@@ -93,15 +111,28 @@ public class PostController {
         KeyStore keys = keyService.generate();
         Post post = createPostMapper.map(
                 createPostForm,
-                person,
                 localInstanceContext.instance(),
                 community,
                 languageRepository.findById((long) createPostForm.language_id()).get(),
                 keys
         );
         post.setCommunity(community);
-
         postRepository.saveAndFlush(post);
+
+        Set<LinkPersonPost> linkPersonPosts = new HashSet<>();
+        linkPersonPosts.add(
+                LinkPersonPost.builder()
+                        .post(post)
+                        .person(person)
+                        .linkType(LinkPersonPostType.creator)
+                        .build()
+        );
+        post.setLinkPersonPost(linkPersonPosts);
+        linkPersonPostRepository.saveAllAndFlush(linkPersonPosts);
+
+        PostAggregates postAggregates = PostAggregates.builder().post(post).community(community).build();
+        postAggregatesRepository.saveAndFlush(postAggregates);
+        post.setPostAggregates(postAggregates);
 
         SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
 
@@ -151,17 +182,21 @@ public class PostController {
     }
 
     @GetMapping("list")
-    GetPostsResponse index(UsernamePasswordAuthenticationToken principal) {
-        Person person = (Person) principal.getPrincipal();
+    @Transactional(readOnly = true)
+    public GetPostsResponse index(UsernamePasswordAuthenticationToken principal) {
+        Person person = null;
+        if (principal != null) {
+            person = (Person) principal.getPrincipal();
+        }
         Collection<Post> posts = postRepository.findAll();
         Collection<PostView> postViewCollection = new HashSet<>();
-        for (Post post :
-                posts) {
-            final PostView postView = postViewMapper.map(
+        for (Post post : posts) {
+            Person creator = postService.getPostCreator(post);
+            PostView postView = postViewMapper.map(
                     post,
                     post.getCommunity(),
-                    SubscribedType.NotSubscribed,
-                    person
+                    lemmyCommunityService.getPersonCommunitySubscribeType(person, post.getCommunity()),
+                    creator
             );
             postViewCollection.add(postView);
         }

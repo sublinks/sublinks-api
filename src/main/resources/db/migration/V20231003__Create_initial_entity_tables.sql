@@ -279,9 +279,10 @@ create index `IDX_POST_LIKES_POST_ID` on `post_likes` (`post_id`);
 create table link_person_posts
 (
     `id`         bigint auto_increment primary key,
-    `person_id`  bigint                                    not null,
-    `post_id`    bigint                                    not null,
-    `created_at` timestamp(3) default current_timestamp(3) not null
+    `person_id`  bigint                                         not null,
+    `post_id`    bigint                                         not null,
+    `link_type`  enum ('creator', 'follower', 'pending_follow') not null,
+    `created_at` timestamp(3) default current_timestamp(3)      not null
 ) engine = InnoDB
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';

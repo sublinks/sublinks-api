@@ -4,7 +4,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.models.requests.CreatePost;
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.instance.Instance;
 import com.sublinks.sublinksapi.language.Language;
-import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.util.KeyStore;
 import org.mapstruct.Mapper;
@@ -39,7 +38,6 @@ public abstract class CreatePostMapper {
     @Mapping(target = "titleSlug", source = "createPostForm")
     public abstract Post map(
             CreatePost createPostForm,
-            Person person,
             Instance instance,
             Community community,
             Language language,

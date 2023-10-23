@@ -18,14 +18,23 @@ public class AuthorizationService {
     }
 
     public EntityPolicy canPerson(Person person) {
+        if (person == null) {
+            return new EntityPolicy(ActionType.check, aclRepository);
+        }
         return new EntityPolicy(person, ActionType.check, aclRepository);
     }
 
     public EntityPolicy allowPerson(Person person) {
+        if (person == null) {
+            return new EntityPolicy(ActionType.allow, aclRepository);
+        }
         return new EntityPolicy(person, ActionType.allow, aclRepository);
     }
 
     public EntityPolicy revokePerson(Person person) {
+        if (person == null) {
+            return new EntityPolicy(ActionType.revoke, aclRepository);
+        }
         return new EntityPolicy(person, ActionType.revoke, aclRepository);
     }
 
@@ -51,6 +60,12 @@ public class AuthorizationService {
 
         private AuthorizedEntityType entityType;
         private Long entityId;
+
+        public EntityPolicy(ActionType actionType, AclRepository aclRepository) {
+            this.person = Person.builder().build();
+            this.actionType = actionType;
+            this.aclRepository = aclRepository;
+        }
 
         public EntityPolicy(Person person, ActionType actionType, AclRepository aclRepository) {
             this.person = person;
