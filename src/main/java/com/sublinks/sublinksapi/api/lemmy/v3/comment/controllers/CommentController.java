@@ -1,7 +1,5 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.comment.controllers;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers.CommentMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers.LemmyCommentMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
@@ -39,20 +37,14 @@ public class CommentController {
 
     final private CommentRepository commentRepository;
 
-    final private LemmyCommentMapper lemmyCommentMapper;
-
-    final private CommentMapper commentMapper;
-
     final private LemmyCommentService lemmyCommentService;
 
     final private PostRepository postRepository;
 
     final private LanguageRepository languageRepository;
 
-    public CommentController(CommentRepository commentRepository, LemmyCommentMapper lemmyCommentMapper, CommentMapper commentMapper, LemmyCommentService lemmyCommentService, PostRepository postRepository, LanguageRepository languageRepository) {
+    public CommentController(CommentRepository commentRepository, LemmyCommentService lemmyCommentService, PostRepository postRepository, LanguageRepository languageRepository) {
         this.commentRepository = commentRepository;
-        this.lemmyCommentMapper = lemmyCommentMapper;
-        this.commentMapper = commentMapper;
         this.lemmyCommentService = lemmyCommentService;
         this.postRepository = postRepository;
         this.languageRepository = languageRepository;

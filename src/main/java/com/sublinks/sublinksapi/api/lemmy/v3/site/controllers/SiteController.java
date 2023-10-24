@@ -17,6 +17,8 @@ import com.sublinks.sublinksapi.instance.InstanceBlock;
 import com.sublinks.sublinksapi.instance.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.InstanceRepository;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
+import com.sublinks.sublinksapi.language.Language;
+import com.sublinks.sublinksapi.language.LanguageRepository;
 import com.sublinks.sublinksapi.person.PersonContext;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
@@ -33,8 +35,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -45,6 +49,7 @@ public class SiteController {
     private final SiteService siteService;
     private final InstanceRepository instanceRepository;
     private final InstanceBlockRepository instanceBlockRepository;
+    private final LanguageRepository languageRepository;
     private final KeyService keyService;
     private final GetSiteResponseMapper getSiteResponseMapper;
     private final CreateSiteFormMapper createSiteFormMapper;
@@ -57,7 +62,7 @@ public class SiteController {
             PersonContext personContext,
             SiteService siteService,
             InstanceRepository instanceRepository,
-            InstanceBlockRepository instanceBlockRepository, KeyService keyService,
+            InstanceBlockRepository instanceBlockRepository, LanguageRepository languageRepository, KeyService keyService,
             GetSiteResponseMapper getSiteResponseMapper, CreateSiteFormMapper createSiteFormMapper,
             EditSiteFormMapper editSiteFormMapper, SiteResponseMapper siteResponseMapper
     ) {
@@ -66,6 +71,7 @@ public class SiteController {
         this.siteService = siteService;
         this.instanceRepository = instanceRepository;
         this.instanceBlockRepository = instanceBlockRepository;
+        this.languageRepository = languageRepository;
         this.keyService = keyService;
         this.getSiteResponseMapper = getSiteResponseMapper;
         this.createSiteFormMapper = createSiteFormMapper;
@@ -76,6 +82,10 @@ public class SiteController {
     @GetMapping
     public GetSiteResponse getSite() {
         Collection<Announcement> announcements = new HashSet<>();
+        List<Long> discussionLanguages = new ArrayList<>();
+        for (Language language : localInstanceContext.instance().getLanguages()) {
+            discussionLanguages.add(language.getId());
+        }
         return getSiteResponseMapper.map(
                 localInstanceContext,
                 personContext,
@@ -83,7 +93,7 @@ public class SiteController {
                 siteService.admins(),
                 siteService.allLanguages(localInstanceContext.languageRepository()),
                 siteService.customEmojis(),
-                siteService.discussionLanguages()
+                discussionLanguages
         );
     }
 
@@ -98,6 +108,12 @@ public class SiteController {
                 keys,
                 instance
         );
+        final List<Language> languages = new ArrayList<>();
+        for (String languageCode : createSiteForm.discussion_languages()) {
+            final Optional<Language> language = languageRepository.findById(Long.valueOf(languageCode));
+            language.ifPresent(languages::add);
+        }
+        instance.setLanguages(languages);
         instanceRepository.save(instance);
         Collection<Announcement> announcements = new HashSet<>();
         return siteResponseMapper.map(localInstanceContext, announcements);
@@ -108,6 +124,12 @@ public class SiteController {
     public SiteResponse updateSite(@Valid @RequestBody EditSite editSiteForm) {
         Collection<Announcement> announcements = new HashSet<>();
         Instance instance = localInstanceContext.instance();
+        final List<Language> languages = new ArrayList<>();
+        for (String languageCode : editSiteForm.discussion_languages()) {
+            final Optional<Language> language = languageRepository.findById(Long.valueOf(languageCode));
+            language.ifPresent(languages::add);
+        }
+        instance.setLanguages(languages);
         editSiteFormMapper.map(editSiteForm, instance);
         instanceRepository.save(instance);
         return siteResponseMapper.map(localInstanceContext, announcements);

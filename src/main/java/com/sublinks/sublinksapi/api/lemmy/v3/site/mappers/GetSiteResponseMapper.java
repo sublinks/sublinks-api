@@ -31,6 +31,6 @@ public interface GetSiteResponseMapper {
             Collection<Person> admins,// todo collection of PersonContext
             Collection<Language> languages,
             Collection<CustomEmojiView> customEmojis,
-            Collection<Integer> discussionLanguages
+            Collection<Long> discussionLanguages
     );
 }

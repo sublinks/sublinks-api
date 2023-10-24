@@ -7,11 +7,9 @@ import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.PersonRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 
 @Service
 public class SiteService {
@@ -22,6 +20,7 @@ public class SiteService {
         this.personRepository = personRepository;
     }
 
+    // @todo finish admin list
     public Collection<Person> admins() {
         return personRepository.findAll();
     }
@@ -39,15 +38,9 @@ public class SiteService {
         return languages;
     }
 
+    // @todo custom emojis
     public Collection<CustomEmojiView> customEmojis() {
         final Collection<CustomEmojiView> emojiViews = new HashSet<>();
         return emojiViews;
-    }
-
-    public Collection<Integer> discussionLanguages() {
-        List<Integer> languageIds = new ArrayList<>();
-        languageIds.add(1);
-        languageIds.add(38);
-        return languageIds;
     }
 }
