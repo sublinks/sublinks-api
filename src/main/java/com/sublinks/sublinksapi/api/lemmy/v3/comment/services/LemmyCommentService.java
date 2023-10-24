@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
 import com.sublinks.sublinksapi.comment.Comment;
 import com.sublinks.sublinksapi.comment.CommentAggregate;
 import com.sublinks.sublinksapi.community.Community;
+import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.post.Post;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,20 @@ public class LemmyCommentService {
     private final LemmyCommunityMapper lemmyCommunityMapper;
     private final LemmyPostMapper lemmyPostMapper;
     private final LemmyCommunityService lemmyCommunityService;
+    private final LocalInstanceContext localInstanceContext;
 
-    public LemmyCommentService(LemmyCommentMapper lemmyCommentMapper, LemmyPersonMapper lemmyPersonMapper, LemmyCommunityMapper lemmyCommunityMapper, LemmyPostMapper lemmyPostMapper, LemmyCommunityService lemmyCommunityService) {
+    public LemmyCommentService(LemmyCommentMapper lemmyCommentMapper, LemmyPersonMapper lemmyPersonMapper, LemmyCommunityMapper lemmyCommunityMapper, LemmyPostMapper lemmyPostMapper, LemmyCommunityService lemmyCommunityService, LocalInstanceContext localInstanceContext) {
         this.lemmyCommentMapper = lemmyCommentMapper;
         this.lemmyPersonMapper = lemmyPersonMapper;
         this.lemmyCommunityMapper = lemmyCommunityMapper;
         this.lemmyPostMapper = lemmyPostMapper;
         this.lemmyCommunityService = lemmyCommunityService;
+        this.localInstanceContext = localInstanceContext;
+    }
+
+    public String generateActivityPubId(Comment comment) {
+        String domain = localInstanceContext.instance().getDomain();
+        return String.format("%s/comment/%d", domain, comment.getId());
     }
 
     public CommentView createCommentView(Comment comment, Person person) {

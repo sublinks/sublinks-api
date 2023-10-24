@@ -31,6 +31,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(path = "/api/v3/comment")
@@ -72,7 +73,23 @@ public class CommentController {
                 .language(language)
                 .path(post.getCommunity().getId() + ";" + post.getId())
                 .build();
+
+
+        commentRepository.save(comment);
+        String path = null;
+        if (createCommentForm.parent_id() != null) {
+            Optional<Comment> parentComment = commentRepository.findById((long) createCommentForm.parent_id());
+            if (parentComment.isPresent()) {
+                path = String.format("%s;%d", parentComment.get().getPath(), comment.getId());
+            }
+        }
+        if (path == null) {
+            path = String.format("0;%d", comment.getId());
+        }
+        comment.setPath(path);
+        comment.setActivityPubId(lemmyCommentService.generateActivityPubId(comment));
         commentRepository.saveAndFlush(comment);
+
         CommentView commentView = lemmyCommentService.createCommentView(comment, person);
         return CommentResponse.builder()
                 .comment_view(commentView)
