@@ -129,6 +129,18 @@ create table instance_languages
   collate = 'utf8mb4_unicode_ci';
 
 /**
+  Blocked Instances table
+ */
+create table instance_blocks
+(
+    `id`          bigint auto_increment primary key,
+    `instance_id` bigint                                    not null,
+    `created_at`  timestamp(3) default current_timestamp(3) not null
+) engine = InnoDB
+  default charset `utf8mb4`
+  collate = 'utf8mb4_unicode_ci';
+
+/**
   Languages table
  */
 create table languages
