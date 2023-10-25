@@ -1,327 +1,363 @@
 /**
   Comments table
  */
-create table comments
+CREATE TABLE `comments`
 (
-    `id`              bigint auto_increment primary key,
-    `activity_pub_id` text    not null,
-    `language_id`     bigint  not null,
-    `is_deleted`      tinyint not null default 0,
-    `is_removed`      tinyint not null default 0,
-    `person_id`       bigint  not null,
-    `community_id`    bigint  not null,
-    `post_id`         bigint  not null,
-    `is_featured`     tinyint not null default 0,
-    `comment_body`    text,
-    `path`            varchar(512),
-    `created_at`      timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`      timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `activity_pub_id` TEXT    NOT NULL,
+    `language_id`     BIGINT  NOT NULL,
+    `is_deleted`      TINYINT NOT NULL DEFAULT 0,
+    `is_removed`      TINYINT NOT NULL DEFAULT 0,
+    `person_id`       BIGINT  NOT NULL,
+    `community_id`    BIGINT  NOT NULL,
+    `post_id`         BIGINT  NOT NULL,
+    `is_featured`     TINYINT NOT NULL DEFAULT 0,
+    `comment_body`    TEXT,
+    `path`            VARCHAR(512),
+    `created_at`      TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`      TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_COMMENTS_LANGUAGE_ID` on `comments` (`language_id`);
-create index `IDX_COMMENTS_PERSON_ID` on `comments` (`person_id`);
-create index `IDX_COMMENTS_COMMUNITY_ID` on `comments` (`community_id`);
-create index `IDX_COMMENTS_POST_ID` on `comments` (`post_id`);
+CREATE INDEX `IDX_COMMENTS_LANGUAGE_ID` ON `comments` (`language_id`);
+CREATE INDEX `IDX_COMMENTS_PERSON_ID` ON `comments` (`person_id`);
+CREATE INDEX `IDX_COMMENTS_COMMUNITY_ID` ON `comments` (`community_id`);
+CREATE INDEX `IDX_COMMENTS_POST_ID` ON `comments` (`post_id`);
 
 /**
   Comment Likes table
  */
-create table comment_likes
+CREATE TABLE `comment_likes`
 (
-    `id`           bigint auto_increment primary key,
-    `post_id`      bigint  not null,
-    `person_id`    bigint  not null,
-    `comment_id`   bigint  not null,
-    `is_up_vote`   tinyint not null default 0,
-    `is_down_vote` tinyint not null default 0,
-    `score`        tinyint not null default 0,
-    `created_at`   timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`   timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id`      BIGINT  NOT NULL,
+    `person_id`    BIGINT  NOT NULL,
+    `comment_id`   BIGINT  NOT NULL,
+    `is_up_vote`   TINYINT NOT NULL DEFAULT 0,
+    `is_down_vote` TINYINT NOT NULL DEFAULT 0,
+    `score`        TINYINT NOT NULL DEFAULT 0,
+    `created_at`   TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`   TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_COMMENT_ID` on `comment_likes` (`comment_id`);
-create index `IDX_PERSON_ID` on `comment_likes` (`person_id`);
+CREATE INDEX `IDX_COMMENT_ID` ON `comment_likes` (`comment_id`);
+CREATE INDEX `IDX_PERSON_ID` ON `comment_likes` (`person_id`);
+
+/**
+  Comment Saves table
+ */
+CREATE TABLE `comment_saves`
+(
+
+    `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`  BIGINT                                    NOT NULL,
+    `comment_id` BIGINT                                    NOT NULL,
+    `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_COMMENT_SAVES_PERSON_ID` ON `comment_saves` (`person_id`);
+CREATE INDEX `IDX_COMMENT_SAVES_COMMENT_ID` ON `comment_saves` (`comment_id`);
 
 /**
   Communities table
  */
-create table communities
+CREATE TABLE `communities`
 (
-    `id`                            bigint auto_increment primary key,
-    `activity_pub_id`               text         not null,
-    `instance_id`                   bigint       not null,
-    `title`                         varchar(255) not null,
-    `title_slug`                    varchar(255) not null,
-    `description`                   text         not null,
-    `is_deleted`                    tinyint      not null default 0,
-    `is_removed`                    tinyint      not null default 0,
-    `is_local`                      tinyint      not null default 0,
-    `is_nsfw`                       tinyint      not null default 0,
-    `is_posting_restricted_to_mods` tinyint      not null default 0,
-    `icon_image_url`                text         not null,
-    `banner_image_url`              text         not null,
-    `public_key`                    text         not null,
-    `private_key`                   text         null,
-    `created_at`                    timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`                    timestamp(3)          default current_timestamp(3) not null on update current_timestamp(3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`                            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `activity_pub_id`               TEXT         NOT NULL,
+    `instance_id`                   BIGINT       NOT NULL,
+    `title`                         VARCHAR(255) NOT NULL,
+    `title_slug`                    VARCHAR(255) NOT NULL,
+    `description`                   TEXT         NOT NULL,
+    `is_deleted`                    TINYINT      NOT NULL DEFAULT 0,
+    `is_removed`                    TINYINT      NOT NULL DEFAULT 0,
+    `is_local`                      TINYINT      NOT NULL DEFAULT 0,
+    `is_nsfw`                       TINYINT      NOT NULL DEFAULT 0,
+    `is_posting_restricted_to_mods` TINYINT      NOT NULL DEFAULT 0,
+    `icon_image_url`                TEXT         NOT NULL,
+    `banner_image_url`              TEXT         NOT NULL,
+    `public_key`                    TEXT         NOT NULL,
+    `private_key`                   TEXT         NULL,
+    `created_at`                    TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`                    TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_COMMUNITIES_INSTANCE_ID` on `communities` (`instance_id`);
-create index `IDX_COMMUNITIES_TITLE_SLUG` on `communities` (`title_slug`);
-create index `IDX_COMMUNITIES_IS_DELETED` on `communities` (`is_deleted`);
-create index `IDX_COMMUNITIES_IS_REMOVED` on `communities` (`is_removed`);
-create index `IDX_COMMUNITIES_IS_LOCAL` on `communities` (`is_local`);
-create index `IDX_COMMUNITIES_IS_NSFW` on `communities` (`is_nsfw`);
-create index `IDX_COMMUNITIES_IS_POSTING_RESTRICTED_TO_MODS` on `communities` (`is_posting_restricted_to_mods`);
+CREATE INDEX `IDX_COMMUNITIES_INSTANCE_ID` ON `communities` (`instance_id`);
+CREATE INDEX `IDX_COMMUNITIES_TITLE_SLUG` ON `communities` (`title_slug`);
+CREATE INDEX `IDX_COMMUNITIES_IS_DELETED` ON `communities` (`is_deleted`);
+CREATE INDEX `IDX_COMMUNITIES_IS_REMOVED` ON `communities` (`is_removed`);
+CREATE INDEX `IDX_COMMUNITIES_IS_LOCAL` ON `communities` (`is_local`);
+CREATE INDEX `IDX_COMMUNITIES_IS_NSFW` ON `communities` (`is_nsfw`);
+CREATE INDEX `IDX_COMMUNITIES_IS_POSTING_RESTRICTED_TO_MODS` ON `communities` (`is_posting_restricted_to_mods`);
 
 
 /**
   Community Languages table
  */
-create table community_languages
+CREATE TABLE `community_languages`
 (
-    `community_id` bigint not null,
-    `language_id`  bigint not null,
-    primary key (`community_id`, `language_id`)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `community_id` BIGINT NOT NULL,
+    `language_id`  BIGINT NOT NULL,
+    PRIMARY KEY (`community_id`, `language_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   Instances table
  */
-create table instances
+CREATE TABLE `instances`
 (
-    `id`              bigint auto_increment primary key,
-    `activity_pub_id` text                                      not null,
-    `domain`          varchar(255)                              not null,
-    `software`        varchar(255)                              not null,
-    `version`         varchar(255)                              not null,
-    `name`            varchar(255)                              not null,
-    `description`     text                                      not null,
-    `sidebar`         text                                      not null,
-    `icon_url`        text                                      not null,
-    `banner_url`      text                                      not null,
-    `public_key`      text                                      not null,
-    `private_key`     text                                      null,
-    `created_at`      timestamp(3) default current_timestamp(3) not null,
-    `updated_at`      timestamp(3) default current_timestamp(3) not null on update current_timestamp(3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `activity_pub_id` TEXT                                      NOT NULL,
+    `domain`          VARCHAR(255)                              NOT NULL,
+    `software`        VARCHAR(255)                              NOT NULL,
+    `version`         VARCHAR(255)                              NOT NULL,
+    `name`            VARCHAR(255)                              NOT NULL,
+    `description`     TEXT                                      NOT NULL,
+    `sidebar`         TEXT                                      NOT NULL,
+    `icon_url`        TEXT                                      NOT NULL,
+    `banner_url`      TEXT                                      NOT NULL,
+    `public_key`      TEXT                                      NOT NULL,
+    `private_key`     TEXT                                      NULL,
+    `created_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   Instance Languages table
  */
-create table instance_languages
+CREATE TABLE `instance_languages`
 (
-    `instance_id` bigint not null,
-    `language_id` bigint not null,
-    primary key (`instance_id`, `language_id`)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `instance_id` BIGINT NOT NULL,
+    `language_id` BIGINT NOT NULL,
+    PRIMARY KEY (`instance_id`, `language_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   Blocked Instances table
  */
-create table instance_blocks
+CREATE TABLE `instance_blocks`
 (
-    `id`          bigint auto_increment primary key,
-    `instance_id` bigint                                    not null,
-    `created_at`  timestamp(3) default current_timestamp(3) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `instance_id` BIGINT                                    NOT NULL,
+    `created_at`  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   Languages table
  */
-create table languages
+CREATE TABLE `languages`
 (
-    `id`   bigint auto_increment primary key,
-    `code` char(3)      not null,
-    `name` varchar(255) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `code` CHAR(3)      NOT NULL,
+    `name` VARCHAR(255) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   People table
  */
-create table people
+CREATE TABLE `people`
 (
-    `id`                             bigint auto_increment primary key,
-    `instance_id`                    bigint       not null,
-    `is_local`                       tinyint      not null default 0,
-    `is_bot_account`                 tinyint      not null default 0,
-    `is_banned`                      tinyint      not null default 0,
-    `is_deleted`                     tinyint      not null default 0,
-    `activity_pub_id`                text         not null,
-    `name`                           varchar(255) not null,
-    `display_name`                   varchar(255) not null,
-    `email`                          varchar(255) null,
-    `is_email_verified`              tinyint      not null default 0,
-    `password`                       varchar(255) not null,
-    `avatar_image_url`               text         not null,
-    `banner_image_url`               text         not null,
-    `biography`                      text         not null,
-    `interface_language`             varchar(20)  null,
-    `default_theme`                  varchar(255) null,
-    `default_listing_type`           enum ('All', 'Local', 'Subscribed', 'ModeratorView'),
-    `default_sort_type`              enum ('Active', 'Hot', 'New', 'Old', 'TopDay', 'TopWeek',
+    `id`                             BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `instance_id`                    BIGINT       NOT NULL,
+    `is_local`                       TINYINT      NOT NULL DEFAULT 0,
+    `is_bot_account`                 TINYINT      NOT NULL DEFAULT 0,
+    `is_banned`                      TINYINT      NOT NULL DEFAULT 0,
+    `is_deleted`                     TINYINT      NOT NULL DEFAULT 0,
+    `activity_pub_id`                TEXT         NOT NULL,
+    `name`                           VARCHAR(255) NOT NULL,
+    `display_name`                   VARCHAR(255) NOT NULL,
+    `email`                          VARCHAR(255) NULL,
+    `is_email_verified`              TINYINT      NOT NULL DEFAULT 0,
+    `password`                       VARCHAR(255) NOT NULL,
+    `avatar_image_url`               TEXT         NOT NULL,
+    `banner_image_url`               TEXT         NOT NULL,
+    `biography`                      TEXT         NOT NULL,
+    `interface_language`             VARCHAR(20)  NULL,
+    `default_theme`                  VARCHAR(255) NULL,
+    `default_listing_type`           ENUM ('All', 'Local', 'Subscribed', 'ModeratorView'),
+    `default_sort_type`              ENUM ('Active', 'Hot', 'New', 'Old', 'TopDay', 'TopWeek',
         'TopMonth', 'TopYear', 'TopAll', 'MostComments', 'NewComments', 'TopHour', 'TopSixHour',
         'TopTwelveHour', 'TopThreeMonths', 'TopSixMonths', 'TopNineMonths', 'Controversial', 'Scaled'),
-    `is_show_scores`                 tinyint      not null default 0,
-    `is_show_read_posts`             tinyint      not null default 0,
-    `is_show_nsfw`                   tinyint      not null default 0,
-    `is_show_new_post_notifications` tinyint      not null default 0,
-    `is_show_bot_accounts`           tinyint      not null default 0,
-    `is_show_avatars`                tinyint      not null default 0,
-    `is_send_notifications_to_email` tinyint      not null default 0,
-    `is_open_links_in_new_tab`       tinyint      not null default 0,
-    `public_key`                     text         not null,
-    `private_key`                    text         null,
-    `created_at`                     timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`                     timestamp(3)          default current_timestamp(3) not null on update current_timestamp(3)
+    `is_show_scores`                 TINYINT      NOT NULL DEFAULT 0,
+    `is_show_read_posts`             TINYINT      NOT NULL DEFAULT 0,
+    `is_show_nsfw`                   TINYINT      NOT NULL DEFAULT 0,
+    `is_show_new_post_notifications` TINYINT      NOT NULL DEFAULT 0,
+    `is_show_bot_accounts`           TINYINT      NOT NULL DEFAULT 0,
+    `is_show_avatars`                TINYINT      NOT NULL DEFAULT 0,
+    `is_send_notifications_to_email` TINYINT      NOT NULL DEFAULT 0,
+    `is_open_links_in_new_tab`       TINYINT      NOT NULL DEFAULT 0,
+    `public_key`                     TEXT         NOT NULL,
+    `private_key`                    TEXT         NULL,
+    `created_at`                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_PEOPLE_NAME` on `people` (`name`);
-create index `IDX_PEOPLE_EMAIL` on `people` (`email`);
-create index `IDX_PEOPLE_IS_BANNED` on `people` (`is_banned`);
-create index `IDX_PEOPLE_IS_LOCAL` on `people` (`is_local`);
+CREATE INDEX `IDX_PEOPLE_NAME` ON `people` (`name`);
+CREATE INDEX `IDX_PEOPLE_EMAIL` ON `people` (`email`);
+CREATE INDEX `IDX_PEOPLE_IS_BANNED` ON `people` (`is_banned`);
+CREATE INDEX `IDX_PEOPLE_IS_LOCAL` ON `people` (`is_local`);
 
-create table person_languages
+CREATE TABLE `person_languages`
 (
-    `person_id`   bigint not null,
-    `language_id` bigint not null,
-    primary key (`person_id`, `language_id`)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `person_id`   BIGINT NOT NULL,
+    `language_id` BIGINT NOT NULL,
+    PRIMARY KEY (`person_id`, `language_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   Link Person Communities table
  */
-create table link_person_communities
+CREATE TABLE `link_person_communities`
 (
-    `id`           bigint auto_increment primary key,
-    `person_id`    bigint                                                               not null,
-    `community_id` bigint                                                               not null,
-    `link_type`    enum ('owner', 'moderator', 'follower', 'pending_follow', 'blocked') not null,
-    `created_at`   timestamp(3) default current_timestamp(3)                            not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`    BIGINT                                                               NOT NULL,
+    `community_id` BIGINT                                                               NOT NULL,
+    `link_type`    ENUM ('owner', 'moderator', 'follower', 'pending_follow', 'blocked') NOT NULL,
+    `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)                            NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID` on `link_person_communities` (`person_id`, `community_id`);
-create unique index `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID_LINK_TYPE` on `link_person_communities` (`person_id`, `community_id`, `link_type`);
+CREATE INDEX `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID` ON `link_person_communities` (`person_id`, `community_id`);
+CREATE UNIQUE INDEX `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID_LINK_TYPE` ON `link_person_communities` (`person_id`, `community_id`, `link_type`);
 
 /**
   Posts table
  */
-create table posts
+CREATE TABLE `posts`
 (
-    `id`                       bigint auto_increment primary key,
-    `instance_id`              bigint       not null,
-    `activity_pub_id`          text         not null,
-    `language_id`              bigint       not null,
-    `is_deleted`               tinyint      not null default 0,
-    `is_removed`               tinyint      not null default 0,
-    `community_id`             bigint       not null,
-    `is_featured`              tinyint      not null default 0,
-    `is_featured_in_community` tinyint      not null default 0,
-    `link_url`                 text         null,
-    `link_title`               varchar(255) null,
-    `link_description`         text         null,
-    `link_thumbnail_url`       text         null,
-    `link_video_url`           text         null,
-    `is_nsfw`                  tinyint      not null default 0,
-    `title`                    varchar(255) not null,
-    `title_slug`               varchar(255) not null,
-    `post_body`                text,
-    `public_key`               text         not null,
-    `private_key`              text         null,
-    `created_at`               timestamp(3)          default current_timestamp(3) not null,
-    `updated_at`               timestamp(3)          default current_timestamp(3) not null on update current_timestamp(3),
+    `id`                       BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `instance_id`              BIGINT       NOT NULL,
+    `activity_pub_id`          TEXT         NOT NULL,
+    `language_id`              BIGINT       NOT NULL,
+    `is_deleted`               TINYINT      NOT NULL DEFAULT 0,
+    `is_removed`               TINYINT      NOT NULL DEFAULT 0,
+    `community_id`             BIGINT       NOT NULL,
+    `is_featured`              TINYINT      NOT NULL DEFAULT 0,
+    `is_featured_in_community` TINYINT      NOT NULL DEFAULT 0,
+    `link_url`                 TEXT         NULL,
+    `link_title`               VARCHAR(255) NULL,
+    `link_description`         TEXT         NULL,
+    `link_thumbnail_url`       TEXT         NULL,
+    `link_video_url`           TEXT         NULL,
+    `is_nsfw`                  TINYINT      NOT NULL DEFAULT 0,
+    `title`                    VARCHAR(255) NOT NULL,
+    `title_slug`               VARCHAR(255) NOT NULL,
+    `post_body`                TEXT,
+    `public_key`               TEXT         NOT NULL,
+    `private_key`              TEXT         NULL,
+    `created_at`               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3),
 
-    constraint `UC_TITLE_SLUG` unique (`title_slug`)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    CONSTRAINT `UC_TITLE_SLUG` UNIQUE (`title_slug`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_POSTS_LANGUAGE_ID` on `posts` (`language_id`);
-create index `IDX_POSTS_COMMUNITY_ID` on `posts` (`community_id`);
-create index `IDX_POSTS_IS_NSFW` on `posts` (`is_nsfw`);
-create index `IDX_POSTS_IS_FEATURED` on `posts` (`is_featured`);
-create index `IDX_POSTS_IS_FEATURED_IN_COMMUNITY` on `posts` (`is_featured_in_community`);
-create index `IDX_POSTS_TITLE_SLUG` on `posts` (`title_slug`);
+CREATE INDEX `IDX_POSTS_LANGUAGE_ID` ON `posts` (`language_id`);
+CREATE INDEX `IDX_POSTS_COMMUNITY_ID` ON `posts` (`community_id`);
+CREATE INDEX `IDX_POSTS_IS_NSFW` ON `posts` (`is_nsfw`);
+CREATE INDEX `IDX_POSTS_IS_FEATURED` ON `posts` (`is_featured`);
+CREATE INDEX `IDX_POSTS_IS_FEATURED_IN_COMMUNITY` ON `posts` (`is_featured_in_community`);
+CREATE INDEX `IDX_POSTS_TITLE_SLUG` ON `posts` (`title_slug`);
 
 /**
   Post Likes table
  */
-create table post_likes
+CREATE TABLE `post_likes`
 (
-    `id`           bigint auto_increment primary key,
-    `post_id`      bigint  not null,
-    `person_id`    bigint  not null,
-    `is_up_vote`   tinyint not null default 0,
-    `is_down_vote` tinyint not null default 0,
-    `score`        tinyint not null default 0,
-    `created_at`   timestamp(3)     default current_timestamp(3) not null,
-    `updated_at`   timestamp(3)     default current_timestamp(3) not null on update current_timestamp(3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id`      BIGINT  NOT NULL,
+    `person_id`    BIGINT  NOT NULL,
+    `is_up_vote`   TINYINT NOT NULL DEFAULT 0,
+    `is_down_vote` TINYINT NOT NULL DEFAULT 0,
+    `score`        TINYINT NOT NULL DEFAULT 0,
+    `created_at`   TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`   TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create index `IDX_POST_LIKES_POST_ID` on `post_likes` (`post_id`);
+CREATE INDEX `IDX_POST_LIKES_POST_ID` ON `post_likes` (`post_id`);
+
+/**
+  Post Saves table
+ */
+CREATE TABLE `post_saves`
+(
+
+    `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`  BIGINT                                    NOT NULL,
+    `post_id`    BIGINT                                    NOT NULL,
+    `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_POST_SAVES_PERSON_ID` ON `post_saves` (`person_id`);
+CREATE INDEX `IDX_POST_SAVES_POST_ID` ON `post_saves` (`post_id`);
 
 /**
   Person Posts table
  */
-create table link_person_posts
+CREATE TABLE `link_person_posts`
 (
-    `id`         bigint auto_increment primary key,
-    `person_id`  bigint                                         not null,
-    `post_id`    bigint                                         not null,
-    `link_type`  enum ('creator', 'follower', 'pending_follow') not null,
-    `created_at` timestamp(3) default current_timestamp(3)      not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`  BIGINT                                         NOT NULL,
+    `post_id`    BIGINT                                         NOT NULL,
+    `link_type`  ENUM ('creator', 'follower', 'pending_follow') NOT NULL,
+    `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)      NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
 /**
   Person Access Control List table
  */
-create table acl
+CREATE TABLE `acl`
 (
-    `id`                bigint auto_increment primary key,
-    `person_id`         bigint           not null,
-    `entity_type`       enum ('community', 'post', 'comment',
-        'report', 'message', 'instance') not null,
-    `entity_id`         bigint           null     default null,
-    `authorized_action` enum ('create', 'read', 'update',
+    `id`                BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`         BIGINT           NOT NULL,
+    `entity_type`       ENUM ('community', 'post', 'comment',
+        'report', 'message', 'instance') NOT NULL,
+    `entity_id`         BIGINT           NULL     DEFAULT NULL,
+    `authorized_action` ENUM ('create', 'read', 'update',
         'delete', 'post', 'comment', 'message',
-        'ban', 'purge', 'follow')        not null,
-    `is_permitted`      tinyint          not null default 0,
-    `created_at`        timestamp(3)              default current_timestamp(3) not null,
-    `updated_at`        timestamp(3)              default current_timestamp(3) not null on update current_timestamp(3)
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+        'ban', 'purge', 'follow')        NOT NULL,
+    `is_permitted`      TINYINT          NOT NULL DEFAULT 0,
+    `created_at`        TIMESTAMP(3)              DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+    `updated_at`        TIMESTAMP(3)              DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` on `acl` (`person_id`, `entity_type`, `entity_id`);
-create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` on `acl` (`person_id`, `entity_type`, `entity_id`, `authorized_action`);
-create unique index `IDX_ACL_PERSON_ID_ENTITY_TYPE_EID_AUTH_ACTION_IS_PERMITTED` on `acl` (`person_id`,
+CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` ON `acl` (`person_id`, `entity_type`, `entity_id`);
+CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` ON `acl` (`person_id`, `entity_type`, `entity_id`, `authorized_action`);
+CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_EID_AUTH_ACTION_IS_PERMITTED` ON `acl` (`person_id`,
                                                                                            `entity_type`,
                                                                                            `entity_id`,
                                                                                            `authorized_action`,

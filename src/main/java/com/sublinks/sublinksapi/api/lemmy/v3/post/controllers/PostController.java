@@ -4,6 +4,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModerator
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmyListingTypeMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmySortTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.CreatePostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.GetPostResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.PostViewMapper;
@@ -25,15 +27,20 @@ import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.community.CommunityRepository;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.LanguageRepository;
+import com.sublinks.sublinksapi.person.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.LinkPersonPost;
 import com.sublinks.sublinksapi.person.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
+import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostAggregates;
 import com.sublinks.sublinksapi.post.PostAggregatesRepository;
 import com.sublinks.sublinksapi.post.PostRepository;
 import com.sublinks.sublinksapi.post.PostService;
+import com.sublinks.sublinksapi.post.SearchCriteria;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
@@ -71,6 +78,8 @@ public class PostController {
     private final CreatePostMapper createPostMapper;
     private final PostViewMapper postViewMapper;
     private final GetPostResponseMapper getPostResponseMapper;
+    private final LemmySortTypeMapper lemmySortTypeMapper;
+    private final LemmyListingTypeMapper lemmyListingTypeMapper;
 
 
     public PostController(
@@ -87,7 +96,7 @@ public class PostController {
             PostRepository postRepository,
             CreatePostMapper createPostMapper,
             PostViewMapper postViewMapper,
-            GetPostResponseMapper getPostResponseMapper) {
+            GetPostResponseMapper getPostResponseMapper, LemmySortTypeMapper lemmySortTypeMapper, LemmyListingTypeMapper lemmyListingTypeMapper) {
         this.localInstanceContext = localInstanceContext;
         this.authorizationService = authorizationService;
         this.keyService = keyService;
@@ -102,6 +111,8 @@ public class PostController {
         this.createPostMapper = createPostMapper;
         this.postViewMapper = postViewMapper;
         this.getPostResponseMapper = getPostResponseMapper;
+        this.lemmySortTypeMapper = lemmySortTypeMapper;
+        this.lemmyListingTypeMapper = lemmyListingTypeMapper;
     }
 
     @PostMapping
@@ -209,7 +220,62 @@ public class PostController {
         if (principal != null) {
             person = (Person) principal.getPrincipal();
         }
-        Collection<Post> posts = postRepository.filterByFetchRequest(person, getPostsForm.community_name());
+
+        List<Long> communityIds = new ArrayList<>();
+        Community community = null;
+        if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
+            Long communityId = getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
+            community = communityRepository.findCommunityByIdOrTitleSlug(
+                    communityId,
+                    getPostsForm.community_name()
+            );
+            communityIds.add(community.getId());
+        }
+
+        if (person != null) {
+            switch (getPostsForm.type_()) {
+                case Subscribed -> {
+                    Set<LinkPersonCommunity> personCommunities = person.getLinkPersonCommunity();
+                    for (LinkPersonCommunity l : personCommunities) {
+                        if (l.getLinkType() == LinkPersonCommunityType.follower) {
+                            communityIds.add(l.getCommunity().getId());
+                        }
+                    }
+                }
+                case Local -> {
+                    for (Community c : communityRepository.findAll()) { // @todo find local
+                        communityIds.add(c.getId());
+                    }
+                }
+                case All, ModeratorView -> {
+                    // @todo only non deleted communities
+                    // fall through for now
+                }
+            }
+        }
+
+        SortType sortType = null;
+        if (getPostsForm.sort() != null) {
+            sortType = lemmySortTypeMapper.map(getPostsForm.sort());
+        }
+
+        ListingType listingType = null;
+        if (getPostsForm.type_() != null) {
+            listingType = lemmyListingTypeMapper.map(getPostsForm.type_());
+        }
+
+        SearchCriteria searchCriteria = SearchCriteria.builder()
+                .page(1)
+                .listingType(listingType)
+                .perPage(20)
+                .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
+                .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
+                .sortType(sortType)
+                .person(person)
+                .communityIds(communityIds)
+                .build();
+
+        Collection<Post> posts = postRepository.allPostsBySearchCriteria(searchCriteria);
         Collection<PostView> postViewCollection = new HashSet<>();
         for (Post post : posts) {
             Person creator = postService.getPostCreator(post);
