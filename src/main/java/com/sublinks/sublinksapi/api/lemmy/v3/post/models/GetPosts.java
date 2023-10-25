@@ -12,6 +12,8 @@ public record GetPosts(
         Integer limit,
         Integer community_id,
         String community_name,
-        Boolean saved_only
+        Boolean saved_only,
+        Boolean disliked_only,
+        String page_cursor
 ) {
 }

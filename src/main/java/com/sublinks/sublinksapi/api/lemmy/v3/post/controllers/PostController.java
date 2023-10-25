@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.PostViewMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPosts;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ListPostReportsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportResponse;
@@ -161,15 +162,13 @@ public class PostController {
 
     @GetMapping
     GetPostResponse show(@Valid GetPost getPostForm) {
-        Post post = postRepository.findById((long)getPostForm.id()).get();
+        Post post = postRepository.findById((long) getPostForm.id()).get();
         Community community = post.getCommunity();
 
         PostView postView = lemmyPostService.postViewFromPost(post);
         CommunityView communityView = lemmyCommunityService.communityViewFromCommunity(community);
         List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
-        List<PostView> crossPosts = new ArrayList<>();
-
-
+        List<PostView> crossPosts = new ArrayList<>();//@todo cross post
         return getPostResponseMapper.map(postView, communityView, moderators, crossPosts);
     }
 
@@ -205,12 +204,12 @@ public class PostController {
 
     @GetMapping("list")
     @Transactional(readOnly = true)
-    public GetPostsResponse index(UsernamePasswordAuthenticationToken principal) {
+    public GetPostsResponse index(@Valid GetPosts getPostsForm, UsernamePasswordAuthenticationToken principal) {
         Person person = null;
         if (principal != null) {
             person = (Person) principal.getPrincipal();
         }
-        Collection<Post> posts = postRepository.findAll();
+        Collection<Post> posts = postRepository.filterByFetchRequest(person, getPostsForm.community_name());
         Collection<PostView> postViewCollection = new HashSet<>();
         for (Post post : posts) {
             Person creator = postService.getPostCreator(post);
