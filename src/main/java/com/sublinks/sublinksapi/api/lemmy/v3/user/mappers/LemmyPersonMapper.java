@@ -36,6 +36,14 @@ public interface LemmyPersonMapper {
     @Mapping(target = "person", source = "person")
     PersonBlockView personToPersonBlockView(Person person, Person target);
 
+    @Mapping(target = "totp_2fa_enabled", constant = "true")
+    @Mapping(target = "post_listing_mode", constant = "List")
+    @Mapping(target = "infinite_scroll_enabled", constant = "true")
+    @Mapping(target = "enable_keyboard_navigation", constant = "true")
+    @Mapping(target = "enable_animated_images",constant = "true")
+    @Mapping(target = "blur_nsfw", constant = "true")
+    @Mapping(target = "auto_expand", constant = "true")
+    @Mapping(target = "admin", constant = "true")
     @Mapping(target = "person_id", source = "person.id")
     @Mapping(target = "email", source = "person.email")
     @Mapping(target = "theme", source = "person.defaultTheme")

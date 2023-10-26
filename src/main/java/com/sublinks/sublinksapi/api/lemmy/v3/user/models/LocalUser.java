@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.models;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.enums.PostListingMode;
 import lombok.Builder;
 
 @Builder
@@ -24,6 +25,14 @@ public record LocalUser(
         boolean email_verified,
         boolean accepted_application,
         String totp_2fa_url,
-        boolean open_links_in_new_tab
+        boolean open_links_in_new_tab,
+        boolean blur_nsfw,
+        boolean auto_expand,
+        boolean infinite_scroll_enabled,
+        boolean admin,
+        PostListingMode post_listing_mode,
+        boolean totp_2fa_enabled,
+        boolean enable_keyboard_navigation,
+        boolean enable_animated_images
 ) {
 }
