@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
-import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LemmyCommunityMapper.class})
 public interface CommunityResponseMapper {
@@ -14,6 +14,6 @@ public interface CommunityResponseMapper {
     @Mapping(target = "discussion_languages", source = "languages")
     CommunityResponse map(
             CommunityView communityView,
-            List<String> languages
+            Set<String> languages
     );
 }

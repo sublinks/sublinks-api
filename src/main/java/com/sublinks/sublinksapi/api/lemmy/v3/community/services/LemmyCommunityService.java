@@ -1,8 +1,10 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityModeratorViewMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.LemmyCommunityMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
+import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.community.Community;
@@ -23,12 +25,17 @@ import java.util.Set;
 @Service
 public class LemmyCommunityService {
     final private LemmyCommunityMapper lemmyCommunityMapper;
-
     private final CommunityModeratorViewMapper communityModeratorViewMapper;
+    private final CommunityResponseMapper communityResponseMapper;
 
-    public LemmyCommunityService(LemmyCommunityMapper lemmyCommunityMapper, CommunityModeratorViewMapper communityModeratorViewMapper) {
+    public LemmyCommunityService(
+            LemmyCommunityMapper lemmyCommunityMapper,
+            CommunityModeratorViewMapper communityModeratorViewMapper,
+            CommunityResponseMapper communityResponseMapper
+    ) {
         this.lemmyCommunityMapper = lemmyCommunityMapper;
         this.communityModeratorViewMapper = communityModeratorViewMapper;
+        this.communityResponseMapper = communityResponseMapper;
     }
 
     public SubscribedType getPersonCommunitySubscribeType(Person person, Community community) {
@@ -107,5 +114,19 @@ public class LemmyCommunityService {
             }
         }
         return moderatorViews;
+    }
+
+    public CommunityResponse createCommunityResponse(Community community, Person person) {
+        return communityResponseMapper.map(
+                communityViewFromCommunity(community, person),
+                communityLanguageCodes(community)
+        );
+    }
+
+    public CommunityResponse createCommunityResponse(Community community) {
+        return communityResponseMapper.map(
+                communityViewFromCommunity(community),
+                communityLanguageCodes(community)
+        );
     }
 }
