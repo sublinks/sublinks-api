@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
@@ -45,7 +46,6 @@ import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -119,7 +119,7 @@ public class PostController {
     @Transactional
     public PostResponse create(
             @Valid @RequestBody CreatePost createPostForm,
-            UsernamePasswordAuthenticationToken principal
+            JwtPerson principal
     ) {
         Community community = communityRepository.findById((long) createPostForm.community_id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         Person person = null;
@@ -215,7 +215,7 @@ public class PostController {
 
     @GetMapping("list")
     @Transactional(readOnly = true)
-    public GetPostsResponse index(@Valid GetPosts getPostsForm, UsernamePasswordAuthenticationToken principal) {
+    public GetPostsResponse index(@Valid GetPosts getPostsForm, JwtPerson principal) {
         Person person = null;
         if (principal != null) {
             person = (Person) principal.getPrincipal();

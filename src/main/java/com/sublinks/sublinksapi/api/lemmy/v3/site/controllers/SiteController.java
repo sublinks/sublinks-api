@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
 import com.sublinks.sublinksapi.announcment.Announcement;
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.CreateSiteFormMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.EditSiteFormMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.GetSiteResponseMapper;
@@ -24,7 +25,6 @@ import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -138,7 +138,7 @@ public class SiteController {
     @PostMapping("/block")
     @Transactional
     public BlockInstanceResponse blockInstance(@Valid @RequestBody BlockInstance blockInstanceForm, Principal principal) {
-        if (!(principal instanceof UsernamePasswordAuthenticationToken)) {
+        if (!(principal instanceof JwtPerson)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         final Optional<Instance> instance = instanceRepository.findById((long) blockInstanceForm.instance_id());

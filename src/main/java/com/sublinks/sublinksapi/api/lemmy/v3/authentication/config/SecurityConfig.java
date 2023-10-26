@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication.config;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.authentication.filters.JwtFilter;
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;

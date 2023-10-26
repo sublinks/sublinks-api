@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityModeratorViewMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CreateCommunityFormMapper;
@@ -42,7 +43,6 @@ import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -98,7 +98,7 @@ public class CommunityController {
 
     @PostMapping
     @Transactional
-    public CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm, UsernamePasswordAuthenticationToken principal) {
+    public CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm, JwtPerson principal) {
         Person person = (Person) principal.getPrincipal();
         authorizationService
                 .canPerson(person)
@@ -155,7 +155,7 @@ public class CommunityController {
     }
 
     @GetMapping
-    public GetCommunityResponse show(@Valid GetCommunity getCommunityForm, UsernamePasswordAuthenticationToken principal) {
+    public GetCommunityResponse show(@Valid GetCommunity getCommunityForm, JwtPerson principal) {
         Community community = communityRepository.findCommunityByIdOrTitleSlug(
                 getCommunityForm.id(), getCommunityForm.name()
         );
@@ -188,7 +188,7 @@ public class CommunityController {
 
     @GetMapping("list")
     @Transactional
-    public ListCommunitiesResponse list(@Valid ListCommunities listCommunitiesForm, UsernamePasswordAuthenticationToken principal) {
+    public ListCommunitiesResponse list(@Valid ListCommunities listCommunitiesForm, JwtPerson principal) {
         Collection<CommunityView> communityViews = new HashSet<>();
 
         Collection<Community> communities = communityRepository.findAll(); // @todo apply filters

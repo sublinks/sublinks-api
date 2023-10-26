@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.authentication.utils.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.GetPersonDetailsResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;

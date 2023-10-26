@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.comment.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
@@ -17,7 +18,6 @@ import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,10 +52,10 @@ public class CommentController {
 
     @PostMapping
     @Transactional
-    public CommentResponse create(@Valid @RequestBody CreateComment createCommentForm, UsernamePasswordAuthenticationToken principal) {
+    public CommentResponse create(@Valid @RequestBody CreateComment createCommentForm, JwtPerson principal) {
         Person person = (Person) principal.getPrincipal();
-        Post post = postRepository.findById((long)createCommentForm.post_id()).get();
-        Language language = languageRepository.findById((long)createCommentForm.language_id()).get();
+        Post post = postRepository.findById((long) createCommentForm.post_id()).get();
+        Language language = languageRepository.findById((long) createCommentForm.language_id()).get();
         Comment comment = Comment.builder()
                 .person(person)
                 .commentBody(createCommentForm.content())
@@ -127,7 +127,7 @@ public class CommentController {
 
     @GetMapping("list")
     GetCommentsResponse list(@Valid GetComments getCommentsForm,
-                             UsernamePasswordAuthenticationToken principal) {
+                             JwtPerson principal) {
         List<Comment> comments = commentRepository.findAll();
         List<CommentView> commentViews = new ArrayList<>();
         for (Comment comment : comments) {

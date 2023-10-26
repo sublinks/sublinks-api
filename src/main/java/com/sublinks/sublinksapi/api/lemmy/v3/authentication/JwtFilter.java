@@ -1,6 +1,5 @@
-package com.sublinks.sublinksapi.api.lemmy.v3.authentication.filters;
+package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.authentication.utils.JwtUtil;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.PersonRepository;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -8,7 +7,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -54,8 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             if (jwtUtil.validateToken(token, person)) {
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(person, null, person.getAuthorities());
+                JwtPerson authenticationToken = new JwtPerson(person, person.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }

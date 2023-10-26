@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.api.lemmy.v3.authentication.utils;
+package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
 import com.sublinks.sublinksapi.person.Person;
 import io.jsonwebtoken.Claims;
