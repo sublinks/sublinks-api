@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.instance.Instance;
 import com.sublinks.sublinksapi.instance.InstanceBlock;
 import com.sublinks.sublinksapi.instance.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.InstanceRepository;
+import com.sublinks.sublinksapi.instance.InstanceService;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.Language;
 import com.sublinks.sublinksapi.language.LanguageRepository;
@@ -47,6 +48,7 @@ public class SiteController {
     private final LocalInstanceContext localInstanceContext;
     private final PersonContext personContext;
     private final SiteService siteService;
+    private final InstanceService instanceService;
     private final InstanceRepository instanceRepository;
     private final InstanceBlockRepository instanceBlockRepository;
     private final LanguageRepository languageRepository;
@@ -61,7 +63,7 @@ public class SiteController {
             LocalInstanceContext localInstanceContext,
             PersonContext personContext,
             SiteService siteService,
-            InstanceRepository instanceRepository,
+            InstanceService instanceService, InstanceRepository instanceRepository,
             InstanceBlockRepository instanceBlockRepository, LanguageRepository languageRepository, KeyService keyService,
             GetSiteResponseMapper getSiteResponseMapper, CreateSiteFormMapper createSiteFormMapper,
             EditSiteFormMapper editSiteFormMapper, SiteResponseMapper siteResponseMapper
@@ -69,6 +71,7 @@ public class SiteController {
         this.localInstanceContext = localInstanceContext;
         this.personContext = personContext;
         this.siteService = siteService;
+        this.instanceService = instanceService;
         this.instanceRepository = instanceRepository;
         this.instanceBlockRepository = instanceBlockRepository;
         this.languageRepository = languageRepository;
@@ -114,7 +117,7 @@ public class SiteController {
             language.ifPresent(languages::add);
         }
         instance.setLanguages(languages);
-        instanceRepository.save(instance);
+        instanceService.createInstance(instance);
         Collection<Announcement> announcements = new HashSet<>();
         return siteResponseMapper.map(localInstanceContext, announcements);
     }
@@ -131,7 +134,7 @@ public class SiteController {
         }
         instance.setLanguages(languages);
         editSiteFormMapper.map(editSiteForm, instance);
-        instanceRepository.save(instance);
+        instanceService.updateInstance(instance);
         return siteResponseMapper.map(localInstanceContext, announcements);
     }
 

@@ -67,7 +67,7 @@ public class UserController {
         Person person = personService.create(
                 registerForm.username()
         );
-        personRepository.save(person);
+        personService.createPerson(person);
         String token = jwtUtil.generateToken(person);
         return LoginResponse.builder()
                 .jwt(token)

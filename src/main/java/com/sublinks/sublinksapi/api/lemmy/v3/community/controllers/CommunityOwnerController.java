@@ -15,6 +15,7 @@ import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.community.CommunityRepository;
+import com.sublinks.sublinksapi.community.CommunityService;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.Language;
 import com.sublinks.sublinksapi.person.LinkPersonCommunity;
@@ -49,6 +50,7 @@ public class CommunityOwnerController {
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
 
     private final CreateCommunityFormMapper createCommunityFormMapper;
+    private final CommunityService communityService;
 
     private final KeyService keyService;
 
@@ -66,7 +68,7 @@ public class CommunityOwnerController {
             CommunityRepository communityRepository,
             LinkPersonCommunityRepository linkPersonCommunityRepository,
             CreateCommunityFormMapper createCommunityFormMapper,
-            KeyService keyService,
+            CommunityService communityService, KeyService keyService,
             AuthorizationService authorizationService,
             LemmyCommunityService lemmyCommunityService, CommunityResponseMapper communityResponseMapper,
             LemmyCommunityMapper lemmyCommunityMapper
@@ -75,6 +77,7 @@ public class CommunityOwnerController {
         this.communityRepository = communityRepository;
         this.linkPersonCommunityRepository = linkPersonCommunityRepository;
         this.createCommunityFormMapper = createCommunityFormMapper;
+        this.communityService = communityService;
         this.keyService = keyService;
         this.authorizationService = authorizationService;
         this.lemmyCommunityService = lemmyCommunityService;
@@ -118,7 +121,7 @@ public class CommunityOwnerController {
                 .linkType(LinkPersonCommunityType.follower)
                 .build());
 
-        communityRepository.saveAndFlush(community);
+        communityService.saveCommunity(community);
         linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
         CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(

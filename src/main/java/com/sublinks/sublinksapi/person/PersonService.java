@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.person;
 import com.sublinks.sublinksapi.comment.Comment;
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
+import com.sublinks.sublinksapi.person.event.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
@@ -17,18 +18,26 @@ import java.util.Optional;
 @Component
 public class PersonService {
     private final KeyService keyService;
-
     private final PersonMapper personMapper;
-
+    private final PersonRepository personRepository;
     private final PersonAggregatesRepository personAggregatesRepository;
-
     private final LocalInstanceContext localInstanceContext;
+    final private PersonCreatedPublisher personCreatedPublisher;
 
-    public PersonService(KeyService keyService, PersonMapper personMapper, PersonAggregatesRepository personAggregatesRepository, LocalInstanceContext localInstanceContext) {
+    public PersonService(
+            KeyService keyService,
+            PersonMapper personMapper,
+            PersonRepository personRepository,
+            PersonAggregatesRepository personAggregatesRepository,
+            LocalInstanceContext localInstanceContext,
+            PersonCreatedPublisher personCreatedPublisher
+    ) {
         this.keyService = keyService;
         this.personMapper = personMapper;
+        this.personRepository = personRepository;
         this.personAggregatesRepository = personAggregatesRepository;
         this.localInstanceContext = localInstanceContext;
+        this.personCreatedPublisher = personCreatedPublisher;
     }
 
     public PersonContext getPersonContext(Person person) {
@@ -53,6 +62,14 @@ public class PersonService {
                 emptyCommunityList,
                 emptyPersonList
         );
+    }
+
+    public void createPerson(Person person) {
+        personRepository.save(person);
+        PersonAggregates personAggregates = PersonAggregates.builder().person(person).build();
+        personAggregatesRepository.save(personAggregates);
+        person.setPersonAggregates(personAggregates);
+        personCreatedPublisher.publishPersonCreatedEvent(person);
     }
 
     public Person create(

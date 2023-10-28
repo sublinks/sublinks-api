@@ -47,7 +47,7 @@ public class Community implements Serializable {
     @JoinColumn(name = "instance_id")
     private Instance instance;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
 
