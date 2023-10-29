@@ -25,7 +25,14 @@ public class LemmyCommentService {
     private final LemmyCommunityService lemmyCommunityService;
     private final LocalInstanceContext localInstanceContext;
 
-    public LemmyCommentService(LemmyCommentMapper lemmyCommentMapper, LemmyPersonMapper lemmyPersonMapper, LemmyCommunityMapper lemmyCommunityMapper, LemmyPostMapper lemmyPostMapper, LemmyCommunityService lemmyCommunityService, LocalInstanceContext localInstanceContext) {
+    public LemmyCommentService(
+            final LemmyCommentMapper lemmyCommentMapper,
+            final LemmyPersonMapper lemmyPersonMapper,
+            final LemmyCommunityMapper lemmyCommunityMapper,
+            final LemmyPostMapper lemmyPostMapper,
+            final LemmyCommunityService lemmyCommunityService,
+            final LocalInstanceContext localInstanceContext
+    ) {
         this.lemmyCommentMapper = lemmyCommentMapper;
         this.lemmyPersonMapper = lemmyPersonMapper;
         this.lemmyCommunityMapper = lemmyCommunityMapper;
@@ -34,31 +41,33 @@ public class LemmyCommentService {
         this.localInstanceContext = localInstanceContext;
     }
 
-    public String generateActivityPubId(Comment comment) {
+    public String generateActivityPubId(final Comment comment) {
+
         String domain = localInstanceContext.instance().getDomain();
         return String.format("%s/comment/%d", domain, comment.getId());
     }
 
-    public CommentView createCommentView(Comment comment, Person person) {
-        com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment lemmyComment = lemmyCommentMapper.commentToComment(comment);
+    public CommentView createCommentView(final Comment comment, final Person person) {
 
-        Person creator = comment.getPerson();
-        com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person lemmyCreator = lemmyPersonMapper.personToPerson(creator);
+        final com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment lemmyComment = lemmyCommentMapper.commentToComment(comment);
 
-        Community community = comment.getCommunity();
-        com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community lemmyCommunity = lemmyCommunityMapper.communityToLemmyCommunity(community);
+        final Person creator = comment.getPerson();
+        final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person lemmyCreator = lemmyPersonMapper.personToPerson(creator);
 
-        Post post = comment.getPost();
-        com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
+        final Community community = comment.getCommunity();
+        final com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community lemmyCommunity = lemmyCommunityMapper.communityToLemmyCommunity(community);
+
+        final Post post = comment.getPost();
+        final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
 
         CommentAggregate commentAggregate = comment.getCommentAggregate();
         if (comment.getCommentAggregate() == null) {
             commentAggregate = CommentAggregate.builder().build();
         }
 
-        CommentAggregates lemmyCommentAggregates = lemmyCommentMapper.toCommentAggregates(commentAggregate);
+        final CommentAggregates lemmyCommentAggregates = lemmyCommentMapper.toCommentAggregates(commentAggregate);
 
-        SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
+        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
 
         return CommentView.builder()
                 .comment(lemmyComment)

@@ -83,20 +83,23 @@ public class PostController {
 
 
     public PostController(
-            LocalInstanceContext localInstanceContext,
-            AuthorizationService authorizationService,
-            KeyService keyService,
-            LemmyCommunityService lemmyCommunityService,
-            LemmyPostService lemmyPostService,
-            PostService postService,
-            LanguageRepository languageRepository,
-            CommunityRepository communityRepository,
-            PostAggregatesRepository postAggregatesRepository,
-            LinkPersonPostRepository linkPersonPostRepository,
-            PostRepository postRepository,
-            CreatePostMapper createPostMapper,
-            PostViewMapper postViewMapper,
-            GetPostResponseMapper getPostResponseMapper, LemmySortTypeMapper lemmySortTypeMapper, LemmyListingTypeMapper lemmyListingTypeMapper) {
+            final LocalInstanceContext localInstanceContext,
+            final AuthorizationService authorizationService,
+            final KeyService keyService,
+            final LemmyCommunityService lemmyCommunityService,
+            final LemmyPostService lemmyPostService,
+            final PostService postService,
+            final LanguageRepository languageRepository,
+            final CommunityRepository communityRepository,
+            final PostAggregatesRepository postAggregatesRepository,
+            final LinkPersonPostRepository linkPersonPostRepository,
+            final PostRepository postRepository,
+            final CreatePostMapper createPostMapper,
+            final PostViewMapper postViewMapper,
+            final GetPostResponseMapper getPostResponseMapper,
+            final LemmySortTypeMapper lemmySortTypeMapper,
+            final LemmyListingTypeMapper lemmyListingTypeMapper
+    ) {
         this.localInstanceContext = localInstanceContext;
         this.authorizationService = authorizationService;
         this.keyService = keyService;
@@ -117,11 +120,9 @@ public class PostController {
 
     @PostMapping
     @Transactional
-    public PostResponse create(
-            @Valid @RequestBody CreatePost createPostForm,
-            JwtPerson principal
-    ) {
-        Community community = communityRepository.findById((long) createPostForm.community_id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    public PostResponse create(@Valid @RequestBody final CreatePost createPostForm, JwtPerson principal) {
+
+        final Community community = communityRepository.findById((long) createPostForm.community_id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         Person person = null;
         if (principal != null) {
             person = (Person) principal.getPrincipal();
@@ -133,7 +134,7 @@ public class PostController {
                 .defaultResponse(community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline : AuthorizationService.ResponseType.allow)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        KeyStore keys = keyService.generate();
+        final KeyStore keys = keyService.generate();
         Post post = createPostMapper.map(
                 createPostForm,
                 localInstanceContext.instance(),
@@ -144,7 +145,7 @@ public class PostController {
         post.setCommunity(community);
         postRepository.saveAndFlush(post);
 
-        Set<LinkPersonPost> linkPersonPosts = new HashSet<>();
+        final Set<LinkPersonPost> linkPersonPosts = new HashSet<>();
         linkPersonPosts.add(
                 LinkPersonPost.builder()
                         .post(post)
@@ -155,11 +156,11 @@ public class PostController {
         post.setLinkPersonPost(linkPersonPosts);
         linkPersonPostRepository.saveAllAndFlush(linkPersonPosts);
 
-        PostAggregates postAggregates = PostAggregates.builder().post(post).community(community).build();
+        final PostAggregates postAggregates = PostAggregates.builder().post(post).community(community).build();
         postAggregatesRepository.saveAndFlush(postAggregates);
         post.setPostAggregates(postAggregates);
 
-        SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
+        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
 
         return PostResponse.builder()
                 .post_view(postViewMapper.map(
@@ -172,56 +173,64 @@ public class PostController {
     }
 
     @GetMapping
-    GetPostResponse show(@Valid GetPost getPostForm) {
-        Post post = postRepository.findById((long) getPostForm.id()).get();
-        Community community = post.getCommunity();
+    GetPostResponse show(@Valid final GetPost getPostForm) {
 
-        PostView postView = lemmyPostService.postViewFromPost(post);
-        CommunityView communityView = lemmyCommunityService.communityViewFromCommunity(community);
-        List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
-        List<PostView> crossPosts = new ArrayList<>();//@todo cross post
+        final Post post = postRepository.findById((long) getPostForm.id()).get();
+        final Community community = post.getCommunity();
+
+        final PostView postView = lemmyPostService.postViewFromPost(post);
+        final CommunityView communityView = lemmyCommunityService.communityViewFromCommunity(community);
+        final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
+        final List<PostView> crossPosts = new ArrayList<>();//@todo cross post
         return getPostResponseMapper.map(postView, communityView, moderators, crossPosts);
     }
 
     @PutMapping
     PostResponse update() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("delete")
     PostResponse delete() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("remove")
     PostResponse remove() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("mark_as_read")
     PostResponse markAsRead() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("lock")
     PostResponse lock() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("feature")
     PostResponse feature() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @GetMapping("list")
     @Transactional(readOnly = true)
-    public GetPostsResponse index(@Valid GetPosts getPostsForm, JwtPerson principal) {
+    public GetPostsResponse index(@Valid final GetPosts getPostsForm, final JwtPerson principal) {
+
         Person person = null;
         if (principal != null) {
             person = (Person) principal.getPrincipal();
         }
 
-        List<Long> communityIds = new ArrayList<>();
+        final List<Long> communityIds = new ArrayList<>();
         Community community = null;
         if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
             Long communityId = getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
@@ -235,7 +244,7 @@ public class PostController {
         if (person != null) {
             switch (getPostsForm.type_()) {
                 case Subscribed -> {
-                    Set<LinkPersonCommunity> personCommunities = person.getLinkPersonCommunity();
+                    final Set<LinkPersonCommunity> personCommunities = person.getLinkPersonCommunity();
                     for (LinkPersonCommunity l : personCommunities) {
                         if (l.getLinkType() == LinkPersonCommunityType.follower) {
                             communityIds.add(l.getCommunity().getId());
@@ -264,7 +273,7 @@ public class PostController {
             listingType = lemmyListingTypeMapper.map(getPostsForm.type_());
         }
 
-        SearchCriteria searchCriteria = SearchCriteria.builder()
+        final SearchCriteria searchCriteria = SearchCriteria.builder()
                 .page(1)
                 .listingType(listingType)
                 .perPage(20)
@@ -275,11 +284,11 @@ public class PostController {
                 .communityIds(communityIds)
                 .build();
 
-        Collection<Post> posts = postRepository.allPostsBySearchCriteria(searchCriteria);
-        Collection<PostView> postViewCollection = new HashSet<>();
+        final Collection<Post> posts = postRepository.allPostsBySearchCriteria(searchCriteria);
+        final Collection<PostView> postViewCollection = new HashSet<>();
         for (Post post : posts) {
-            Person creator = postService.getPostCreator(post);
-            PostView postView = postViewMapper.map(
+            final Person creator = postService.getPostCreator(post);
+            final PostView postView = postViewMapper.map(
                     post,
                     post.getCommunity(),
                     lemmyCommunityService.getPersonCommunitySubscribeType(person, post.getCommunity()),
@@ -295,31 +304,37 @@ public class PostController {
 
     @PostMapping("like")
     PostResponse like() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("save")
     PostResponse saveForLater() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("report")
     PostReportResponse report() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("report/resolve")
     PostReportResponse reportResolve() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("report/list")
     ListPostReportsResponse reportList() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("site_metadata")
     GetSiteMetadataResponse siteMetadata() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

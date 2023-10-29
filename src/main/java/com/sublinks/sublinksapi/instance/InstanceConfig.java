@@ -12,18 +12,21 @@ import java.util.Optional;
 public class InstanceConfig {
     private final Long localInstanceId;
 
-    public InstanceConfig(@Value("${sublinks.settings.local_instance_id:1}") Long localInstanceId) {
+    public InstanceConfig(@Value("${sublinks.settings.local_instance_id:1}") final Long localInstanceId) {
+
         this.localInstanceId = localInstanceId;
     }
 
     @Bean
-    Instance localInstance(InstanceRepository instanceRepository) {
+    Instance localInstance(final InstanceRepository instanceRepository) {
+
         final Optional<Instance> instance = instanceRepository.findById(localInstanceId);
         return instance.orElseGet(() -> Instance.builder().build());
     }
 
     @Bean
-    InstanceAggregate localInstanceAggregate(InstanceAggregateRepository aggregateRepository) {
+    InstanceAggregate localInstanceAggregate(final InstanceAggregateRepository aggregateRepository) {
+
         final Optional<InstanceAggregate> localInstanceAggregate = aggregateRepository.findById(localInstanceId);
         return localInstanceAggregate.orElseGet(() -> InstanceAggregate.builder().build());
     }

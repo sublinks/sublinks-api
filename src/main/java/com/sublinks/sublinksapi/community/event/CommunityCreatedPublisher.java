@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 public class CommunityCreatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public CommunityCreatedPublisher(ApplicationEventPublisher applicationEventPublisher) {
+    public CommunityCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    public void publishCommunityCreatedEvent(Community community) {
-        CommunityCreatedEvent communityCreatedEvent = new CommunityCreatedEvent(this, community);
+    public void publish(final Community community) {
+
+        final CommunityCreatedEvent communityCreatedEvent = new CommunityCreatedEvent(this, community);
         applicationEventPublisher.publishEvent(communityCreatedEvent);
     }
 }

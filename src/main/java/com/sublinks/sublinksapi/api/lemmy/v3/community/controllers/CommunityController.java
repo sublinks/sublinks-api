@@ -17,7 +17,6 @@ import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.LinkPersonCommunityRepository;
 import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.person.PersonRepository;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -42,29 +41,29 @@ public class CommunityController {
     private final LocalInstanceContext localInstanceContext;
     private final CommunityRepository communityRepository;
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
-    private final PersonRepository personRepository;
     private final LemmyCommunityService lemmyCommunityService;
     private final GetCommunityResponseMapper getCommunityResponseMapper;
 
 
     public CommunityController(
-            LocalInstanceContext localInstanceContext,
-            CommunityRepository communityRepository,
-            LinkPersonCommunityRepository linkPersonCommunityRepository, PersonRepository personRepository, LemmyCommunityService lemmyCommunityService,
-            GetCommunityResponseMapper getCommunityResponseMapper
+            final LocalInstanceContext localInstanceContext,
+            final CommunityRepository communityRepository,
+            final LinkPersonCommunityRepository linkPersonCommunityRepository,
+            final LemmyCommunityService lemmyCommunityService,
+            final GetCommunityResponseMapper getCommunityResponseMapper
     ) {
         this.localInstanceContext = localInstanceContext;
         this.communityRepository = communityRepository;
         this.linkPersonCommunityRepository = linkPersonCommunityRepository;
-        this.personRepository = personRepository;
         this.lemmyCommunityService = lemmyCommunityService;
         this.getCommunityResponseMapper = getCommunityResponseMapper;
     }
 
 
     @GetMapping
-    public GetCommunityResponse show(@Valid GetCommunity getCommunityForm, JwtPerson principal) {
-        Community community = communityRepository.findCommunityByIdOrTitleSlug(
+    public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm, final JwtPerson principal) {
+
+        final Community community = communityRepository.findCommunityByIdOrTitleSlug(
                 getCommunityForm.id(), getCommunityForm.name()
         );
         CommunityView communityView;
@@ -74,8 +73,8 @@ public class CommunityController {
         } else {
             communityView = lemmyCommunityService.communityViewFromCommunity(community);
         }
-        Set<String> languageCodes = lemmyCommunityService.communityLanguageCodes(community);
-        List<CommunityModeratorView> moderatorViews = lemmyCommunityService.communityModeratorViewList(community);
+        final Set<String> languageCodes = lemmyCommunityService.communityLanguageCodes(community);
+        final List<CommunityModeratorView> moderatorViews = lemmyCommunityService.communityModeratorViewList(community);
         return getCommunityResponseMapper.map(
                 communityView,
                 languageCodes,
@@ -86,10 +85,11 @@ public class CommunityController {
 
     @GetMapping("list")
     @Transactional
-    public ListCommunitiesResponse list(@Valid ListCommunities listCommunitiesForm, JwtPerson principal) {
-        Collection<CommunityView> communityViews = new HashSet<>();
+    public ListCommunitiesResponse list(@Valid final ListCommunities listCommunitiesForm, final JwtPerson principal) {
 
-        Collection<Community> communities = communityRepository.findAll(); // @todo apply filters
+        final Collection<CommunityView> communityViews = new HashSet<>();
+
+        final Collection<Community> communities = communityRepository.findAll(); // @todo apply filters
         for (Community community : communities) {
             CommunityView communityView;
             if (principal != null) {
@@ -107,16 +107,17 @@ public class CommunityController {
     }
 
     @PostMapping("follow")
-    CommunityResponse follow(@Valid @RequestBody FollowCommunity followCommunityForm, JwtPerson principal) {
-        Person person = (Person) principal.getPrincipal();
+    CommunityResponse follow(@Valid @RequestBody final FollowCommunity followCommunityForm, final JwtPerson principal) {
 
-        Optional<Community> community = communityRepository.findById((long) followCommunityForm.community_id());
+        final Person person = (Person) principal.getPrincipal();
+
+        final Optional<Community> community = communityRepository.findById((long) followCommunityForm.community_id());
 
         if (community.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        Optional<LinkPersonCommunity> linkPersonCommunity =
+        final Optional<LinkPersonCommunity> linkPersonCommunity =
                 linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
                         community.get(),
                         person,
@@ -127,7 +128,7 @@ public class CommunityController {
             linkPersonCommunityRepository.delete(linkPersonCommunity.get());
             person.getLinkPersonCommunity().removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
         } else if (followCommunityForm.follow() && linkPersonCommunity.isEmpty()) {
-            LinkPersonCommunity newLink = LinkPersonCommunity.builder()
+            final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
                     .community(community.get())
                     .person(person)
                     .linkType(LinkPersonCommunityType.follower)

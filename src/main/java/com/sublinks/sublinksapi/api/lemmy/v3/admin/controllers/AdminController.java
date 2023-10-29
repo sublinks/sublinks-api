@@ -25,42 +25,50 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/admin")
 public class AdminController {
     @PostMapping("add")
-    AddAdminResponse create(@Valid AddAdmin addAdminForm) {
+    AddAdminResponse create(@Valid final AddAdmin addAdminForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @GetMapping("registration_application/count")
     GetUnreadRegistrationApplicationCountResponse registrationApplicationCount() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @GetMapping("registration_application/list")
-    ListRegistrationApplicationsResponse registrationApplicationList(@Valid ListRegistrationApplications listRegistrationApplicationsForm) {
+    ListRegistrationApplicationsResponse registrationApplicationList(@Valid final ListRegistrationApplications listRegistrationApplicationsForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping("registration_application/approve")
-    RegistrationApplicationResponse registrationApplicationApprove(@Valid ApproveRegistrationApplication approveRegistrationApplicationForm) {
+    RegistrationApplicationResponse registrationApplicationApprove(@Valid final ApproveRegistrationApplication approveRegistrationApplicationForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("purge/person")
-    PurgeItemResponse purgePerson(@Valid PurgePerson purgePersonForm) {
+    PurgeItemResponse purgePerson(@Valid final PurgePerson purgePersonForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("purge/community")
-    PurgeItemResponse purgeCommunity(@Valid PurgeCommunity purgeCommunityForm) {
+    PurgeItemResponse purgeCommunity(@Valid final PurgeCommunity purgeCommunityForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("purge/post")
-    PurgeItemResponse purgePost(@Valid PurgePost purgePostForm) {
+    PurgeItemResponse purgePost(@Valid final PurgePost purgePostForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("purge/comment")
-    PurgeItemResponse purgeComment(@Valid PurgeComment purgeCommentForm) {
+    PurgeItemResponse purgeComment(@Valid final PurgeComment purgeCommentForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

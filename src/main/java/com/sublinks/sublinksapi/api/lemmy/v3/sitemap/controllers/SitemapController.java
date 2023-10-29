@@ -9,6 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class SitemapController {
     @GetMapping("api/v3/sitemap.xml")
     String index() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

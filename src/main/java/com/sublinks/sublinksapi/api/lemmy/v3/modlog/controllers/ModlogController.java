@@ -13,7 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/modlog")
 public class ModlogController {
     @GetMapping
-    GetModlogResponse index(@Valid GetModLog getModLogForm) {
+    GetModlogResponse index(@Valid final GetModLog getModLogForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

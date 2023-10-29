@@ -44,18 +44,15 @@ import java.util.HashSet;
 @RequestMapping(path = "/api/v3/user")
 public class UserController {
     private final JwtUtil jwtUtil;
-
     private final PersonService personService;
-
     private final PersonRepository personRepository;
-
     private final GetPersonDetailsResponseMapper getPersonDetailsResponseMapper;
 
     public UserController(
-            JwtUtil jwtUtil,
-            PersonService personService,
-            PersonRepository personRepository,
-            GetPersonDetailsResponseMapper getPersonDetailsResponseMapper) {
+            final JwtUtil jwtUtil,
+            final PersonService personService,
+            final PersonRepository personRepository,
+            final GetPersonDetailsResponseMapper getPersonDetailsResponseMapper) {
         this.jwtUtil = jwtUtil;
         this.personService = personService;
         this.personRepository = personRepository;
@@ -63,12 +60,13 @@ public class UserController {
     }
 
     @PostMapping("register")
-    LoginResponse create(@Valid @RequestBody Register registerForm) throws NoSuchAlgorithmException {
-        Person person = personService.create(
+    LoginResponse create(@Valid @RequestBody final Register registerForm) throws NoSuchAlgorithmException {
+
+        final Person person = personService.create(
                 registerForm.username()
         );
-        personService.createPerson(person);
-        String token = jwtUtil.generateToken(person);
+        personService.createLocalPerson(person);
+        final String token = jwtUtil.generateToken(person);
         return LoginResponse.builder()
                 .jwt(token)
                 .registration_created(false)
@@ -82,7 +80,8 @@ public class UserController {
     }
 
     @GetMapping()
-    GetPersonDetailsResponse show(@Valid GetPersonDetails getPersonDetailsForm) {
+    GetPersonDetailsResponse show(@Valid final GetPersonDetails getPersonDetailsForm) {
+
         Long userId = null;
         Person person = null;
         if (getPersonDetailsForm.person_id() != null) {
@@ -101,27 +100,32 @@ public class UserController {
 
     @GetMapping("mention")
     GetPersonMentionsResponse mention() {
+
         return GetPersonMentionsResponse.builder().build();
     }
 
     @PostMapping("mention/mark_as_read")
     PersonMentionResponse mentionMarkAsRead() {
+
         return PersonMentionResponse.builder().build();
     }
 
     @GetMapping("replies")
     GetRepliesResponse replies() {
+
         return GetRepliesResponse.builder().build();
     }
 
     @PostMapping("ban")
     BanPersonResponse ban() {
+
         return BanPersonResponse.builder().build();
     }
 
     @GetMapping("banned")
     BannedPersonsResponse bannedList() {
-        Collection<PersonView> bannedPersons = new HashSet<>();
+
+        final Collection<PersonView> bannedPersons = new HashSet<>();
         return BannedPersonsResponse.builder()
                 .banned(bannedPersons)
                 .build();
@@ -129,13 +133,15 @@ public class UserController {
 
     @PostMapping("block")
     BlockPersonResponse block() {
+
         return BlockPersonResponse.builder().build();
     }
 
     @PostMapping("login")
-    LoginResponse login(@Valid @RequestBody Login loginForm) {
-        Person person = personRepository.findOneByName(loginForm.username_or_email());
-        String token = jwtUtil.generateToken(person);
+    LoginResponse login(@Valid @RequestBody final Login loginForm) {
+
+        final Person person = personRepository.findOneByName(loginForm.username_or_email());
+        final String token = jwtUtil.generateToken(person);
         return LoginResponse.builder()
                 .jwt(token)
                 .registration_created(false)
@@ -145,61 +151,73 @@ public class UserController {
 
     @PostMapping("delete_account")
     DeleteAccountResponse delete() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("password_reset")
     PasswordResetResponse passwordReset() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("password_change")
     LoginResponse passwordChange() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("mark_all_as_read")
     GetRepliesResponse markAllAsRead() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping("save_user_settings")
     LoginResponse saveUserSettings() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping("change_password")
     LoginResponse changePassword() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @GetMapping("report_count")
     GetReportCountResponse reportCount() {
+
         return GetReportCountResponse.builder().build();
     }
 
     @GetMapping("unread_count")
     GetUnreadCountResponse unreadCount() {
+
         return GetUnreadCountResponse.builder().build();
     }
 
     @PostMapping("verify_email")
     VerifyEmailResponse verifyEmail() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("leave_admin")
     GetSiteResponse leaveAdmin() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("totp/generate")
     GenerateTotpSecretResponse totpGenerate() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("totp/update")
     UpdateTotpResponse totpUpdate() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

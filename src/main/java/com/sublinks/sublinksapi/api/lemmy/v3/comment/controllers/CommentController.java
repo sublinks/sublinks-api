@@ -34,16 +34,20 @@ import java.util.Optional;
 @RestController
 @RequestMapping(path = "/api/v3/comment")
 public class CommentController {
+    private final CommentRepository commentRepository;
 
-    final private CommentRepository commentRepository;
+    private final LemmyCommentService lemmyCommentService;
 
-    final private LemmyCommentService lemmyCommentService;
+    private final PostRepository postRepository;
 
-    final private PostRepository postRepository;
+    private final LanguageRepository languageRepository;
 
-    final private LanguageRepository languageRepository;
-
-    public CommentController(CommentRepository commentRepository, LemmyCommentService lemmyCommentService, PostRepository postRepository, LanguageRepository languageRepository) {
+    public CommentController(
+            final CommentRepository commentRepository,
+            final LemmyCommentService lemmyCommentService,
+            final PostRepository postRepository,
+            final LanguageRepository languageRepository
+    ) {
         this.commentRepository = commentRepository;
         this.lemmyCommentService = lemmyCommentService;
         this.postRepository = postRepository;
@@ -52,11 +56,12 @@ public class CommentController {
 
     @PostMapping
     @Transactional
-    public CommentResponse create(@Valid @RequestBody CreateComment createCommentForm, JwtPerson principal) {
-        Person person = (Person) principal.getPrincipal();
-        Post post = postRepository.findById((long) createCommentForm.post_id()).get();
-        Language language = languageRepository.findById((long) createCommentForm.language_id()).get();
-        Comment comment = Comment.builder()
+    public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm, final JwtPerson principal) {
+
+        final Person person = (Person) principal.getPrincipal();
+        final Post post = postRepository.findById((long) createCommentForm.post_id()).get();
+        final Language language = languageRepository.findById((long) createCommentForm.language_id()).get();
+        final Comment comment = Comment.builder()
                 .person(person)
                 .commentBody(createCommentForm.content())
                 .activityPubId("")
@@ -82,7 +87,7 @@ public class CommentController {
         comment.setActivityPubId(lemmyCommentService.generateActivityPubId(comment));
         commentRepository.saveAndFlush(comment);
 
-        CommentView commentView = lemmyCommentService.createCommentView(comment, person);
+        final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
         return CommentResponse.builder()
                 .comment_view(commentView)
                 .form_id(createCommentForm.form_id())
@@ -92,46 +97,53 @@ public class CommentController {
 
     @PutMapping
     CommentResponse update() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("delete")
     CommentResponse delete() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("remove")
     CommentResponse remove() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("mark_as_read")
     CommentResponse markAsRead() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("distinguish")
     CommentResponse distinguish() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("like")
     CommentResponse like() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping("save")
     CommentResponse saveForLater() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @GetMapping("list")
-    GetCommentsResponse list(@Valid GetComments getCommentsForm,
-                             JwtPerson principal) {
-        List<Comment> comments = commentRepository.findAll();
-        List<CommentView> commentViews = new ArrayList<>();
+    GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
+
+        final List<Comment> comments = commentRepository.findAll();
+        final List<CommentView> commentViews = new ArrayList<>();
         for (Comment comment : comments) {
-            CommentView commentView = lemmyCommentService.createCommentView(comment, (Person) principal.getPrincipal());
+            final CommentView commentView = lemmyCommentService.createCommentView(comment, (Person) principal.getPrincipal());
             commentViews.add(commentView);
         }
         return GetCommentsResponse.builder().comments(commentViews).build();
@@ -139,16 +151,19 @@ public class CommentController {
 
     @PostMapping("report")
     CommentReportResponse report() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping("report/resolve")
     CommentReportResponse reportResolve() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("report/list")
     ListCommentReportsResponse reportList() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

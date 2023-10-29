@@ -13,7 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/resolve_object")
 public class ResolveObjectController {
     @GetMapping
-    GetModlogResponse index(@Valid ResolveObject resolveObjectForm) {
+    GetModlogResponse index(@Valid final ResolveObject resolveObjectForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

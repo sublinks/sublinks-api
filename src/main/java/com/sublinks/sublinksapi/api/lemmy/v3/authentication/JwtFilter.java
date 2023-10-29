@@ -18,20 +18,20 @@ import java.io.IOException;
 @Component
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
-
     private final PersonRepository personRepository;
 
-    public JwtFilter(JwtUtil jwtUtil, PersonRepository personRepository) {
+    public JwtFilter(final JwtUtil jwtUtil, final PersonRepository personRepository) {
         this.jwtUtil = jwtUtil;
         this.personRepository = personRepository;
     }
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+            final HttpServletRequest request,
+            final HttpServletResponse response,
+            final FilterChain filterChain) throws ServletException, IOException {
+
+        final String authorizationHeader = request.getHeader("Authorization");
 
         String token = null;
         String userName = null;
@@ -52,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
 
             if (jwtUtil.validateToken(token, person)) {
-                JwtPerson authenticationToken = new JwtPerson(person, person.getAuthorities());
+                final JwtPerson authenticationToken = new JwtPerson(person, person.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }

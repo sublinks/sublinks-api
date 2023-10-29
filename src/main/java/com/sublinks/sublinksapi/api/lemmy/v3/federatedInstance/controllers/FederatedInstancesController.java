@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class FederatedInstancesController {
     @GetMapping
     GetFederatedInstancesResponse index() {
+
         return GetFederatedInstancesResponse
                 .builder()
                 .build();

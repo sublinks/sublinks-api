@@ -13,25 +13,28 @@ import java.util.function.Supplier;
 public class AuthorizationService {
     private final AclRepository aclRepository;
 
-    public AuthorizationService(AclRepository aclRepository) {
+    public AuthorizationService(final AclRepository aclRepository) {
         this.aclRepository = aclRepository;
     }
 
-    public EntityPolicy canPerson(Person person) {
+    public EntityPolicy canPerson(final Person person) {
+
         if (person == null) {
             return new EntityPolicy(ActionType.check, aclRepository);
         }
         return new EntityPolicy(person, ActionType.check, aclRepository);
     }
 
-    public EntityPolicy allowPerson(Person person) {
+    public EntityPolicy allowPerson(final Person person) {
+
         if (person == null) {
             return new EntityPolicy(ActionType.allow, aclRepository);
         }
         return new EntityPolicy(person, ActionType.allow, aclRepository);
     }
 
-    public EntityPolicy revokePerson(Person person) {
+    public EntityPolicy revokePerson(final Person person) {
+
         if (person == null) {
             return new EntityPolicy(ActionType.revoke, aclRepository);
         }
@@ -61,43 +64,49 @@ public class AuthorizationService {
         private AuthorizedEntityType entityType;
         private Long entityId;
 
-        public EntityPolicy(ActionType actionType, AclRepository aclRepository) {
+        public EntityPolicy(final ActionType actionType, final AclRepository aclRepository) {
             this.person = Person.builder().build();
             this.actionType = actionType;
             this.aclRepository = aclRepository;
         }
 
-        public EntityPolicy(Person person, ActionType actionType, AclRepository aclRepository) {
+        public EntityPolicy(final Person person, final ActionType actionType, final AclRepository aclRepository) {
             this.person = person;
             this.actionType = actionType;
             this.aclRepository = aclRepository;
         }
 
-        public EntityPolicy performTheAction(AuthorizeAction authorizedAction) {
+        public EntityPolicy performTheAction(final AuthorizeAction authorizedAction) {
+
             this.authorizedActions.add(authorizedAction);
             return this;
         }
 
-        public EntityPolicy defaultResponse(ResponseType responseType) {
+        public EntityPolicy defaultResponse(final ResponseType responseType) {
+
             this.defaultResponse = responseType;
             return this;
         }
 
         public EntityPolicy defaultingToAllow() {
+
             return defaultResponse(ResponseType.allow);
         }
 
         public EntityPolicy defaultingToDecline() {
+
             return defaultResponse(ResponseType.decline);
         }
 
         public EntityPolicy onEntity(AuthorizedEntityType entityType) {
+
             this.entityType = entityType;
             execute();
             return this;
         }
 
-        public EntityPolicy onEntity(AuthorizationEntity entity) {
+        public EntityPolicy onEntity(final AuthorizationEntity entity) {
+
             this.entityType = entity.entityType();
             this.entityId = entity.getId();
             execute();
@@ -105,12 +114,14 @@ public class AuthorizationService {
         }
 
         public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier) throws X {
+
             if (!isPermitted) {
                 throw exceptionSupplier.get();
             }
         }
 
         private void execute() {
+
             switch (actionType) {
                 case allow -> createAclRules();
                 case revoke -> revokeAclRules();
@@ -120,6 +131,7 @@ public class AuthorizationService {
         }
 
         private void checkAclRules() {
+
             for (AuthorizeAction authorizedAction : authorizedActions) {
                 Acl acl;
                 if (entityId != null) {
@@ -141,6 +153,7 @@ public class AuthorizationService {
         }
 
         private void revokeAclRules() {
+
             for (AuthorizeAction authorizedAction : authorizedActions) {
                 Acl acl;
                 if (entityId != null) {
@@ -168,6 +181,7 @@ public class AuthorizationService {
         }
 
         private void createAclRules() {
+
             for (AuthorizeAction authorizedAction : authorizedActions) {
                 Acl acl;
                 if (entityId != null) {

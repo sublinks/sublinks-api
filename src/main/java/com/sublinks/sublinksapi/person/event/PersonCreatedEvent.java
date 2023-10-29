@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationEvent;
 public class PersonCreatedEvent extends ApplicationEvent {
     private final Person person;
 
-    public PersonCreatedEvent(Object source, Person person) {
+    public PersonCreatedEvent(final Object source, final Person person) {
         super(source);
         this.person = person;
     }

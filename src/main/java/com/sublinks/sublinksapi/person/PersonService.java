@@ -22,15 +22,15 @@ public class PersonService {
     private final PersonRepository personRepository;
     private final PersonAggregatesRepository personAggregatesRepository;
     private final LocalInstanceContext localInstanceContext;
-    final private PersonCreatedPublisher personCreatedPublisher;
+    private final PersonCreatedPublisher personCreatedPublisher;
 
     public PersonService(
-            KeyService keyService,
-            PersonMapper personMapper,
-            PersonRepository personRepository,
-            PersonAggregatesRepository personAggregatesRepository,
-            LocalInstanceContext localInstanceContext,
-            PersonCreatedPublisher personCreatedPublisher
+            final KeyService keyService,
+            final PersonMapper personMapper,
+            final PersonRepository personRepository,
+            final PersonAggregatesRepository personAggregatesRepository,
+            final LocalInstanceContext localInstanceContext,
+            final PersonCreatedPublisher personCreatedPublisher
     ) {
         this.keyService = keyService;
         this.personMapper = personMapper;
@@ -40,16 +40,18 @@ public class PersonService {
         this.personCreatedPublisher = personCreatedPublisher;
     }
 
-    public PersonContext getPersonContext(Person person) {
-        Optional<PersonAggregates> personAggregates = Optional.ofNullable(personAggregatesRepository.findFirstByPersonId(person.getId()));
-        List<Integer> discussLanguages = new ArrayList<>();
+    public PersonContext getPersonContext(final Person person) {
+
+        final Optional<PersonAggregates> personAggregates = Optional.ofNullable(personAggregatesRepository.findFirstByPersonId(person.getId()));
+        final List<Integer> discussLanguages = new ArrayList<>();
         discussLanguages.add(1);
         discussLanguages.add(38);
+        //@todo person languages
 
-        Collection<Community> emptyCommunityList = new ArrayList<>();
-        Collection<Person> emptyPersonList = new ArrayList<>();
-        Collection<Post> emptyPostList = new ArrayList<>();
-        Collection<Comment> emptyCommentList = new ArrayList<>();
+        final Collection<Community> emptyCommunityList = new ArrayList<>();
+        final Collection<Person> emptyPersonList = new ArrayList<>();
+        final Collection<Post> emptyPostList = new ArrayList<>();
+        final Collection<Comment> emptyCommentList = new ArrayList<>();
 
         return personMapper.PersonToPersonContext(
                 person,
@@ -64,18 +66,23 @@ public class PersonService {
         );
     }
 
-    public void createPerson(Person person) {
+    public void createLocalPerson(final Person person) {
+
+        final KeyStore keys = keyService.generate();
+        person.setPublicKey(keys.publicKey());
+        person.setPrivateKey(keys.privateKey());
+        person.setLocal(true);
         personRepository.save(person);
-        PersonAggregates personAggregates = PersonAggregates.builder().person(person).build();
+
+        final PersonAggregates personAggregates = PersonAggregates.builder().person(person).build();
         personAggregatesRepository.save(personAggregates);
         person.setPersonAggregates(personAggregates);
-        personCreatedPublisher.publishPersonCreatedEvent(person);
+        personCreatedPublisher.publish(person);
     }
 
-    public Person create(
-            String name
-    ) throws NoSuchAlgorithmException {
-        KeyStore keys = keyService.generate();
+    public Person create(final String name) throws NoSuchAlgorithmException {
+
+        // @todo actual create account stuff
         return Person.builder()
                 .name(name)
                 .password("")
@@ -85,9 +92,6 @@ public class PersonService {
                 .avatarImageUrl("")
                 .bannerImageUrl("")
                 .biography("")
-                .publicKey(keys.publicKey())
-                .privateKey(keys.privateKey())
-                .isLocal(true)
                 .isBanned(false)
                 .build();
     }

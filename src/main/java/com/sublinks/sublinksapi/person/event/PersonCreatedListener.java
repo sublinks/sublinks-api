@@ -7,18 +7,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PersonCreatedListener implements ApplicationListener<PersonCreatedEvent> {
-    final private InstanceAggregateRepository instanceAggregateRepository;
+    private final InstanceAggregateRepository instanceAggregateRepository;
 
-    public PersonCreatedListener(InstanceAggregateRepository instanceAggregateRepository) {
+    public PersonCreatedListener(final InstanceAggregateRepository instanceAggregateRepository) {
         this.instanceAggregateRepository = instanceAggregateRepository;
     }
 
     @Override
-    public void onApplicationEvent(PersonCreatedEvent event) {
+    public void onApplicationEvent(final PersonCreatedEvent event) {
+
         if (!event.getPerson().isLocal()) {
             return;
         }
-        InstanceAggregate instanceAggregate = event.getPerson().getInstance().getInstanceAggregate();
+        final InstanceAggregate instanceAggregate = event.getPerson().getInstance().getInstanceAggregate();
         instanceAggregate.setUserCount(instanceAggregate.getUserCount() + 1);
         instanceAggregateRepository.save(instanceAggregate);
     }

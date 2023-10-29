@@ -52,7 +52,7 @@ public class Instance {
     @PrimaryKeyJoinColumn
     private List<Post> posts;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn
     private InstanceAggregate instanceAggregate;
 

@@ -9,7 +9,7 @@ import java.util.Collection;
 public class JwtPerson extends AbstractAuthenticationToken {
     private final Person person;
 
-    public JwtPerson(Person person, Collection<? extends GrantedAuthority> authorities) {
+    public JwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
         super(authorities);
         this.person = person;
         setAuthenticated(false);
@@ -17,11 +17,13 @@ public class JwtPerson extends AbstractAuthenticationToken {
 
     @Override
     public Object getCredentials() {
+
         return null;
     }
 
     @Override
     public Object getPrincipal() {
+
         return this.person;
     }
 }

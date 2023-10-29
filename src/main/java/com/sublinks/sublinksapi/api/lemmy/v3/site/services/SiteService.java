@@ -13,19 +13,20 @@ import java.util.LinkedHashSet;
 
 @Service
 public class SiteService {
-
     private final PersonRepository personRepository;
 
-    public SiteService(PersonRepository personRepository) {
+    public SiteService(final PersonRepository personRepository) {
         this.personRepository = personRepository;
     }
 
     // @todo finish admin list
     public Collection<Person> admins() {
+
         return personRepository.findAll();
     }
 
     public Collection<Language> allLanguages(final LanguageRepository languageRepository) {
+
         final Collection<Language> languages = new LinkedHashSet<>();
         for (com.sublinks.sublinksapi.language.Language language : languageRepository.findAll()) {
             Language l = Language.builder()
@@ -40,6 +41,7 @@ public class SiteService {
 
     // @todo custom emojis
     public Collection<CustomEmojiView> customEmojis() {
+
         final Collection<CustomEmojiView> emojiViews = new HashSet<>();
         return emojiViews;
     }

@@ -22,31 +22,32 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     EntityManager em;
 
     @Override
-    public List<Post> allPostsBySearchCriteria(SearchCriteria searchCriteria) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Post> cq = cb.createQuery(Post.class);
+    public List<Post> allPostsBySearchCriteria(final SearchCriteria searchCriteria) {
 
-        Root<Post> postTable = cq.from(Post.class);
-        Join<Post, Community> communityJoin = postTable.join("community", JoinType.INNER);
+        final CriteriaBuilder cb = em.getCriteriaBuilder();
+        final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
 
-        List<Predicate> predicates = new ArrayList<>();
+        final Root<Post> postTable = cq.from(Post.class);
+        final Join<Post, Community> communityJoin = postTable.join("community", JoinType.INNER);
+
+        final List<Predicate> predicates = new ArrayList<>();
         if ((searchCriteria.isSavedOnly() || !searchCriteria.isDislikedOnly()) && searchCriteria.person() != null) {
             if (searchCriteria.isSavedOnly() && !searchCriteria.isDislikedOnly()) {
-                Join<Post, PostSave> postPostSaveJoin = postTable.join("community", JoinType.INNER);
+                final Join<Post, PostSave> postPostSaveJoin = postTable.join("community", JoinType.INNER);
                 predicates.add(cb.equal(postPostSaveJoin.get("person"), searchCriteria.person()));
             } else if (!searchCriteria.isSavedOnly() && searchCriteria.isDislikedOnly()) {
-                Join<Post, PostLike> postPostLikeJoin = postTable.join("post");
+                final Join<Post, PostLike> postPostLikeJoin = postTable.join("post");
                 predicates.add(cb.equal(postPostLikeJoin.get("person"), searchCriteria.person()));
             } else {
-                // throw error
+                // @todo throw error
             }
         }
         if (searchCriteria.communityIds() != null && !searchCriteria.communityIds().isEmpty()) {
-            Expression<Long> expression = communityJoin.get("id");
+            final Expression<Long> expression = communityJoin.get("id");
             predicates.add(expression.in(searchCriteria.communityIds()));
         }
         if (searchCriteria.person() != null && searchCriteria.listingType() == ListingType.Subscribed) {
-            Join<Community, LinkPersonCommunity> linkPersonCommunityJoin = communityJoin.join("linkPersonCommunity", JoinType.INNER);
+            final Join<Community, LinkPersonCommunity> linkPersonCommunityJoin = communityJoin.join("linkPersonCommunity", JoinType.INNER);
             predicates.add(cb.equal(linkPersonCommunityJoin.get("person"), searchCriteria.person()));
         }
 

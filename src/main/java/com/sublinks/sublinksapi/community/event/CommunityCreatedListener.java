@@ -7,14 +7,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CommunityCreatedListener implements ApplicationListener<CommunityCreatedEvent> {
-    final private InstanceAggregateRepository instanceAggregateRepository;
+    private final InstanceAggregateRepository instanceAggregateRepository;
 
-    public CommunityCreatedListener(InstanceAggregateRepository instanceAggregateRepository) {
+    public CommunityCreatedListener(final InstanceAggregateRepository instanceAggregateRepository) {
         this.instanceAggregateRepository = instanceAggregateRepository;
     }
 
     @Override
     public void onApplicationEvent(CommunityCreatedEvent event) {
+
         if (!event.getCommunity().isLocal()) {
             return;
         }

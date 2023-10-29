@@ -24,45 +24,53 @@ public class JwtUtil implements Serializable {
     private static final long serialVersionUID = -2550185165626007488L;
     private final String secret;
 
-    public JwtUtil(@Value("${jwt.secret}") String secret) {
+    public JwtUtil(@Value("${jwt.secret}") final String secret) {
         this.secret = secret;
     }
 
-    public String generateToken(Person person) {
-        Map<String, Object> claims = new HashMap<>();
+    public String generateToken(final Person person) {
+
+        final Map<String, Object> claims = new HashMap<>();
         return doGenerateToken(claims, person.getUsername());
     }
 
-    public Boolean validateToken(String token, Person person) {
+    public Boolean validateToken(final String token, final Person person) {
+
         final String tokenUsername = extractUsername(token);
         return (tokenUsername.equals(person.getUsername()) && !isTokenExpired(token));
     }
 
-    public String extractUsername(String token) {
+    public String extractUsername(final String token) {
+
         return extractClaim(token, Claims::getSubject);
     }
 
-    public Date extractExpiration(String token) {
+    public Date extractExpiration(final String token) {
+
         return extractClaim(token, Claims::getExpiration);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+    public <T> T extractClaim(final String token, final Function<Claims, T> claimsResolver) {
+
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    private Claims extractAllClaims(String token) {
-        SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+    private Claims extractAllClaims(final String token) {
+
+        final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
         return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 
-    private Boolean isTokenExpired(String token) {
+    private Boolean isTokenExpired(final String token) {
+
         return extractExpiration(token).before(new Date());
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        Key key = Keys.hmacShaKeyFor(keyBytes);
+    private String doGenerateToken(final Map<String, Object> claims, final String subject) {
+
+        final byte[] keyBytes = Decoders.BASE64.decode(secret);
+        final Key key = Keys.hmacShaKeyFor(keyBytes);
         return Jwts.builder()
                 .claims(claims)
                 .subject(subject)

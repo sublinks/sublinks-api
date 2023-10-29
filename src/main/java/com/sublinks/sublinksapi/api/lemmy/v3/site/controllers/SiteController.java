@@ -19,11 +19,8 @@ import com.sublinks.sublinksapi.instance.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.InstanceRepository;
 import com.sublinks.sublinksapi.instance.InstanceService;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
-import com.sublinks.sublinksapi.language.Language;
-import com.sublinks.sublinksapi.language.LanguageRepository;
+import com.sublinks.sublinksapi.language.LanguageService;
 import com.sublinks.sublinksapi.person.PersonContext;
-import com.sublinks.sublinksapi.util.KeyService;
-import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,10 +33,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -49,10 +44,9 @@ public class SiteController {
     private final PersonContext personContext;
     private final SiteService siteService;
     private final InstanceService instanceService;
+    private final LanguageService languageService;
     private final InstanceRepository instanceRepository;
     private final InstanceBlockRepository instanceBlockRepository;
-    private final LanguageRepository languageRepository;
-    private final KeyService keyService;
     private final GetSiteResponseMapper getSiteResponseMapper;
     private final CreateSiteFormMapper createSiteFormMapper;
     private final EditSiteFormMapper editSiteFormMapper;
@@ -60,22 +54,25 @@ public class SiteController {
 
 
     public SiteController(
-            LocalInstanceContext localInstanceContext,
-            PersonContext personContext,
-            SiteService siteService,
-            InstanceService instanceService, InstanceRepository instanceRepository,
-            InstanceBlockRepository instanceBlockRepository, LanguageRepository languageRepository, KeyService keyService,
-            GetSiteResponseMapper getSiteResponseMapper, CreateSiteFormMapper createSiteFormMapper,
-            EditSiteFormMapper editSiteFormMapper, SiteResponseMapper siteResponseMapper
+           final  LocalInstanceContext localInstanceContext,
+            final PersonContext personContext,
+            final SiteService siteService,
+            final InstanceService instanceService,
+            final LanguageService languageService,
+            final InstanceRepository instanceRepository,
+            final InstanceBlockRepository instanceBlockRepository,
+            final GetSiteResponseMapper getSiteResponseMapper,
+            final CreateSiteFormMapper createSiteFormMapper,
+            final EditSiteFormMapper editSiteFormMapper,
+            final SiteResponseMapper siteResponseMapper
     ) {
         this.localInstanceContext = localInstanceContext;
         this.personContext = personContext;
         this.siteService = siteService;
         this.instanceService = instanceService;
+        this.languageService = languageService;
         this.instanceRepository = instanceRepository;
         this.instanceBlockRepository = instanceBlockRepository;
-        this.languageRepository = languageRepository;
-        this.keyService = keyService;
         this.getSiteResponseMapper = getSiteResponseMapper;
         this.createSiteFormMapper = createSiteFormMapper;
         this.editSiteFormMapper = editSiteFormMapper;
@@ -84,11 +81,9 @@ public class SiteController {
 
     @GetMapping
     public GetSiteResponse getSite() {
-        Collection<Announcement> announcements = new HashSet<>();
-        List<Long> discussionLanguages = new ArrayList<>();
-        for (Language language : localInstanceContext.instance().getLanguages()) {
-            discussionLanguages.add(language.getId());
-        }
+
+        // @todo announcements
+        final Collection<Announcement> announcements = new HashSet<>();
         return getSiteResponseMapper.map(
                 localInstanceContext,
                 personContext,
@@ -96,43 +91,29 @@ public class SiteController {
                 siteService.admins(),
                 siteService.allLanguages(localInstanceContext.languageRepository()),
                 siteService.customEmojis(),
-                discussionLanguages
+                languageService.instanceLanguageIds(localInstanceContext.instance())
         );
     }
 
     @PostMapping
     @Transactional
-    public SiteResponse createSite(@Valid @RequestBody CreateSite createSiteForm) {
-        KeyStore keys = keyService.generate();
-        Instance instance = localInstanceContext.instance();
-        createSiteFormMapper.map(
-                createSiteForm,
-                localInstanceContext,
-                keys,
-                instance
-        );
-        final List<Language> languages = new ArrayList<>();
-        for (String languageCode : createSiteForm.discussion_languages()) {
-            final Optional<Language> language = languageRepository.findById(Long.valueOf(languageCode));
-            language.ifPresent(languages::add);
-        }
-        instance.setLanguages(languages);
+    public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm) {
+
+        final Instance instance = localInstanceContext.instance();
+        createSiteFormMapper.map(createSiteForm, localInstanceContext, instance);
+        instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
         instanceService.createInstance(instance);
-        Collection<Announcement> announcements = new HashSet<>();
+        final Collection<Announcement> announcements = new HashSet<>();
         return siteResponseMapper.map(localInstanceContext, announcements);
     }
 
     @PutMapping
     @Transactional
-    public SiteResponse updateSite(@Valid @RequestBody EditSite editSiteForm) {
-        Collection<Announcement> announcements = new HashSet<>();
-        Instance instance = localInstanceContext.instance();
-        final List<Language> languages = new ArrayList<>();
-        for (String languageCode : editSiteForm.discussion_languages()) {
-            final Optional<Language> language = languageRepository.findById(Long.valueOf(languageCode));
-            language.ifPresent(languages::add);
-        }
-        instance.setLanguages(languages);
+    public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm) {
+
+        final Collection<Announcement> announcements = new HashSet<>();
+        final Instance instance = localInstanceContext.instance();
+        instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
         editSiteFormMapper.map(editSiteForm, instance);
         instanceService.updateInstance(instance);
         return siteResponseMapper.map(localInstanceContext, announcements);
@@ -140,7 +121,9 @@ public class SiteController {
 
     @PostMapping("/block")
     @Transactional
-    public BlockInstanceResponse blockInstance(@Valid @RequestBody BlockInstance blockInstanceForm, Principal principal) {
+    public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final Principal principal) {
+
+        // @todo ensure they are an admin or authorized to block an instance
         if (!(principal instanceof JwtPerson)) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
@@ -148,7 +131,7 @@ public class SiteController {
         if (instance.isEmpty()) {
             return new BlockInstanceResponse(false);
         }
-        InstanceBlock instanceBlock = instanceBlockRepository.findInstanceBlockByInstance(instance.get());
+        final InstanceBlock instanceBlock = instanceBlockRepository.findInstanceBlockByInstance(instance.get());
         if (blockInstanceForm.block() && instanceBlock == null) {
             instanceBlockRepository.save(InstanceBlock.builder().instance(instance.get()).build());
         } else if (!blockInstanceForm.block()) {

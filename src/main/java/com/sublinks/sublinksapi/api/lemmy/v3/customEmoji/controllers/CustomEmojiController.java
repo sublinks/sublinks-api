@@ -16,17 +16,20 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/custom_emoji")
 public class CustomEmojiController {
     @PostMapping
-    CustomEmojiResponse create(@Valid CreateCustomEmoji createCustomEmojiForm) {
+    CustomEmojiResponse create(@Valid final CreateCustomEmoji createCustomEmojiForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping
-    CustomEmojiResponse update(@Valid EditCustomEmoji editCustomEmojiForm) {
+    CustomEmojiResponse update(@Valid final EditCustomEmoji editCustomEmojiForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("delete")
-    CustomEmojiResponse delete(@Valid DeleteCustomEmoji deleteCustomEmojiForm) {
+    CustomEmojiResponse delete(@Valid final DeleteCustomEmoji deleteCustomEmojiForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

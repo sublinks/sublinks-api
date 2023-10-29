@@ -1,5 +1,8 @@
 package com.sublinks.sublinksapi.instance;
 
+import com.sublinks.sublinksapi.util.KeyService;
+import com.sublinks.sublinksapi.util.KeyStore;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -8,29 +11,30 @@ public class InstanceService {
     private final InstanceRepository instanceRepository;
     private final InstanceAggregateRepository instanceAggregateRepository;
 
+    private final KeyService keyService;
+
     public InstanceService(
-            InstanceRepository instanceRepository,
-            InstanceAggregateRepository instanceAggregateRepository
+            final InstanceRepository instanceRepository,
+            final InstanceAggregateRepository instanceAggregateRepository,
+            final KeyService keyService
     ) {
         this.instanceRepository = instanceRepository;
         this.instanceAggregateRepository = instanceAggregateRepository;
+        this.keyService = keyService;
     }
 
-    public void createInstance(Instance instance) {
+    public void createInstance(@NotNull Instance instance) {
+
+        KeyStore keys = keyService.generate();
+        instance.setPublicKey(keys.publicKey());
+        instance.setPrivateKey(keys.privateKey());
         instanceRepository.save(instance);
         InstanceAggregate instanceAggregate = InstanceAggregate.builder().instance(instance).build();
         instanceAggregateRepository.save(instanceAggregate);
     }
 
-    public void updateInstance(Instance instance) {
-        instanceRepository.save(instance);
-    }
+    public void updateInstance(@NotNull Instance instance) {
 
-    public InstanceAggregate getInstanceAggregate(Instance instance) {
-        InstanceAggregate instanceAggregate = instance.getInstanceAggregate();
-        if (instanceAggregate == null) {
-            instanceAggregate = InstanceAggregate.builder().instance(instance).build();
-        }
-        return instanceAggregate;
+        instanceRepository.save(instance);
     }
 }

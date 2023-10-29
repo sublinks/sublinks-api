@@ -14,7 +14,6 @@ import com.sublinks.sublinksapi.authorization.AuthorizationService;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.community.CommunityRepository;
 import com.sublinks.sublinksapi.community.CommunityService;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.Language;
@@ -44,37 +43,27 @@ import java.util.Set;
 @RequestMapping(path = "/api/v3/community")
 public class CommunityOwnerController {
     private final LocalInstanceContext localInstanceContext;
-
-    private final CommunityRepository communityRepository;
-
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
-
     private final CreateCommunityFormMapper createCommunityFormMapper;
     private final CommunityService communityService;
-
     private final KeyService keyService;
-
     private final AuthorizationService authorizationService;
-
     private final LemmyCommunityService lemmyCommunityService;
-
     private final CommunityResponseMapper communityResponseMapper;
-
     private final LemmyCommunityMapper lemmyCommunityMapper;
 
 
     public CommunityOwnerController(
-            LocalInstanceContext localInstanceContext,
-            CommunityRepository communityRepository,
-            LinkPersonCommunityRepository linkPersonCommunityRepository,
-            CreateCommunityFormMapper createCommunityFormMapper,
-            CommunityService communityService, KeyService keyService,
-            AuthorizationService authorizationService,
-            LemmyCommunityService lemmyCommunityService, CommunityResponseMapper communityResponseMapper,
-            LemmyCommunityMapper lemmyCommunityMapper
+            final LocalInstanceContext localInstanceContext,
+            final LinkPersonCommunityRepository linkPersonCommunityRepository,
+            final CreateCommunityFormMapper createCommunityFormMapper,
+            final CommunityService communityService, KeyService keyService,
+            final AuthorizationService authorizationService,
+            final LemmyCommunityService lemmyCommunityService,
+            final CommunityResponseMapper communityResponseMapper,
+            final LemmyCommunityMapper lemmyCommunityMapper
     ) {
         this.localInstanceContext = localInstanceContext;
-        this.communityRepository = communityRepository;
         this.linkPersonCommunityRepository = linkPersonCommunityRepository;
         this.createCommunityFormMapper = createCommunityFormMapper;
         this.communityService = communityService;
@@ -87,7 +76,8 @@ public class CommunityOwnerController {
 
     @PostMapping
     @Transactional
-    public CommunityResponse create(@Valid @RequestBody CreateCommunity createCommunityForm, JwtPerson principal) {
+    public CommunityResponse create(@Valid @RequestBody final CreateCommunity createCommunityForm, JwtPerson principal) {
+
         Person person = (Person) principal.getPrincipal();
         authorizationService
                 .canPerson(person)
@@ -101,7 +91,7 @@ public class CommunityOwnerController {
             final Optional<Language> language = localInstanceContext.languageRepository().findById(Long.valueOf(languageCode));
             language.ifPresent(languages::add);
         }
-        KeyStore keys = keyService.generate();
+        final KeyStore keys = keyService.generate();
         Community community = createCommunityFormMapper.map(
                 createCommunityForm,
                 localInstanceContext.instance(),
@@ -109,7 +99,7 @@ public class CommunityOwnerController {
         );
         community.setLanguages(languages);
 
-        Set<LinkPersonCommunity> linkPersonCommunities = new HashSet<>();
+        final Set<LinkPersonCommunity> linkPersonCommunities = new HashSet<>();
         linkPersonCommunities.add(LinkPersonCommunity.builder()
                 .community(community)
                 .person(person)
@@ -124,7 +114,7 @@ public class CommunityOwnerController {
         communityService.saveCommunity(community);
         linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
-        CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
+        final CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
                 community,
                 SubscribedType.Subscribed,
                 false,
@@ -138,7 +128,8 @@ public class CommunityOwnerController {
     }
 
     @PutMapping
-    CommunityResponse update(@Valid EditCommunity editCommunityForm) {
+    CommunityResponse update(@Valid final EditCommunity editCommunityForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

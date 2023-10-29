@@ -16,8 +16,10 @@ import java.util.List;
 public class PersonConfig {
     @Bean
     @Scope(value = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
-    PersonContext signedInUserContext() {
-        Object principal = SecurityContextHolder.getContext()
+    public PersonContext signedInUserContext() {
+
+        // @todo actual relationship data for the user
+        final Object principal = SecurityContextHolder.getContext()
                 .getAuthentication().getPrincipal();
         PersonContext personContext = new PersonContext();
         if (principal instanceof Person person) {
@@ -32,34 +34,34 @@ public class PersonConfig {
         return personContext;
     }
 
-    private PersonAggregates aggregates(Person person) {
+    private PersonAggregates aggregates(final Person person) {
         return null;
     }
 
-    private Collection<Community> communityBlocks(Person person) {
-        Collection<Community> communities = new HashSet<>();
+    private Collection<Community> communityBlocks(final Person person) {
+        final Collection<Community> communities = new HashSet<>();
         return communities;
     }
 
-    private Collection<Person> personBlocks(Person person) {
-        Collection<Person> people = new HashSet<>();
+    private Collection<Person> personBlocks(final Person person) {
+        final Collection<Person> people = new HashSet<>();
         return people;
     }
 
-    private Collection<Community> follows(Person person) {
-        Collection<Community> communities = new HashSet<>();
+    private Collection<Community> follows(final Person person) {
+        final Collection<Community> communities = new HashSet<>();
         return communities;
     }
 
-    private Collection<Integer> discussionLanguages(Person person) {
-        List<Integer> languageIds = new ArrayList<>();
+    private Collection<Integer> discussionLanguages(final Person person) {
+        final List<Integer> languageIds = new ArrayList<>();
         languageIds.add(1);
         languageIds.add(38);
         return languageIds;
     }
 
-    public Collection<Community> moderates(Person person) {
-        Collection<Community> communities = new HashSet<>();
+    public Collection<Community> moderates(final Person person) {
+        final Collection<Community> communities = new HashSet<>();
         return communities;
     }
 }

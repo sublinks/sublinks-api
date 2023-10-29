@@ -13,7 +13,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/search")
 public class SearchController {
     @GetMapping
-    GetModlogResponse index(@Valid Search searchForm) {
+    GetModlogResponse index(@Valid final Search searchForm) {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

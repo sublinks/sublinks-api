@@ -17,41 +17,49 @@ import org.springframework.web.server.ResponseStatusException;
 public class PrivateMessageController {
     @GetMapping
     PrivateMessagesResponse list() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping
     PrivateMessageResponse create() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping
     PrivateMessageResponse update() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("delete")
     PrivateMessageResponse delete() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("mark_as_read")
     PrivateMessageResponse markAsRead() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PostMapping("report")
     PrivateMessageReportResponse report() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @PutMapping("report/resolve")
     PrivateMessageReportResponse reportResolve() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
     @GetMapping("report/list")
     ListPrivateMessageReportsResponse reportList() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }

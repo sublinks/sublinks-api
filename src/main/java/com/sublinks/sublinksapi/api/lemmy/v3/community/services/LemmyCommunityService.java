@@ -24,26 +24,26 @@ import java.util.Set;
 
 @Service
 public class LemmyCommunityService {
-    final private LemmyCommunityMapper lemmyCommunityMapper;
+    private final LemmyCommunityMapper lemmyCommunityMapper;
     private final CommunityModeratorViewMapper communityModeratorViewMapper;
     private final CommunityResponseMapper communityResponseMapper;
 
     public LemmyCommunityService(
-            LemmyCommunityMapper lemmyCommunityMapper,
-            CommunityModeratorViewMapper communityModeratorViewMapper,
-            CommunityResponseMapper communityResponseMapper
+            final LemmyCommunityMapper lemmyCommunityMapper,
+            final CommunityModeratorViewMapper communityModeratorViewMapper,
+            final CommunityResponseMapper communityResponseMapper
     ) {
         this.lemmyCommunityMapper = lemmyCommunityMapper;
         this.communityModeratorViewMapper = communityModeratorViewMapper;
         this.communityResponseMapper = communityResponseMapper;
     }
 
-    public SubscribedType getPersonCommunitySubscribeType(Person person, Community community) {
+    public SubscribedType getPersonCommunitySubscribeType(final Person person, final Community community) {
+
         if (person == null || community == null) {
             return SubscribedType.NotSubscribed;
         }
-        for (LinkPersonCommunity link :
-                person.getLinkPersonCommunity()) {
+        for (LinkPersonCommunity link : person.getLinkPersonCommunity()) {
             if (link.getCommunity() == community) {
                 return switch (link.getLinkType()) {
                     case owner, follower, moderator -> SubscribedType.Subscribed;
@@ -55,8 +55,9 @@ public class LemmyCommunityService {
         return SubscribedType.NotSubscribed;
     }
 
-    public CommunityView communityViewFromCommunity(Community community) {
-        CommunityAggregates communityAggregates = communityAggregates(community);
+    public CommunityView communityViewFromCommunity(final Community community) {
+
+        final CommunityAggregates communityAggregates = communityAggregates(community);
         return lemmyCommunityMapper.communityToCommunityView(
                 community,
                 SubscribedType.NotSubscribed,
@@ -65,7 +66,8 @@ public class LemmyCommunityService {
         );
     }
 
-    public CommunityView communityViewFromCommunity(Community community, Person person) {
+    public CommunityView communityViewFromCommunity(final Community community, final Person person) {
+
         SubscribedType subscribedType = SubscribedType.NotSubscribed;
         boolean isBlocked = false;
         for (LinkPersonCommunity linkPersonCommunity : person.getLinkPersonCommunity()) {
@@ -80,7 +82,7 @@ public class LemmyCommunityService {
                 }
             }
         }
-        CommunityAggregates communityAggregates = communityAggregates(community);
+        final CommunityAggregates communityAggregates = communityAggregates(community);
         return lemmyCommunityMapper.communityToCommunityView(
                 community,
                 subscribedType,
@@ -89,21 +91,24 @@ public class LemmyCommunityService {
         );
     }
 
-    public CommunityAggregates communityAggregates(Community community) {
+    public CommunityAggregates communityAggregates(final Community community) {
+
         return Optional.ofNullable(community.getCommunityAggregates())
                 .orElse(CommunityAggregates.builder().community(community).build());
     }
 
-    public Set<String> communityLanguageCodes(Community community) {
-        Set<String> languageCodes = new HashSet<>();
+    public Set<String> communityLanguageCodes(final Community community) {
+
+        final Set<String> languageCodes = new HashSet<>();
         for (Language language : community.getLanguages()) {
             languageCodes.add(language.getCode());
         }
         return languageCodes;
     }
 
-    public List<CommunityModeratorView> communityModeratorViewList(Community community) {
-        List<CommunityModeratorView> moderatorViews = new ArrayList<>();
+    public List<CommunityModeratorView> communityModeratorViewList(final Community community) {
+
+        final List<CommunityModeratorView> moderatorViews = new ArrayList<>();
         for (LinkPersonCommunity linkPerson : community.getLinkPersonCommunity()) {
             final CommunityModeratorView communityModeratorView = communityModeratorViewMapper.map(community, linkPerson.getPerson());
             if (linkPerson.getLinkType() == LinkPersonCommunityType.owner) {
@@ -116,14 +121,16 @@ public class LemmyCommunityService {
         return moderatorViews;
     }
 
-    public CommunityResponse createCommunityResponse(Community community, Person person) {
+    public CommunityResponse createCommunityResponse(final Community community, final Person person) {
+
         return communityResponseMapper.map(
                 communityViewFromCommunity(community, person),
                 communityLanguageCodes(community)
         );
     }
 
-    public CommunityResponse createCommunityResponse(Community community) {
+    public CommunityResponse createCommunityResponse(final Community community) {
+
         return communityResponseMapper.map(
                 communityViewFromCommunity(community),
                 communityLanguageCodes(community)

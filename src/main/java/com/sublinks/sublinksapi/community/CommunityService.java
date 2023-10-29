@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CommunityService {
-    final private CommunityRepository communityRepository;
-    final private CommunityCreatedPublisher communityCreatedPublisher;
+    private final CommunityRepository communityRepository;
+    private final CommunityCreatedPublisher communityCreatedPublisher;
 
     public CommunityService(
             CommunityRepository communityRepository,
@@ -16,9 +16,9 @@ public class CommunityService {
         this.communityCreatedPublisher = communityCreatedPublisher;
     }
 
-    public Community saveCommunity(Community community) {
+    public void saveCommunity(Community community) {
+
         communityRepository.save(community);
-        communityCreatedPublisher.publishCommunityCreatedEvent(community);
-        return community;
+        communityCreatedPublisher.publish(community);
     }
 }

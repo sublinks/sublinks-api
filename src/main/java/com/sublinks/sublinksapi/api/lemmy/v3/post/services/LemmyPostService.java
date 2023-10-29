@@ -13,26 +13,31 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class LemmyPostService {
-
     private final LemmyPostMapper lemmyPostMapper;
     private final LemmyCommunityMapper lemmyCommunityMapper;
     private final LemmyPersonMapper lemmyPersonMapper;
     private final PostService postService;
 
-    public LemmyPostService(LemmyPostMapper lemmyPostMapper, LemmyCommunityMapper lemmyCommunityMapper, LemmyPersonMapper lemmyPersonMapper, PostService postService) {
+    public LemmyPostService(
+            final LemmyPostMapper lemmyPostMapper,
+            final LemmyCommunityMapper lemmyCommunityMapper,
+            final LemmyPersonMapper lemmyPersonMapper,
+            final PostService postService
+    ) {
         this.lemmyPostMapper = lemmyPostMapper;
         this.lemmyCommunityMapper = lemmyCommunityMapper;
         this.lemmyPersonMapper = lemmyPersonMapper;
         this.postService = postService;
     }
 
-    public PostView postViewFromPost(Post post) {
-        com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
-        com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
+    public PostView postViewFromPost(final Post post) {
+
+        final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
+        final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
                 postService.getPostCreator(post)
         );
-        Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
-        PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
+        final Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
+        final PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
                 post.getPostAggregates()
         );
         return PostView.builder()
@@ -49,13 +54,14 @@ public class LemmyPostService {
                 .build();
     }
 
-    public PostView postViewFromPost(Post post, Person person) {
-        com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
-        com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
+    public PostView postViewFromPost(final Post post, final Person person) {
+
+        final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
+        final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
                 postService.getPostCreator(post)
         );
-        Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
-        PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
+        final Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
+        final PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
                 post.getPostAggregates()
         );
         return PostView.builder()
