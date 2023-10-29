@@ -11,7 +11,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LemmyCommunityMapper.class})
 public abstract class CreateCommunityFormMapper {
     @Mapping(target = "linkPersonCommunity", ignore = true)
-    @Mapping(target = "communityAggregates", ignore = true)
+    @Mapping(target = "communityAggregate", ignore = true)
     @Mapping(target = "instance", source = "instance")
     @Mapping(target = "titleSlug", source = "createCommunityForm.name")
     @Mapping(target = "title", source = "createCommunityForm.title")

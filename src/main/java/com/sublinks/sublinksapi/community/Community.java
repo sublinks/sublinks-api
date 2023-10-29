@@ -53,7 +53,7 @@ public class Community implements Serializable {
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn
-    private CommunityAggregates communityAggregates;
+    private CommunityAggregate communityAggregate;
 
     @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
     Set<LinkPersonCommunity> linkPersonCommunity;

@@ -21,7 +21,7 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(name = "community_aggregates")
-public class CommunityAggregates {
+public class CommunityAggregate {
     /**
      * Relationships
      */

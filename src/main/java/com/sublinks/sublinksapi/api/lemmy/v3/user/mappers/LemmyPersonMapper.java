@@ -12,6 +12,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonBlockView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.person.PersonAggregate;
 import com.sublinks.sublinksapi.person.PersonContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -65,16 +66,16 @@ public interface LemmyPersonMapper {
     LocalUser personToLocalUser(Person person);
 
 
-    @Mapping(target = "post_score", source = "personAggregates.postScore")
-    @Mapping(target = "post_count", source = "personAggregates.postCount")
-    @Mapping(target = "person_id", source = "personAggregates.person.id")
-    @Mapping(target = "comment_score", source = "personAggregates.commentScore")
-    @Mapping(target = "comment_count", source = "personAggregates.commentCount")
-    PersonAggregates personAggregatesToPersonAggregates(com.sublinks.sublinksapi.person.PersonAggregates personAggregates);
+    @Mapping(target = "post_score", source = "personAggregate.postScore")
+    @Mapping(target = "post_count", source = "personAggregate.postCount")
+    @Mapping(target = "person_id", source = "personAggregate.person.id")
+    @Mapping(target = "comment_score", source = "personAggregate.commentScore")
+    @Mapping(target = "comment_count", source = "personAggregate.commentCount")
+    PersonAggregates personAggregatesToPersonAggregates(PersonAggregate personAggregate);
 
     @Mapping(target = "person", source = "personContext.person")
     @Mapping(target = "local_user", source = "personContext.person")
-    @Mapping(target = "counts", source = "personContext.personAggregates")
+    @Mapping(target = "counts", source = "personContext.getPersonAggregate")
     LocalUserView personToLocalUserView(PersonContext personContext);
 
     @Mapping(target = "local_user_view", source = "personContext")
@@ -86,7 +87,7 @@ public interface LemmyPersonMapper {
     MyUserInfo personToMyUserInfo(PersonContext personContext);
 
     @Mapping(target = "person", source = "personContext.person")
-    @Mapping(target = "counts", source = "personContext.personAggregates")
+    @Mapping(target = "counts", source = "personContext.getPersonAggregate")
     PersonView personToPersonView(PersonContext personContext);
 
     @Mapping(target = "id", source = "person.id")

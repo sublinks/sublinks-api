@@ -6,19 +6,28 @@ import org.springframework.stereotype.Service;
 @Service
 public class CommunityService {
     private final CommunityRepository communityRepository;
+    private final CommunityAggregateRepository communityAggregateRepository;
     private final CommunityCreatedPublisher communityCreatedPublisher;
 
     public CommunityService(
-            CommunityRepository communityRepository,
-            CommunityCreatedPublisher communityCreatedPublisher
+            final CommunityRepository communityRepository,
+            final CommunityAggregateRepository communityAggregateRepository,
+            final CommunityCreatedPublisher communityCreatedPublisher
     ) {
         this.communityRepository = communityRepository;
+        this.communityAggregateRepository = communityAggregateRepository;
         this.communityCreatedPublisher = communityCreatedPublisher;
     }
 
-    public void saveCommunity(Community community) {
+    public void createCommunity(Community community) {
 
         communityRepository.save(community);
+        final CommunityAggregate communityAggregate = CommunityAggregate.builder()
+                .community(community)
+                .subscriberCount(1)
+                .build();
+        communityAggregateRepository.save(communityAggregate);
+        community.setCommunityAggregate(communityAggregate);
         communityCreatedPublisher.publish(community);
     }
 }

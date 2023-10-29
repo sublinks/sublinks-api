@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.community.mappers;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
-import com.sublinks.sublinksapi.community.CommunityAggregates;
+import com.sublinks.sublinksapi.community.CommunityAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -35,17 +35,17 @@ public interface LemmyCommunityMapper {
             com.sublinks.sublinksapi.community.Community community,
             SubscribedType subscribedType,
             boolean blocked,
-            CommunityAggregates counts);
+            CommunityAggregate counts);
 
-    @Mapping(target = "users_active_week", source = "communityAggregates.activeWeeklyUserCount")
-    @Mapping(target = "users_active_month", source = "communityAggregates.activeMonthlyUserCount")
-    @Mapping(target = "users_active_half_year", source = "communityAggregates.activeHalfYearUserCount")
-    @Mapping(target = "users_active_day", source = "communityAggregates.activeDailyUserCount")
-    @Mapping(target = "subscribers", source = "communityAggregates.subscriberCount")
-    @Mapping(target = "posts", source = "communityAggregates.postCount")
-    @Mapping(target = "community_id", source = "communityAggregates.community.id")
-    @Mapping(target = "comments", source = "communityAggregates.commentCount")
+    @Mapping(target = "users_active_week", source = "communityAggregate.activeWeeklyUserCount")
+    @Mapping(target = "users_active_month", source = "communityAggregate.activeMonthlyUserCount")
+    @Mapping(target = "users_active_half_year", source = "communityAggregate.activeHalfYearUserCount")
+    @Mapping(target = "users_active_day", source = "communityAggregate.activeDailyUserCount")
+    @Mapping(target = "subscribers", source = "communityAggregate.subscriberCount")
+    @Mapping(target = "posts", source = "communityAggregate.postCount")
+    @Mapping(target = "community_id", source = "communityAggregate.community.id")
+    @Mapping(target = "comments", source = "communityAggregate.commentCount")
     @Mapping(target = "published", constant = "")
     @Mapping(target = "hot_rank", constant = "0l")
-    com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityAggregates map(CommunityAggregates communityAggregates);
+    com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityAggregates map(CommunityAggregate communityAggregate);
 }

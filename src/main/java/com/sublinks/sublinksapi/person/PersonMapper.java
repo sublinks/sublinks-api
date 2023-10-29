@@ -15,7 +15,7 @@ public interface PersonMapper {
     @Mapping(target = "person", source = "person")
     @Mapping(target = "posts", source = "posts")
     @Mapping(target = "comments", source = "comments")
-    @Mapping(target = "personAggregates", source = "personAggregates")
+    @Mapping(target = "personAggregate", source = "personAggregate")
     @Mapping(target = "discussLanguages", source = "discussLanguages")
     @Mapping(target = "moderates", source = "moderates")
     @Mapping(target = "follows", source = "follows")
@@ -25,7 +25,7 @@ public interface PersonMapper {
             Person person,
             Collection<Post> posts,
             Collection<Comment> comments,
-            PersonAggregates personAggregates,
+            PersonAggregate personAggregate,
             Collection<Integer> discussLanguages,
             Collection<Community> moderates,
             Collection<Community> follows,

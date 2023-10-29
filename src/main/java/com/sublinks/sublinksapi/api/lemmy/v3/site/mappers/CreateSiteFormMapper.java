@@ -14,6 +14,7 @@ public interface CreateSiteFormMapper {
     @Mapping(target = "people", ignore = true)
     @Mapping(target = "languages", ignore = true)
     @Mapping(target = "communities", ignore = true)
+    @Mapping(target = "instanceAggregate", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
@@ -28,6 +29,5 @@ public interface CreateSiteFormMapper {
     @Mapping(target = "sidebar", expression = "java(entity.sidebar() == null ? null : entity.sidebar())")
     @Mapping(target = "bannerUrl", constant = "")
     @Mapping(target = "iconUrl", constant = "")
-
     void map(CreateSite entity, LocalInstanceContext context, @MappingTarget Instance instance);
 }

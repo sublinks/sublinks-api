@@ -20,7 +20,7 @@ public class PersonService {
     private final KeyService keyService;
     private final PersonMapper personMapper;
     private final PersonRepository personRepository;
-    private final PersonAggregatesRepository personAggregatesRepository;
+    private final PersonAggregateRepository personAggregateRepository;
     private final LocalInstanceContext localInstanceContext;
     private final PersonCreatedPublisher personCreatedPublisher;
 
@@ -28,21 +28,21 @@ public class PersonService {
             final KeyService keyService,
             final PersonMapper personMapper,
             final PersonRepository personRepository,
-            final PersonAggregatesRepository personAggregatesRepository,
+            final PersonAggregateRepository personAggregateRepository,
             final LocalInstanceContext localInstanceContext,
             final PersonCreatedPublisher personCreatedPublisher
     ) {
         this.keyService = keyService;
         this.personMapper = personMapper;
         this.personRepository = personRepository;
-        this.personAggregatesRepository = personAggregatesRepository;
+        this.personAggregateRepository = personAggregateRepository;
         this.localInstanceContext = localInstanceContext;
         this.personCreatedPublisher = personCreatedPublisher;
     }
 
     public PersonContext getPersonContext(final Person person) {
 
-        final Optional<PersonAggregates> personAggregates = Optional.ofNullable(personAggregatesRepository.findFirstByPersonId(person.getId()));
+        final Optional<PersonAggregate> personAggregates = Optional.ofNullable(personAggregateRepository.findFirstByPersonId(person.getId()));
         final List<Integer> discussLanguages = new ArrayList<>();
         discussLanguages.add(1);
         discussLanguages.add(38);
@@ -57,7 +57,7 @@ public class PersonService {
                 person,
                 emptyPostList,
                 emptyCommentList,
-                personAggregates.orElse(PersonAggregates.builder().person(person).build()),
+                personAggregates.orElse(PersonAggregate.builder().person(person).build()),
                 discussLanguages,
                 emptyCommunityList,
                 emptyCommunityList,
@@ -74,9 +74,9 @@ public class PersonService {
         person.setLocal(true);
         personRepository.save(person);
 
-        final PersonAggregates personAggregates = PersonAggregates.builder().person(person).build();
-        personAggregatesRepository.save(personAggregates);
-        person.setPersonAggregates(personAggregates);
+        final PersonAggregate personAggregate = PersonAggregate.builder().person(person).build();
+        personAggregateRepository.save(personAggregate);
+        person.setPersonAggregate(personAggregate);
         personCreatedPublisher.publish(person);
     }
 

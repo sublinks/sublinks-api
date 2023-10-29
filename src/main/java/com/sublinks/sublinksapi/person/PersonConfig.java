@@ -24,7 +24,7 @@ public class PersonConfig {
         PersonContext personContext = new PersonContext();
         if (principal instanceof Person person) {
             personContext.setPerson(person);
-            personContext.setPersonAggregates(aggregates(person));
+            personContext.setPersonAggregate(aggregates(person));
             personContext.setDiscussLanguages(discussionLanguages(person));
             personContext.setFollows(follows(person));
             personContext.setModerates(moderates(person));
@@ -34,7 +34,7 @@ public class PersonConfig {
         return personContext;
     }
 
-    private PersonAggregates aggregates(final Person person) {
+    private PersonAggregate aggregates(final Person person) {
         return null;
     }
 

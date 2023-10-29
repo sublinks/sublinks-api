@@ -20,7 +20,7 @@ public class PersonContext {
     private Person person;
     private Collection<Post> posts;
     private Collection<Comment> comments;
-    private PersonAggregates personAggregates;
+    private PersonAggregate personAggregate;
     private Collection<Integer> discussLanguages;
     private Collection<Community> moderates;
     private Collection<Community> follows;

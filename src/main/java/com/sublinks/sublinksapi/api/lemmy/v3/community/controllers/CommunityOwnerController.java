@@ -111,14 +111,14 @@ public class CommunityOwnerController {
                 .linkType(LinkPersonCommunityType.follower)
                 .build());
 
-        communityService.saveCommunity(community);
+        communityService.createCommunity(community);
         linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
         final CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
                 community,
                 SubscribedType.Subscribed,
                 false,
-                community.getCommunityAggregates()
+                community.getCommunityAggregate()
         );
 
         return communityResponseMapper.map(

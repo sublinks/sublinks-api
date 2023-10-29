@@ -8,7 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.community.CommunityAggregates;
+import com.sublinks.sublinksapi.community.CommunityAggregate;
 import com.sublinks.sublinksapi.language.Language;
 import com.sublinks.sublinksapi.person.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.Person;
@@ -57,12 +57,12 @@ public class LemmyCommunityService {
 
     public CommunityView communityViewFromCommunity(final Community community) {
 
-        final CommunityAggregates communityAggregates = communityAggregates(community);
+        final CommunityAggregate communityAggregate = communityAggregates(community);
         return lemmyCommunityMapper.communityToCommunityView(
                 community,
                 SubscribedType.NotSubscribed,
                 false,
-                communityAggregates
+                communityAggregate
         );
     }
 
@@ -82,19 +82,19 @@ public class LemmyCommunityService {
                 }
             }
         }
-        final CommunityAggregates communityAggregates = communityAggregates(community);
+        final CommunityAggregate communityAggregate = communityAggregates(community);
         return lemmyCommunityMapper.communityToCommunityView(
                 community,
                 subscribedType,
                 isBlocked,
-                communityAggregates
+                communityAggregate
         );
     }
 
-    public CommunityAggregates communityAggregates(final Community community) {
+    public CommunityAggregate communityAggregates(final Community community) {
 
-        return Optional.ofNullable(community.getCommunityAggregates())
-                .orElse(CommunityAggregates.builder().community(community).build());
+        return Optional.ofNullable(community.getCommunityAggregate())
+                .orElse(CommunityAggregate.builder().community(community).build());
     }
 
     public Set<String> communityLanguageCodes(final Community community) {

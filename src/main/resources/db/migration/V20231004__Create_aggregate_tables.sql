@@ -16,7 +16,7 @@ create table comment_aggregates
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
 
-create index `IDX_COMMENT_AGGREGATES_COMMENT_ID` on `comment_aggregates` (`comment_id`);
+create unique index `IDX_COMMENT_AGGREGATES_COMMENT_ID` on `comment_aggregates` (`comment_id`);
 
 /**
   Community aggregates table
@@ -38,7 +38,7 @@ create table community_aggregates
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
 
-create index `IDX_COMMUNITY_AGGREGATES_COMMUNITY_ID` on `community_aggregates` (`community_id`);
+create unique index `IDX_COMMUNITY_AGGREGATES_COMMUNITY_ID` on `community_aggregates` (`community_id`);
 
 
 /**
@@ -57,7 +57,7 @@ create table person_aggregates
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
 
-create index `IDX_PERSON_AGGREGATES_PERSON_ID` on `person_aggregates` (`person_id`);
+create unique index `IDX_PERSON_AGGREGATES_PERSON_ID` on `person_aggregates` (`person_id`);
 
 /**
   Post aggregates table
@@ -79,7 +79,7 @@ create table post_aggregates
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
 
-create index `IDX_POST_AGGREGATES_POST_ID` on `post_aggregates` (`post_id`);
+create unique index `IDX_POST_AGGREGATES_POST_ID` on `post_aggregates` (`post_id`);
 create index `IDX_POST_AGGREGATES_COMMUNITY_ID` on `post_aggregates` (`community_id`);
 
 /**
@@ -102,4 +102,4 @@ create table instance_aggregates
   default charset `utf8mb4`
   collate = 'utf8mb4_unicode_ci';
 
-create index `IDX_INSTANCE_AGGREGATES_POST_ID` on `instance_aggregates` (`instance_id`);
+create unique index `IDX_INSTANCE_AGGREGATES_POST_ID` on `instance_aggregates` (`instance_id`);
