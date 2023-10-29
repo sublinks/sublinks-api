@@ -37,13 +37,11 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.Post;
-import com.sublinks.sublinksapi.post.PostAggregates;
 import com.sublinks.sublinksapi.post.PostAggregatesRepository;
 import com.sublinks.sublinksapi.post.PostRepository;
 import com.sublinks.sublinksapi.post.PostService;
 import com.sublinks.sublinksapi.post.SearchCriteria;
 import com.sublinks.sublinksapi.util.KeyService;
-import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -122,7 +120,8 @@ public class PostController {
     @Transactional
     public PostResponse create(@Valid @RequestBody final CreatePost createPostForm, JwtPerson principal) {
 
-        final Community community = communityRepository.findById((long) createPostForm.community_id()).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        final Community community = communityRepository.findById((long) createPostForm.community_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         Person person = null;
         if (principal != null) {
             person = (Person) principal.getPrincipal();
@@ -134,16 +133,15 @@ public class PostController {
                 .defaultResponse(community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline : AuthorizationService.ResponseType.allow)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        final KeyStore keys = keyService.generate();
         Post post = createPostMapper.map(
                 createPostForm,
                 localInstanceContext.instance(),
                 community,
                 languageRepository.findById((long) createPostForm.language_id()).get(),
-                keys
+                true
         );
         post.setCommunity(community);
-        postRepository.saveAndFlush(post);
+        postService.createPost(post);
 
         final Set<LinkPersonPost> linkPersonPosts = new HashSet<>();
         linkPersonPosts.add(
@@ -154,11 +152,7 @@ public class PostController {
                         .build()
         );
         post.setLinkPersonPost(linkPersonPosts);
-        linkPersonPostRepository.saveAllAndFlush(linkPersonPosts);
-
-        final PostAggregates postAggregates = PostAggregates.builder().post(post).community(community).build();
-        postAggregatesRepository.saveAndFlush(postAggregates);
-        post.setPostAggregates(postAggregates);
+        linkPersonPostRepository.saveAll(linkPersonPosts);
 
         final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
 

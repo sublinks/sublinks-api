@@ -5,13 +5,13 @@ import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.instance.Instance;
 import com.sublinks.sublinksapi.language.Language;
 import com.sublinks.sublinksapi.post.Post;
-import com.sublinks.sublinksapi.util.KeyStore;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class CreatePostMapper {
+    @Mapping(target = "linkPersonPost", ignore = true)
     @Mapping(target = "postAggregates", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "id", ignore = true)
@@ -22,14 +22,15 @@ public abstract class CreatePostMapper {
     @Mapping(target = "isFeatured", constant = "false")
     @Mapping(target = "isDeleted", constant = "false")
     @Mapping(target = "isRemoved", constant = "false")
-    @Mapping(target = "publicKey", source = "keys.publicKey")
-    @Mapping(target = "privateKey", source = "keys.privateKey")
+    @Mapping(target = "publicKey", ignore = true)
+    @Mapping(target = "privateKey", ignore = true)
     @Mapping(target = "activityPubId", constant = "")
     @Mapping(target = "instance", source = "instance")
     @Mapping(target = "language", source = "language")
     @Mapping(target = "title", source = "createPostForm.name")
     @Mapping(target = "postBody", source = "createPostForm.body")
     @Mapping(target = "isNsfw", source = "createPostForm.nsfw")
+    @Mapping(target = "isLocal", source = "isLocal")
     @Mapping(target = "linkThumbnailUrl", constant = "")
     @Mapping(target = "linkDescription", constant = "")
     @Mapping(target = "linkTitle", constant = "")
@@ -41,7 +42,7 @@ public abstract class CreatePostMapper {
             Instance instance,
             Community community,
             Language language,
-            KeyStore keys
+            Boolean isLocal
     );
 
     public String mapTitleSlug(CreatePost createPostForm) {
