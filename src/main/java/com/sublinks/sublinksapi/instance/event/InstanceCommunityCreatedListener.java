@@ -1,18 +1,24 @@
-package com.sublinks.sublinksapi.community.event;
+package com.sublinks.sublinksapi.instance.event;
 
-import com.sublinks.sublinksapi.community.CommunityAggregateRepository;
+import com.sublinks.sublinksapi.community.event.CommunityCreatedEvent;
 import com.sublinks.sublinksapi.instance.InstanceAggregate;
 import com.sublinks.sublinksapi.instance.InstanceAggregateRepository;
+import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class CommunityCreatedListener implements ApplicationListener<CommunityCreatedEvent> {
+public class InstanceCommunityCreatedListener implements ApplicationListener<CommunityCreatedEvent> {
     private final InstanceAggregateRepository instanceAggregateRepository;
+    private final LocalInstanceContext localInstanceContext;
 
-    public CommunityCreatedListener(final InstanceAggregateRepository instanceAggregateRepository, CommunityAggregateRepository communityAggregateRepository) {
+    public InstanceCommunityCreatedListener(
+            final InstanceAggregateRepository instanceAggregateRepository,
+            LocalInstanceContext localInstanceContext
+    ) {
         this.instanceAggregateRepository = instanceAggregateRepository;
+        this.localInstanceContext = localInstanceContext;
     }
 
     @Override
@@ -22,7 +28,8 @@ public class CommunityCreatedListener implements ApplicationListener<CommunityCr
         if (!event.getCommunity().isLocal()) {
             return;
         }
-        final InstanceAggregate instanceAggregate = event.getCommunity().getInstance().getInstanceAggregate();
+
+        final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
         instanceAggregate.setCommunityCount(instanceAggregate.getCommunityCount() + 1);
         instanceAggregateRepository.save(instanceAggregate);
     }

@@ -75,7 +75,7 @@ public interface LemmyPersonMapper {
 
     @Mapping(target = "person", source = "personContext.person")
     @Mapping(target = "local_user", source = "personContext.person")
-    @Mapping(target = "counts", source = "personContext.getPersonAggregate")
+    @Mapping(target = "counts", source = "personContext.personAggregate")
     LocalUserView personToLocalUserView(PersonContext personContext);
 
     @Mapping(target = "local_user_view", source = "personContext")
@@ -87,7 +87,7 @@ public interface LemmyPersonMapper {
     MyUserInfo personToMyUserInfo(PersonContext personContext);
 
     @Mapping(target = "person", source = "personContext.person")
-    @Mapping(target = "counts", source = "personContext.getPersonAggregate")
+    @Mapping(target = "counts", source = "personContext.personAggregate")
     PersonView personToPersonView(PersonContext personContext);
 
     @Mapping(target = "id", source = "person.id")

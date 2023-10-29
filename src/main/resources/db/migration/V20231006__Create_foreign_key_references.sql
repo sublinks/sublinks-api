@@ -1,100 +1,100 @@
 /**
   Comments table
  */
-alter table comments
-    add foreign key (language_id) references `languages` (id) on delete cascade,
-    add foreign key (person_id) references people (id) on delete cascade,
-    add foreign key (community_id) references communities (id) on delete cascade,
-    add foreign key (post_id) references posts (id) on delete cascade;
+ALTER TABLE `comments`
+    ADD FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE;
 
 /**
   Comment Aggregates table
  */
-alter table comment_aggregates
-    add foreign key (comment_id) references comments (id) on delete cascade;
+ALTER TABLE `comment_aggregates`
+    ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 /**
   Comment Likes table
  */
-alter table comment_likes
-    add foreign key (person_id) references people (id) on delete cascade,
-    add foreign key (comment_id) references comments (id) on delete cascade;
+ALTER TABLE `comment_likes`
+    ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 /**
   Communities table
  */
-alter table communities
-    add foreign key (instance_id) references instances (id) on delete cascade;
+ALTER TABLE `communities`
+    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;
 
 /**
   Community Languages table
  */
-alter table community_languages
-    add foreign key (community_id) references communities (id) on delete cascade,
-    add foreign key (language_id) references languages (id) on delete cascade;
+ALTER TABLE `community_languages`
+    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE;
 
 /**
   Community Aggregates table
  */
-alter table community_aggregates
-    add foreign key (community_id) references communities (id) on delete cascade;
+ALTER TABLE `community_aggregates`
+    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE;
 
 /**
   Instance Aggregates table
  */
-alter table instance_aggregates
-    add foreign key (instance_id) references instances (id) on delete cascade;
+ALTER TABLE `instance_aggregates`
+    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;
 
 /**
   Instance Languages table
  */
-alter table instance_languages
-    add foreign key (instance_id) references instances (id) on delete cascade,
-    add foreign key (language_id) references languages (id) on delete cascade;
+ALTER TABLE `instance_languages`
+    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE;
 
 
 /**
   People table
  */
-alter table people
-    add foreign key (instance_id) references instances (id) on delete cascade;
+ALTER TABLE `people`
+    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;
 
 /**
   Person Aggregates table
  */
-alter table person_aggregates
-    add foreign key (person_id) references people (id) on delete cascade;
+ALTER TABLE `person_aggregates`
+    ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
 /**
   Link Person Communities table
  */
-alter table link_person_communities
-    add foreign key (person_id) references people (id) on delete cascade,
-    add foreign key (community_id) references communities (id) on delete cascade;
+ALTER TABLE `link_person_communities`
+    ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE;
 
 /**
   Person Languages table
  */
-alter table person_languages
-    add foreign key (person_id) references people (id) on delete cascade,
-    add foreign key (language_id) references languages (id) on delete cascade;
+ALTER TABLE `person_languages`
+    ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE;
 
 /**
   Posts table
  */
-alter table posts
-    add foreign key (instance_id) references instances (id) on delete cascade,
-    add foreign key (language_id) references languages (id) on delete cascade,
-    add foreign key (community_id) references communities (id) on delete cascade;
+ALTER TABLE `posts`
+    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE;
 
 /**
   Post Aggregates table
  */
-alter table post_aggregates
-    add foreign key (post_id) references posts (id) on delete cascade,
-    add foreign key (community_id) references communities (id) on delete cascade;
+ALTER TABLE `post_aggregates`
+    ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE;
 
 /**
   Posts Likes table
  */
-alter table post_likes
-    add foreign key (post_id) references posts (id) on delete cascade;
+ALTER TABLE `post_likes`
+    ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE;

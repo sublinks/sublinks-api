@@ -38,31 +38,25 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post {
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    Set<LinkPersonPost> linkPersonPost;
     /**
      * Relationships
      */
     @ManyToOne
     @JoinColumn(name = "community_id")
     private Community community;
-
     @OneToMany(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
-
     @ManyToOne
     private Instance instance;
-
     @ManyToOne
     @JoinColumn(name = "language_id")
     private Language language;
-
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PostAggregates postAggregates;
-
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
-    Set<LinkPersonPost> linkPersonPost;
-
     /**
      * Attributes
      */
@@ -78,6 +72,9 @@ public class Post {
 
     @Column(nullable = false, name = "is_removed")
     private boolean isRemoved;
+
+    @Column(nullable = false, name = "is_local")
+    private boolean isLocal;
 
     @Column(nullable = false, name = "is_featured")
     private boolean isFeatured;

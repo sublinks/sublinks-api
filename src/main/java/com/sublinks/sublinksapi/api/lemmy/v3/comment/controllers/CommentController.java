@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReportsRe
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.comment.Comment;
 import com.sublinks.sublinksapi.comment.CommentRepository;
+import com.sublinks.sublinksapi.comment.CommentService;
 import com.sublinks.sublinksapi.language.Language;
 import com.sublinks.sublinksapi.language.LanguageRepository;
 import com.sublinks.sublinksapi.person.Person;
@@ -35,20 +36,19 @@ import java.util.Optional;
 @RequestMapping(path = "/api/v3/comment")
 public class CommentController {
     private final CommentRepository commentRepository;
-
+    private final CommentService commentService;
     private final LemmyCommentService lemmyCommentService;
-
     private final PostRepository postRepository;
-
     private final LanguageRepository languageRepository;
 
     public CommentController(
             final CommentRepository commentRepository,
-            final LemmyCommentService lemmyCommentService,
+            final CommentService commentService, final LemmyCommentService lemmyCommentService,
             final PostRepository postRepository,
             final LanguageRepository languageRepository
     ) {
         this.commentRepository = commentRepository;
+        this.commentService = commentService;
         this.lemmyCommentService = lemmyCommentService;
         this.postRepository = postRepository;
         this.languageRepository = languageRepository;
@@ -63,6 +63,7 @@ public class CommentController {
         final Language language = languageRepository.findById((long) createCommentForm.language_id()).get();
         final Comment comment = Comment.builder()
                 .person(person)
+                .isLocal(true)
                 .commentBody(createCommentForm.content())
                 .activityPubId("")
                 .post(post)
@@ -71,8 +72,7 @@ public class CommentController {
                 .path(post.getCommunity().getId() + ";" + post.getId())
                 .build();
 
-
-        commentRepository.save(comment);
+        commentService.createComment(comment);
         String path = null;
         if (createCommentForm.parent_id() != null) {
             Optional<Comment> parentComment = commentRepository.findById((long) createCommentForm.parent_id());

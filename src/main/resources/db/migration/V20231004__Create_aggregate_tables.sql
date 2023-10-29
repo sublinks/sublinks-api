@@ -1,105 +1,105 @@
 /**
   Comment aggregates table
  */
-create table comment_aggregates
+CREATE TABLE `comment_aggregates`
 (
-    `id`               bigint auto_increment primary key,
-    `comment_id`       bigint                                    not null,
-    `up_votes`         int          default 0                    not null,
-    `down_votes`       int          default 0                    not null,
-    `score`            int          default 0                    not null,
-    `children_count`   int          default 0                    not null,
-    `hot_rank`         int          default 0                    not null,
-    `controversy_rank` int          default 0                    not null,
-    `created_at`       timestamp(3) default current_timestamp(3) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `comment_id`       BIGINT                                    NOT NULL,
+    `up_votes`         INT          DEFAULT 0                    NOT NULL,
+    `down_votes`       INT          DEFAULT 0                    NOT NULL,
+    `score`            INT          DEFAULT 0                    NOT NULL,
+    `children_count`   INT          DEFAULT 0                    NOT NULL,
+    `hot_rank`         INT          DEFAULT 0                    NOT NULL,
+    `controversy_rank` INT          DEFAULT 0                    NOT NULL,
+    `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create unique index `IDX_COMMENT_AGGREGATES_COMMENT_ID` on `comment_aggregates` (`comment_id`);
+CREATE UNIQUE INDEX `IDX_COMMENT_AGGREGATES_COMMENT_ID` ON `comment_aggregates` (`comment_id`);
 
 /**
   Community aggregates table
  */
-create table community_aggregates
+CREATE TABLE `community_aggregates`
 (
-    `id`                          bigint auto_increment primary key,
-    `community_id`                bigint                                    not null,
-    `subscriber_count`            int          default 0                    not null,
-    `post_count`                  int          default 0                    not null,
-    `comment_count`               int          default 0                    not null,
-    `active_daily_user_count`     int          default 0                    not null,
-    `active_weekly_user_count`    int          default 0                    not null,
-    `active_monthly_user_count`   int          default 0                    not null,
-    `active_half_year_user_count` int          default 0                    not null,
-    `hot_rank`                    int          default 0                    not null,
-    `created_at`                  timestamp(3) default current_timestamp(3) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`                          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `community_id`                BIGINT                                    NOT NULL,
+    `subscriber_count`            INT          DEFAULT 0                    NOT NULL,
+    `post_count`                  INT          DEFAULT 0                    NOT NULL,
+    `comment_count`               INT          DEFAULT 0                    NOT NULL,
+    `active_daily_user_count`     INT          DEFAULT 0                    NOT NULL,
+    `active_weekly_user_count`    INT          DEFAULT 0                    NOT NULL,
+    `active_monthly_user_count`   INT          DEFAULT 0                    NOT NULL,
+    `active_half_year_user_count` INT          DEFAULT 0                    NOT NULL,
+    `hot_rank`                    INT          DEFAULT 0                    NOT NULL,
+    `created_at`                  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create unique index `IDX_COMMUNITY_AGGREGATES_COMMUNITY_ID` on `community_aggregates` (`community_id`);
+CREATE UNIQUE INDEX `IDX_COMMUNITY_AGGREGATES_COMMUNITY_ID` ON `community_aggregates` (`community_id`);
 
 
 /**
   Person aggregates table
  */
-create table person_aggregates
+CREATE TABLE `person_aggregates`
 (
-    `id`            bigint auto_increment primary key,
-    `person_id`     bigint                                    not null,
-    `post_count`    int          default 0                    not null,
-    `comment_count` int          default 0                    not null,
-    `post_score`    int          default 0                    not null,
-    `comment_score` int          default 0                    not null,
-    `created_at`    timestamp(3) default current_timestamp(3) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`     BIGINT                                    NOT NULL,
+    `post_count`    INT          DEFAULT 0                    NOT NULL,
+    `comment_count` INT          DEFAULT 0                    NOT NULL,
+    `post_score`    INT          DEFAULT 0                    NOT NULL,
+    `comment_score` INT          DEFAULT 0                    NOT NULL,
+    `created_at`    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create unique index `IDX_PERSON_AGGREGATES_PERSON_ID` on `person_aggregates` (`person_id`);
+CREATE UNIQUE INDEX `IDX_PERSON_AGGREGATES_PERSON_ID` ON `person_aggregates` (`person_id`);
 
 /**
   Post aggregates table
  */
-create table post_aggregates
+CREATE TABLE `post_aggregates`
 (
-    `id`               bigint auto_increment primary key,
-    `post_id`          bigint                                    not null,
-    `community_id`     bigint                                    not null,
-    `comment_count`    int          default 0                    not null,
-    `down_vote_count`  int          default 0                    not null,
-    `up_vote_count`    int          default 0                    not null,
-    `score`            int          default 0                    not null,
-    `hot_rank`         int          default 0                    not null,
-    `hot_rank_active`  int          default 0                    not null,
-    `controversy_rank` int          default 0                    not null,
-    `created_at`       timestamp(3) default current_timestamp(3) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id`          BIGINT                                    NOT NULL,
+    `community_id`     BIGINT                                    NOT NULL,
+    `comment_count`    INT          DEFAULT 0                    NOT NULL,
+    `down_vote_count`  INT          DEFAULT 0                    NOT NULL,
+    `up_vote_count`    INT          DEFAULT 0                    NOT NULL,
+    `score`            INT          DEFAULT 0                    NOT NULL,
+    `hot_rank`         INT          DEFAULT 0                    NOT NULL,
+    `hot_rank_active`  INT          DEFAULT 0                    NOT NULL,
+    `controversy_rank` INT          DEFAULT 0                    NOT NULL,
+    `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create unique index `IDX_POST_AGGREGATES_POST_ID` on `post_aggregates` (`post_id`);
-create index `IDX_POST_AGGREGATES_COMMUNITY_ID` on `post_aggregates` (`community_id`);
+CREATE UNIQUE INDEX `IDX_POST_AGGREGATES_POST_ID` ON `post_aggregates` (`post_id`);
+CREATE INDEX `IDX_POST_AGGREGATES_COMMUNITY_ID` ON `post_aggregates` (`community_id`);
 
 /**
   Instance aggregates table
  */
-create table instance_aggregates
+CREATE TABLE `instance_aggregates`
 (
-    `id`                          bigint auto_increment primary key,
-    `instance_id`                 bigint                                    not null,
-    `user_count`                  int          default 0                    not null,
-    `post_count`                  int          default 0                    not null,
-    `comment_count`               int          default 0                    not null,
-    `community_count`             int          default 0                    not null,
-    `active_daily_user_count`     int          default 0                    not null,
-    `active_weekly_user_count`    int          default 0                    not null,
-    `active_monthly_user_count`   int          default 0                    not null,
-    `active_half_year_user_count` int          default 0                    not null,
-    `created_at`                  timestamp(3) default current_timestamp(3) not null
-) engine = InnoDB
-  default charset `utf8mb4`
-  collate = 'utf8mb4_unicode_ci';
+    `id`                          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `instance_id`                 BIGINT                                    NOT NULL,
+    `user_count`                  INT          DEFAULT 0                    NOT NULL,
+    `post_count`                  INT          DEFAULT 0                    NOT NULL,
+    `comment_count`               INT          DEFAULT 0                    NOT NULL,
+    `community_count`             INT          DEFAULT 0                    NOT NULL,
+    `active_daily_user_count`     INT          DEFAULT 0                    NOT NULL,
+    `active_weekly_user_count`    INT          DEFAULT 0                    NOT NULL,
+    `active_monthly_user_count`   INT          DEFAULT 0                    NOT NULL,
+    `active_half_year_user_count` INT          DEFAULT 0                    NOT NULL,
+    `created_at`                  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
 
-create unique index `IDX_INSTANCE_AGGREGATES_POST_ID` on `instance_aggregates` (`instance_id`);
+CREATE UNIQUE INDEX `IDX_INSTANCE_AGGREGATES_POST_ID` ON `instance_aggregates` (`instance_id`);

@@ -79,6 +79,9 @@ public class Comment implements Serializable {
     @Column(nullable = false, name = "is_removed")
     private boolean isRemoved;
 
+    @Column(nullable = false, name = "is_local")
+    private boolean isLocal;
+
     @Column(nullable = false, name = "is_featured")
     private boolean isFeatured;
 
