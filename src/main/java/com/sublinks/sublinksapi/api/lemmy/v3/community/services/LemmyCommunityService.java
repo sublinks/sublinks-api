@@ -72,11 +72,11 @@ public class LemmyCommunityService {
         boolean isBlocked = false;
         for (LinkPersonCommunity linkPersonCommunity : person.getLinkPersonCommunity()) {
             if (Objects.equals(community.getId(), linkPersonCommunity.getCommunity().getId())) {
-                subscribedType = switch (linkPersonCommunity.getLinkType()) {
-                    case owner, follower, moderator -> SubscribedType.Subscribed;
-                    case pending_follow -> SubscribedType.Pending;
-                    default -> SubscribedType.NotSubscribed;
-                };
+                if (linkPersonCommunity.getLinkType() == LinkPersonCommunityType.follower) {
+                    subscribedType = SubscribedType.Subscribed;
+                } else if (linkPersonCommunity.getLinkType() == LinkPersonCommunityType.pending_follow) {
+                    subscribedType = SubscribedType.Pending;
+                }
                 if (linkPersonCommunity.getLinkType() == LinkPersonCommunityType.blocked) {
                     isBlocked = true;
                 }

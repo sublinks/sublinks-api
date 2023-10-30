@@ -50,6 +50,10 @@ public class PostRepositoryImpl implements PostRepositorySearch {
             final Join<Community, LinkPersonCommunity> linkPersonCommunityJoin = communityJoin.join("linkPersonCommunity", JoinType.INNER);
             predicates.add(cb.equal(linkPersonCommunityJoin.get("person"), searchCriteria.person()));
         }
+        if (searchCriteria.person() != null) {
+            final Join<Post, PostLike> postPostLikeJoin = postTable.join("postLikes", JoinType.LEFT);
+            predicates.add(cb.equal(postPostLikeJoin.get("person"), searchCriteria.person()));
+        }
 
         cq.where(predicates.toArray(new Predicate[0]));
 

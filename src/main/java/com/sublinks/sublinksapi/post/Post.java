@@ -38,25 +38,35 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post {
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
-    Set<LinkPersonPost> linkPersonPost;
     /**
      * Relationships
      */
+    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+    Set<LinkPersonPost> linkPersonPost;
+
     @ManyToOne
     @JoinColumn(name = "community_id")
     private Community community;
+
     @OneToMany(cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
+
     @ManyToOne
     private Instance instance;
+
     @ManyToOne
     @JoinColumn(name = "language_id")
     private Language language;
+
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PostAggregates postAggregates;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private List<PostLike> postLikes;
+
     /**
      * Attributes
      */

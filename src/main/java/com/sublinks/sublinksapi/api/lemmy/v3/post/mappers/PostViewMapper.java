@@ -18,11 +18,11 @@ public interface PostViewMapper {
     @Mapping(target = "saved", constant = "false")
     @Mapping(target = "read", constant = "false")
     @Mapping(target = "post", source = "post")
-    @Mapping(target = "my_vote", constant = "1")
+    @Mapping(target = "my_vote", source = "personVote")
     @Mapping(target = "creator_blocked", constant = "false")
     @Mapping(target = "creator_banned_from_community", constant = "false")
     @Mapping(target = "creator", source = "person")
     @Mapping(target = "counts", source = "post.postAggregates")
     @Mapping(target = "community", source = "community")
-    PostView map(Post post, Community community, SubscribedType subscribedType, Person person);
+    PostView map(Post post, Community community, SubscribedType subscribedType, Person person, int personVote);
 }

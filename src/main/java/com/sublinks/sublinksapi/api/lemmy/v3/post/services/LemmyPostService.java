@@ -49,7 +49,7 @@ public class LemmyPostService {
                 .saved(false)
                 .read(false)
                 .creator_blocked(false)
-                .my_vote(1)
+                .my_vote(0)
                 .unread_comments(0)
                 .build();
     }
@@ -73,7 +73,7 @@ public class LemmyPostService {
                 .saved(false)
                 .read(false)
                 .creator_blocked(false)
-                .my_vote(1)
+                .my_vote(post.getPostLikes().iterator().next().getScore())
                 .unread_comments(0)
                 .build();
     }

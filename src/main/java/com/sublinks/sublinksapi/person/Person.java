@@ -77,6 +77,9 @@ public class Person implements UserDetails, Principal {
     @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
     Set<LinkPersonCommunity> linkPersonCommunity;
 
+    @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+    Set<LinkPersonPost> linkPersonPost;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "person_languages",

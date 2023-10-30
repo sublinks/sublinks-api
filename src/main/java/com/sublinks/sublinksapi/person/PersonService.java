@@ -4,10 +4,12 @@ import com.sublinks.sublinksapi.comment.Comment;
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.event.PersonCreatedPublisher;
+import com.sublinks.sublinksapi.person.event.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ public class PersonService {
     private final PersonAggregateRepository personAggregateRepository;
     private final LocalInstanceContext localInstanceContext;
     private final PersonCreatedPublisher personCreatedPublisher;
+    private final PersonUpdatedPublisher personUpdatedPublisher;
 
     public PersonService(
             final KeyService keyService,
@@ -30,14 +33,15 @@ public class PersonService {
             final PersonRepository personRepository,
             final PersonAggregateRepository personAggregateRepository,
             final LocalInstanceContext localInstanceContext,
-            final PersonCreatedPublisher personCreatedPublisher
-    ) {
+            final PersonCreatedPublisher personCreatedPublisher,
+            PersonUpdatedPublisher personUpdatedPublisher) {
         this.keyService = keyService;
         this.personMapper = personMapper;
         this.personRepository = personRepository;
         this.personAggregateRepository = personAggregateRepository;
         this.localInstanceContext = localInstanceContext;
         this.personCreatedPublisher = personCreatedPublisher;
+        this.personUpdatedPublisher = personUpdatedPublisher;
     }
 
     public PersonContext getPersonContext(final Person person) {
@@ -66,8 +70,10 @@ public class PersonService {
         );
     }
 
-    public void createLocalPerson(final Person person) {
+    @Transactional
+    public void createPerson(final Person person) {
 
+        // @todo if not local throw a fit
         final KeyStore keys = keyService.generate();
         person.setPublicKey(keys.publicKey());
         person.setPrivateKey(keys.privateKey());
@@ -78,6 +84,13 @@ public class PersonService {
         personAggregateRepository.save(personAggregate);
         person.setPersonAggregate(personAggregate);
         personCreatedPublisher.publish(person);
+    }
+
+    @Transactional
+    public void updatePerson(final Person person) {
+
+        personRepository.save(person);
+        personUpdatedPublisher.publish(person);
     }
 
     public Person create(final String name) throws NoSuchAlgorithmException {

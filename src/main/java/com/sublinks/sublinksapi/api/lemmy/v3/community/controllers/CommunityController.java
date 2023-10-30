@@ -14,8 +14,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.community.CommunityRepository;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.LinkPersonCommunityRepository;
+import com.sublinks.sublinksapi.person.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import jakarta.validation.Valid;
@@ -31,7 +31,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -42,6 +41,7 @@ public class CommunityController {
     private final CommunityRepository communityRepository;
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
     private final LemmyCommunityService lemmyCommunityService;
+    private final LinkPersonCommunityService linkPersonCommunityService;
     private final GetCommunityResponseMapper getCommunityResponseMapper;
 
 
@@ -50,12 +50,14 @@ public class CommunityController {
             final CommunityRepository communityRepository,
             final LinkPersonCommunityRepository linkPersonCommunityRepository,
             final LemmyCommunityService lemmyCommunityService,
+            final LinkPersonCommunityService linkPersonCommunityService,
             final GetCommunityResponseMapper getCommunityResponseMapper
     ) {
         this.localInstanceContext = localInstanceContext;
         this.communityRepository = communityRepository;
         this.linkPersonCommunityRepository = linkPersonCommunityRepository;
         this.lemmyCommunityService = lemmyCommunityService;
+        this.linkPersonCommunityService = linkPersonCommunityService;
         this.getCommunityResponseMapper = getCommunityResponseMapper;
     }
 
@@ -117,25 +119,12 @@ public class CommunityController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
 
-        final Optional<LinkPersonCommunity> linkPersonCommunity =
-                linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
-                        community.get(),
-                        person,
-                        LinkPersonCommunityType.follower
-                );
-
-        if (!followCommunityForm.follow() && linkPersonCommunity.isPresent()) {
-            linkPersonCommunityRepository.delete(linkPersonCommunity.get());
-            person.getLinkPersonCommunity().removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
-        } else if (followCommunityForm.follow() && linkPersonCommunity.isEmpty()) {
-            final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
-                    .community(community.get())
-                    .person(person)
-                    .linkType(LinkPersonCommunityType.follower)
-                    .build();
-            linkPersonCommunityRepository.save(newLink);
-            person.getLinkPersonCommunity().add(newLink);
+        if (followCommunityForm.follow()) {
+            linkPersonCommunityService.addLink(person, community.get(), LinkPersonCommunityType.follower);
+        } else {
+            linkPersonCommunityService.removeLink(person, community.get(), LinkPersonCommunityType.follower);
         }
+
         return lemmyCommunityService.createCommunityResponse(
                 community.get(),
                 person

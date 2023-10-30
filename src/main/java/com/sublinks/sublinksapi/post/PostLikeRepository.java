@@ -1,8 +1,10 @@
 package com.sublinks.sublinksapi.post;
 
-import com.sublinks.sublinksapi.instance.Instance;
+import com.sublinks.sublinksapi.person.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PostLikeRepository extends JpaRepository<Instance, Long> {
+import java.util.Optional;
 
+public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
+    Optional<PostLike> getPostLikesByPostAndPerson(Post post, Person person);
 }
