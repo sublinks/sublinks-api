@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Language;
 import com.sublinks.sublinksapi.language.LanguageRepository;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.PersonRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
@@ -12,12 +13,9 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 @Service
+@RequiredArgsConstructor
 public class SiteService {
     private final PersonRepository personRepository;
-
-    public SiteService(final PersonRepository personRepository) {
-        this.personRepository = personRepository;
-    }
 
     // @todo finish admin list
     public Collection<Person> admins() {

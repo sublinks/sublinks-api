@@ -13,6 +13,7 @@ import com.sublinks.sublinksapi.language.Language;
 import com.sublinks.sublinksapi.person.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,20 +24,11 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class LemmyCommunityService {
     private final LemmyCommunityMapper lemmyCommunityMapper;
     private final CommunityModeratorViewMapper communityModeratorViewMapper;
     private final CommunityResponseMapper communityResponseMapper;
-
-    public LemmyCommunityService(
-            final LemmyCommunityMapper lemmyCommunityMapper,
-            final CommunityModeratorViewMapper communityModeratorViewMapper,
-            final CommunityResponseMapper communityResponseMapper
-    ) {
-        this.lemmyCommunityMapper = lemmyCommunityMapper;
-        this.communityModeratorViewMapper = communityModeratorViewMapper;
-        this.communityResponseMapper = communityResponseMapper;
-    }
 
     public SubscribedType getPersonCommunitySubscribeType(final Person person, final Community community) {
 

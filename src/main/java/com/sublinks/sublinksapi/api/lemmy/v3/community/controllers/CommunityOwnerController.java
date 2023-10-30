@@ -24,6 +24,7 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +41,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/community")
 public class CommunityOwnerController {
     private final LocalInstanceContext localInstanceContext;
@@ -51,28 +53,6 @@ public class CommunityOwnerController {
     private final LemmyCommunityService lemmyCommunityService;
     private final CommunityResponseMapper communityResponseMapper;
     private final LemmyCommunityMapper lemmyCommunityMapper;
-
-
-    public CommunityOwnerController(
-            final LocalInstanceContext localInstanceContext,
-            final LinkPersonCommunityRepository linkPersonCommunityRepository,
-            final CreateCommunityFormMapper createCommunityFormMapper,
-            final CommunityService communityService, KeyService keyService,
-            final AuthorizationService authorizationService,
-            final LemmyCommunityService lemmyCommunityService,
-            final CommunityResponseMapper communityResponseMapper,
-            final LemmyCommunityMapper lemmyCommunityMapper
-    ) {
-        this.localInstanceContext = localInstanceContext;
-        this.linkPersonCommunityRepository = linkPersonCommunityRepository;
-        this.createCommunityFormMapper = createCommunityFormMapper;
-        this.communityService = communityService;
-        this.keyService = keyService;
-        this.authorizationService = authorizationService;
-        this.lemmyCommunityService = lemmyCommunityService;
-        this.communityResponseMapper = communityResponseMapper;
-        this.lemmyCommunityMapper = lemmyCommunityMapper;
-    }
 
     @PostMapping
     @Transactional

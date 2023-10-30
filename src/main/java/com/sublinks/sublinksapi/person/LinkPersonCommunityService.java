@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.event.LinkPersonCommunityCreatedPublisher;
 import com.sublinks.sublinksapi.person.event.LinkPersonCommunityDeletedPublisher;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,16 +12,11 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class LinkPersonCommunityService {
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
     private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
     private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
-
-    public LinkPersonCommunityService(LinkPersonCommunityRepository linkPersonCommunityRepository, LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher, LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher) {
-        this.linkPersonCommunityRepository = linkPersonCommunityRepository;
-        this.linkPersonCommunityCreatedPublisher = linkPersonCommunityCreatedPublisher;
-        this.linkPersonCommunityDeletedPublisher = linkPersonCommunityDeletedPublisher;
-    }
 
     @Transactional
     public void addLink(Person person, Community community, LinkPersonCommunityType type) {

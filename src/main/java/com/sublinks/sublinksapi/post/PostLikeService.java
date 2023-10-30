@@ -1,18 +1,16 @@
 package com.sublinks.sublinksapi.post;
 
 import com.sublinks.sublinksapi.person.Person;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
-
-    public PostLikeService(PostLikeRepository postLikeRepository) {
-        this.postLikeRepository = postLikeRepository;
-    }
 
     @Transactional
     public void updateOrCreatePostLikeLike(final Post post, final Person person) {

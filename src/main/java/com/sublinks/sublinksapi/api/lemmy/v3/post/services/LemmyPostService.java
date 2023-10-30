@@ -9,26 +9,16 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LemmyPostService {
     private final LemmyPostMapper lemmyPostMapper;
     private final LemmyCommunityMapper lemmyCommunityMapper;
     private final LemmyPersonMapper lemmyPersonMapper;
     private final PostService postService;
-
-    public LemmyPostService(
-            final LemmyPostMapper lemmyPostMapper,
-            final LemmyCommunityMapper lemmyCommunityMapper,
-            final LemmyPersonMapper lemmyPersonMapper,
-            final PostService postService
-    ) {
-        this.lemmyPostMapper = lemmyPostMapper;
-        this.lemmyCommunityMapper = lemmyCommunityMapper;
-        this.lemmyPersonMapper = lemmyPersonMapper;
-        this.postService = postService;
-    }
 
     public PostView postViewFromPost(final Post post) {
 

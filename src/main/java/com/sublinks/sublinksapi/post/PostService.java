@@ -6,26 +6,16 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.post.event.PostCreatedPublisher;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
     private final PostAggregatesRepository postAggregatesRepository;
     private final PostCreatedPublisher postCreatedPublisher;
     private final KeyService keyService;
-
-    public PostService(
-            final PostRepository postRepository,
-            final PostAggregatesRepository postAggregatesRepository,
-            final PostCreatedPublisher postCreatedPublisher,
-            final KeyService keyService
-    ) {
-        this.postRepository = postRepository;
-        this.postAggregatesRepository = postAggregatesRepository;
-        this.postCreatedPublisher = postCreatedPublisher;
-        this.keyService = keyService;
-    }
 
     public Person getPostCreator(final Post post) {
 

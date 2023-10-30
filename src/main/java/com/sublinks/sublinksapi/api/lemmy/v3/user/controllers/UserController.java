@@ -27,6 +27,7 @@ import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.PersonRepository;
 import com.sublinks.sublinksapi.person.PersonService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,23 +42,13 @@ import java.util.Collection;
 import java.util.HashSet;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/user")
 public class UserController {
     private final JwtUtil jwtUtil;
     private final PersonService personService;
     private final PersonRepository personRepository;
     private final GetPersonDetailsResponseMapper getPersonDetailsResponseMapper;
-
-    public UserController(
-            final JwtUtil jwtUtil,
-            final PersonService personService,
-            final PersonRepository personRepository,
-            final GetPersonDetailsResponseMapper getPersonDetailsResponseMapper) {
-        this.jwtUtil = jwtUtil;
-        this.personService = personService;
-        this.personRepository = personRepository;
-        this.getPersonDetailsResponseMapper = getPersonDetailsResponseMapper;
-    }
 
     @PostMapping("register")
     LoginResponse create(@Valid @RequestBody final Register registerForm) throws NoSuchAlgorithmException {

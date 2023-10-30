@@ -18,6 +18,7 @@ import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostRepository;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
 public class CommentController {
     private final CommentRepository commentRepository;
@@ -40,19 +42,6 @@ public class CommentController {
     private final LemmyCommentService lemmyCommentService;
     private final PostRepository postRepository;
     private final LanguageRepository languageRepository;
-
-    public CommentController(
-            final CommentRepository commentRepository,
-            final CommentService commentService, final LemmyCommentService lemmyCommentService,
-            final PostRepository postRepository,
-            final LanguageRepository languageRepository
-    ) {
-        this.commentRepository = commentRepository;
-        this.commentService = commentService;
-        this.lemmyCommentService = lemmyCommentService;
-        this.postRepository = postRepository;
-        this.languageRepository = languageRepository;
-    }
 
     @PostMapping
     @Transactional

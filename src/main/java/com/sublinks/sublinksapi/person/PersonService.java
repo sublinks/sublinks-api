@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.person.event.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
+@RequiredArgsConstructor
 public class PersonService {
     private final KeyService keyService;
     private final PersonMapper personMapper;
@@ -26,23 +28,6 @@ public class PersonService {
     private final LocalInstanceContext localInstanceContext;
     private final PersonCreatedPublisher personCreatedPublisher;
     private final PersonUpdatedPublisher personUpdatedPublisher;
-
-    public PersonService(
-            final KeyService keyService,
-            final PersonMapper personMapper,
-            final PersonRepository personRepository,
-            final PersonAggregateRepository personAggregateRepository,
-            final LocalInstanceContext localInstanceContext,
-            final PersonCreatedPublisher personCreatedPublisher,
-            PersonUpdatedPublisher personUpdatedPublisher) {
-        this.keyService = keyService;
-        this.personMapper = personMapper;
-        this.personRepository = personRepository;
-        this.personAggregateRepository = personAggregateRepository;
-        this.localInstanceContext = localInstanceContext;
-        this.personCreatedPublisher = personCreatedPublisher;
-        this.personUpdatedPublisher = personUpdatedPublisher;
-    }
 
     public PersonContext getPersonContext(final Person person) {
 

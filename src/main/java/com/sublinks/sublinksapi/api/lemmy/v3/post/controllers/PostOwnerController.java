@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostLikeService;
 import com.sublinks.sublinksapi.post.PostService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/post")
 public class PostOwnerController {
     private final LocalInstanceContext localInstanceContext;
@@ -43,30 +45,6 @@ public class PostOwnerController {
     private final CommunityRepository communityRepository;
     private final CreatePostMapper createPostMapper;
     private final PostViewMapper postViewMapper;
-
-    public PostOwnerController(
-            final LocalInstanceContext localInstanceContext,
-            final AuthorizationService authorizationService,
-            final LemmyCommunityService lemmyCommunityService,
-            final PostService postService,
-            final PostLikeService postLikeService,
-            final LinkPersonPostService linkPersonPostService,
-            final LanguageRepository languageRepository,
-            final CommunityRepository communityRepository,
-            final CreatePostMapper createPostMapper,
-            final PostViewMapper postViewMapper
-    ) {
-        this.localInstanceContext = localInstanceContext;
-        this.authorizationService = authorizationService;
-        this.lemmyCommunityService = lemmyCommunityService;
-        this.postService = postService;
-        this.postLikeService = postLikeService;
-        this.linkPersonPostService = linkPersonPostService;
-        this.languageRepository = languageRepository;
-        this.communityRepository = communityRepository;
-        this.createPostMapper = createPostMapper;
-        this.postViewMapper = postViewMapper;
-    }
 
     @PostMapping
     @Transactional

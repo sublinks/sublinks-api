@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.language;
 
 import com.sublinks.sublinksapi.instance.Instance;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -9,13 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class LanguageService {
 
     private final LanguageRepository languageRepository;
-
-    public LanguageService(final LanguageRepository languageRepository) {
-        this.languageRepository = languageRepository;
-    }
 
     public List<Long> instanceLanguageIds(final Instance instance) {
 

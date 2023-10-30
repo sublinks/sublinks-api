@@ -19,6 +19,7 @@ import com.sublinks.sublinksapi.person.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/community")
 public class CommunityController {
     private final LocalInstanceContext localInstanceContext;
@@ -43,24 +45,6 @@ public class CommunityController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LinkPersonCommunityService linkPersonCommunityService;
     private final GetCommunityResponseMapper getCommunityResponseMapper;
-
-
-    public CommunityController(
-            final LocalInstanceContext localInstanceContext,
-            final CommunityRepository communityRepository,
-            final LinkPersonCommunityRepository linkPersonCommunityRepository,
-            final LemmyCommunityService lemmyCommunityService,
-            final LinkPersonCommunityService linkPersonCommunityService,
-            final GetCommunityResponseMapper getCommunityResponseMapper
-    ) {
-        this.localInstanceContext = localInstanceContext;
-        this.communityRepository = communityRepository;
-        this.linkPersonCommunityRepository = linkPersonCommunityRepository;
-        this.lemmyCommunityService = lemmyCommunityService;
-        this.linkPersonCommunityService = linkPersonCommunityService;
-        this.getCommunityResponseMapper = getCommunityResponseMapper;
-    }
-
 
     @GetMapping
     public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm, final JwtPerson principal) {

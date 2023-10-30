@@ -14,9 +14,11 @@ import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.post.Post;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class LemmyCommentService {
     private final LemmyCommentMapper lemmyCommentMapper;
     private final LemmyPersonMapper lemmyPersonMapper;
@@ -24,22 +26,6 @@ public class LemmyCommentService {
     private final LemmyPostMapper lemmyPostMapper;
     private final LemmyCommunityService lemmyCommunityService;
     private final LocalInstanceContext localInstanceContext;
-
-    public LemmyCommentService(
-            final LemmyCommentMapper lemmyCommentMapper,
-            final LemmyPersonMapper lemmyPersonMapper,
-            final LemmyCommunityMapper lemmyCommunityMapper,
-            final LemmyPostMapper lemmyPostMapper,
-            final LemmyCommunityService lemmyCommunityService,
-            final LocalInstanceContext localInstanceContext
-    ) {
-        this.lemmyCommentMapper = lemmyCommentMapper;
-        this.lemmyPersonMapper = lemmyPersonMapper;
-        this.lemmyCommunityMapper = lemmyCommunityMapper;
-        this.lemmyPostMapper = lemmyPostMapper;
-        this.lemmyCommunityService = lemmyCommunityService;
-        this.localInstanceContext = localInstanceContext;
-    }
 
     public String generateActivityPubId(final Comment comment) {
 

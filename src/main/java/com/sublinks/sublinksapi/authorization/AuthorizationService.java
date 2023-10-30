@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.authorization;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.person.Person;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -10,12 +11,9 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorizationService {
     private final AclRepository aclRepository;
-
-    public AuthorizationService(final AclRepository aclRepository) {
-        this.aclRepository = aclRepository;
-    }
 
     public EntityPolicy canPerson(final Person person) {
 

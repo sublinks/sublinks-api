@@ -3,26 +3,18 @@ package com.sublinks.sublinksapi.instance;
 import com.sublinks.sublinksapi.util.KeyService;
 import com.sublinks.sublinksapi.util.KeyStore;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
+@RequiredArgsConstructor
 public class InstanceService {
 
     private final InstanceRepository instanceRepository;
     private final InstanceAggregateRepository instanceAggregateRepository;
 
     private final KeyService keyService;
-
-    public InstanceService(
-            final InstanceRepository instanceRepository,
-            final InstanceAggregateRepository instanceAggregateRepository,
-            final KeyService keyService
-    ) {
-        this.instanceRepository = instanceRepository;
-        this.instanceAggregateRepository = instanceAggregateRepository;
-        this.keyService = keyService;
-    }
 
     @Transactional
     public void createInstance(@NotNull Instance instance) {

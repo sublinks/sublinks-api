@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.LanguageService;
 import com.sublinks.sublinksapi.person.PersonContext;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,7 @@ import java.util.HashSet;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
 public class SiteController {
     private final LocalInstanceContext localInstanceContext;
@@ -51,33 +53,6 @@ public class SiteController {
     private final CreateSiteFormMapper createSiteFormMapper;
     private final EditSiteFormMapper editSiteFormMapper;
     private final SiteResponseMapper siteResponseMapper;
-
-
-    public SiteController(
-           final  LocalInstanceContext localInstanceContext,
-            final PersonContext personContext,
-            final SiteService siteService,
-            final InstanceService instanceService,
-            final LanguageService languageService,
-            final InstanceRepository instanceRepository,
-            final InstanceBlockRepository instanceBlockRepository,
-            final GetSiteResponseMapper getSiteResponseMapper,
-            final CreateSiteFormMapper createSiteFormMapper,
-            final EditSiteFormMapper editSiteFormMapper,
-            final SiteResponseMapper siteResponseMapper
-    ) {
-        this.localInstanceContext = localInstanceContext;
-        this.personContext = personContext;
-        this.siteService = siteService;
-        this.instanceService = instanceService;
-        this.languageService = languageService;
-        this.instanceRepository = instanceRepository;
-        this.instanceBlockRepository = instanceBlockRepository;
-        this.getSiteResponseMapper = getSiteResponseMapper;
-        this.createSiteFormMapper = createSiteFormMapper;
-        this.editSiteFormMapper = editSiteFormMapper;
-        this.siteResponseMapper = siteResponseMapper;
-    }
 
     @GetMapping
     public GetSiteResponse getSite() {

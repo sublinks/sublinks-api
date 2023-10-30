@@ -32,6 +32,7 @@ import com.sublinks.sublinksapi.post.PostRepository;
 import com.sublinks.sublinksapi.post.PostService;
 import com.sublinks.sublinksapi.post.SearchCriteria;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,6 +50,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/post")
 public class PostController {
     private final LemmyCommunityService lemmyCommunityService;
@@ -61,31 +63,6 @@ public class PostController {
     private final GetPostResponseMapper getPostResponseMapper;
     private final LemmySortTypeMapper lemmySortTypeMapper;
     private final LemmyListingTypeMapper lemmyListingTypeMapper;
-
-
-    public PostController(
-            final LemmyCommunityService lemmyCommunityService,
-            final LemmyPostService lemmyPostService,
-            final PostService postService,
-            final PostLikeService postLikeService,
-            final CommunityRepository communityRepository,
-            final PostRepository postRepository,
-            final PostViewMapper postViewMapper,
-            final GetPostResponseMapper getPostResponseMapper,
-            final LemmySortTypeMapper lemmySortTypeMapper,
-            final LemmyListingTypeMapper lemmyListingTypeMapper
-    ) {
-        this.lemmyCommunityService = lemmyCommunityService;
-        this.lemmyPostService = lemmyPostService;
-        this.postService = postService;
-        this.postLikeService = postLikeService;
-        this.communityRepository = communityRepository;
-        this.postRepository = postRepository;
-        this.postViewMapper = postViewMapper;
-        this.getPostResponseMapper = getPostResponseMapper;
-        this.lemmySortTypeMapper = lemmySortTypeMapper;
-        this.lemmyListingTypeMapper = lemmyListingTypeMapper;
-    }
 
     @GetMapping
     GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson person) {
