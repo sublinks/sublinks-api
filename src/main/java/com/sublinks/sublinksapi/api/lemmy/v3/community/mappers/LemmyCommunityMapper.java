@@ -17,11 +17,11 @@ public interface LemmyCommunityMapper {
     @Mapping(target = "hidden", constant = "false")
     @Mapping(target = "updated", source = "community.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "published", source = "community.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+    @Mapping(target = "actor_id", source = "activityPubId")
     //@Mapping(target = "banner", source = "community.bannerImageUrl")
     //@Mapping(target = "icon", source = "community.iconImageUrl")
     @Mapping(target = "inbox_url", constant = "https://aol.com")
     @Mapping(target = "followers_url", constant = "https://yahoo.com")
-    @Mapping(target = "actor_id", constant = "https://google.com")
     @Mapping(target = "banner", ignore = true)
     @Mapping(target = "icon", ignore = true)
     Community communityToLemmyCommunity(com.sublinks.sublinksapi.community.Community community);

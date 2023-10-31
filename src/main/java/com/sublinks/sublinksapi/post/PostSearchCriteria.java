@@ -8,7 +8,7 @@ import lombok.Builder;
 import java.util.List;
 
 @Builder
-public record SearchCriteria(
+public record PostSearchCriteria(
         SortType sortType,
         ListingType listingType,
         int perPage,

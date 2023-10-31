@@ -29,8 +29,8 @@ import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostLikeService;
 import com.sublinks.sublinksapi.post.PostRepository;
+import com.sublinks.sublinksapi.post.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.PostService;
-import com.sublinks.sublinksapi.post.SearchCriteria;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -141,7 +141,7 @@ public class PostController {
             listingType = lemmyListingTypeMapper.map(getPostsForm.type_());
         }
 
-        final SearchCriteria searchCriteria = SearchCriteria.builder()
+        final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
                 .page(1)
                 .listingType(listingType)
                 .perPage(20)
@@ -152,7 +152,7 @@ public class PostController {
                 .communityIds(communityIds)
                 .build();
 
-        final Collection<Post> posts = postRepository.allPostsBySearchCriteria(searchCriteria);
+        final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
         final Collection<PostView> postViewCollection = new HashSet<>();
         for (Post post : posts) {
             final Person creator = postService.getPostCreator(post);
