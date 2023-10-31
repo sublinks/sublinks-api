@@ -33,6 +33,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
+@Transactional
 @RequestMapping(path = "/api/v3/post")
 public class PostOwnerController {
     private final LocalInstanceContext localInstanceContext;

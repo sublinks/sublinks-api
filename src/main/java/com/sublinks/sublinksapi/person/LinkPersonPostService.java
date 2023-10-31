@@ -26,8 +26,6 @@ public class LinkPersonPostService {
                 .person(person)
                 .linkType(type)
                 .build();
-        person.getLinkPersonPost().add(newLink);
-        post.getLinkPersonPost().add(newLink);
         linkPersonPostRepository.save(newLink);
         linkPersonPostCreatedPublisher.publish(newLink);
     }

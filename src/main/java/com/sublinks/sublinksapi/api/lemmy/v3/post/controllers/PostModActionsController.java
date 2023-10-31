@@ -4,12 +4,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ListPostReportsResponse
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
+@Transactional
 @RequestMapping(path = "/api/v3/post")
 public class PostModActionsController {
     @PostMapping("remove")
