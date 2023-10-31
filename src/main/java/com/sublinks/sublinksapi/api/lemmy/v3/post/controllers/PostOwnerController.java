@@ -72,8 +72,6 @@ public class PostOwnerController {
         );
 
         postService.createPost(post, community, person);
-        postLikeService.updateOrCreatePostLikeLike(post, person);
-
 
         final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
 

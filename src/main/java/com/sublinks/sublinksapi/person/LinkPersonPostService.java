@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostDeletedPublisher;
 import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.post.PostLikeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ public class LinkPersonPostService {
     private final LinkPersonPostRepository linkPersonPostRepository;
     private final LinkPersonPostCreatedPublisher linkPersonPostCreatedPublisher;
     private final LinkPersonPostDeletedPublisher linkPersonPostDeletedPublisher;
+    private final PostLikeService postLikeService;
 
     @Transactional
     public void createLink(Person person, Post post, LinkPersonPostType type) {
@@ -37,6 +39,7 @@ public class LinkPersonPostService {
         post.getLinkPersonPost().add(newLink);
         person.getLinkPersonPost().add(newLink);
         linkPersonPostRepository.save(newLink);
+        postLikeService.updateOrCreatePostLikeLike(post, person);
         linkPersonPostCreatedPublisher.publish(newLink);
     }
 
