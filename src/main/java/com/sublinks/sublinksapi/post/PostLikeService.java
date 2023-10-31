@@ -1,6 +1,8 @@
 package com.sublinks.sublinksapi.post;
 
 import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.post.event.PostLikeCreatedPublisher;
+import com.sublinks.sublinksapi.post.event.PostLikeUpdatedPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +13,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class PostLikeService {
     private final PostLikeRepository postLikeRepository;
+    private final PostLikeCreatedPublisher postLikeCreatedPublisher;
+    private final PostLikeUpdatedPublisher postLikeUpdatedPublisher;
 
     @Transactional
     public void updateOrCreatePostLikeLike(final Post post, final Person person) {
@@ -55,7 +59,7 @@ public class PostLikeService {
                 .score(score)
                 .build();
         postLikeRepository.save(postLike);
-        // @todo publish like created
+        postLikeCreatedPublisher.publish(postLike);
     }
 
     private void updatePostLike(final PostLike postLike, final int score) {
@@ -64,6 +68,6 @@ public class PostLikeService {
         postLike.setDownVote(score == -1);
         postLike.setScore(score);
         postLikeRepository.save(postLike);
-        // @todo publish like updated
+        postLikeUpdatedPublisher.publish(postLike);
     }
 }

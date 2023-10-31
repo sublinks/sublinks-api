@@ -125,7 +125,6 @@ public class AuthorizationService {
                 case revoke -> revokeAclRules();
                 default -> checkAclRules();
             }
-            ;
         }
 
         private void checkAclRules() {
