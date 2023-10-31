@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.community.events;
 
-import com.sublinks.sublinksapi.community.Community;
+import com.sublinks.sublinksapi.community.dto.Community;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

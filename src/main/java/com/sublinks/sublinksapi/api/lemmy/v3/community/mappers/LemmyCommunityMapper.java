@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.community.mappers;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
-import com.sublinks.sublinksapi.community.CommunityAggregate;
+import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -24,7 +24,7 @@ public interface LemmyCommunityMapper {
     @Mapping(target = "followers_url", constant = "https://yahoo.com")
     @Mapping(target = "banner", ignore = true)
     @Mapping(target = "icon", ignore = true)
-    Community communityToLemmyCommunity(com.sublinks.sublinksapi.community.Community community);
+    Community communityToLemmyCommunity(com.sublinks.sublinksapi.community.dto.Community community);
 
 
     @Mapping(target = "subscribed", source = "subscribedType")
@@ -32,7 +32,7 @@ public interface LemmyCommunityMapper {
     @Mapping(target = "community", source = "community")
     @Mapping(target = "blocked", source = "blocked")
     CommunityView communityToCommunityView(
-            com.sublinks.sublinksapi.community.Community community,
+            com.sublinks.sublinksapi.community.dto.Community community,
             SubscribedType subscribedType,
             boolean blocked,
             CommunityAggregate counts);

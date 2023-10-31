@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.authorization;
 
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
-import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.person.dto.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

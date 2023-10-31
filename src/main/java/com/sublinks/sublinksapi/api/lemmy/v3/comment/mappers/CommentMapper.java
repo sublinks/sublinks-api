@@ -16,5 +16,5 @@ public interface CommentMapper {
     @Mapping(target = "creator_id", source = "comment.person.id")
     @Mapping(target = "content", source = "comment.commentBody")
     @Mapping(target = "ap_id", source = "comment.activityPubId")
-    Comment commentToLemmyComment(com.sublinks.sublinksapi.comment.Comment comment);
+    Comment commentToLemmyComment(com.sublinks.sublinksapi.comment.dto.Comment comment);
 }

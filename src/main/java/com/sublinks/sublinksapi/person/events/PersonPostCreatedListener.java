@@ -1,10 +1,10 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.person.PersonAggregate;
-import com.sublinks.sublinksapi.person.PersonAggregateRepository;
-import com.sublinks.sublinksapi.post.PostService;
-import com.sublinks.sublinksapi.post.event.PostCreatedEvent;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
+import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
+import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;

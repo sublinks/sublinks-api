@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
-import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.person.dto.Person;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 

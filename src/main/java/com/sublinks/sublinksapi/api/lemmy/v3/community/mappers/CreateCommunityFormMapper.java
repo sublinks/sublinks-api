@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CreateCommunity;
-import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.instance.Instance;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.util.KeyStore;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

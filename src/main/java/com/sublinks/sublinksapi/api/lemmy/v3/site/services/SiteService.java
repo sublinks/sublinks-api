@@ -2,9 +2,9 @@ package com.sublinks.sublinksapi.api.lemmy.v3.site.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.CustomEmojiView;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Language;
-import com.sublinks.sublinksapi.language.LanguageRepository;
-import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.person.PersonRepository;
+import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +26,7 @@ public class SiteService {
     public Collection<Language> allLanguages(final LanguageRepository languageRepository) {
 
         final Collection<Language> languages = new LinkedHashSet<>();
-        for (com.sublinks.sublinksapi.language.Language language : languageRepository.findAll()) {
+        for (com.sublinks.sublinksapi.language.dto.Language language : languageRepository.findAll()) {
             Language l = Language.builder()
                     .id(language.getId())
                     .code(language.getCode())

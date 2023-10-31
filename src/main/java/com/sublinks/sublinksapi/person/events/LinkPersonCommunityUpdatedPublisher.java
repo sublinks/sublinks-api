@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;

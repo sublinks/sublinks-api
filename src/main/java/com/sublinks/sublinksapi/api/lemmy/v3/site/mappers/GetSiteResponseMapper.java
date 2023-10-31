@@ -1,13 +1,13 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.mappers;
 
-import com.sublinks.sublinksapi.announcment.Announcement;
+import com.sublinks.sublinksapi.announcment.dto.Announcement;
 import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.CustomEmojiView;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Language;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.Person;
 import com.sublinks.sublinksapi.person.PersonContext;
+import com.sublinks.sublinksapi.person.dto.Person;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

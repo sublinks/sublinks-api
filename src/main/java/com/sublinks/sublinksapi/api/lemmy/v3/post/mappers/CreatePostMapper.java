@@ -1,10 +1,10 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
-import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.instance.Instance;
-import com.sublinks.sublinksapi.language.Language;
-import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.instance.dto.Instance;
+import com.sublinks.sublinksapi.language.dto.Language;
+import com.sublinks.sublinksapi.post.dto.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

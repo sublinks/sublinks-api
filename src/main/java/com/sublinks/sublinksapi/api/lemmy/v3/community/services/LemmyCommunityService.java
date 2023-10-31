@@ -7,11 +7,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModerator
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
-import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.community.CommunityAggregate;
-import com.sublinks.sublinksapi.language.Language;
-import com.sublinks.sublinksapi.person.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.Person;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.language.dto.Language;
+import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

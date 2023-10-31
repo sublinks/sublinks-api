@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentAggregates;
-import com.sublinks.sublinksapi.comment.CommentAggregate;
+import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -18,7 +18,7 @@ public interface LemmyCommentMapper {
     @Mapping(target = "creator_id", source = "comment.person.id")
     @Mapping(target = "content", source = "comment.commentBody")
     @Mapping(target = "ap_id", source = "comment.activityPubId")
-    Comment commentToComment(com.sublinks.sublinksapi.comment.Comment comment);
+    Comment commentToComment(com.sublinks.sublinksapi.comment.dto.Comment comment);
 
     @Mapping(target = "upvotes", source = "commentAggregate.upVotes")
     @Mapping(target = "score", source = "commentAggregate.score")

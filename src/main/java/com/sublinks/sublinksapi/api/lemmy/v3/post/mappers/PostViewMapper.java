@@ -4,9 +4,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.LemmyCommunityMap
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
-import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.post.dto.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

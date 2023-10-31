@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
-import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.person.PersonMapper;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.mappers.PersonMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

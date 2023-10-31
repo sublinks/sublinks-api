@@ -1,8 +1,10 @@
 package com.sublinks.sublinksapi.person;
 
-import com.sublinks.sublinksapi.comment.Comment;
-import com.sublinks.sublinksapi.community.Community;
-import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.post.dto.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

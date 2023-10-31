@@ -8,7 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.LemmyPostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
 import com.sublinks.sublinksapi.person.PersonContext;
-import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.post.dto.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

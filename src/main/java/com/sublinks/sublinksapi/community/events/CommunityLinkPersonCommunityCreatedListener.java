@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.community.events;
 
-import com.sublinks.sublinksapi.community.CommunityAggregate;
-import com.sublinks.sublinksapi.community.CommunityAggregateRepository;
+import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.community.repositories.CommunityAggregateRepository;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityCreatedEvent;
 import lombok.RequiredArgsConstructor;

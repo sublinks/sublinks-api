@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.EditSite;
-import com.sublinks.sublinksapi.instance.Instance;
+import com.sublinks.sublinksapi.instance.dto.Instance;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

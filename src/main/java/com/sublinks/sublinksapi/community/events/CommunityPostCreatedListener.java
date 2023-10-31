@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.community.events;
 
-import com.sublinks.sublinksapi.community.CommunityAggregate;
-import com.sublinks.sublinksapi.community.CommunityAggregateRepository;
-import com.sublinks.sublinksapi.post.event.PostCreatedEvent;
+import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.community.repositories.CommunityAggregateRepository;
+import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;

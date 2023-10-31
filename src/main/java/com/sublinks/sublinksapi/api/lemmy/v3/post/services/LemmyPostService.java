@@ -6,9 +6,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.LemmyPostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
-import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.post.Post;
-import com.sublinks.sublinksapi.post.PostService;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

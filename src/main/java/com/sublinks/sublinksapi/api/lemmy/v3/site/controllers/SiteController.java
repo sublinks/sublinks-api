@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
-import com.sublinks.sublinksapi.announcment.Announcement;
+import com.sublinks.sublinksapi.announcment.dto.Announcement;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.CreateSiteFormMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.EditSiteFormMapper;
@@ -13,13 +13,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.EditSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.SiteService;
-import com.sublinks.sublinksapi.instance.Instance;
-import com.sublinks.sublinksapi.instance.InstanceBlock;
-import com.sublinks.sublinksapi.instance.InstanceBlockRepository;
-import com.sublinks.sublinksapi.instance.InstanceRepository;
-import com.sublinks.sublinksapi.instance.InstanceService;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
-import com.sublinks.sublinksapi.language.LanguageService;
+import com.sublinks.sublinksapi.instance.dto.Instance;
+import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
+import com.sublinks.sublinksapi.instance.repositories.InstanceBlockRepository;
+import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
+import com.sublinks.sublinksapi.instance.services.InstanceService;
+import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.PersonContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.community.events;
 
-import com.sublinks.sublinksapi.community.Community;
+import com.sublinks.sublinksapi.community.dto.Community;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

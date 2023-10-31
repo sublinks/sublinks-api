@@ -8,12 +8,12 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.LemmyPostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
-import com.sublinks.sublinksapi.comment.Comment;
-import com.sublinks.sublinksapi.comment.CommentAggregate;
-import com.sublinks.sublinksapi.community.Community;
+import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.post.Post;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.post.dto.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -24,7 +24,7 @@ public interface LemmyPostMapper {
     @Mapping(target = "body", source = "post.postBody")
     @Mapping(target = "updated", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "ap_id", source = "post.activityPubId")
-    Post postToPost(com.sublinks.sublinksapi.post.Post post);
+    Post postToPost(com.sublinks.sublinksapi.post.dto.Post post);
 
     @Mapping(target = "upvotes", source = "postAggregates.upVoteCount")
     @Mapping(target = "score", source = "postAggregates.score")
@@ -38,5 +38,5 @@ public interface LemmyPostMapper {
     @Mapping(target = "featured_community", source = "post.featuredInCommunity")
     @Mapping(target = "downvotes", source = "postAggregates.downVoteCount")
     @Mapping(target = "comments", source = "postAggregates.upVoteCount")
-    PostAggregates postAggregatesToPostAggregates(com.sublinks.sublinksapi.post.PostAggregates postAggregates);
+    PostAggregates postAggregatesToPostAggregates(com.sublinks.sublinksapi.post.dto.PostAggregates postAggregates);
 }
