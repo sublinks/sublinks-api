@@ -1,17 +1,19 @@
 package com.sublinks.sublinksapi.person;
 
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
-import com.sublinks.sublinksapi.person.event.LinkPersonPostCreatedPublisher;
-import com.sublinks.sublinksapi.person.event.LinkPersonPostDeletedPublisher;
+import com.sublinks.sublinksapi.person.events.LinkPersonPostCreatedPublisher;
+import com.sublinks.sublinksapi.person.events.LinkPersonPostDeletedPublisher;
 import com.sublinks.sublinksapi.post.Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class LinkPersonPostService {
     private final LinkPersonPostRepository linkPersonPostRepository;
@@ -26,6 +28,14 @@ public class LinkPersonPostService {
                 .person(person)
                 .linkType(type)
                 .build();
+        if (post.getLinkPersonPost() == null) {
+            post.setLinkPersonPost(new HashSet<>());
+        }
+        if (person.getLinkPersonPost() == null) {
+            person.setLinkPersonPost(new HashSet<>());
+        }
+        post.getLinkPersonPost().add(newLink);
+        person.getLinkPersonPost().add(newLink);
         linkPersonPostRepository.save(newLink);
         linkPersonPostCreatedPublisher.publish(newLink);
     }

@@ -2,8 +2,8 @@ package com.sublinks.sublinksapi.person;
 
 import com.sublinks.sublinksapi.community.Community;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.event.LinkPersonCommunityCreatedPublisher;
-import com.sublinks.sublinksapi.person.event.LinkPersonCommunityDeletedPublisher;
+import com.sublinks.sublinksapi.person.events.LinkPersonCommunityCreatedPublisher;
+import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

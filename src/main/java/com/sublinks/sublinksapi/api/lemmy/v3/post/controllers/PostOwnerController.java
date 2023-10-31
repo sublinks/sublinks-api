@@ -16,7 +16,6 @@ import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.LanguageRepository;
 import com.sublinks.sublinksapi.person.LinkPersonPostService;
 import com.sublinks.sublinksapi.person.Person;
-import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.post.Post;
 import com.sublinks.sublinksapi.post.PostLikeService;
 import com.sublinks.sublinksapi.post.PostService;
@@ -71,10 +70,10 @@ public class PostOwnerController {
                 languageRepository.findById((long) createPostForm.language_id()).get(),
                 true
         );
-        post.setCommunity(community);
-        postService.createPost(post);
+
+        postService.createPost(post, community, person);
         postLikeService.updateOrCreatePostLikeLike(post, person);
-        linkPersonPostService.createLink(person, post, LinkPersonPostType.creator);
+
 
         final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
 

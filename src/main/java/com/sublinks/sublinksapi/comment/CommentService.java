@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.comment;
 
-import com.sublinks.sublinksapi.comment.event.CommentCreatedPublisher;
+import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

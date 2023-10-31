@@ -51,8 +51,8 @@ import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/api/v3/post")
 @Transactional
+@RequestMapping(path = "/api/v3/post")
 public class PostController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LemmyPostService lemmyPostService;

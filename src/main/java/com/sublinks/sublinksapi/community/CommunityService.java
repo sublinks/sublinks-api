@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.community;
 
-import com.sublinks.sublinksapi.community.event.CommunityCreatedPublisher;
+import com.sublinks.sublinksapi.community.events.CommunityCreatedPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
