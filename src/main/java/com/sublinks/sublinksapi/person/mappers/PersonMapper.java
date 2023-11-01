@@ -2,9 +2,9 @@ package com.sublinks.sublinksapi.person.mappers;
 
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.PersonContext;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.person.models.PersonContext;
 import com.sublinks.sublinksapi.post.dto.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

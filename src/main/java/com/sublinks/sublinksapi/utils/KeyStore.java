@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.util;
+package com.sublinks.sublinksapi.utils;
 
 public record KeyStore(
         String publicKey,

@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.instance.events;
 
 import com.sublinks.sublinksapi.comment.events.CommentCreatedEvent;
-import com.sublinks.sublinksapi.instance.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.dto.InstanceAggregate;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceAggregateRepository;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;

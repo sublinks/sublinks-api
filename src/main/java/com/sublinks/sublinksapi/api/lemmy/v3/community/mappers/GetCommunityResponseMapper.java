@@ -4,7 +4,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModerator
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetCommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.SiteResponseMapper;
-import com.sublinks.sublinksapi.instance.LocalInstanceContext;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

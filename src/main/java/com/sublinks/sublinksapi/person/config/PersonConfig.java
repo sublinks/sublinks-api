@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.person.config;
 
 import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.PersonContext;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.person.models.PersonContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;

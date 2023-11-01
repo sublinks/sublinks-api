@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.util;
+package com.sublinks.sublinksapi.utils;
 
 import org.springframework.stereotype.Service;
 

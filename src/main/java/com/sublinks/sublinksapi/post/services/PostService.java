@@ -10,8 +10,8 @@ import com.sublinks.sublinksapi.post.dto.PostAggregates;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostAggregatesRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
-import com.sublinks.sublinksapi.util.KeyService;
-import com.sublinks.sublinksapi.util.KeyStore;
+import com.sublinks.sublinksapi.utils.KeyService;
+import com.sublinks.sublinksapi.utils.KeyStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

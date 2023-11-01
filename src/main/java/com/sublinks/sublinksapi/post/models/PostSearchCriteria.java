@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.post;
+package com.sublinks.sublinksapi.post.models;
 
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;

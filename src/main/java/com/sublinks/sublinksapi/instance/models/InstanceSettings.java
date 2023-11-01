@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.instance;
+package com.sublinks.sublinksapi.instance.models;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

@@ -7,7 +7,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModerator
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.LemmyPostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
-import com.sublinks.sublinksapi.person.PersonContext;
+import com.sublinks.sublinksapi.person.models.PersonContext;
 import com.sublinks.sublinksapi.post.dto.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

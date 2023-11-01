@@ -33,7 +33,7 @@ public class AdminController {
     @GetMapping("registration_application/count")
     GetUnreadRegistrationApplicationCountResponse registrationApplicationCount() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(0).build();
     }
 
     @GetMapping("registration_application/list")

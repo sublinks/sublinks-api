@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.instance;
+package com.sublinks.sublinksapi.instance.models;
 
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.instance.dto.InstanceAggregate;

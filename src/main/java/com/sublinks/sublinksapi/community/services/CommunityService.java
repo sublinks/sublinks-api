@@ -5,7 +5,7 @@ import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
 import com.sublinks.sublinksapi.community.events.CommunityCreatedPublisher;
 import com.sublinks.sublinksapi.community.repositories.CommunityAggregateRepository;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.instance.LocalInstanceContext;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

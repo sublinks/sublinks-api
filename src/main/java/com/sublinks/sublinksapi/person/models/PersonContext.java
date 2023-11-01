@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.person;
+package com.sublinks.sublinksapi.person.models;
 
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;

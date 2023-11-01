@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.post.repositories;
 
-import com.sublinks.sublinksapi.post.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 
 import java.util.List;
 
