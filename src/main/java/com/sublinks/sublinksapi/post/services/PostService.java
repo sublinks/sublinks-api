@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
+import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.utils.KeyService;
@@ -23,6 +24,7 @@ public class PostService {
     private final PostCreatedPublisher postCreatedPublisher;
     private final KeyService keyService;
     private final LinkPersonPostService linkPersonPostService;
+    private final PostDeletedPublisher postDeletedPublisher;
 
     public Person getPostCreator(final Post post) {
 
@@ -58,5 +60,11 @@ public class PostService {
         postAggregateRepository.save(postAggregate);
         post.setPostAggregate(postAggregate);
         postCreatedPublisher.publish(post);
+    }
+
+    public void softDeletePost(final Post post) {
+
+        postRepository.save(post);
+        postDeletedPublisher.publish(post);
     }
 }

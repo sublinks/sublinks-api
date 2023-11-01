@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.authorization;
+package com.sublinks.sublinksapi.authorization.dto;
 
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;

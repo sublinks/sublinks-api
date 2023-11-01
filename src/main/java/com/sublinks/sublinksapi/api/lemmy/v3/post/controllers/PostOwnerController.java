@@ -1,20 +1,21 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.CreatePostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
-import com.sublinks.sublinksapi.authorization.AuthorizationService;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
+import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostOwnerController {
     private final LocalInstanceContext localInstanceContext;
     private final AuthorizationService authorizationService;
-    private final LemmyCommunityService lemmyCommunityService;
+    private final PostRepository postRepository;
     private final LemmyPostService lemmyPostService;
     private final PostService postService;
     private final LanguageRepository languageRepository;
@@ -80,8 +81,24 @@ public class PostOwnerController {
     }
 
     @PostMapping("delete")
-    PostResponse delete() {
+    PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
+        Post post = postRepository.findById((long) deletePostForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        Person person = (Person) principal.getPrincipal();
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        authorizationService
+                .canPerson(person)
+                .defaultingToDecline()
+                .performTheAction(AuthorizeAction.delete)
+                .onEntity(post)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        post.setDeleted(deletePostForm.deleted());
+
+        postService.softDeletePost(post);
+
+        return PostResponse.builder()
+                .post_view(lemmyPostService.postViewFromPost(post, person))
+                .build();
     }
 }

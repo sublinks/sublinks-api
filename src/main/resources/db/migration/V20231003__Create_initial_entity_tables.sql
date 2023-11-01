@@ -358,10 +358,5 @@ CREATE TABLE `acl`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` ON `acl` (`person_id`, `entity_type`, `entity_id`);
+CREATE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` ON `acl` (`person_id`, `entity_type`, `entity_id`);
 CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` ON `acl` (`person_id`, `entity_type`, `entity_id`, `authorized_action`);
-CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_EID_AUTH_ACTION_IS_PERMITTED` ON `acl` (`person_id`,
-                                                                                           `entity_type`,
-                                                                                           `entity_id`,
-                                                                                           `authorized_action`,
-                                                                                           `is_permitted`);

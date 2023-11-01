@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.post.dto;
 
+import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.dto.Instance;
@@ -37,7 +39,7 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Post implements AuthorizationEntityInterface {
     /**
      * Relationships
      */
@@ -131,4 +133,9 @@ public class Post {
     @UpdateTimestamp
     @Column(updatable = false, nullable = false, name = "updated_at")
     private Date updatedAt;
+
+    @Override
+    public AuthorizedEntityType entityType() {
+        return AuthorizedEntityType.post;
+    }
 }

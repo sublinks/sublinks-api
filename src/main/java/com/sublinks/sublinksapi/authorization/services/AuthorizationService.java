@@ -1,7 +1,10 @@
-package com.sublinks.sublinksapi.authorization;
+package com.sublinks.sublinksapi.authorization.services;
 
+import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
+import com.sublinks.sublinksapi.authorization.dto.Acl;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
+import com.sublinks.sublinksapi.authorization.repositories.AclRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -96,14 +99,14 @@ public class AuthorizationService {
             return defaultResponse(ResponseType.decline);
         }
 
-        public EntityPolicy onEntity(AuthorizedEntityType entityType) {
+        public EntityPolicy onEntity(final AuthorizedEntityType entityType) {
 
             this.entityType = entityType;
             execute();
             return this;
         }
 
-        public EntityPolicy onEntity(final AuthorizationEntity entity) {
+        public EntityPolicy onEntity(final AuthorizationEntityInterface entity) {
 
             this.entityType = entity.entityType();
             this.entityId = entity.getId();
