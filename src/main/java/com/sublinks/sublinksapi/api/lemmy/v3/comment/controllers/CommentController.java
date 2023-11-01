@@ -58,7 +58,7 @@ public class CommentController {
                 .post(post)
                 .community(post.getCommunity())
                 .language(language)
-                .path(post.getCommunity().getId() + ";" + post.getId())
+                .path(post.getCommunity().getId() + "." + post.getId())
                 .build();
 
         commentService.createComment(comment);
