@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.dto.PostSave;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,39 +48,34 @@ import java.util.Set;
 @Entity
 @Table(name = "people")
 public class Person implements UserDetails, Principal {
+    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+    Set<LinkPersonCommunity> linkPersonCommunity;
+    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+    Set<LinkPersonPost> linkPersonPost;
     /**
      * Relationships
      */
     @ManyToOne
     @JoinColumn(name = "instance_id")
     private Instance instance;
-
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
-
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<Post> posts;
-
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<CommentLike> commentLikes;
-
+    @OneToMany
+    @PrimaryKeyJoinColumn
+    private List<PostSave> postSaves;
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<PostLike> postLikes;
-
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PersonAggregate personAggregate;
-
-    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
-    Set<LinkPersonCommunity> linkPersonCommunity;
-
-    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
-    Set<LinkPersonPost> linkPersonPost;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "person_languages",

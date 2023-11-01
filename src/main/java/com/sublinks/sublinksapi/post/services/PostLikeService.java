@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.events.PostLikeCreatedPublisher;
+import com.sublinks.sublinksapi.post.events.PostLikeUpdatedEvent;
 import com.sublinks.sublinksapi.post.events.PostLikeUpdatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostLikeRepository;
 import lombok.RequiredArgsConstructor;
@@ -67,10 +68,31 @@ public class PostLikeService {
 
     private void updatePostLike(final PostLike postLike, final int score) {
 
+        PostLikeUpdatedEvent.Action action = null;
+        if (postLike.isUpVote()) {
+            if (score == -1) {
+                action = PostLikeUpdatedEvent.Action.FROM_UP_TO_DOWN;
+            } else if(score == 0) {
+                action = PostLikeUpdatedEvent.Action.FROM_UP_TO_NEUTRAL;
+            }
+        } else if (postLike.isDownVote()) {
+           if (score == 1) {
+                action = PostLikeUpdatedEvent.Action.FROM_DOWN_TO_UP;
+            } else if(score == 0) {
+                action = PostLikeUpdatedEvent.Action.FROM_DOWN_TO_NEUTRAL;
+            }
+        } else {
+           if (score == 1) {
+                action = PostLikeUpdatedEvent.Action.FROM_NEUTRAL_TO_UP;
+            } else if(score == -1) {
+                action = PostLikeUpdatedEvent.Action.FROM_NEUTRAL_TO_DOWN;
+            }
+        }
+
         postLike.setUpVote(score == 1);
         postLike.setDownVote(score == -1);
         postLike.setScore(score);
         postLikeRepository.save(postLike);
-        postLikeUpdatedPublisher.publish(postLike);
+        postLikeUpdatedPublisher.publish(postLike, action);
     }
 }

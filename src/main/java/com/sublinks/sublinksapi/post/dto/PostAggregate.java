@@ -22,7 +22,7 @@ import lombok.Setter;
 @Builder
 @Entity
 @Table(name = "post_aggregates")
-public class PostAggregates {
+public class PostAggregate {
     /**
      * Relationships
      */

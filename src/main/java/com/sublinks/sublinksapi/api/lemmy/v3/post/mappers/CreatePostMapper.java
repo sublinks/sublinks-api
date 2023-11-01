@@ -12,7 +12,7 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class CreatePostMapper {
     @Mapping(target = "linkPersonPost", ignore = true)
-    @Mapping(target = "postAggregates", ignore = true)
+    @Mapping(target = "postAggregate", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)

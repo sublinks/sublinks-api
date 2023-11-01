@@ -8,7 +8,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmyListingTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmySortTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.GetPostResponseMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.PostViewMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePostLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
@@ -17,6 +16,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.SavePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.utils.Url;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadata;
@@ -33,6 +33,7 @@ import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
+import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -66,9 +68,9 @@ public class PostController {
     private final LemmyPostService lemmyPostService;
     private final PostService postService;
     private final PostLikeService postLikeService;
+    private final PostSaveService postSaveService;
     private final CommunityRepository communityRepository;
     private final PostRepository postRepository;
-    private final PostViewMapper postViewMapper;
     private final GetPostResponseMapper getPostResponseMapper;
     private final LemmySortTypeMapper lemmySortTypeMapper;
     private final LemmyListingTypeMapper lemmyListingTypeMapper;
@@ -164,14 +166,8 @@ public class PostController {
         final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
         final Collection<PostView> postViewCollection = new HashSet<>();
         for (Post post : posts) {
-            final Person creator = postService.getPostCreator(post);
-            final PostView postView = postViewMapper.map(
-                    post,
-                    post.getCommunity(),
-                    lemmyCommunityService.getPersonCommunitySubscribeType(person, post.getCommunity()),
-                    creator,
-                    post.getPostLikes().iterator().next().getScore()
-            );
+
+            final PostView postView = lemmyPostService.postViewFromPost(post, person);
             postViewCollection.add(postView);
         }
 
@@ -196,20 +192,26 @@ public class PostController {
         final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, post.get().getCommunity());
 
         return PostResponse.builder()
-                .post_view(postViewMapper.map(
-                        post.get(),
-                        post.get().getCommunity(),
-                        subscribedType,
-                        person,
-                        createPostLikeForm.score()
-                ))
+                .post_view(lemmyPostService.postViewFromPost(post.get(), person))
                 .build();
     }
 
-    @PostMapping("save")
-    PostResponse saveForLater() {
+    @PutMapping("save")
+    public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        Optional<Post> post = postRepository.findById((long) savePostForm.post_id());
+        if (post.isEmpty() || jwtPerson == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        final Person person = (Person) jwtPerson.getPrincipal();
+        if (savePostForm.save()) {
+            postSaveService.createPostSave(post.get(), person);
+        } else {
+            postSaveService.deletePostSave(post.get(), person);
+        }
+        return PostResponse.builder()
+                .post_view(lemmyPostService.postViewFromPost(post.get(), person))
+                .build();
     }
 
     @PostMapping("report")

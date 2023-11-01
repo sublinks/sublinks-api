@@ -61,7 +61,7 @@ public class Post {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
-    private PostAggregates postAggregates;
+    private PostAggregate postAggregate;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn

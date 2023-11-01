@@ -24,7 +24,7 @@ public interface GetSiteResponseMapper {
     @Mapping(target = "custom_emojis", source = "customEmojis")
     @Mapping(target = "all_languages", source = "languages")
     @Mapping(target = "admins", source = "admins")
-    public GetSiteResponse map(
+    GetSiteResponse map(
             LocalInstanceContext context,
             PersonContext personContext,
             Collection<Announcement> announcements,

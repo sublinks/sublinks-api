@@ -41,7 +41,7 @@ public interface LemmyPersonMapper {
     @Mapping(target = "post_listing_mode", constant = "List")
     @Mapping(target = "infinite_scroll_enabled", constant = "true")
     @Mapping(target = "enable_keyboard_navigation", constant = "true")
-    @Mapping(target = "enable_animated_images",constant = "true")
+    @Mapping(target = "enable_animated_images", constant = "true")
     @Mapping(target = "blur_nsfw", constant = "true")
     @Mapping(target = "auto_expand", constant = "true")
     @Mapping(target = "admin", constant = "true")

@@ -27,5 +27,5 @@ public interface EditSiteFormMapper {
     @Mapping(target = "sidebar", expression = "java(entity.sidebar() == null ? null : entity.sidebar())")
     @Mapping(target = "bannerUrl", constant = "")
     @Mapping(target = "iconUrl", constant = "")
-    void map(EditSite entity,  @MappingTarget Instance instance);
+    void map(EditSite entity, @MappingTarget Instance instance);
 }

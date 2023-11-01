@@ -8,9 +8,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.services.PostLikeService;
+import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,22 +24,12 @@ public class LemmyPostService {
     private final LemmyCommunityMapper lemmyCommunityMapper;
     private final LemmyPersonMapper lemmyPersonMapper;
     private final PostService postService;
+    private final PostSaveService postSaveService;
+    private final PostLikeService postLikeService;
 
     public PostView postViewFromPost(final Post post) {
 
-        final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
-        final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
-                postService.getPostCreator(post)
-        );
-        final Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
-        final PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
-                post.getPostAggregates()
-        );
-        return PostView.builder()
-                .post(lemmyPost)
-                .creator(creator)
-                .community(community)
-                .counts(postAggregates)
+        return postViewBuilder(post)
                 .creator_banned_from_community(false)
                 .saved(false)
                 .read(false)
@@ -46,25 +41,35 @@ public class LemmyPostService {
 
     public PostView postViewFromPost(final Post post, final Person person) {
 
+        Optional<PostLike> postLike = postLikeService.getPostLike(post, person);
+        int vote = 0;
+        if (postLike.isPresent()) {
+            vote = postLike.get().getScore();
+        }
+        return postViewBuilder(post)
+                .creator_banned_from_community(false)
+                .saved(postSaveService.isPostSaved(post, person))
+                .read(false)
+                .creator_blocked(false)
+                .my_vote(vote)
+                .unread_comments(0)
+                .build();
+    }
+
+    private PostView.PostViewBuilder postViewBuilder(final Post post) {
         final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
         final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
                 postService.getPostCreator(post)
         );
         final Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
         final PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
-                post.getPostAggregates()
+                post.getPostAggregate()
         );
+
         return PostView.builder()
                 .post(lemmyPost)
                 .creator(creator)
                 .community(community)
-                .counts(postAggregates)
-                .creator_banned_from_community(false)
-                .saved(false)
-                .read(false)
-                .creator_blocked(false)
-                .my_vote(post.getPostLikes().iterator().next().getScore())
-                .unread_comments(0)
-                .build();
+                .counts(postAggregates);
     }
 }

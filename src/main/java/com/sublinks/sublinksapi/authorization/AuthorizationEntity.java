@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.authorization;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 
 public interface AuthorizationEntity {
-    public Long getId();
+    Long getId();
 
-    public AuthorizedEntityType entityType();
+    AuthorizedEntityType entityType();
 }

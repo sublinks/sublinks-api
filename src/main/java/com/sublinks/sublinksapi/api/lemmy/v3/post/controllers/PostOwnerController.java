@@ -2,11 +2,10 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.CreatePostMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.PostViewMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.authorization.AuthorizationService;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
@@ -36,11 +35,11 @@ public class PostOwnerController {
     private final LocalInstanceContext localInstanceContext;
     private final AuthorizationService authorizationService;
     private final LemmyCommunityService lemmyCommunityService;
+    private final LemmyPostService lemmyPostService;
     private final PostService postService;
     private final LanguageRepository languageRepository;
     private final CommunityRepository communityRepository;
     private final CreatePostMapper createPostMapper;
-    private final PostViewMapper postViewMapper;
 
     @PostMapping
     @Transactional
@@ -69,16 +68,8 @@ public class PostOwnerController {
 
         postService.createPost(post, community, person);
 
-        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, community);
-
         return PostResponse.builder()
-                .post_view(postViewMapper.map(
-                        post,
-                        community,
-                        subscribedType,
-                        person,
-                        1
-                ))
+                .post_view(lemmyPostService.postViewFromPost(post, person))
                 .build();
     }
 

@@ -15,5 +15,5 @@ public interface SiteResponseMapper {
 
     @Mapping(target = "site_view", source = "context")
     @Mapping(target = "tag_lines", source = "announcements")
-    public SiteResponse map(LocalInstanceContext context, Collection<Announcement> announcements);
+    SiteResponse map(LocalInstanceContext context, Collection<Announcement> announcements);
 }

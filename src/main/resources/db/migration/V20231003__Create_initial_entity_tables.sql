@@ -322,6 +322,7 @@ CREATE TABLE `post_saves`
 
 CREATE INDEX `IDX_POST_SAVES_PERSON_ID` ON `post_saves` (`person_id`);
 CREATE INDEX `IDX_POST_SAVES_POST_ID` ON `post_saves` (`post_id`);
+CREATE UNIQUE INDEX `IDX_POST_SAVES_PERSON_ID_POST_ID` ON `post_saves` (`person_id`, `post_id`);
 
 /**
   Person Posts table

@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 public class PostLikeUpdatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void publish(PostLike postLike) {
+    public void publish(final PostLike postLike, final PostLikeUpdatedEvent.Action action) {
 
-        PostLikeUpdatedEvent postLikeUpdatedEvent = new PostLikeUpdatedEvent(this, postLike);
+        PostLikeUpdatedEvent postLikeUpdatedEvent = new PostLikeUpdatedEvent(this, postLike, action);
         applicationEventPublisher.publishEvent(postLikeUpdatedEvent);
     }
 }

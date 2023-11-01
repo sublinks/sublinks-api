@@ -6,9 +6,9 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostAggregates;
+import com.sublinks.sublinksapi.post.dto.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
-import com.sublinks.sublinksapi.post.repositories.PostAggregatesRepository;
+import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.utils.KeyService;
 import com.sublinks.sublinksapi.utils.KeyStore;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final PostAggregatesRepository postAggregatesRepository;
+    private final PostAggregateRepository postAggregateRepository;
     private final PostCreatedPublisher postCreatedPublisher;
     private final KeyService keyService;
     private final LinkPersonPostService linkPersonPostService;
@@ -51,12 +51,12 @@ public class PostService {
 
         linkPersonPostService.createLink(creator, post, LinkPersonPostType.creator);
 
-        final PostAggregates postAggregates = PostAggregates.builder()
+        final PostAggregate postAggregate = PostAggregate.builder()
                 .post(post)
                 .community(post.getCommunity())
                 .build();
-        postAggregatesRepository.save(postAggregates);
-        post.setPostAggregates(postAggregates);
+        postAggregateRepository.save(postAggregate);
+        post.setPostAggregate(postAggregate);
         postCreatedPublisher.publish(post);
     }
 }

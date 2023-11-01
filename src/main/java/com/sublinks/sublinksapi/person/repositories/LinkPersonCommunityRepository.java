@@ -10,5 +10,6 @@ import java.util.Optional;
 
 public interface LinkPersonCommunityRepository extends JpaRepository<LinkPersonCommunity, Long> {
     Optional<LinkPersonCommunity> getLinkPersonCommunityByCommunityAndPersonAndLinkType(Community community, Person person, LinkPersonCommunityType type);
+
     Optional<LinkPersonCommunity> getLinkPersonCommunitiesByPersonAndLinkType(Person person, LinkPersonCommunityType type);
 }
