@@ -5,7 +5,6 @@ import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
-import com.sublinks.sublinksapi.post.dto.PostSave;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -35,28 +34,20 @@ public class PostRepositoryImpl implements PostRepositorySearch {
         final Join<Post, Community> communityJoin = postTable.join("community", JoinType.INNER);
 
         final List<Predicate> predicates = new ArrayList<>();
-        if ((postSearchCriteria.isSavedOnly() || !postSearchCriteria.isDislikedOnly()) && postSearchCriteria.person() != null) {
-            if (postSearchCriteria.isSavedOnly() && !postSearchCriteria.isDislikedOnly()) {
-                final Join<Post, PostSave> postPostSaveJoin = postTable.join("community", JoinType.INNER);
-                predicates.add(cb.equal(postPostSaveJoin.get("person"), postSearchCriteria.person()));
-            } else if (!postSearchCriteria.isSavedOnly() && postSearchCriteria.isDislikedOnly()) {
-                final Join<Post, PostLike> postPostLikeJoin = postTable.join("post");
-                predicates.add(cb.equal(postPostLikeJoin.get("person"), postSearchCriteria.person()));
-            } else {
-                // @todo throw error
-            }
-        }
+        // Community filter
         if (postSearchCriteria.communityIds() != null && !postSearchCriteria.communityIds().isEmpty()) {
             final Expression<Long> expression = communityJoin.get("id");
             predicates.add(expression.in(postSearchCriteria.communityIds()));
         }
+        // Subscribed only filter
         if (postSearchCriteria.person() != null && postSearchCriteria.listingType() == ListingType.Subscribed) {
             final Join<Community, LinkPersonCommunity> linkPersonCommunityJoin = communityJoin.join("linkPersonCommunity", JoinType.INNER);
             predicates.add(cb.equal(linkPersonCommunityJoin.get("person"), postSearchCriteria.person()));
         }
+        // Join for PostLike
         if (postSearchCriteria.person() != null) {
             final Join<Post, PostLike> postPostLikeJoin = postTable.join("postLikes", JoinType.LEFT);
-            predicates.add(cb.equal(postPostLikeJoin.get("person"), postSearchCriteria.person()));
+            postPostLikeJoin.on(cb.equal(postPostLikeJoin.get("person"), postSearchCriteria.person()));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));

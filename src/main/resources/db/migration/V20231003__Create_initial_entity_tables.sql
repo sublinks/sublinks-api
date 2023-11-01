@@ -360,3 +360,18 @@ CREATE TABLE `acl`
 
 CREATE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID` ON `acl` (`person_id`, `entity_type`, `entity_id`);
 CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` ON `acl` (`person_id`, `entity_type`, `entity_id`, `authorized_action`);
+
+/**
+  Post Read table
+ */
+CREATE TABLE `post_reads`
+(
+    `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `post_id`    BIGINT                                    NOT NULL,
+    `person_id`  BIGINT                                    NOT NULL,
+    `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE UNIQUE INDEX `IDX_POST_READ_POST_ID_PERSON_ID` ON `post_reads` (`post_id`, `person_id`);

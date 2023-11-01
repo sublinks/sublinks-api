@@ -4,7 +4,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmyListingTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmySortTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.GetPostResponseMapper;
@@ -13,6 +12,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPosts;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.MarkPostAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
@@ -33,8 +33,8 @@ import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
+import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
-import com.sublinks.sublinksapi.post.services.PostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
@@ -66,7 +66,6 @@ import java.util.Set;
 public class PostController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LemmyPostService lemmyPostService;
-    private final PostService postService;
     private final PostLikeService postLikeService;
     private final PostSaveService postSaveService;
     private final CommunityRepository communityRepository;
@@ -75,16 +74,19 @@ public class PostController {
     private final LemmySortTypeMapper lemmySortTypeMapper;
     private final LemmyListingTypeMapper lemmyListingTypeMapper;
     private final Url url;
+    private final PostReadService postReadService;
 
     @GetMapping
     GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson person) {
 
-        final Post post = postRepository.findById((long) getPostForm.id()).get();
+        Post post = postRepository.findById((long) getPostForm.id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         final Community community = post.getCommunity();
 
         PostView postView;
         if (person != null) {
             postView = lemmyPostService.postViewFromPost(post, (Person) person.getPrincipal());
+            postReadService.markPostReadByPerson(post, (Person) person.getPrincipal());
         } else {
             postView = lemmyPostService.postViewFromPost(post);
         }
@@ -95,9 +97,17 @@ public class PostController {
     }
 
     @PostMapping("mark_as_read")
-    PostResponse markAsRead() {
+    PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm, final JwtPerson principal) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        Optional<Post> post = postRepository.findById((long) markPostAsReadForm.post_id());
+        if (post.isEmpty() || principal == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        final Person person = (Person) principal.getPrincipal();
+        postReadService.markPostReadByPerson(post.get(), person);
+        return PostResponse.builder()
+                .post_view(lemmyPostService.postViewFromPost(post.get(), person))
+                .build();
     }
 
     @GetMapping("list")
@@ -166,7 +176,6 @@ public class PostController {
         final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
         final Collection<PostView> postViewCollection = new HashSet<>();
         for (Post post : posts) {
-
             final PostView postView = lemmyPostService.postViewFromPost(post, person);
             postViewCollection.add(postView);
         }
@@ -188,8 +197,6 @@ public class PostController {
         } else {
             postLikeService.updateOrCreatePostLikeNeutral(post.get(), person);
         }
-
-        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(person, post.get().getCommunity());
 
         return PostResponse.builder()
                 .post_view(lemmyPostService.postViewFromPost(post.get(), person))

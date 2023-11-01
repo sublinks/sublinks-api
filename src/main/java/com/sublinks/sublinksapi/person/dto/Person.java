@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.dto.PostRead;
 import com.sublinks.sublinksapi.post.dto.PostSave;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -73,6 +74,9 @@ public class Person implements UserDetails, Principal {
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<PostLike> postLikes;
+    @OneToMany
+    @PrimaryKeyJoinColumn
+    private List<PostRead> postReads;
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PersonAggregate personAggregate;
