@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.dto.Post, Post> {
@@ -26,5 +27,5 @@ public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.dto.
     @Mapping(target = "body", source = "post.postBody")
     @Mapping(target = "updated", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "ap_id", source = "post.activityPubId")
-    Post convert(com.sublinks.sublinksapi.post.dto.Post post);
+    Post convert(@Nullable com.sublinks.sublinksapi.post.dto.Post post);
 }

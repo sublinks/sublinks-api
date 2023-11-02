@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PostAggregateMapper extends Converter<PostAggregate, PostAggregates> {
@@ -22,5 +23,5 @@ public interface PostAggregateMapper extends Converter<PostAggregate, PostAggreg
     @Mapping(target = "featured_community", source = "post.featuredInCommunity")
     @Mapping(target = "downvotes", source = "postAggregate.downVoteCount")
     @Mapping(target = "comments", source = "postAggregate.commentCount")
-    PostAggregates convert(PostAggregate postAggregate);
+    PostAggregates convert(@Nullable PostAggregate postAggregate);
 }

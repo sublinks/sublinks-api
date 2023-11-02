@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CommentAggregatesMapper extends Converter<CommentAggregate, CommentAggregates> {
@@ -17,5 +18,5 @@ public interface CommentAggregatesMapper extends Converter<CommentAggregate, Com
     @Mapping(target = "downvotes", source = "commentAggregate.downVotes")
     @Mapping(target = "comment_id", source = "commentAggregate.comment.id")
     @Mapping(target = "child_count", source = "commentAggregate.childrenCount")
-    CommentAggregates convert(CommentAggregate commentAggregate);
+    CommentAggregates convert(@Nullable CommentAggregate commentAggregate);
 }

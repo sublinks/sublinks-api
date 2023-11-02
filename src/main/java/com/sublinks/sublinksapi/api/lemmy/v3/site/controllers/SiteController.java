@@ -1,18 +1,14 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
-import com.sublinks.sublinksapi.announcment.dto.Announcement;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.CreateSiteFormMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.EditSiteFormMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.GetSiteResponseMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.mappers.SiteResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstance;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstanceResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.CreateSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.EditSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.services.SiteService;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -20,7 +16,6 @@ import com.sublinks.sublinksapi.instance.repositories.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
-import com.sublinks.sublinksapi.person.models.PersonContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -34,8 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
@@ -43,31 +37,26 @@ import java.util.Optional;
 @RequestMapping(path = "/api/v3/site")
 public class SiteController {
     private final LocalInstanceContext localInstanceContext;
-    private final PersonContext personContext;
-    private final SiteService siteService;
+    private final LemmySiteService lemmySiteService;
     private final InstanceService instanceService;
     private final LanguageService languageService;
     private final InstanceRepository instanceRepository;
     private final InstanceBlockRepository instanceBlockRepository;
-    private final GetSiteResponseMapper getSiteResponseMapper;
-    private final CreateSiteFormMapper createSiteFormMapper;
-    private final EditSiteFormMapper editSiteFormMapper;
-    private final SiteResponseMapper siteResponseMapper;
+    private final MyUserInfoService myUserInfoService;
 
     @GetMapping
     public GetSiteResponse getSite() {
 
-        // @todo announcements
-        final Collection<Announcement> announcements = new HashSet<>();
-        return getSiteResponseMapper.map(
-                localInstanceContext,
-                personContext,
-                announcements,
-                siteService.admins(),
-                siteService.allLanguages(localInstanceContext.languageRepository()),
-                siteService.customEmojis(),
-                languageService.instanceLanguageIds(localInstanceContext.instance())
-        );
+        return GetSiteResponse.builder()
+                .version("0.19.0")
+                .taglines(new ArrayList<>())
+                .site_view(lemmySiteService.getSiteView())
+                .my_user(myUserInfoService.getMyUserInfo())
+                .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
+                .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
+                .custom_emojis(lemmySiteService.customEmojis())
+                .admins(lemmySiteService.admins())
+                .build();
     }
 
     @PostMapping
@@ -75,23 +64,38 @@ public class SiteController {
     public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm) {
 
         final Instance instance = localInstanceContext.instance();
-        createSiteFormMapper.map(createSiteForm, localInstanceContext, instance);
+        instance.setName(createSiteForm.name());
+        instance.setActivityPubId(localInstanceContext.settings().baseUrl());
+        instance.setSoftware("");
+        instance.setVersion("");
+        instance.setDescription(createSiteForm.description() == null ? null : createSiteForm.description());
+        instance.setSidebar(createSiteForm.sidebar() == null ? null : createSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
+        instance.setBannerUrl(""); // @todo image
+        instance.setIconUrl(""); // @todo image
         instanceService.createInstance(instance);
-        final Collection<Announcement> announcements = new HashSet<>();
-        return siteResponseMapper.map(localInstanceContext, announcements);
+        return SiteResponse.builder()
+                .site_view(lemmySiteService.getSiteView())
+                .tag_lines(new ArrayList<>())
+                .build();
     }
 
     @PutMapping
     @Transactional
     public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm) {
 
-        final Collection<Announcement> announcements = new HashSet<>();
         final Instance instance = localInstanceContext.instance();
+        instance.setName(editSiteForm.name());
+        instance.setDescription(editSiteForm.description() == null ? null : editSiteForm.description());
+        instance.setSidebar(editSiteForm.sidebar() == null ? null : editSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
-        editSiteFormMapper.map(editSiteForm, instance);
+        instance.setBannerUrl(""); // @todo image
+        instance.setIconUrl(""); // @todo image
         instanceService.updateInstance(instance);
-        return siteResponseMapper.map(localInstanceContext, announcements);
+        return SiteResponse.builder()
+                .site_view(lemmySiteService.getSiteView())
+                .tag_lines(new ArrayList<>())
+                .build();
     }
 
     @PostMapping("/block")

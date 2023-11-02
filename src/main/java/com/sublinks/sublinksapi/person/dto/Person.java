@@ -6,7 +6,6 @@ import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
-import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.dto.PostRead;
 import com.sublinks.sublinksapi.post.dto.PostSave;
@@ -62,9 +61,6 @@ public class Person implements UserDetails, Principal {
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
-    @OneToMany
-    @PrimaryKeyJoinColumn
-    private List<Post> posts;
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<CommentLike> commentLikes;

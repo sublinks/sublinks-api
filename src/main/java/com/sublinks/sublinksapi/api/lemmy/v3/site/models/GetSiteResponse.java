@@ -13,7 +13,7 @@ public record GetSiteResponse(
         Collection<PersonView> admins,
         String version,
         MyUserInfo my_user,
-        Collection<Integer> discussion_languages,
+        Collection<Long> discussion_languages,
         Collection<Language> all_languages,
         Collection<Tagline> taglines,
         Collection<CustomEmojiView> custom_emojis

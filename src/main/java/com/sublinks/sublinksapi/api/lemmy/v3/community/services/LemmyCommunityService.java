@@ -1,8 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.services;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityModeratorViewMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityResponseMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.LemmyCommunityMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
@@ -14,21 +12,18 @@ import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class LemmyCommunityService {
-    private final LemmyCommunityMapper lemmyCommunityMapper;
-    private final CommunityModeratorViewMapper communityModeratorViewMapper;
-    private final CommunityResponseMapper communityResponseMapper;
+    private final ConversionService conversionService;
 
     public SubscribedType getPersonCommunitySubscribeType(final Person person, final Community community) {
 
@@ -49,13 +44,12 @@ public class LemmyCommunityService {
 
     public CommunityView communityViewFromCommunity(final Community community) {
 
-        final CommunityAggregate communityAggregate = communityAggregates(community);
-        return lemmyCommunityMapper.communityToCommunityView(
-                community,
-                SubscribedType.NotSubscribed,
-                false,
-                communityAggregate
-        );
+        return CommunityView.builder()
+                .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+                .subscribed(SubscribedType.NotSubscribed)
+                .blocked(false)
+                .counts(conversionService.convert(communityAggregates(community), CommunityAggregates.class))
+                .build();
     }
 
     public CommunityView communityViewFromCommunity(final Community community, final Person person) {
@@ -74,13 +68,12 @@ public class LemmyCommunityService {
                 }
             }
         }
-        final CommunityAggregate communityAggregate = communityAggregates(community);
-        return lemmyCommunityMapper.communityToCommunityView(
-                community,
-                subscribedType,
-                isBlocked,
-                communityAggregate
-        );
+        return CommunityView.builder()
+                .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+                .subscribed(subscribedType)
+                .blocked(isBlocked)
+                .counts(conversionService.convert(communityAggregates(community), CommunityAggregates.class))
+                .build();
     }
 
     public CommunityAggregate communityAggregates(final Community community) {
@@ -89,9 +82,9 @@ public class LemmyCommunityService {
                 .orElse(CommunityAggregate.builder().community(community).build());
     }
 
-    public Set<String> communityLanguageCodes(final Community community) {
+    public List<String> communityLanguageCodes(final Community community) {
 
-        final Set<String> languageCodes = new HashSet<>();
+        final List<String> languageCodes = new ArrayList<>();
         for (Language language : community.getLanguages()) {
             languageCodes.add(language.getCode());
         }
@@ -102,7 +95,10 @@ public class LemmyCommunityService {
 
         final List<CommunityModeratorView> moderatorViews = new ArrayList<>();
         for (LinkPersonCommunity linkPerson : community.getLinkPersonCommunity()) {
-            final CommunityModeratorView communityModeratorView = communityModeratorViewMapper.map(community, linkPerson.getPerson());
+            final CommunityModeratorView communityModeratorView = CommunityModeratorView.builder()
+                    .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+                    .moderator(conversionService.convert(linkPerson.getPerson(), com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
+                    .build();
             if (linkPerson.getLinkType() == LinkPersonCommunityType.owner) {
                 moderatorViews.add(0, communityModeratorView);
             }
@@ -115,17 +111,17 @@ public class LemmyCommunityService {
 
     public CommunityResponse createCommunityResponse(final Community community, final Person person) {
 
-        return communityResponseMapper.map(
-                communityViewFromCommunity(community, person),
-                communityLanguageCodes(community)
-        );
+        return CommunityResponse.builder()
+                .community_view(communityViewFromCommunity(community, person))
+                .discussion_languages(communityLanguageCodes(community))
+                .build();
     }
 
     public CommunityResponse createCommunityResponse(final Community community) {
 
-        return communityResponseMapper.map(
-                communityViewFromCommunity(community),
-                communityLanguageCodes(community)
-        );
+        return CommunityResponse.builder()
+                .community_view(communityViewFromCommunity(community))
+                .discussion_languages(communityLanguageCodes(community))
+                .build();
     }
 }

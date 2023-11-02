@@ -1,15 +1,10 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CommunityResponseMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.CreateCommunityFormMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.LemmyCommunityMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.EditCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
@@ -21,8 +16,7 @@ import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
-import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
-import com.sublinks.sublinksapi.utils.KeyStore;
+import com.sublinks.sublinksapi.utils.SlugUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -46,13 +40,10 @@ import java.util.Set;
 public class CommunityOwnerController {
     private final LocalInstanceContext localInstanceContext;
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
-    private final CreateCommunityFormMapper createCommunityFormMapper;
     private final CommunityService communityService;
-    private final KeyGeneratorUtil keyGeneratorUtil;
     private final AuthorizationService authorizationService;
     private final LemmyCommunityService lemmyCommunityService;
-    private final CommunityResponseMapper communityResponseMapper;
-    private final LemmyCommunityMapper lemmyCommunityMapper;
+    private final SlugUtil slugUtil;
 
     @PostMapping
     @Transactional
@@ -71,13 +62,18 @@ public class CommunityOwnerController {
             final Optional<Language> language = localInstanceContext.languageRepository().findById(Long.valueOf(languageCode));
             language.ifPresent(languages::add);
         }
-        final KeyStore keys = keyGeneratorUtil.generate();
-        Community community = createCommunityFormMapper.map(
-                createCommunityForm,
-                localInstanceContext.instance(),
-                keys
-        );
-        community.setLanguages(languages);
+
+        Community community = Community.builder()
+                .instance(localInstanceContext.instance())
+                .title(createCommunityForm.title())
+                .titleSlug(slugUtil.stringToSlug(createCommunityForm.title()))
+                .description(createCommunityForm.description())
+                .isPostingRestrictedToMods(createCommunityForm.posting_restricted_to_mods())
+                .isNsfw(createCommunityForm.nsfw())
+                .iconImageUrl("")
+                .bannerImageUrl("")
+                .languages(languages)
+                .build();
 
         final Set<LinkPersonCommunity> linkPersonCommunities = new HashSet<>();
         linkPersonCommunities.add(LinkPersonCommunity.builder()
@@ -94,17 +90,7 @@ public class CommunityOwnerController {
         communityService.createCommunity(community);
         linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
-        final CommunityView communityView = lemmyCommunityMapper.communityToCommunityView(
-                community,
-                SubscribedType.Subscribed,
-                false,
-                community.getCommunityAggregate()
-        );
-
-        return communityResponseMapper.map(
-                communityView,
-                lemmyCommunityService.communityLanguageCodes(community)
-        );
+        return lemmyCommunityService.createCommunityResponse(community, person);
     }
 
     @PutMapping

@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CommentMapper extends Converter<com.sublinks.sublinksapi.comment.dto.Comment, Comment> {
@@ -18,5 +19,5 @@ public interface CommentMapper extends Converter<com.sublinks.sublinksapi.commen
     @Mapping(target = "creator_id", source = "comment.person.id")
     @Mapping(target = "content", source = "comment.commentBody")
     @Mapping(target = "ap_id", source = "comment.activityPubId")
-    Comment convert(com.sublinks.sublinksapi.comment.dto.Comment comment);
+    Comment convert(@Nullable com.sublinks.sublinksapi.comment.dto.Comment comment);
 }

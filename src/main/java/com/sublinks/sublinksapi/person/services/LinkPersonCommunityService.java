@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -51,5 +53,16 @@ public class LinkPersonCommunityService {
         community.getLinkPersonCommunity().removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
         linkPersonCommunityRepository.delete(linkPersonCommunity.get());
         linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
+    }
+
+    public Collection<Community> getPersonLinkByType(Person person, LinkPersonCommunityType type) {
+        Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository
+                .getLinkPersonCommunitiesByPersonAndLinkType(person, type);
+
+        Collection<Community> communities = new ArrayList<>();
+        for (LinkPersonCommunity linkPersonCommunity : linkPersonCommunities) {
+            communities.add(linkPersonCommunity.getCommunity());
+        }
+        return communities;
     }
 }

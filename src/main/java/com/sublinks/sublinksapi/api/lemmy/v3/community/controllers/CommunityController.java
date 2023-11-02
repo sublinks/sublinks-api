@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.GetCommunityResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
@@ -11,15 +10,16 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetCommunityRespon
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunities;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunitiesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +33,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,10 +40,9 @@ import java.util.Set;
 public class CommunityController {
     private final LocalInstanceContext localInstanceContext;
     private final CommunityRepository communityRepository;
-    private final LinkPersonCommunityRepository linkPersonCommunityRepository;
     private final LemmyCommunityService lemmyCommunityService;
     private final LinkPersonCommunityService linkPersonCommunityService;
-    private final GetCommunityResponseMapper getCommunityResponseMapper;
+    private final ConversionService conversionService;
 
     @GetMapping
     public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm, final JwtPerson principal) {
@@ -59,14 +57,13 @@ public class CommunityController {
         } else {
             communityView = lemmyCommunityService.communityViewFromCommunity(community);
         }
-        final Set<String> languageCodes = lemmyCommunityService.communityLanguageCodes(community);
         final List<CommunityModeratorView> moderatorViews = lemmyCommunityService.communityModeratorViewList(community);
-        return getCommunityResponseMapper.map(
-                communityView,
-                languageCodes,
-                moderatorViews,
-                localInstanceContext
-        );
+        return GetCommunityResponse.builder()
+                .community_view(communityView)
+                .site(conversionService.convert(localInstanceContext, Site.class))
+                .moderators(moderatorViews)
+                .discussion_languages(lemmyCommunityService.communityLanguageCodes(community))
+                .build();
     }
 
     @GetMapping("list")

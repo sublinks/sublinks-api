@@ -3,7 +3,6 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.GetPersonDetailsResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
@@ -23,6 +22,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonService;
@@ -47,8 +47,8 @@ import java.util.HashSet;
 public class UserController {
     private final JwtUtil jwtUtil;
     private final PersonService personService;
+    private final LemmyPersonService lemmyPersonService;
     private final PersonRepository personRepository;
-    private final GetPersonDetailsResponseMapper getPersonDetailsResponseMapper;
 
     @PostMapping("register")
     LoginResponse create(@Valid @RequestBody final Register registerForm) throws NoSuchAlgorithmException {
@@ -84,9 +84,12 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
         }
 
-        return getPersonDetailsResponseMapper.PersonToGetPersonDetailsResponse(
-                personService.getPersonContext(person)
-        );
+        return GetPersonDetailsResponse.builder()
+                .person_view(lemmyPersonService.getPersonView(person))
+                .posts(lemmyPersonService.getPersonPosts(person))
+                .moderates(lemmyPersonService.getPersonModerates(person))
+                .comments(lemmyPersonService.getPersonComments(person))
+                .build();
     }
 
     @GetMapping("mention")
