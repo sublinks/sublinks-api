@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.CreatePostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
@@ -17,6 +16,7 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.utils.SlugUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -40,7 +40,7 @@ public class PostOwnerController {
     private final PostService postService;
     private final LanguageRepository languageRepository;
     private final CommunityRepository communityRepository;
-    private final CreatePostMapper createPostMapper;
+    private final SlugUtil slugUtil;
 
     @PostMapping
     @Transactional
@@ -59,15 +59,22 @@ public class PostOwnerController {
                 .defaultResponse(community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline : AuthorizationService.ResponseType.allow)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        Post post = createPostMapper.map(
-                createPostForm,
-                localInstanceContext.instance(),
-                community,
-                languageRepository.findById((long) createPostForm.language_id()).get(),
-                true
-        );
+        Post post = Post.builder()
+                .instance(localInstanceContext.instance())
+                .community(community)
+                .language(languageRepository.findById((long) createPostForm.language_id()).get()) // @todo catch errors here
+                .title(createPostForm.name())
+                .titleSlug(slugUtil.stringToSlug(createPostForm.name()))
+                .postBody(createPostForm.body())
+                .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()))
+                .linkTitle("")
+                .linkDescription("")
+                .linkUrl("")
+                .linkVideoUrl("")
+                .linkThumbnailUrl("")
+                .build();
 
-        postService.createPost(post, community, person);
+        postService.createPost(post, person);
 
         return PostResponse.builder()
                 .post_view(lemmyPostService.postViewFromPost(post, person))

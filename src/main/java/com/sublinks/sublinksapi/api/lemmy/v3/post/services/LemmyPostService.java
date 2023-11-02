@@ -2,7 +2,6 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.LemmyCommunityMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.LemmyPostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.LemmyPersonMapper;
@@ -13,6 +12,7 @@ import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,12 +20,12 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class LemmyPostService {
-    private final LemmyPostMapper lemmyPostMapper;
     private final LemmyCommunityMapper lemmyCommunityMapper;
     private final LemmyPersonMapper lemmyPersonMapper;
     private final PostService postService;
     private final PostSaveService postSaveService;
     private final PostLikeService postLikeService;
+    private final ConversionService conversionService;
 
     public PostView postViewFromPost(final Post post) {
 
@@ -57,14 +57,13 @@ public class LemmyPostService {
     }
 
     private PostView.PostViewBuilder postViewBuilder(final Post post) {
-        final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = lemmyPostMapper.postToPost(post);
+        final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = conversionService.convert(post, com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.class);
         final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person creator = lemmyPersonMapper.personToPerson(
                 postService.getPostCreator(post)
         );
         final Community community = lemmyCommunityMapper.communityToLemmyCommunity(post.getCommunity());
-        final PostAggregates postAggregates = lemmyPostMapper.postAggregatesToPostAggregates(
-                post.getPostAggregate()
-        );
+
+        final PostAggregates postAggregates = conversionService.convert(post.getPostAggregate(), PostAggregates.class);
 
         return PostView.builder()
                 .post(lemmyPost)

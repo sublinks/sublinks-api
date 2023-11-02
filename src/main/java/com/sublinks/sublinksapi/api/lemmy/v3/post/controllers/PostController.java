@@ -6,7 +6,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmyListingTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmySortTypeMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.GetPostResponseMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePostLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
@@ -70,7 +69,6 @@ public class PostController {
     private final PostSaveService postSaveService;
     private final CommunityRepository communityRepository;
     private final PostRepository postRepository;
-    private final GetPostResponseMapper getPostResponseMapper;
     private final LemmySortTypeMapper lemmySortTypeMapper;
     private final LemmyListingTypeMapper lemmyListingTypeMapper;
     private final Url url;
@@ -93,7 +91,12 @@ public class PostController {
         final CommunityView communityView = lemmyCommunityService.communityViewFromCommunity(community);
         final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
         final List<PostView> crossPosts = new ArrayList<>();//@todo cross post
-        return getPostResponseMapper.map(postView, communityView, moderators, crossPosts);
+        return GetPostResponse.builder()
+                .post_view(postView)
+                .community_view(communityView)
+                .moderators(moderators)
+                .cross_posts(crossPosts)
+                .build();
     }
 
     @PostMapping("mark_as_read")

@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
@@ -11,10 +10,11 @@ import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
-import com.sublinks.sublinksapi.utils.KeyService;
+import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,9 +22,10 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostAggregateRepository postAggregateRepository;
     private final PostCreatedPublisher postCreatedPublisher;
-    private final KeyService keyService;
+    private final KeyGeneratorUtil keyGeneratorUtil;
     private final LinkPersonPostService linkPersonPostService;
     private final PostDeletedPublisher postDeletedPublisher;
+    private final PostLikeService postLikeService;
 
     public Person getPostCreator(final Post post) {
 
@@ -39,16 +40,18 @@ public class PostService {
         return null;
     }
 
-    public void createPost(final Post post, final Community community, final Person creator) {
+    @Transactional
+    public void createPost(final Post post, final Person creator) {
 
-        post.setCommunity(community);
-
-        final KeyStore keys = keyService.generate();
+        final KeyStore keys = keyGeneratorUtil.generate();
         post.setPublicKey(keys.publicKey());
         post.setPrivateKey(keys.privateKey());
 
         post.setLocal(true);
 
+        post.setActivityPubId("");
+        postRepository.save(post);
+        post.setActivityPubId("%s/post/%d".formatted(post.getInstance().getDomain(), post.getId()));
         postRepository.save(post);
 
         linkPersonPostService.createLink(creator, post, LinkPersonPostType.creator);
@@ -59,6 +62,9 @@ public class PostService {
                 .build();
         postAggregateRepository.save(postAggregate);
         post.setPostAggregate(postAggregate);
+
+        postLikeService.updateOrCreatePostLikeLike(post, creator);
+
         postCreatedPublisher.publish(post);
     }
 

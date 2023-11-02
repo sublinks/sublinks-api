@@ -18,7 +18,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,8 +49,7 @@ public class Post implements AuthorizationEntityInterface {
     @JoinColumn(name = "community_id")
     private Community community;
 
-    @OneToMany(cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
     private List<Comment> comments;
 
     @ManyToOne
@@ -61,12 +59,10 @@ public class Post implements AuthorizationEntityInterface {
     @JoinColumn(name = "language_id")
     private Language language;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
     private PostAggregate postAggregate;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    @PrimaryKeyJoinColumn
     private List<PostLike> postLikes;
 
     /**

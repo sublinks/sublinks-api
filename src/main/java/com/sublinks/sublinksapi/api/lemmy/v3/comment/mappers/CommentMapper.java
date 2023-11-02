@@ -4,9 +4,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.springframework.core.convert.converter.Converter;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface CommentMapper {
+public interface CommentMapper extends Converter<com.sublinks.sublinksapi.comment.dto.Comment, Comment> {
+    @Override
     @Mapping(target = "updated", source = "comment.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "published", source = "comment.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "post_id", source = "comment.post.id")
@@ -16,5 +18,5 @@ public interface CommentMapper {
     @Mapping(target = "creator_id", source = "comment.person.id")
     @Mapping(target = "content", source = "comment.commentBody")
     @Mapping(target = "ap_id", source = "comment.activityPubId")
-    Comment commentToLemmyComment(com.sublinks.sublinksapi.comment.dto.Comment comment);
+    Comment convert(com.sublinks.sublinksapi.comment.dto.Comment comment);
 }

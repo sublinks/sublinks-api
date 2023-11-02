@@ -7,7 +7,7 @@ import java.security.KeyPairGenerator;
 import java.util.Base64;
 
 @Service
-public class KeyService {
+public class KeyGeneratorUtil {
     public KeyStore generate() {
 
         final KeyPair pair = generateKeyPair();

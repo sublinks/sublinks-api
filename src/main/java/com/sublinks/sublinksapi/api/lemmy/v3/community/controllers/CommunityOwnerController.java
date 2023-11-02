@@ -21,7 +21,7 @@ import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
-import com.sublinks.sublinksapi.utils.KeyService;
+import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +48,7 @@ public class CommunityOwnerController {
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
     private final CreateCommunityFormMapper createCommunityFormMapper;
     private final CommunityService communityService;
-    private final KeyService keyService;
+    private final KeyGeneratorUtil keyGeneratorUtil;
     private final AuthorizationService authorizationService;
     private final LemmyCommunityService lemmyCommunityService;
     private final CommunityResponseMapper communityResponseMapper;
@@ -71,7 +71,7 @@ public class CommunityOwnerController {
             final Optional<Language> language = localInstanceContext.languageRepository().findById(Long.valueOf(languageCode));
             language.ifPresent(languages::add);
         }
-        final KeyStore keys = keyService.generate();
+        final KeyStore keys = keyGeneratorUtil.generate();
         Community community = createCommunityFormMapper.map(
                 createCommunityForm,
                 localInstanceContext.instance(),

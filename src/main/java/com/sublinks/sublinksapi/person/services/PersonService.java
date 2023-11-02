@@ -7,12 +7,11 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonAggregate;
 import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
-import com.sublinks.sublinksapi.person.mappers.PersonMapper;
 import com.sublinks.sublinksapi.person.models.PersonContext;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.utils.KeyService;
+import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -27,8 +26,7 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class PersonService {
-    private final KeyService keyService;
-    private final PersonMapper personMapper;
+    private final KeyGeneratorUtil keyGeneratorUtil;
     private final PersonRepository personRepository;
     private final PersonAggregateRepository personAggregateRepository;
     private final LocalInstanceContext localInstanceContext;
@@ -48,24 +46,24 @@ public class PersonService {
         final Collection<Post> emptyPostList = new ArrayList<>();
         final Collection<Comment> emptyCommentList = new ArrayList<>();
 
-        return personMapper.PersonToPersonContext(
-                person,
-                emptyPostList,
-                emptyCommentList,
-                personAggregates.orElse(PersonAggregate.builder().person(person).build()),
-                discussLanguages,
-                emptyCommunityList,
-                emptyCommunityList,
-                emptyCommunityList,
-                emptyPersonList
-        );
+        return PersonContext.builder()
+                .person(person)
+                .posts(emptyPostList)
+                .comments(emptyCommentList)
+                .personAggregate(personAggregates.orElse(PersonAggregate.builder().person(person).build()))
+                .discussLanguages(discussLanguages)
+                .moderates(emptyCommunityList)
+                .follows(emptyCommunityList)
+                .communityBlocks(emptyCommunityList)
+                .personBlocks(emptyPersonList)
+                .build();
     }
 
     @Transactional
     public void createPerson(final Person person) {
 
         // @todo if not local throw a fit
-        final KeyStore keys = keyService.generate();
+        final KeyStore keys = keyGeneratorUtil.generate();
         person.setPublicKey(keys.publicKey());
         person.setPrivateKey(keys.privateKey());
         person.setLocal(true);

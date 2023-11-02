@@ -1,10 +1,10 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers.LemmyCommentMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers.CommentAggregatesMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.mappers.LemmyCommunityMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.LemmyPostMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.mappers.PostMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
 import com.sublinks.sublinksapi.person.models.PersonContext;
@@ -16,7 +16,7 @@ import org.mapstruct.MappingConstants;
 import java.util.Collection;
 import java.util.HashSet;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LemmyPersonMapper.class, LemmyCommunityMapper.class, LemmyCommentMapper.class, LemmyPostMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {LemmyPersonMapper.class, LemmyCommunityMapper.class, CommentAggregatesMapper.class, PostMapper.class})
 public abstract class GetPersonDetailsResponseMapper {
 
     @Mapping(target = "person_view", source = "personContext")
