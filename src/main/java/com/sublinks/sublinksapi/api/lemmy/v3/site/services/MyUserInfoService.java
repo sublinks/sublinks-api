@@ -57,9 +57,18 @@ public class MyUserInfoService {
     }
 
     public Collection<CommunityModeratorView> getUserCommunityModerates() {
+        // @todo make this a single query
+        Collection<Community> communitiesOwned = linkPersonCommunityService.getPersonLinkByType(personContext.getPerson(), LinkPersonCommunityType.owner);
         Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(personContext.getPerson(), LinkPersonCommunityType.moderator);
 
         Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
+        for (Community community : communitiesOwned) {
+            communityModeratorViews.add(
+                    CommunityModeratorView.builder()
+                            .moderator(conversionService.convert(personContext.getPerson(), Person.class))
+                            .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+                            .build());
+        }
         for (Community community : communities) {
             communityModeratorViews.add(
                     CommunityModeratorView.builder()

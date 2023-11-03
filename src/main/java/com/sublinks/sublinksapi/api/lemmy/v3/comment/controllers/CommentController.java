@@ -66,11 +66,11 @@ public class CommentController {
         if (createCommentForm.parent_id() != null) {
             Optional<Comment> parentComment = commentRepository.findById((long) createCommentForm.parent_id());
             if (parentComment.isPresent()) {
-                path = String.format("%s;%d", parentComment.get().getPath(), comment.getId());
+                path = String.format("%s.%d", parentComment.get().getPath(), comment.getId());
             }
         }
         if (path == null) {
-            path = String.format("0;%d", comment.getId());
+            path = String.format("0.%d", comment.getId());
         }
         comment.setPath(path);
         comment.setActivityPubId(lemmyCommentService.generateActivityPubId(comment));

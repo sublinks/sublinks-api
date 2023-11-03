@@ -16,6 +16,7 @@ import com.sublinks.sublinksapi.instance.repositories.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
+import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -45,18 +46,29 @@ public class SiteController {
     private final MyUserInfoService myUserInfoService;
 
     @GetMapping
-    public GetSiteResponse getSite() {
+    public GetSiteResponse getSite(final JwtPerson jwtPerson) {
+        Person person = null;
+        if (jwtPerson != null) {
+            person = (Person) jwtPerson.getPrincipal();
+        }
 
-        return GetSiteResponse.builder()
+        GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
                 .version("0.19.0")
                 .taglines(new ArrayList<>())
                 .site_view(lemmySiteService.getSiteView())
-                .my_user(myUserInfoService.getMyUserInfo())
                 .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
                 .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
                 .custom_emojis(lemmySiteService.customEmojis())
-                .admins(lemmySiteService.admins())
-                .build();
+                .admins(lemmySiteService.admins());
+
+        if (person != null) {
+            builder.my_user(myUserInfoService.getMyUserInfo());
+
+        }
+
+        return builder.build();
+
+
     }
 
     @PostMapping
