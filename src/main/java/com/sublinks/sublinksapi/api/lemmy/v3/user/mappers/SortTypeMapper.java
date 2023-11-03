@@ -7,7 +7,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface SortTypeMapper extends Converter<com.sublinks.sublinksapi.person.enums.SortType, SortType> {
+public interface SortTypeMapper extends Converter<SortType, com.sublinks.sublinksapi.person.enums.SortType> {
     @Override
-    SortType convert(@Nullable com.sublinks.sublinksapi.person.enums.SortType sortType);
+    com.sublinks.sublinksapi.person.enums.SortType convert(@Nullable SortType sortType);
 }

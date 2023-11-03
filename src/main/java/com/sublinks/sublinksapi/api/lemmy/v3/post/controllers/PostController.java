@@ -4,8 +4,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmyListingTypeMapper;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.mappers.LemmySortTypeMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePostLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
@@ -34,11 +32,10 @@ import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
+import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -49,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -69,10 +65,10 @@ public class PostController {
     private final PostSaveService postSaveService;
     private final CommunityRepository communityRepository;
     private final PostRepository postRepository;
-    private final LemmySortTypeMapper lemmySortTypeMapper;
-    private final LemmyListingTypeMapper lemmyListingTypeMapper;
     private final Url url;
     private final PostReadService postReadService;
+    private final ConversionService conversionService;
+    private final SiteMetadataUtil siteMetadataUtil;
 
     @GetMapping
     GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson person) {
@@ -155,15 +151,8 @@ public class PostController {
             }
         }
 
-        SortType sortType = null;
-        if (getPostsForm.sort() != null) {
-            sortType = lemmySortTypeMapper.map(getPostsForm.sort());
-        }
-
-        ListingType listingType = null;
-        if (getPostsForm.type_() != null) {
-            listingType = lemmyListingTypeMapper.map(getPostsForm.type_());
-        }
+        SortType sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
+        ListingType listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
 
         final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
                 .page(1)
@@ -239,40 +228,14 @@ public class PostController {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
-        Document doc = null;
-        try {
-            doc = Jsoup.connect(normalizedUrl).get();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        Elements metaOgTitle = doc.select("meta[property=og:title]");
-        Elements metaOgDescription = doc.select("meta[property=og:description]");
-        Elements metaOgImage = doc.select("meta[property=og:image]");
-        Elements metaOgVideo = doc.select("meta[property=og:video:url]");
-
-        String title = doc.title();
-        if (!metaOgTitle.isEmpty()) {
-            title = metaOgTitle.first().attr("content");
-        }
-        String description = null;
-        if (!metaOgDescription.isEmpty()) {
-            description = metaOgDescription.first().attr("content");
-        }
-        String image = null;
-        if (!metaOgImage.isEmpty()) {
-            image = metaOgImage.first().attr("content");
-        }
-        String video = null;
-        if (!metaOgVideo.isEmpty()) {
-            video = metaOgVideo.first().attr("content");
-        }
+        SiteMetadataUtil.SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
 
         return GetSiteMetadataResponse.builder()
                 .metadata(SiteMetadata.builder()
-                        .title(title)
-                        .description(description)
-                        .image(image)
-                        .embed_video_url(video)
+                        .title(siteMetadata.title())
+                        .description(siteMetadata.description())
+                        .image(siteMetadata.imageUrl())
+                        .embed_video_url(siteMetadata.videoUrl())
                         .build())
                 .build();
     }
