@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,10 +34,10 @@ public class LinkPersonPostService {
                 .linkType(type)
                 .build();
         if (post.getLinkPersonPost() == null) {
-            post.setLinkPersonPost(new HashSet<>());
+            post.setLinkPersonPost(new LinkedHashSet<>());
         }
         if (person.getLinkPersonPost() == null) {
-            person.setLinkPersonPost(new HashSet<>());
+            person.setLinkPersonPost(new LinkedHashSet<>());
         }
         post.getLinkPersonPost().add(newLink);
         person.getLinkPersonPost().add(newLink);

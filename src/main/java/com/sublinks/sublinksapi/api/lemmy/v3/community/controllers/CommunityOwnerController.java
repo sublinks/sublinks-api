@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,7 +75,7 @@ public class CommunityOwnerController {
                 .languages(languages)
                 .build();
 
-        final Set<LinkPersonCommunity> linkPersonCommunities = new HashSet<>();
+        final Set<LinkPersonCommunity> linkPersonCommunities = new LinkedHashSet<>();
         linkPersonCommunities.add(LinkPersonCommunity.builder()
                 .community(community)
                 .person(person)

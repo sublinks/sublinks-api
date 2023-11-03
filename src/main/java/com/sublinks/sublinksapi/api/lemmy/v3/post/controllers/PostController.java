@@ -49,7 +49,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -166,7 +166,7 @@ public class PostController {
                 .build();
 
         final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
-        final Collection<PostView> postViewCollection = new HashSet<>();
+        final Collection<PostView> postViewCollection = new LinkedHashSet<>();
         for (Post post : posts) {
             final PostView postView = lemmyPostService.postViewFromPost(post, person);
             postViewCollection.add(postView);

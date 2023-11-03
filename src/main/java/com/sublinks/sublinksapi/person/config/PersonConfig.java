@@ -10,10 +10,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashSet;
 
 @Configuration
 public class PersonConfig {
@@ -42,29 +40,29 @@ public class PersonConfig {
     }
 
     private Collection<Community> communityBlocks(final Person person) {
-        final Collection<Community> communities = new HashSet<>();
+        final Collection<Community> communities = new LinkedHashSet<>();
         return communities;
     }
 
     private Collection<Person> personBlocks(final Person person) {
-        final Collection<Person> people = new HashSet<>();
+        final Collection<Person> people = new LinkedHashSet<>();
         return people;
     }
 
     private Collection<Community> follows(final Person person) {
-        final Collection<Community> communities = new HashSet<>();
+        final Collection<Community> communities = new LinkedHashSet<>();
         return communities;
     }
 
     private Collection<Integer> discussionLanguages(final Person person) {
-        final List<Integer> languageIds = new ArrayList<>();
+        final Collection<Integer> languageIds = new LinkedHashSet<>();
         languageIds.add(1);
         languageIds.add(38);
         return languageIds;
     }
 
     public Collection<Community> moderates(final Person person) {
-        final Collection<Community> communities = new HashSet<>();
+        final Collection<Community> communities = new LinkedHashSet<>();
         return communities;
     }
 }

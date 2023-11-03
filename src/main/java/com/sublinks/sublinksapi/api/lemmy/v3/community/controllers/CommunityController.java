@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,7 +70,7 @@ public class CommunityController {
     @Transactional
     public ListCommunitiesResponse list(@Valid final ListCommunities listCommunitiesForm, final JwtPerson principal) {
 
-        final Collection<CommunityView> communityViews = new HashSet<>();
+        final Collection<CommunityView> communityViews = new LinkedHashSet<>();
 
         final Collection<Community> communities = communityRepository.findAll(); // @todo apply filters
         for (Community community : communities) {

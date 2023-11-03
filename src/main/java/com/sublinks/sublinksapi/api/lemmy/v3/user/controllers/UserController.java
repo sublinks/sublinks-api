@@ -39,7 +39,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 @RestController
 @RequiredArgsConstructor
@@ -119,7 +119,7 @@ public class UserController {
     @GetMapping("banned")
     BannedPersonsResponse bannedList() {
 
-        final Collection<PersonView> bannedPersons = new HashSet<>();
+        final Collection<PersonView> bannedPersons = new LinkedHashSet<>();
         return BannedPersonsResponse.builder()
                 .banned(bannedPersons)
                 .build();

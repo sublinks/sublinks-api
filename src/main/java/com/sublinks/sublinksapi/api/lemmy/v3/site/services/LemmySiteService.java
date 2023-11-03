@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 @Service
@@ -52,7 +51,7 @@ public class LemmySiteService {
     // @todo custom emojis
     public Collection<CustomEmojiView> customEmojis() {
 
-        final Collection<CustomEmojiView> emojiViews = new HashSet<>();
+        final Collection<CustomEmojiView> emojiViews = new LinkedHashSet<>();
         return emojiViews;
     }
 
