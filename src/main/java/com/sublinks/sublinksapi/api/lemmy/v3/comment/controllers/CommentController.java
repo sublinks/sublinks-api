@@ -7,18 +7,21 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReportsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.enums.CommentSortType;
+import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +45,7 @@ public class CommentController {
     private final LemmyCommentService lemmyCommentService;
     private final PostRepository postRepository;
     private final LanguageRepository languageRepository;
+    private final ConversionService conversionService;
 
     @PostMapping
     @Transactional
@@ -58,7 +62,6 @@ public class CommentController {
                 .post(post)
                 .community(post.getCommunity())
                 .language(language)
-                .path(post.getCommunity().getId() + "." + post.getId())
                 .build();
 
         commentService.createComment(comment);
@@ -96,20 +99,8 @@ public class CommentController {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @PostMapping("remove")
-    CommentResponse remove() {
-
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
     @PostMapping("mark_as_read")
     CommentResponse markAsRead() {
-
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @PostMapping("distinguish")
-    CommentResponse distinguish() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
@@ -129,7 +120,22 @@ public class CommentController {
     @GetMapping("list")
     GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
-        final List<Comment> comments = commentRepository.findAll();
+        Post post = postRepository.findById((long) getCommentsForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+        CommentSortType sortType = conversionService.convert(getCommentsForm.sort(), CommentSortType.class);
+        ListingType listingType = conversionService.convert(getCommentsForm.type_(), ListingType.class);
+
+        final CommentSearchCriteria commentRepositorySearch = CommentSearchCriteria.builder()
+                .page(1)
+                .listingType(listingType)
+                .perPage(20)
+                .commentSortType(sortType)
+                .post(post)
+                .build();
+
+
+        final List<Comment> comments = commentRepository.allCommentsBySearchCriteria(commentRepositorySearch);
         final List<CommentView> commentViews = new ArrayList<>();
         for (Comment comment : comments) {
             final CommentView commentView = lemmyCommentService.createCommentView(comment, (Person) principal.getPrincipal());
@@ -140,18 +146,6 @@ public class CommentController {
 
     @PostMapping("report")
     CommentReportResponse report() {
-
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @PutMapping("report/resolve")
-    CommentReportResponse reportResolve() {
-
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @PostMapping("report/list")
-    ListCommentReportsResponse reportList() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }

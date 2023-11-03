@@ -16,6 +16,7 @@ public record PostSearchCriteria(
         List<Long> communityIds,
         Person person,
         boolean isSavedOnly,
+        boolean isLikedOnly,
         boolean isDislikedOnly
 ) {
 }
