@@ -9,6 +9,6 @@ public class SlugUtil {
                 .toLowerCase()
                 .replace("\n", " ")
                 .replace("[^a-z\\d\\s]", " ")
-                .replace("/ +/g", "_");
+                .replaceAll("\\s+", "_");
     }
 }

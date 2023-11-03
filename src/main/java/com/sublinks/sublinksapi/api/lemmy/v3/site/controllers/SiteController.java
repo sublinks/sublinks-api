@@ -77,9 +77,10 @@ public class SiteController {
 
         final Instance instance = localInstanceContext.instance();
         instance.setName(createSiteForm.name());
+        instance.setDomain(localInstanceContext.settings().baseUrl());
         instance.setActivityPubId(localInstanceContext.settings().baseUrl());
-        instance.setSoftware("");
-        instance.setVersion("");
+        instance.setSoftware("sublinks");
+        instance.setVersion("0.1.0");
         instance.setDescription(createSiteForm.description() == null ? null : createSiteForm.description());
         instance.setSidebar(createSiteForm.sidebar() == null ? null : createSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
