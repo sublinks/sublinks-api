@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
+import com.sublinks.sublinksapi.post.events.PostUpdatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
@@ -26,6 +27,7 @@ public class PostService {
     private final LinkPersonPostService linkPersonPostService;
     private final PostDeletedPublisher postDeletedPublisher;
     private final PostLikeService postLikeService;
+    private final PostUpdatedPublisher postUpdatedPublisher;
 
     public Person getPostCreator(final Post post) {
 
@@ -41,6 +43,13 @@ public class PostService {
     }
 
     @Transactional
+    public void updatePost(final Post post) {
+
+        postRepository.save(post);
+        postUpdatedPublisher.publish(post);
+    }
+
+    @Transactional
     public void createPost(final Post post, final Person creator) {
 
         final KeyStore keys = keyGeneratorUtil.generate();
@@ -50,7 +59,7 @@ public class PostService {
         post.setLocal(true);
 
         post.setActivityPubId("");
-        postRepository.save(post);
+        postRepository.save(post); // @todo fix second save making post look edited right away
         post.setActivityPubId("%s/post/%d".formatted(post.getInstance().getDomain(), post.getId()));
         postRepository.save(post);
 

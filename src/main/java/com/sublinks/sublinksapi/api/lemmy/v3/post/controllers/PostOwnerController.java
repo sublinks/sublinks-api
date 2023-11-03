@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.EditPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
@@ -82,9 +83,33 @@ public class PostOwnerController {
     }
 
     @PutMapping
-    PostResponse update() {
+    PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        Post post = postRepository.findById((long) editPostForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+        Person person = null;
+        if (principal != null) {
+            person = (Person) principal.getPrincipal();
+        }
+        authorizationService
+                .canPerson(person)
+                .defaultingToDecline()
+                .performTheAction(AuthorizeAction.update)
+                .onEntity(post)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        post.setTitle(editPostForm.name());
+        post.setPostBody(editPostForm.body());
+        post.setNsfw((editPostForm.nsfw() != null && editPostForm.nsfw()));
+        post.setLanguage(languageRepository.findById((long) editPostForm.language_id()).get()); // @todo catch errors here
+        post.setLinkUrl(editPostForm.url());
+
+        postService.updatePost(post);
+
+        return PostResponse.builder()
+                .post_view(lemmyPostService.postViewFromPost(post, person))
+                .build();
     }
 
     @PostMapping("delete")
