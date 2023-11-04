@@ -57,6 +57,9 @@ public class CommentLike implements Serializable {
     @Column(nullable = false, name = "is_down_vote")
     private boolean isDownVote;
 
+    @Column(nullable = false)
+    private int score;
+
     @CreationTimestamp
     @Column(updatable = false, nullable = false, name = "created_at")
     private Date createdAt;

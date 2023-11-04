@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportRespons
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateComment;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
@@ -12,6 +13,7 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
@@ -46,6 +48,7 @@ public class CommentController {
     private final PostRepository postRepository;
     private final LanguageRepository languageRepository;
     private final ConversionService conversionService;
+    private final CommentLikeService commentLikeService;
 
     @PostMapping
     @Transactional
@@ -82,7 +85,6 @@ public class CommentController {
         final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
         return CommentResponse.builder()
                 .comment_view(commentView)
-                .form_id(createCommentForm.form_id())
                 .recipient_ids(new ArrayList<>())
                 .build();
     }
@@ -106,9 +108,23 @@ public class CommentController {
     }
 
     @PostMapping("like")
-    CommentResponse like() {
+    CommentResponse like(@Valid @RequestBody CreateCommentLike createCommentLikeForm, JwtPerson jwtPerson) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        final Person person = (Person) jwtPerson.getPrincipal();
+        final Optional<Comment> comment = commentRepository.findById(createCommentLikeForm.comment_id());
+        if (createCommentLikeForm.score() == 1) {
+            commentLikeService.updateOrCreateCommentLikeLike(comment.get(), person);
+        } else if (createCommentLikeForm.score() == -1) {
+            commentLikeService.updateOrCreateCommentLikeDislike(comment.get(), person);
+        } else {
+            commentLikeService.updateOrCreateCommentLikeNeutral(comment.get(), person);
+        }
+
+        final CommentView commentView = lemmyCommentService.createCommentView(comment.get(), person);
+        return CommentResponse.builder()
+                .comment_view(commentView)
+                .recipient_ids(new ArrayList<>())
+                .build();
     }
 
     @PutMapping("save")
@@ -120,11 +136,16 @@ public class CommentController {
     @GetMapping("list")
     GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
-        Post post = postRepository.findById((long) getCommentsForm.post_id())
+        final Post post = postRepository.findById((long) getCommentsForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-        CommentSortType sortType = conversionService.convert(getCommentsForm.sort(), CommentSortType.class);
-        ListingType listingType = conversionService.convert(getCommentsForm.type_(), ListingType.class);
+        Person person = null;
+        if (principal != null) {
+            person = (Person) principal.getPrincipal();
+        }
+
+        final CommentSortType sortType = conversionService.convert(getCommentsForm.sort(), CommentSortType.class);
+        final ListingType listingType = conversionService.convert(getCommentsForm.type_(), ListingType.class);
 
         final CommentSearchCriteria commentRepositorySearch = CommentSearchCriteria.builder()
                 .page(1)
@@ -134,11 +155,15 @@ public class CommentController {
                 .post(post)
                 .build();
 
-
         final List<Comment> comments = commentRepository.allCommentsBySearchCriteria(commentRepositorySearch);
         final List<CommentView> commentViews = new ArrayList<>();
         for (Comment comment : comments) {
-            final CommentView commentView = lemmyCommentService.createCommentView(comment, (Person) principal.getPrincipal());
+            CommentView commentView;
+            if (person != null) {
+                commentView = lemmyCommentService.createCommentView(comment, person);
+            } else {
+                commentView = lemmyCommentService.createCommentView(comment);
+            }
             commentViews.add(commentView);
         }
         return GetCommentsResponse.builder().comments(commentViews).build();

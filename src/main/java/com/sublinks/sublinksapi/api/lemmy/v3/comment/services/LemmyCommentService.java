@@ -9,9 +9,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,6 +22,7 @@ public class LemmyCommentService {
     private final LemmyCommunityService lemmyCommunityService;
     private final LocalInstanceContext localInstanceContext;
     private final ConversionService conversionService;
+    private final CommentLikeService commentLikeService;
 
     public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
 
@@ -27,10 +30,45 @@ public class LemmyCommentService {
         return String.format("%s/comment/%d", domain, comment.getId());
     }
 
+
+    @NonNull
     public CommentView createCommentView(
             final com.sublinks.sublinksapi.comment.dto.Comment comment,
             final com.sublinks.sublinksapi.person.dto.Person person
     ) {
+
+        return commentViewBuilder(comment, person).build();
+    }
+
+    @NonNull
+    public CommentView createCommentView(
+            final com.sublinks.sublinksapi.comment.dto.Comment comment
+    ) {
+
+        return commentViewBuilder(comment).build();
+    }
+
+    @NonNull
+    private CommentView.CommentViewBuilder commentViewBuilder(
+            final com.sublinks.sublinksapi.comment.dto.Comment comment,
+            final com.sublinks.sublinksapi.person.dto.Person person
+    ) {
+        CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
+
+        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
+                person, comment.getCommunity()
+        );
+        final int personVote = commentLikeService.getPersonCommentVote(person, comment);
+
+        commentView.subscribed(subscribedType)
+                .saved(false)// @todo check if saved
+                .my_vote(personVote);
+
+        return commentView;
+    }
+
+    @NonNull
+    private CommentView.CommentViewBuilder commentViewBuilder(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
 
         final Comment lemmyComment = conversionService.convert(comment, Comment.class);
 
@@ -47,21 +85,13 @@ public class LemmyCommentService {
 
         final CommentAggregates lemmyCommentAggregates = conversionService.convert(commentAggregate, CommentAggregates.class);
 
-        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
-                person, comment.getCommunity()
-        );
-
         return CommentView.builder()
                 .comment(lemmyComment)
                 .creator(lemmyCreator)
                 .community(lemmyCommunity)
                 .post(lemmyPost)
                 .counts(lemmyCommentAggregates)
-                .subscribed(subscribedType) // @todo fix this
                 .creator_banned_from_community(false) // @todo creator checks
-                .creator_blocked(false)
-                .saved(false)// @todo check if saved
-                .my_vote(1) // @todo user vote
-                .build();
+                .creator_blocked(false);
     }
 }

@@ -95,6 +95,11 @@ public class PersonService {
                 .bannerImageUrl("")
                 .biography("")
                 .isBanned(false)
+                .isShowAvatars(true)
+                .isShowScores(true)
+                .isShowAvatars(true)
+                .isShowReadPosts(true)
+                .isShowNsfw(true)
                 .build();
     }
 }
