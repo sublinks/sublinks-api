@@ -48,34 +48,43 @@ import java.util.Set;
 @Entity
 @Table(name = "people")
 public class Person implements UserDetails, Principal {
-    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
-    Set<LinkPersonCommunity> linkPersonCommunity;
-    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
-    Set<LinkPersonPost> linkPersonPost;
     /**
      * Relationships
      */
+    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+    Set<LinkPersonCommunity> linkPersonCommunity;
+
+    @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+    Set<LinkPersonPost> linkPersonPost;
+
     @ManyToOne
     @JoinColumn(name = "instance_id")
     private Instance instance;
+
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
-    @OneToMany
+
+    @OneToMany(mappedBy = "person")
     @PrimaryKeyJoinColumn
     private List<CommentLike> commentLikes;
+
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<PostSave> postSaves;
+
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<PostLike> postLikes;
+
     @OneToMany
     @PrimaryKeyJoinColumn
     private List<PostRead> postReads;
+
     @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private PersonAggregate personAggregate;
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "person_languages",

@@ -12,8 +12,10 @@ import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @Transactional
@@ -42,6 +46,7 @@ public class PostOwnerController {
     private final LanguageRepository languageRepository;
     private final CommunityRepository communityRepository;
     private final SlugUtil slugUtil;
+    private final PersonService personService;
 
     @PostMapping
     @Transactional
@@ -60,10 +65,22 @@ public class PostOwnerController {
                 .defaultResponse(community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline : AuthorizationService.ResponseType.allow)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
+        // Language
+        Optional<Language> language;
+        if (createPostForm.language_id() != null) {
+            language = languageRepository.findById((long) createPostForm.language_id());
+        } else {
+            language = personService.getPersonDefaultPostLanguage(person, community);
+        }
+
+        if (language.isEmpty()) {
+            throw new RuntimeException("No language selected");
+        }
+
         Post post = Post.builder()
                 .instance(localInstanceContext.instance())
                 .community(community)
-                .language(languageRepository.findById((long) createPostForm.language_id()).get()) // @todo catch errors here
+                .language(language.get())
                 .title(createPostForm.name())
                 .titleSlug(slugUtil.stringToSlug(createPostForm.name()))
                 .postBody(createPostForm.body())

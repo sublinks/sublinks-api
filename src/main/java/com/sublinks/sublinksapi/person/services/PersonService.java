@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.person.services;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonAggregate;
 import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
@@ -32,6 +33,17 @@ public class PersonService {
     private final LocalInstanceContext localInstanceContext;
     private final PersonCreatedPublisher personCreatedPublisher;
     private final PersonUpdatedPublisher personUpdatedPublisher;
+
+    @Transactional
+    public Optional<Language> getPersonDefaultPostLanguage(final Person person, final Community community) {
+
+        for (Language language : person.getLanguages()) {
+            if (community.getLanguages().contains(language)) {
+                return Optional.of(language);
+            }
+        }
+        return Optional.empty();
+    }
 
     public PersonContext getPersonContext(final Person person) {
 
@@ -67,6 +79,9 @@ public class PersonService {
         person.setPublicKey(keys.publicKey());
         person.setPrivateKey(keys.privateKey());
         person.setLocal(true);
+
+        final List<Language> languages = new ArrayList<>(localInstanceContext.instance().getLanguages());
+        person.setLanguages(languages);
         personRepository.save(person);
 
         final PersonAggregate personAggregate = PersonAggregate.builder().person(person).build();

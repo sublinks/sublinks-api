@@ -52,7 +52,7 @@ public class Comment implements Serializable {
     @JoinColumn(name = "community_id")
     private Community community;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
     private List<CommentLike> likes;
 
     @ManyToOne
