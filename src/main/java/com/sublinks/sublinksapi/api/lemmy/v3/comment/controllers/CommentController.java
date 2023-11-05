@@ -80,7 +80,9 @@ public class CommentController {
         }
         comment.setPath(path);
         comment.setActivityPubId(lemmyCommentService.generateActivityPubId(comment));
-        commentRepository.saveAndFlush(comment);
+        commentRepository.save(comment);
+
+        commentLikeService.updateOrCreateCommentLikeLike(comment, person);
 
         final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
         return CommentResponse.builder()

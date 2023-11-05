@@ -17,34 +17,35 @@ public class PostLikeUpdatedListener implements ApplicationListener<PostLikeUpda
     public void onApplicationEvent(PostLikeUpdatedEvent event) {
         final PostAggregate postAggregate = event.getPostLike().getPost().getPostAggregate();
         switch (event.getAction()) {
-            case FROM_UP_TO_DOWN:
+            case FROM_UP_TO_DOWN -> {
                 postAggregate.setScore(postAggregate.getScore() - 2);
                 postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() - 1);
                 postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() + 1);
-                break;
-            case FROM_UP_TO_NEUTRAL:
+            }
+            case FROM_UP_TO_NEUTRAL -> {
                 postAggregate.setScore(postAggregate.getScore() - 1);
                 postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() - 1);
-                break;
-            case FROM_DOWN_TO_UP:
+            }
+            case FROM_DOWN_TO_UP -> {
                 postAggregate.setScore(postAggregate.getScore() + 2);
                 postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() + 1);
                 postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() - 1);
-                break;
-            case FROM_DOWN_TO_NEUTRAL:
+            }
+            case FROM_DOWN_TO_NEUTRAL -> {
                 postAggregate.setScore(postAggregate.getScore() + 1);
                 postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() - 1);
-                break;
-            case FROM_NEUTRAL_TO_UP:
+            }
+            case FROM_NEUTRAL_TO_UP -> {
                 postAggregate.setScore(postAggregate.getScore() + 1);
                 postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() + 1);
-                break;
-            case FROM_NEUTRAL_TO_DOWN:
+            }
+            case FROM_NEUTRAL_TO_DOWN -> {
                 postAggregate.setScore(postAggregate.getScore() - 1);
                 postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() + 1);
-                break;
-            default:
+            }
+            default -> {
                 // do nothing
+            }
         }
         postAggregateRepository.save(postAggregate);
     }
