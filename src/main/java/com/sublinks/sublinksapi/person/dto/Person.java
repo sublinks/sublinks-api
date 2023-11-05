@@ -85,7 +85,7 @@ public class Person implements UserDetails, Principal {
     @PrimaryKeyJoinColumn
     private PersonAggregate personAggregate;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(
             name = "person_languages",
             joinColumns = @JoinColumn(name = "person_id"),
