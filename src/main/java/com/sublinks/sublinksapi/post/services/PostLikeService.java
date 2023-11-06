@@ -58,7 +58,7 @@ public class PostLikeService {
         final PostLike postLike = PostLike.builder()
                 .post(post)
                 .person(person)
-                .isUpVote(score == 0)
+                .isUpVote(score == 1)
                 .isDownVote(score == -1)
                 .score(score)
                 .build();

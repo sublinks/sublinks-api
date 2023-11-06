@@ -84,7 +84,12 @@ public class PostController {
         } else {
             postView = lemmyPostService.postViewFromPost(post);
         }
-        final CommunityView communityView = lemmyCommunityService.communityViewFromCommunity(community);
+        final CommunityView communityView;
+        if (person == null) {
+            communityView = lemmyCommunityService.communityViewFromCommunity(community);
+        } else {
+            communityView = lemmyCommunityService.communityViewFromCommunity(community, (Person) person.getPrincipal());
+        }
         final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
         final List<PostView> crossPosts = new ArrayList<>();//@todo cross post
         return GetPostResponse.builder()
@@ -181,17 +186,18 @@ public class PostController {
     PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson jwtPerson) {
 
         final Person person = (Person) jwtPerson.getPrincipal();
-        final Optional<Post> post = postRepository.findById(createPostLikeForm.post_id());
+        final Post post = postRepository.findById(createPostLikeForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         if (createPostLikeForm.score() == 1) {
-            postLikeService.updateOrCreatePostLikeLike(post.get(), person);
+            postLikeService.updateOrCreatePostLikeLike(post, person);
         } else if (createPostLikeForm.score() == -1) {
-            postLikeService.updateOrCreatePostLikeDislike(post.get(), person);
+            postLikeService.updateOrCreatePostLikeDislike(post, person);
         } else {
-            postLikeService.updateOrCreatePostLikeNeutral(post.get(), person);
+            postLikeService.updateOrCreatePostLikeNeutral(post, person);
         }
 
         return PostResponse.builder()
-                .post_view(lemmyPostService.postViewFromPost(post.get(), person))
+                .post_view(lemmyPostService.postViewFromPost(post, person))
                 .build();
     }
 

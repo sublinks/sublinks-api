@@ -19,12 +19,15 @@ public class CommentService {
     @Transactional
     public void createComment(final Comment comment) {
 
+        commentRepository.save(comment);
+
         CommentAggregate commentAggregate = CommentAggregate.builder()
                 .comment(comment)
                 .build();
-        commentRepository.save(comment);
+
         commentAggregateRepository.save(commentAggregate);
         comment.setCommentAggregate(commentAggregate);
+
         commentCreatedPublisher.publish(comment);
     }
 }

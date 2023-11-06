@@ -19,6 +19,7 @@ import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import jakarta.validation.Valid;
@@ -49,14 +50,25 @@ public class CommentController {
     private final LanguageRepository languageRepository;
     private final ConversionService conversionService;
     private final CommentLikeService commentLikeService;
+    private final PersonService personService;
 
     @PostMapping
     @Transactional
     public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm, final JwtPerson principal) {
 
         final Person person = (Person) principal.getPrincipal();
-        final Post post = postRepository.findById((long) createCommentForm.post_id()).get();
-        final Language language = languageRepository.findById((long) createCommentForm.language_id()).get();
+        final Post post = postRepository.findById((long) createCommentForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        // Language
+        Optional<Language> language;
+        if (createCommentForm.language_id() != null) {
+            language = languageRepository.findById((long) createCommentForm.language_id());
+        } else {
+            language = personService.getPersonDefaultPostLanguage(person, post.getCommunity());
+        }
+        if (language.isEmpty()) {
+            throw new RuntimeException("No language selected");
+        }
         final Comment comment = Comment.builder()
                 .person(person)
                 .isLocal(true)
@@ -64,7 +76,7 @@ public class CommentController {
                 .activityPubId("")
                 .post(post)
                 .community(post.getCommunity())
-                .language(language)
+                .language(language.get())
                 .build();
 
         commentService.createComment(comment);
