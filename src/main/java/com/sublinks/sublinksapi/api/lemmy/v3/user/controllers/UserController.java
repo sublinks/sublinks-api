@@ -37,9 +37,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Objects;
 
 @RestController
 @RequiredArgsConstructor
@@ -51,11 +51,13 @@ public class UserController {
     private final PersonRepository personRepository;
 
     @PostMapping("register")
-    LoginResponse create(@Valid @RequestBody final Register registerForm) throws NoSuchAlgorithmException {
+    LoginResponse create(@Valid @RequestBody final Register registerForm) {
 
-        final Person person = personService.create(
-                registerForm.username()
-        );
+        final Person person = personService.getDefaultNewUser(registerForm.username());
+        if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
+            throw new RuntimeException("Passwords do not match");
+            // @todo throw lemmy error code
+        }
         personService.createPerson(person);
         final String token = jwtUtil.generateToken(person);
         return LoginResponse.builder()
@@ -135,11 +137,12 @@ public class UserController {
     LoginResponse login(@Valid @RequestBody final Login loginForm) {
 
         final Person person = personRepository.findOneByName(loginForm.username_or_email());
+        // @todo verify password
         final String token = jwtUtil.generateToken(person);
         return LoginResponse.builder()
                 .jwt(token)
-                .registration_created(false)
-                .verify_email_sent(false)
+                .registration_created(false) // @todo return true if application created
+                .verify_email_sent(false) // @todo return true if welcome email sent for verification
                 .build();
     }
 
