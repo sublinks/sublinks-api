@@ -68,7 +68,7 @@ public class PostLikeService {
 
     private void updatePostLike(final PostLike postLike, final int score) {
 
-        PostLikeUpdatedEvent.Action action = null;
+        PostLikeUpdatedEvent.Action action = PostLikeUpdatedEvent.Action.NO_CHANGE;
         if (postLike.isUpVote()) {
             if (score == -1) {
                 action = PostLikeUpdatedEvent.Action.FROM_UP_TO_DOWN;

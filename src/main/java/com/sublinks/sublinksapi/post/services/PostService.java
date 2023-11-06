@@ -9,7 +9,6 @@ import com.sublinks.sublinksapi.post.dto.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
 import com.sublinks.sublinksapi.post.events.PostUpdatedPublisher;
-import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
@@ -21,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
-    private final PostAggregateRepository postAggregateRepository;
     private final PostCreatedPublisher postCreatedPublisher;
     private final KeyGeneratorUtil keyGeneratorUtil;
     private final LinkPersonPostService linkPersonPostService;
@@ -57,21 +55,17 @@ public class PostService {
         post.setPrivateKey(keys.privateKey());
 
         post.setLocal(true);
-
+        final PostAggregate postAggregate = PostAggregate.builder()
+                .post(post)
+                .community(post.getCommunity())
+                .build();
+        post.setPostAggregate(postAggregate);
         post.setActivityPubId("");
         postRepository.save(post); // @todo fix second save making post look edited right away
         post.setActivityPubId("%s/post/%d".formatted(post.getInstance().getDomain(), post.getId()));
         postRepository.save(post);
 
         linkPersonPostService.createLink(creator, post, LinkPersonPostType.creator);
-
-        final PostAggregate postAggregate = PostAggregate.builder()
-                .post(post)
-                .community(post.getCommunity())
-                .build();
-        postAggregateRepository.save(postAggregate);
-        post.setPostAggregate(postAggregate);
-
         postLikeService.updateOrCreatePostLikeLike(post, creator);
 
         postCreatedPublisher.publish(post);

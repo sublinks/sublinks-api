@@ -78,7 +78,7 @@ public class CommentLikeService {
 
     private void updateCommentLike(final CommentLike commentLike, final int score) {
 
-        CommentLikeUpdatedEvent.Action action = null;
+        CommentLikeUpdatedEvent.Action action = CommentLikeUpdatedEvent.Action.NO_CHANGE;
         if (commentLike.isUpVote()) {
             if (score == -1) {
                 action = CommentLikeUpdatedEvent.Action.FROM_UP_TO_DOWN;

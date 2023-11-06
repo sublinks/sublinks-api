@@ -21,6 +21,7 @@ public class PostLikeUpdatedEvent extends ApplicationEvent {
         FROM_UP_TO_DOWN,
         FROM_UP_TO_NEUTRAL,
         FROM_NEUTRAL_TO_UP,
-        FROM_NEUTRAL_TO_DOWN
+        FROM_NEUTRAL_TO_DOWN,
+        NO_CHANGE
     }
 }
