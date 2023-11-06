@@ -14,6 +14,6 @@ public record MyUserInfo(
         Collection<CommunityModeratorView> moderates,
         Collection<CommunityBlockView> community_blocks,
         Collection<PersonBlockView> person_blocks,
-        Collection<Integer> discussion_languages
+        Collection<Long> discussion_languages
 ) {
 }

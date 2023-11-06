@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.post.events;
+package com.sublinks.sublinksapi.post.listeners;
 
 import com.sublinks.sublinksapi.comment.events.CommentCreatedEvent;
 import com.sublinks.sublinksapi.post.dto.PostAggregate;

@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.instance.events;
+package com.sublinks.sublinksapi.instance.listeners;
 
 import com.sublinks.sublinksapi.instance.dto.InstanceAggregate;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;

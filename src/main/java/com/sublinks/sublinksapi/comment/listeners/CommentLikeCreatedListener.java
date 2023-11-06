@@ -1,6 +1,7 @@
-package com.sublinks.sublinksapi.comment.events;
+package com.sublinks.sublinksapi.comment.listeners;
 
 import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.comment.events.CommentLikeCreatedEvent;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;

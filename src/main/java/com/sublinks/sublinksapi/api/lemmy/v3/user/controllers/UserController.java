@@ -12,6 +12,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SaveUserSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
@@ -21,6 +23,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -29,8 +32,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -41,6 +46,7 @@ public class UserController {
     private final PersonRepository personRepository;
     private final ConversionService conversionService;
     private final PersonService personService;
+    private final LocalInstanceContext localInstanceContext;
 
     @GetMapping()
     GetPersonDetailsResponse show(@Valid final GetPersonDetails getPersonDetailsForm) {
@@ -97,8 +103,10 @@ public class UserController {
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Transactional
     @PutMapping("save_user_settings")
-    LoginResponse saveUserSettings(@Valid @RequestBody SaveUserSettings saveUserSettingsForm, JwtPerson principal) {
+    public LoginResponse saveUserSettings(@Valid @RequestBody SaveUserSettings saveUserSettingsForm, JwtPerson principal) {
+
         Person person = Optional.ofNullable((Person)principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
@@ -126,7 +134,12 @@ public class UserController {
         // @todo generate_totp_2fa
         person.setOpenLinksInNewTab(saveUserSettingsForm.open_links_in_new_tab() != null && saveUserSettingsForm.open_links_in_new_tab());
 
-        // @todo languages
+        final List<Language> languages = new ArrayList<>();
+        for (String languageCode : saveUserSettingsForm.discussion_languages()) {
+            final Optional<Language> language = localInstanceContext.languageRepository().findById(Long.valueOf(languageCode));
+            language.ifPresent(languages::add);
+        }
+        person.setLanguages(languages);
 
         personService.updatePerson(person);
 

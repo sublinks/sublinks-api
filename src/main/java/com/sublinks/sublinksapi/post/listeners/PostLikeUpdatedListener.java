@@ -1,6 +1,7 @@
-package com.sublinks.sublinksapi.post.events;
+package com.sublinks.sublinksapi.post.listeners;
 
 import com.sublinks.sublinksapi.post.dto.PostAggregate;
+import com.sublinks.sublinksapi.post.events.PostLikeUpdatedEvent;
 import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;

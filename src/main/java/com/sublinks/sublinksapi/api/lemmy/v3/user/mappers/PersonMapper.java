@@ -17,7 +17,7 @@ public interface PersonMapper extends Converter<Person, com.sublinks.sublinksapi
     @Mapping(target = "banned", source = "person.banned")
     @Mapping(target = "published", source = "person.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "updated", source = "person.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-    @Mapping(target = "actor_id", constant = "")
+    @Mapping(target = "actor_id", source = "person.activityPubId")
     @Mapping(target = "bio", source = "person.biography")
     @Mapping(target = "local", source = "person.local")
     @Mapping(target = "banner", source = "person.bannerImageUrl")

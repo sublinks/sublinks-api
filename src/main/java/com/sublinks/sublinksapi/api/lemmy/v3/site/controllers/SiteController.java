@@ -62,7 +62,7 @@ public class SiteController {
                 .admins(lemmySiteService.admins());
 
         if (person != null) {
-            builder.my_user(myUserInfoService.getMyUserInfo());
+            builder.my_user(myUserInfoService.getMyUserInfo(person));
 
         }
 

@@ -10,8 +10,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonBlockView;
 import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.models.PersonContext;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -24,31 +24,41 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class MyUserInfoService {
     private final ConversionService conversionService;
-    private final PersonContext personContext;
     private final LinkPersonCommunityService linkPersonCommunityService;
 
-    public MyUserInfo getMyUserInfo() {
+    public MyUserInfo getMyUserInfo(com.sublinks.sublinksapi.person.dto.Person person) {
+
         return MyUserInfo.builder()
                 .local_user_view(LocalUserView.builder()
-                        .local_user(conversionService.convert(personContext.getPerson(), LocalUser.class))
-                        .person(conversionService.convert(personContext.getPerson(), Person.class))
-                        .counts(conversionService.convert(personContext.getPersonAggregate(), PersonAggregates.class))
+                        .local_user(conversionService.convert(person, LocalUser.class))
+                        .person(conversionService.convert(person, Person.class))
+                        .counts(conversionService.convert(person.getPersonAggregate(), PersonAggregates.class))
                         .build())
-                .follows(getUserCommunityFollows())
-                .moderates(getUserCommunityModerates())
-                .community_blocks(getUserCommunitiesBlocked())
-                .person_blocks(getUserPeopleBlocked())
-                .discussion_languages(personContext.getDiscussLanguages())
+                .follows(getUserCommunityFollows(person))
+                .moderates(getUserCommunityModerates(person))
+                .community_blocks(getUserCommunitiesBlocked(person))
+                .person_blocks(getUserPeopleBlocked(person))
+                .discussion_languages(getDiscussionLanguages(person))
                 .build();
     }
 
-    public Collection<CommunityFollowerView> getUserCommunityFollows() {
-        Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(personContext.getPerson(), LinkPersonCommunityType.follower);
+    public Collection<Long> getDiscussionLanguages(com.sublinks.sublinksapi.person.dto.Person person) {
+
+        Collection<Long> languages = new ArrayList<>();
+        for (Language language : person.getLanguages()) {
+            languages.add(language.getId());
+        }
+        return languages;
+    }
+
+    public Collection<CommunityFollowerView> getUserCommunityFollows(com.sublinks.sublinksapi.person.dto.Person person) {
+
+        Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.follower);
 
         Collection<CommunityFollowerView> communityFollowerViews = new ArrayList<>();
         for (Community community : communities) {
             communityFollowerViews.add(CommunityFollowerView.builder()
-                    .follower(conversionService.convert(personContext.getPerson(), Person.class))
+                    .follower(conversionService.convert(person, Person.class))
                     .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
                     .build());
         }
@@ -56,43 +66,46 @@ public class MyUserInfoService {
         return communityFollowerViews;
     }
 
-    public Collection<CommunityModeratorView> getUserCommunityModerates() {
+    public Collection<CommunityModeratorView> getUserCommunityModerates(com.sublinks.sublinksapi.person.dto.Person person) {
+
         // @todo make this a single query
-        Collection<Community> communitiesOwned = linkPersonCommunityService.getPersonLinkByType(personContext.getPerson(), LinkPersonCommunityType.owner);
-        Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(personContext.getPerson(), LinkPersonCommunityType.moderator);
+        Collection<Community> communitiesOwned = linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner);
+        Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.moderator);
 
         Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
         for (Community community : communitiesOwned) {
             communityModeratorViews.add(
                     CommunityModeratorView.builder()
-                            .moderator(conversionService.convert(personContext.getPerson(), Person.class))
+                            .moderator(conversionService.convert(person, Person.class))
                             .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
                             .build());
         }
         for (Community community : communities) {
             communityModeratorViews.add(
                     CommunityModeratorView.builder()
-                            .moderator(conversionService.convert(personContext.getPerson(), Person.class))
+                            .moderator(conversionService.convert(person, Person.class))
                             .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
                             .build());
         }
         return communityModeratorViews;
     }
 
-    public Collection<CommunityBlockView> getUserCommunitiesBlocked() {
-        Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(personContext.getPerson(), LinkPersonCommunityType.blocked);
+    public Collection<CommunityBlockView> getUserCommunitiesBlocked(com.sublinks.sublinksapi.person.dto.Person person) {
+
+        Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked);
 
         Collection<CommunityBlockView> communityBlockViews = new ArrayList<>();
         for (Community community : communities) {
             communityBlockViews.add(CommunityBlockView.builder()
-                    .person(conversionService.convert(personContext.getPerson(), Person.class))
+                    .person(conversionService.convert(person, Person.class))
                     .community(conversionService.convert(community, com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
                     .build());
         }
         return communityBlockViews;
     }
 
-    public Collection<PersonBlockView> getUserPeopleBlocked() {
+    public Collection<PersonBlockView> getUserPeopleBlocked(com.sublinks.sublinksapi.person.dto.Person person) {
+
         return new ArrayList<>(); // @todo people blocks
     }
 }

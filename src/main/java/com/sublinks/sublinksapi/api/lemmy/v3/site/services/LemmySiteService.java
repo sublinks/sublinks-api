@@ -8,10 +8,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
-import com.sublinks.sublinksapi.person.models.PersonContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -25,8 +23,6 @@ import java.util.LinkedHashSet;
 public class LemmySiteService {
     private final ConversionService conversionService;
     private final LocalInstanceContext localInstanceContext;
-    private final LemmyPersonService lemmyPersonService;
-    private final PersonContext personContext;
 
     // @todo finish admin list
     public Collection<PersonView> admins() {

@@ -1,6 +1,7 @@
-package com.sublinks.sublinksapi.post.events;
+package com.sublinks.sublinksapi.post.listeners;
 
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;

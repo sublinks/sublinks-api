@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.authorization.events;
+package com.sublinks.sublinksapi.authorization.listeners;
 
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;

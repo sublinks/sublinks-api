@@ -12,6 +12,8 @@ import com.sublinks.sublinksapi.post.dto.PostSave;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -145,9 +147,11 @@ public class Person implements UserDetails, Principal {
     @Column(nullable = false, name = "default_theme")
     private String defaultTheme;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "default_listing_type")
     private ListingType defaultListingType;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "default_sort_type")
     private SortType defaultSortType;
 
