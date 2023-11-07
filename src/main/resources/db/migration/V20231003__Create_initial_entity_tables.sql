@@ -391,3 +391,18 @@ CREATE TABLE `post_reads`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE UNIQUE INDEX `IDX_POST_READ_POST_ID_PERSON_ID` ON `post_reads` (`post_id`, `person_id`);
+
+/**
+  Comment Read table
+ */
+CREATE TABLE `comment_reads`
+(
+    `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `comment_id` BIGINT                                    NOT NULL,
+    `person_id`  BIGINT                                    NOT NULL,
+    `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE UNIQUE INDEX `IDX_COMMENT_READ_COMMENT_ID_PERSON_ID` ON `comment_reads` (`comment_id`, `person_id`);

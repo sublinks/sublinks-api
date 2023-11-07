@@ -78,15 +78,19 @@ public class Person implements UserDetails, Principal {
     @PrimaryKeyJoinColumn
     private List<CommentLike> commentLikes;
 
-    @OneToMany
+    @OneToMany(mappedBy = "person")
+    @PrimaryKeyJoinColumn
+    private List<CommentLike> commentReads;
+
+    @OneToMany(mappedBy = "person")
     @PrimaryKeyJoinColumn
     private List<PostSave> postSaves;
 
-    @OneToMany
+    @OneToMany(mappedBy = "person")
     @PrimaryKeyJoinColumn
     private List<PostLike> postLikes;
 
-    @OneToMany
+    @OneToMany(mappedBy = "person")
     @PrimaryKeyJoinColumn
     private List<PostRead> postReads;
 

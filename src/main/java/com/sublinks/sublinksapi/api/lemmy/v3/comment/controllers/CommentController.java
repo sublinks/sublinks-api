@@ -6,14 +6,19 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentLike;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.EditComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.MarkCommentReplyAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
+import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
+import com.sublinks.sublinksapi.comment.services.CommentReadService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
@@ -51,11 +56,14 @@ public class CommentController {
     private final ConversionService conversionService;
     private final CommentLikeService commentLikeService;
     private final PersonService personService;
+    private final CommentReadService commentReadService;
+    private final AuthorizationService authorizationService;
 
     @PostMapping
     @Transactional
     public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm, final JwtPerson principal) {
 
+        // @todo auth service
         final Person person = (Person) principal.getPrincipal();
         final Post post = postRepository.findById((long) createCommentForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -104,9 +112,37 @@ public class CommentController {
     }
 
     @PutMapping
-    CommentResponse update() {
+    CommentResponse update(@Valid @RequestBody final EditComment editCommentForm, final JwtPerson principal) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        Person person = Optional.ofNullable((Person) principal.getPrincipal())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        authorizationService
+                .canPerson(person)
+                .performTheAction(AuthorizeAction.update)
+                .onEntity(comment)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        comment.setCommentBody(editCommentForm.content());
+        Optional<Language> language;
+        if (editCommentForm.language_id() != null) {
+            language = languageRepository.findById((long) editCommentForm.language_id());
+        } else {
+            language = personService.getPersonDefaultPostLanguage(person, comment.getPost().getCommunity());
+        }
+        if (language.isEmpty()) {
+            throw new RuntimeException("No language selected");
+        }
+        comment.setLanguage(language.get());
+
+        commentService.updateComment(comment);
+
+        final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
+        return CommentResponse.builder()
+                .comment_view(commentView)
+                .recipient_ids(new ArrayList<>())
+                .build();
     }
 
     @PostMapping("delete")
@@ -116,9 +152,20 @@ public class CommentController {
     }
 
     @PostMapping("mark_as_read")
-    CommentResponse markAsRead() {
+    CommentResponse markAsRead(@Valid @RequestBody final MarkCommentReplyAsRead markCommentReplyAsRead, final JwtPerson principal) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        Optional<Comment> comment = commentRepository.findById((long) markCommentReplyAsRead.comment_reply_id());
+        if (comment.isEmpty() || principal == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        final Person person = (Person) principal.getPrincipal();
+        commentReadService.markCommentReadByPerson(comment.get(), person);
+
+        final CommentView commentView = lemmyCommentService.createCommentView(comment.get(), person);
+        return CommentResponse.builder()
+                .comment_view(commentView)
+                .recipient_ids(new ArrayList<>())
+                .build();
     }
 
     @PostMapping("like")
@@ -175,6 +222,7 @@ public class CommentController {
             CommentView commentView;
             if (person != null) {
                 commentView = lemmyCommentService.createCommentView(comment, person);
+                commentReadService.markCommentReadByPerson(comment, person);
             } else {
                 commentView = lemmyCommentService.createCommentView(comment);
             }

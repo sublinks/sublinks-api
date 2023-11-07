@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.comment.dto;
 
+import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -36,7 +38,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "comments")
-public class Comment implements Serializable {
+public class Comment implements Serializable, AuthorizationEntityInterface {
     /**
      * Relationships
      */
@@ -98,4 +100,9 @@ public class Comment implements Serializable {
     @UpdateTimestamp
     @Column(updatable = false, nullable = false, name = "updated_at")
     private Date updatedAt;
+
+    @Override
+    public AuthorizedEntityType entityType() {
+        return AuthorizedEntityType.comment;
+    }
 }

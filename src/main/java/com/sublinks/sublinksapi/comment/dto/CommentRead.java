@@ -1,8 +1,9 @@
-package com.sublinks.sublinksapi.post.dto;
+package com.sublinks.sublinksapi.comment.dto;
 
 import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,7 +16,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.util.Date;
 
@@ -25,16 +25,16 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "post_likes")
-public class PostLike {
+@Table(name = "comment_reads")
+public class CommentRead {
     /**
      * Relationships
      */
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "person_id")
     private Person person;
 
@@ -45,20 +45,7 @@ public class PostLike {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, name = "is_up_vote")
-    private boolean isUpVote;
-
-    @Column(nullable = false, name = "is_down_vote")
-    private boolean isDownVote;
-
-    @Column(nullable = false)
-    private int score;
-
     @CreationTimestamp
     @Column(updatable = false, nullable = false, name = "created_at")
     private Date createdAt;
-
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
 }
