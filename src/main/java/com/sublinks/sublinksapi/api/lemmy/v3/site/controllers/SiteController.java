@@ -63,7 +63,6 @@ public class SiteController {
 
         if (person != null) {
             builder.my_user(myUserInfoService.getMyUserInfo(person));
-
         }
 
         return builder.build();

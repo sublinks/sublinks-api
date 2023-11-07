@@ -52,24 +52,18 @@ ALTER TABLE `instance_languages`
     ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE,
     ADD FOREIGN KEY (`language_id`) REFERENCES `languages` (`id`) ON DELETE CASCADE;
 
-
-/**
-  People table
- */
-ALTER TABLE `people`
-    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;
-
 /**
   Person Aggregates table
  */
 ALTER TABLE `person_aggregates`
     ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
 /**
   Link Person Communities table
  */
-ALTER TABLE `link_person_communities`
+ALTER TABLE `link_person_instances`
     ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
-    ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE;
+    ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;
 
 /**
   Person Languages table

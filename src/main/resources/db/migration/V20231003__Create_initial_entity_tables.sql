@@ -136,6 +136,23 @@ CREATE TABLE `instances`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
+  Person Instance table
+ */
+CREATE TABLE `link_person_instances`
+(
+    `id`          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `person_id`   BIGINT                                    NOT NULL,
+    `instance_id` BIGINT                                    NOT NULL,
+    `link_type`   ENUM ('super_admin', 'admin', 'user')     NOT NULL,
+    `created_at`  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE UNIQUE INDEX `IDX_LINK_PERSON_INSTANCE_PERSON_ID_INSTANCE_ID` ON `link_person_instances` (`person_id`, `instance_id`);
+
+
+/**
   Instance Languages table
  */
 CREATE TABLE `instance_languages`
@@ -177,7 +194,6 @@ CREATE TABLE `languages`
 CREATE TABLE `people`
 (
     `id`                             BIGINT AUTO_INCREMENT PRIMARY KEY,
-    `instance_id`                    BIGINT       NOT NULL,
     `is_local`                       TINYINT      NOT NULL DEFAULT 0,
     `is_bot_account`                 TINYINT      NOT NULL DEFAULT 0,
     `is_banned`                      TINYINT      NOT NULL DEFAULT 0,

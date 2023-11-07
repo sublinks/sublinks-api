@@ -60,8 +60,15 @@ public class Person implements UserDetails, Principal {
     Set<LinkPersonPost> linkPersonPost;
 
     @ManyToOne
-    @JoinColumn(name = "instance_id")
+    @JoinTable(
+            name = "link_person_instances",
+            joinColumns = @JoinColumn(name = "person_id"),
+            inverseJoinColumns = @JoinColumn(name = "instance_id")
+    )
     private Instance instance;
+
+    @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
+    private LinkPersonInstance linkPersonInstance;
 
     @OneToMany
     @PrimaryKeyJoinColumn

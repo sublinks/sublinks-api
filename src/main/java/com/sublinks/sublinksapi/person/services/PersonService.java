@@ -3,8 +3,10 @@ package com.sublinks.sublinksapi.person.services;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
+import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
 import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
@@ -54,6 +56,15 @@ public class PersonService {
         person.setPrivateKey(keys.privateKey());
         person.setLocal(true);
 
+        LinkPersonInstanceType accountLevel = localInstanceContext.instance().getDomain().isEmpty()
+                ? LinkPersonInstanceType.super_admin : LinkPersonInstanceType.user;
+
+        person.setLinkPersonInstance(LinkPersonInstance.builder()
+                .instance(localInstanceContext.instance())
+                .linkType(accountLevel)
+                .person(person)
+                .build());
+
         final List<Language> languages = new ArrayList<>(localInstanceContext.instance().getLanguages());
         person.setLanguages(languages);
         personRepository.save(person);
@@ -61,6 +72,7 @@ public class PersonService {
         final PersonAggregate personAggregate = PersonAggregate.builder().person(person).build();
         personAggregateRepository.save(personAggregate);
         person.setPersonAggregate(personAggregate);
+
         personCreatedPublisher.publish(person);
     }
 
@@ -75,7 +87,7 @@ public class PersonService {
 
         return Person.builder()
                 .name(name)
-                .instance(localInstanceContext.instance())
+                //.instance(localInstanceContext.instance())
                 .password("")
                 .displayName("")
                 .activityPubId("")

@@ -8,7 +8,7 @@ import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {AdminBooleanMapper.class})
 public interface LocalUserMapper extends Converter<Person, LocalUser> {
     @Override
     @Mapping(target = "totp_2fa_enabled", constant = "true")
@@ -17,8 +17,8 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
     @Mapping(target = "enable_keyboard_navigation", constant = "true")
     @Mapping(target = "enable_animated_images", constant = "true")
     @Mapping(target = "blur_nsfw", constant = "true")
-    @Mapping(target = "auto_expand", constant = "true")
-    @Mapping(target = "admin", constant = "true")
+    @Mapping(target = "auto_expand", constant = "false")
+    @Mapping(target = "admin", source = "person")
     @Mapping(target = "person_id", source = "person.id")
     @Mapping(target = "email", source = "person.email")
     @Mapping(target = "theme", source = "person.defaultTheme")
