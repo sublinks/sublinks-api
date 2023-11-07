@@ -77,8 +77,8 @@ public class SiteController {
 
         final Instance instance = localInstanceContext.instance();
         instance.setName(createSiteForm.name());
-        instance.setDomain(localInstanceContext.settings().baseUrl());
-        instance.setActivityPubId(localInstanceContext.settings().baseUrl());
+        instance.setDomain(localInstanceContext.settings().getBaseUrl());
+        instance.setActivityPubId(localInstanceContext.settings().getBaseUrl());
         instance.setSoftware("sublinks");
         instance.setVersion("0.1.0");
         instance.setDescription(createSiteForm.description() == null ? null : createSiteForm.description());
