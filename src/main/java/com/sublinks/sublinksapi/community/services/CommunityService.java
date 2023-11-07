@@ -36,4 +36,10 @@ public class CommunityService {
         community.setCommunityAggregate(communityAggregate);
         communityCreatedPublisher.publish(community);
     }
+
+    public void updateCommunity(Community community) {
+
+        communityRepository.save(community);
+        // @todo publish edit
+    }
 }

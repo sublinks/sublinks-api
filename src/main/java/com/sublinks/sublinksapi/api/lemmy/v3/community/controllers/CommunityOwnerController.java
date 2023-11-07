@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
@@ -44,6 +45,7 @@ public class CommunityOwnerController {
     private final AuthorizationService authorizationService;
     private final LemmyCommunityService lemmyCommunityService;
     private final SlugUtil slugUtil;
+    private final CommunityRepository communityRepository;
 
     @PostMapping
     @Transactional
@@ -94,8 +96,35 @@ public class CommunityOwnerController {
     }
 
     @PutMapping
-    CommunityResponse update(@Valid final EditCommunity editCommunityForm) {
+    CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm, final JwtPerson principal) {
+        Person person = Optional.ofNullable((Person) principal.getPrincipal())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        Community community = communityRepository.findById(editCommunityForm.community_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+        authorizationService
+                .canPerson(person)
+                .performTheAction(AuthorizeAction.update)
+                .onEntity(community)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        community.setTitle(editCommunityForm.title());
+        community.setDescription(editCommunityForm.description());
+        community.setIconImageUrl("");
+        community.setBannerImageUrl("");
+        community.setNsfw(editCommunityForm.nsfw());
+        community.setPostingRestrictedToMods(editCommunityForm.posting_restricted_to_mods());
+
+        final List<Language> languages = new ArrayList<>();
+        for (String languageCode : editCommunityForm.discussion_languages()) {
+            final Optional<Language> language = localInstanceContext.languageRepository().findById(Long.valueOf(languageCode));
+            language.ifPresent(languages::add);
+        }
+
+        community.setLanguages(languages);
+
+        communityService.updateCommunity(community);
+
+        return lemmyCommunityService.createCommunityResponse(community, person);
     }
 }

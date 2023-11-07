@@ -6,7 +6,7 @@ import java.util.Collection;
 
 @Builder
 public record EditCommunity(
-        Integer community_id,
+        Long community_id,
         String title,
         String description,
         String icon,

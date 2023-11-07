@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.community.dto;
 
+import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.language.dto.Language;
@@ -39,25 +41,21 @@ import java.util.Set;
 @Builder
 @Entity
 @Table(name = "communities")
-public class Community implements Serializable {
+public class Community implements Serializable, AuthorizationEntityInterface {
+    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
+    Set<LinkPersonCommunity> linkPersonCommunity;
     /**
      * Relationships
      */
     @ManyToOne
     @JoinColumn(name = "instance_id")
     private Instance instance;
-
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
     @PrimaryKeyJoinColumn
     private List<Comment> comments;
-
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @PrimaryKeyJoinColumn
     private CommunityAggregate communityAggregate;
-
-    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
-    Set<LinkPersonCommunity> linkPersonCommunity;
-
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
             name = "community_languages",
@@ -119,4 +117,9 @@ public class Community implements Serializable {
     @UpdateTimestamp
     @Column(updatable = false, nullable = false, name = "updated_at")
     private Date updatedAt;
+
+    @Override
+    public AuthorizedEntityType entityType() {
+        return AuthorizedEntityType.community;
+    }
 }
