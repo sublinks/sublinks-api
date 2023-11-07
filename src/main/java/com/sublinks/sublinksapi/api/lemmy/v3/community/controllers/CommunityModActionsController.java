@@ -3,8 +3,6 @@ package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.AddModToCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.AddModToCommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BanFromCommunityResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BlockCommunity;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BlockCommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.DeleteCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetCommunityResponse;
@@ -25,12 +23,6 @@ import org.springframework.web.server.ResponseStatusException;
 public class CommunityModActionsController {
     @PutMapping("hide")
     CommunityResponse hide(@Valid final HideCommunity hideCommunityForm) {
-
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
-
-    @PostMapping("block")
-    BlockCommunityResponse block(@Valid final BlockCommunity blockCommunityForm) {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }

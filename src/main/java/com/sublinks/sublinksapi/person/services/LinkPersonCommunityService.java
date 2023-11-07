@@ -23,6 +23,16 @@ public class LinkPersonCommunityService {
     private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
     private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
 
+    public boolean hasLink(Person person, Community community, LinkPersonCommunityType type) {
+        final Optional<LinkPersonCommunity> linkPersonCommunity =
+                linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
+                        community,
+                        person,
+                        type
+                );
+        return linkPersonCommunity.isPresent();
+    }
+
     @Transactional
     public void addLink(Person person, Community community, LinkPersonCommunityType type) {
 

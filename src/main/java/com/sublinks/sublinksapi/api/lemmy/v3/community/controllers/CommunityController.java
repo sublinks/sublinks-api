@@ -1,6 +1,8 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BlockCommunity;
+import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BlockCommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
@@ -101,6 +103,9 @@ public class CommunityController {
         }
 
         if (followCommunityForm.follow()) {
+            if (linkPersonCommunityService.hasLink(person, community.get(), LinkPersonCommunityType.blocked)) {
+                linkPersonCommunityService.removeLink(person, community.get(), LinkPersonCommunityType.blocked);
+            }
             linkPersonCommunityService.addLink(person, community.get(), LinkPersonCommunityType.follower);
         } else {
             linkPersonCommunityService.removeLink(person, community.get(), LinkPersonCommunityType.follower);
@@ -110,5 +115,28 @@ public class CommunityController {
                 community.get(),
                 person
         );
+    }
+
+    @PostMapping("block")
+    BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm, final JwtPerson principal) {
+
+        Person person = Optional.ofNullable((Person)principal.getPrincipal())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        Community community = communityRepository.findById(blockCommunityForm.community_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+        if (blockCommunityForm.block()) {
+             if (linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.follower)) {
+                linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.follower);
+            }
+           linkPersonCommunityService.addLink(person, community, LinkPersonCommunityType.blocked);
+        } else {
+           linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.blocked);
+        }
+
+       return BlockCommunityResponse.builder()
+               .community_view(lemmyCommunityService.communityViewFromCommunity(community, person))
+               .blocked(blockCommunityForm.block())
+               .build();
     }
 }
