@@ -7,12 +7,15 @@ import java.util.Random;
 @Service
 public class SlugUtil {
     public String stringToSlug(String title) {
-        final String titleSlug = title
+        return title
                 .toLowerCase()
                 .replace("\n", " ")
                 .replace("[^a-z\\d\\s]", " ")
                 .replaceAll("\\s+", "_");
-        return randomStringGenerator() + "-" + titleSlug;
+    }
+
+    public String uniqueSlug(String title) {
+        return randomStringGenerator() + "-" + stringToSlug(title);
     }
 
     public String randomStringGenerator() {

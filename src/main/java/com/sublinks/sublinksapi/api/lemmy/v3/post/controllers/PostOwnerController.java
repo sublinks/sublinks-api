@@ -82,7 +82,7 @@ public class PostOwnerController {
                 .community(community)
                 .language(language.get())
                 .title(createPostForm.name())
-                .titleSlug(slugUtil.stringToSlug(createPostForm.name()))
+                .titleSlug(slugUtil.uniqueSlug(createPostForm.name()))
                 .postBody(createPostForm.body())
                 .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()))
                 .linkTitle("")
