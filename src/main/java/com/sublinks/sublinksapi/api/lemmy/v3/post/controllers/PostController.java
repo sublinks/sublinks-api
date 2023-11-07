@@ -134,7 +134,7 @@ public class PostController {
             communityIds.add(community.getId());
         }
 
-        if (person != null) {
+        if (person != null && getPostsForm.type_() != null) {
             switch (getPostsForm.type_()) {
                 case Subscribed -> {
                     final Set<LinkPersonCommunity> personCommunities = person.getLinkPersonCommunity();
@@ -156,8 +156,14 @@ public class PostController {
             }
         }
 
-        SortType sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
-        ListingType listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
+        SortType sortType = null; // @todo set to site default
+        if (getPostsForm.sort() != null) {
+            sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
+        }
+        ListingType listingType = null; // @todo set to site default
+        if (getPostsForm.type_() != null) {
+            listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
+        }
 
         final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
                 .page(1)
