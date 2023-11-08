@@ -10,6 +10,6 @@ public record GetCommunityResponse(
         CommunityView community_view,
         Site site,
         List<CommunityModeratorView> moderators,
-        List<String> discussion_languages
+        List<Long> discussion_languages
 ) {
 }

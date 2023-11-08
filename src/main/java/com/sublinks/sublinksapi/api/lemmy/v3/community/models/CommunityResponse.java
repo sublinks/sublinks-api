@@ -7,6 +7,6 @@ import java.util.List;
 @Builder
 public record CommunityResponse(
         CommunityView community_view,
-        List<String> discussion_languages
+        List<Long> discussion_languages
 ) {
 }

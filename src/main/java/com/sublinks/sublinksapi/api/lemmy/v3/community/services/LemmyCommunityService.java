@@ -82,11 +82,11 @@ public class LemmyCommunityService {
                 .orElse(CommunityAggregate.builder().community(community).build());
     }
 
-    public List<String> communityLanguageCodes(final Community community) {
+    public List<Long> communityLanguageCodes(final Community community) {
 
-        final List<String> languageCodes = new ArrayList<>();
+        final List<Long> languageCodes = new ArrayList<>();
         for (Language language : community.getLanguages()) {
-            languageCodes.add(language.getCode());
+            languageCodes.add(language.getId());
         }
         return languageCodes;
     }
