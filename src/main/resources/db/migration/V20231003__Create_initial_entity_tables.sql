@@ -406,3 +406,31 @@ CREATE TABLE `comment_reads`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE UNIQUE INDEX `IDX_COMMENT_READ_COMMENT_ID_PERSON_ID` ON `comment_reads` (`comment_id`, `person_id`);
+
+/**
+  Moderation Logs table
+ */
+CREATE TABLE `moderation_logs`
+(
+    `id`                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `instance_id`          BIGINT                                    NOT NULL,
+    `action_type`          VARCHAR(255)                              NOT NULL,
+    `reason`               VARCHAR(255)                              NULL,
+    `entity_id`            BIGINT                                    NOT NULL,
+    `admin_person_id`      BIGINT                                    NULL,
+    `post_id`              BIGINT                                    NULL,
+    `community_id`         BIGINT                                    NULL,
+    `moderation_person_id` BIGINT                                    NULL,
+    `other_person_id`      BIGINT                                    NULL,
+    `removed`              TINYINT                                   NULL,
+    `hidden`               TINYINT                                   NULL,
+    `locked`               TINYINT                                   NULL,
+    `banned`               TINYINT                                   NULL,
+    `featured`             TINYINT                                   NULL,
+    `expires`              TIMESTAMP(3)                              NULL,
+    `created_at`           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE UNIQUE INDEX `IDX_MODERATION_LOGS_INSTANCE_ID_ACTION_TYPE_ENTITY_ID` ON `moderation_logs` (`instance_id`, `action_type`, `entity_id`);
