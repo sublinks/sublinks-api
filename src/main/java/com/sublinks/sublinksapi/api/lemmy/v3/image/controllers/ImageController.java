@@ -1,13 +1,16 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.image.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,20 +18,20 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/pictrs/image")
 public class ImageController {
     @PostMapping
-    public ResponseEntity upload() {
+    String upload(@RequestParam("images[]") MultipartFile images) {
 
-        return ResponseEntity.ok().build();
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @GetMapping("/image/{filename}")
-    public ResponseEntity show(@PathVariable String filename) {
+    @GetMapping("{filename}")
+    String fullResImage(@PathVariable String filename) {
 
-        return ResponseEntity.ok().build();
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
-    @GetMapping("/delete/{token}/{filename}")
-    public ResponseEntity delete(@PathVariable String token, @PathVariable String filename) {
+    @GetMapping("delete/{token}/{filename}")
+    String delete(@PathVariable String token, @PathVariable String filename) {
 
-        return ResponseEntity.ok().build();
+        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 }
