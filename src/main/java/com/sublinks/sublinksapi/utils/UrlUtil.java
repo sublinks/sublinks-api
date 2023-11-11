@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.api.lemmy.v3.post.utils;
+package com.sublinks.sublinksapi.utils;
 
 import org.springframework.stereotype.Component;
 
@@ -14,17 +14,16 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Component
-public class Url {
-    public String normalizeUrl(final String providedUrl) throws MalformedURLException {
-        final URL url = new URL(providedUrl);
-
+public class UrlUtil {
+    public String normalizeUrl(final String providedUrl) {
         try {
+            final URL url = new URL(providedUrl);
             final String normalizedQueryString = removeTrackingParameters(url.getQuery());
             // @Todo verify protocol is http, https, magnet
             final URI uri = new URI(url.getProtocol(), url.getAuthority(), url.getPath(), normalizedQueryString, url.getRef());
             return uri.toString();
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
+        } catch (URISyntaxException | MalformedURLException e) {
+            return providedUrl;
         }
     }
 
@@ -47,5 +46,16 @@ public class Url {
         return parameters.entrySet().stream()
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining("&"));
+    }
+
+    public void checkUrlProtocol(String providedUrl) {
+        try {
+            final URL url = new URL(providedUrl);
+            if (!List.of("http", "https", "magnet").contains(url.getProtocol())) {
+                throw new RuntimeException("Invalid URL Scheme");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid URL Scheme");
+        }
     }
 }

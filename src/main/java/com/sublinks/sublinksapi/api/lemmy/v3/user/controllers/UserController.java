@@ -120,8 +120,8 @@ public class UserController {
         person.setDefaultSortType(conversionService.convert(saveUserSettingsForm.default_sort_type(), SortType.class));
         person.setDefaultListingType(conversionService.convert(saveUserSettingsForm.default_listing_type(), ListingType.class));
         person.setInterfaceLanguage(saveUserSettingsForm.interface_language() != null ? saveUserSettingsForm.interface_language(): "");
-        person.setAvatarImageUrl("");
-        person.setBannerImageUrl("");
+        person.setAvatarImageUrl(saveUserSettingsForm.avatar());
+        person.setBannerImageUrl(saveUserSettingsForm.banner());
         person.setDisplayName(saveUserSettingsForm.display_name() != null ? saveUserSettingsForm.display_name(): "");
         person.setEmail(saveUserSettingsForm.email()); // @todo verify email again?
         person.setBiography(saveUserSettingsForm.bio() != null ? saveUserSettingsForm.bio(): "");
