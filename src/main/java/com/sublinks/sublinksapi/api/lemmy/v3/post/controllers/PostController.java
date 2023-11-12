@@ -15,7 +15,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.SavePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.utils.Url;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadataResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
@@ -33,6 +32,7 @@ import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
+import com.sublinks.sublinksapi.utils.UrlUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -46,7 +46,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -65,7 +64,7 @@ public class PostController {
     private final PostSaveService postSaveService;
     private final CommunityRepository communityRepository;
     private final PostRepository postRepository;
-    private final Url url;
+    private final UrlUtil urlUtil;
     private final PostReadService postReadService;
     private final ConversionService conversionService;
     private final SiteMetadataUtil siteMetadataUtil;
@@ -234,12 +233,7 @@ public class PostController {
     @GetMapping("site_metadata")
     public GetSiteMetadataResponse siteMetadata(@Valid GetSiteMetadata getSiteMetadataForm) {
 
-        String normalizedUrl = null;
-        try {
-            normalizedUrl = url.normalizeUrl(getSiteMetadataForm.url());
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        }
+        String normalizedUrl = urlUtil.normalizeUrl(getSiteMetadataForm.url());
         SiteMetadataUtil.SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
 
         return GetSiteMetadataResponse.builder()

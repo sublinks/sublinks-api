@@ -19,7 +19,9 @@ import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.SlugUtil;
+import com.sublinks.sublinksapi.utils.UrlUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,8 @@ public class PostOwnerController {
     private final CommunityRepository communityRepository;
     private final SlugUtil slugUtil;
     private final PersonService personService;
+    private final SiteMetadataUtil siteMetadataUtil;
+    private final UrlUtil urlUtil;
 
     @PostMapping
     @Transactional
@@ -77,20 +81,34 @@ public class PostOwnerController {
             throw new RuntimeException("No language selected");
         }
 
-        Post post = Post.builder()
+        String url = createPostForm.url();
+        SiteMetadataUtil.SiteMetadata metadata = null;
+        if (createPostForm.url() != null) {
+            url = urlUtil.normalizeUrl(createPostForm.url());
+            urlUtil.checkUrlProtocol(url);
+            metadata = siteMetadataUtil.fetchSiteMetadata(url);
+        }
+
+        Post.PostBuilder postBuilder = Post.builder()
                 .instance(localInstanceContext.instance())
                 .community(community)
                 .language(language.get())
                 .title(createPostForm.name())
                 .titleSlug(slugUtil.uniqueSlug(createPostForm.name()))
                 .postBody(createPostForm.body())
-                .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()))
-                .linkTitle("")
-                .linkDescription("")
-                .linkUrl("")
-                .linkVideoUrl("")
-                .linkThumbnailUrl("")
-                .build();
+                .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()));
+
+        if (url != null) {
+            postBuilder.linkUrl(url);
+            if (metadata != null) {
+                postBuilder.linkTitle(metadata.title())
+                        .linkDescription(metadata.description())
+                        .linkVideoUrl(metadata.videoUrl())
+                        .linkThumbnailUrl(metadata.imageUrl());
+            }
+        }
+
+        Post post = postBuilder.build();
 
         postService.createPost(post, person);
 

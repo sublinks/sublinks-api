@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.utils;
 
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,13 +13,13 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class SiteMetadataUtil {
 
-   public SiteMetadata fetchSiteMetadata(String normalizedUrl) {
+    public SiteMetadata fetchSiteMetadata(String normalizedUrl) {
 
         Document doc = null;
         try {
             doc = Jsoup.connect(normalizedUrl).get();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return SiteMetadata.builder().build();
         }
 
         Elements metaOgTitle = doc.select("meta[property=og:title]");
@@ -48,6 +49,7 @@ public class SiteMetadataUtil {
         return new SiteMetadata(title, description, image, video);
     }
 
+    @Builder
     public record SiteMetadata(
             String title,
             String description,

@@ -33,6 +33,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.2'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.2'
 
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
     implementation 'org.jsoup:jsoup:1.16.2'
 
     implementation "org.mapstruct:mapstruct:1.5.5.Final"

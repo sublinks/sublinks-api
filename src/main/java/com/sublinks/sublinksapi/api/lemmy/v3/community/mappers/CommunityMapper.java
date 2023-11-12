@@ -17,11 +17,9 @@ public interface CommunityMapper extends Converter<com.sublinks.sublinksapi.comm
     @Mapping(target = "updated", source = "community.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "published", source = "community.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
     @Mapping(target = "actor_id", source = "activityPubId")
-    //@Mapping(target = "banner", source = "community.bannerImageUrl")
-    //@Mapping(target = "icon", source = "community.iconImageUrl")
+    @Mapping(target = "banner", source = "community.bannerImageUrl")
+    @Mapping(target = "icon", source = "community.iconImageUrl")
     @Mapping(target = "inbox_url", constant = "https://aol.com")
     @Mapping(target = "followers_url", constant = "https://yahoo.com")
-    @Mapping(target = "banner", ignore = true)
-    @Mapping(target = "icon", ignore = true)
     Community convert(@Nullable com.sublinks.sublinksapi.community.dto.Community community);
 }
