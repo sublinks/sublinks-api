@@ -434,3 +434,28 @@ CREATE TABLE `moderation_logs`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE UNIQUE INDEX `IDX_MODERATION_LOGS_INSTANCE_ID_ACTION_TYPE_ENTITY_ID` ON `moderation_logs` (`instance_id`, `action_type`, `entity_id`);
+
+/**
+  Post Post Cross Post table
+ */
+CREATE TABLE `post_post_cross_post`
+(
+    `post_id`       BIGINT NOT NULL,
+    `cross_post_id` BIGINT NOT NULL,
+    PRIMARY KEY (`post_id`, `cross_post_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Post Cross Posts table
+ */
+CREATE TABLE `post_cross_posts`
+(
+    `id`       BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `md5_hash` CHAR(32) CHARACTER SET 'latin1' NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_POST_CROSS_POST_MD5_HASH` ON `post_cross_posts` (`md5_hash`);
