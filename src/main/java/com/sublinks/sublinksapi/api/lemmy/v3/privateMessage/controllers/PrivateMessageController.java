@@ -1,24 +1,61 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.controllers;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.ListPrivateMessageReportsResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.PrivateMessageReportResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.PrivateMessageResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.PrivateMessagesResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
+import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.*;
+import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.services.LemmyPrivateMessageService;
+import com.sublinks.sublinksapi.comment.enums.CommentSortType;
+import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.private_messages.dto.PrivateMessage;
+import com.sublinks.sublinksapi.private_messages.enums.PrivateMessageSortType;
+import com.sublinks.sublinksapi.private_messages.models.PrivateMessageSearchCriteria;
+import com.sublinks.sublinksapi.private_messages.repositories.PrivateMessageRepository;
+import com.sublinks.sublinksapi.private_messages.repositories.PrivateMessageRepositorySearch;
+import com.sublinks.sublinksapi.private_messages.services.PrivateMessageService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/private_message")
 public class PrivateMessageController {
-    @GetMapping
-    PrivateMessagesResponse list() {
+    private final PrivateMessageService privateMessageService;
+    private final PrivateMessageRepository privateMessageRepository;
+    private final LemmyPrivateMessageService lemmyPrivateMessageService;
+    private final ConversionService conversionService;
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    @GetMapping
+    PrivateMessagesResponse list(@RequestParam final GetPrivateMessages getPrivateMessagesForm, final JwtPerson principal) {
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        Person sender = (Person) principal.getPrincipal();
+
+        // @todo: add support for other sort types
+        final PrivateMessageSortType sortType = PrivateMessageSortType.New;
+
+        final PrivateMessageSearchCriteria privateMessageSearchCriteria = PrivateMessageSearchCriteria.builder()
+                .page(getPrivateMessagesForm.page() == null ? 1 : getPrivateMessagesForm.page())
+                .perPage(getPrivateMessagesForm.limit() == null ? 20 : getPrivateMessagesForm.limit())
+                .commentSortType(sortType)
+                .build();
+
+        final List<PrivateMessage> privateMessages = privateMessageRepository.allPrivateMessagesBySearchCriteria(privateMessageSearchCriteria);
+        final List<PrivateMessageView> privateMessageViews = new ArrayList<>();
+        privateMessages.forEach(privateMessage -> {
+            privateMessageViews.add(lemmyPrivateMessageService.createPrivateMessageView(privateMessage));
+        });
+
+        return PrivateMessagesResponse.builder().private_messages(privateMessageViews).build();
     }
 
     @PostMapping
