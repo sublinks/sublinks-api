@@ -15,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -64,6 +65,14 @@ public class Post implements AuthorizationEntityInterface {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<PostLike> postLikes;
+
+    @ManyToOne
+            @JoinTable(
+            name = "post_post_cross_post",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "cross_post_id")
+    )
+    CrossPost crossPost;
 
     /**
      * Attributes
@@ -133,5 +142,23 @@ public class Post implements AuthorizationEntityInterface {
     @Override
     public AuthorizedEntityType entityType() {
         return AuthorizedEntityType.post;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Post post = (Post) o;
+
+        if (getId() != null ? !getId().equals(post.getId()) : post.getId() != null) return false;
+        return getTitleSlug() != null ? getTitleSlug().equals(post.getTitleSlug()) : post.getTitleSlug() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getId() != null ? getId().hashCode() : 0;
+        result = 31 * result + (getTitleSlug() != null ? getTitleSlug().hashCode() : 0);
+        return result;
     }
 }
