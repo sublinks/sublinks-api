@@ -12,9 +12,13 @@ import com.sublinks.sublinksapi.post.events.PostUpdatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
+import com.sublinks.sublinksapi.utils.UrlUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigInteger;
+import java.security.MessageDigest;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +30,23 @@ public class PostService {
     private final PostDeletedPublisher postDeletedPublisher;
     private final PostLikeService postLikeService;
     private final PostUpdatedPublisher postUpdatedPublisher;
+    private final UrlUtil urlUtil;
+
+    public String getPostMd5Hash(final Post post) {
+
+        if (post.getLinkUrl() == null || post.getLinkUrl().isEmpty()) {
+            return null;
+        }
+
+        try {
+            final byte[] bytesOfLink = urlUtil.normalizeUrl(post.getLinkUrl()).getBytes("UTF-8");
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
+            return new BigInteger(1, bytesOfMD5Link).toString(16);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
 
     public Person getPostCreator(final Post post) {
 
