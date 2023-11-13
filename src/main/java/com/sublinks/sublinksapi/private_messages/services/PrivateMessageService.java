@@ -32,6 +32,9 @@ public class PrivateMessageService {
     @Transactional
     public void createPrivateMessage(final PrivateMessage privateMessage) {
         privateMessageRepository.save(privateMessage);
+        privateMessage.setActivityPubId(this.generateActivityPubId(privateMessage));
+        privateMessageRepository.save(privateMessage);
+
         privateMessageCreatedPublisher.publish(privateMessage);
     }
 

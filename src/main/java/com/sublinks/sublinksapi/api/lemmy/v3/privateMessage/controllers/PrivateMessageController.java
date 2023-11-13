@@ -72,7 +72,6 @@ public class PrivateMessageController {
                 .recipient(recipient)
                 .isLocal(recipient.isLocal())
                 .build();
-        privateMessage.setActivityPubId(privateMessageService.generateActivityPubId(privateMessage));
         privateMessageService.createPrivateMessage(privateMessage);
 
         final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(privateMessage);
