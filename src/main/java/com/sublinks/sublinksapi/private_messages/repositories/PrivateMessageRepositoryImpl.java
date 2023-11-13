@@ -1,11 +1,12 @@
 package com.sublinks.sublinksapi.private_messages.repositories;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.private_messages.dto.PrivateMessage;
 import com.sublinks.sublinksapi.private_messages.models.PrivateMessageSearchCriteria;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -29,6 +30,11 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
         if(privateMessageSearchCriteria.unresolvedOnly()) {
             predicates.add(cb.equal(privateMessageTable.get("resolved"), false));
         }
+
+        if(privateMessageSearchCriteria.person() != null) {
+            predicates.add(cb.or(cb.equal(privateMessageTable.get("recipient"), privateMessageSearchCriteria.person()), cb.equal(privateMessageTable.get("sender"), privateMessageSearchCriteria.person())));
+        }
+
         cq.where(predicates.toArray(new Predicate[0]));
 
         // @todo determine sort/pagination
