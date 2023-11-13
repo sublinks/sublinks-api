@@ -35,7 +35,6 @@ public class PrivateMessageController {
     private final PrivateMessageService privateMessageService;
     private final PrivateMessageRepository privateMessageRepository;
     private final LemmyPrivateMessageService lemmyPrivateMessageService;
-    private final ConversionService conversionService;
     private final PersonRepository personRepository;
     private final AuthorizationService authorizationService;
 
