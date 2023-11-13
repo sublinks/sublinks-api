@@ -1,11 +1,8 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.services;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.PrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.PrivateMessageView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
-import com.sublinks.sublinksapi.comment.services.CommentLikeService;
-import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -18,7 +15,6 @@ public class LemmyPrivateMessageService {
     public PrivateMessageView createPrivateMessageView(
             final com.sublinks.sublinksapi.private_messages.dto.PrivateMessage privateMessage
     ) {
-
         return privateMessageViewBuilder(privateMessage).build();
     }
 
