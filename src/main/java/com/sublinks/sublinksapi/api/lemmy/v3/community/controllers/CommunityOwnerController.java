@@ -72,8 +72,8 @@ public class CommunityOwnerController {
                 .description(createCommunityForm.description())
                 .isPostingRestrictedToMods(createCommunityForm.posting_restricted_to_mods() != null && createCommunityForm.posting_restricted_to_mods())
                 .isNsfw(createCommunityForm.nsfw() != null && createCommunityForm.nsfw())
-                .iconImageUrl("")
-                .bannerImageUrl("")
+                .iconImageUrl(createCommunityForm.icon())
+                .bannerImageUrl(createCommunityForm.banner())
                 .languages(languages)
                 .build();
 
@@ -110,8 +110,8 @@ public class CommunityOwnerController {
 
         community.setTitle(editCommunityForm.title());
         community.setDescription(editCommunityForm.description());
-        community.setIconImageUrl("");
-        community.setBannerImageUrl("");
+        community.setIconImageUrl(editCommunityForm.icon());
+        community.setBannerImageUrl(editCommunityForm.banner());
         community.setNsfw(editCommunityForm.nsfw());
         community.setPostingRestrictedToMods(editCommunityForm.posting_restricted_to_mods());
 

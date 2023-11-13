@@ -83,8 +83,8 @@ public class SiteController {
         instance.setDescription(createSiteForm.description() == null ? null : createSiteForm.description());
         instance.setSidebar(createSiteForm.sidebar() == null ? null : createSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
-        instance.setBannerUrl(""); // @todo image
-        instance.setIconUrl(""); // @todo image
+        instance.setBannerUrl(createSiteForm.banner());
+        instance.setIconUrl(createSiteForm.icon());
         instanceService.createInstance(instance);
         return SiteResponse.builder()
                 .site_view(lemmySiteService.getSiteView())
@@ -101,8 +101,8 @@ public class SiteController {
         instance.setDescription(editSiteForm.description() == null ? null : editSiteForm.description());
         instance.setSidebar(editSiteForm.sidebar() == null ? null : editSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
-        instance.setBannerUrl(""); // @todo image
-        instance.setIconUrl(""); // @todo image
+        instance.setBannerUrl(editSiteForm.banner()); // @todo image
+        instance.setIconUrl(editSiteForm.icon()); // @todo image
         instanceService.updateInstance(instance);
         return SiteResponse.builder()
                 .site_view(lemmySiteService.getSiteView())

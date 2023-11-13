@@ -13,7 +13,7 @@ CREATE TABLE `comments`
     `community_id`    BIGINT  NOT NULL,
     `post_id`         BIGINT  NOT NULL,
     `is_featured`     TINYINT NOT NULL DEFAULT 0,
-    `comment_body`    TEXT,
+    `comment_body`    TEXT    NULL,
     `path`            VARCHAR(512),
     `created_at`      TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
     `updated_at`      TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
@@ -73,16 +73,16 @@ CREATE TABLE `communities`
     `id`                            BIGINT AUTO_INCREMENT PRIMARY KEY,
     `activity_pub_id`               TEXT         NOT NULL,
     `instance_id`                   BIGINT       NOT NULL,
-    `title`                         VARCHAR(255) NOT NULL,
+    `title`                         VARCHAR(255) NULL,
     `title_slug`                    VARCHAR(255) NOT NULL,
-    `description`                   TEXT         NOT NULL,
+    `description`                   TEXT         NULL,
     `is_deleted`                    TINYINT      NOT NULL DEFAULT 0,
     `is_removed`                    TINYINT      NOT NULL DEFAULT 0,
     `is_local`                      TINYINT      NOT NULL DEFAULT 0,
     `is_nsfw`                       TINYINT      NOT NULL DEFAULT 0,
     `is_posting_restricted_to_mods` TINYINT      NOT NULL DEFAULT 0,
-    `icon_image_url`                TEXT         NOT NULL,
-    `banner_image_url`              TEXT         NOT NULL,
+    `icon_image_url`                TEXT         NULL,
+    `banner_image_url`              TEXT         NULL,
     `public_key`                    TEXT         NOT NULL,
     `private_key`                   TEXT         NULL,
     `created_at`                    TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
@@ -120,13 +120,13 @@ CREATE TABLE `instances`
     `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
     `activity_pub_id` TEXT                                      NOT NULL,
     `domain`          VARCHAR(255)                              NOT NULL,
-    `software`        VARCHAR(255)                              NOT NULL,
-    `version`         VARCHAR(255)                              NOT NULL,
-    `name`            VARCHAR(255)                              NOT NULL,
-    `description`     TEXT                                      NOT NULL,
-    `sidebar`         TEXT                                      NOT NULL,
-    `icon_url`        TEXT                                      NOT NULL,
-    `banner_url`      TEXT                                      NOT NULL,
+    `software`        VARCHAR(255)                              NULL,
+    `version`         VARCHAR(255)                              NULL,
+    `name`            VARCHAR(255)                              NULL,
+    `description`     TEXT                                      NULL,
+    `sidebar`         TEXT                                      NULL,
+    `icon_url`        TEXT                                      NULL,
+    `banner_url`      TEXT                                      NULL,
     `public_key`      TEXT                                      NOT NULL,
     `private_key`     TEXT                                      NULL,
     `created_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
@@ -199,14 +199,14 @@ CREATE TABLE `people`
     `is_banned`                      TINYINT      NOT NULL DEFAULT 0,
     `is_deleted`                     TINYINT      NOT NULL DEFAULT 0,
     `activity_pub_id`                TEXT         NOT NULL,
-    `name`                           VARCHAR(255) NOT NULL,
-    `display_name`                   VARCHAR(255) NOT NULL,
+    `name`                           VARCHAR(255) NULL,
+    `display_name`                   VARCHAR(255) NULL,
     `email`                          VARCHAR(255) NULL,
     `is_email_verified`              TINYINT      NOT NULL DEFAULT 0,
     `password`                       VARCHAR(255) NOT NULL,
-    `avatar_image_url`               TEXT         NOT NULL,
-    `banner_image_url`               TEXT         NOT NULL,
-    `biography`                      TEXT         NOT NULL,
+    `avatar_image_url`               TEXT         NULL,
+    `banner_image_url`               TEXT         NULL,
+    `biography`                      TEXT         NULL,
     `interface_language`             VARCHAR(20)  NULL,
     `default_theme`                  VARCHAR(255) NULL,
     `default_listing_type`           ENUM ('All', 'Local', 'Subscribed', 'ModeratorView'),
@@ -284,7 +284,7 @@ CREATE TABLE `posts`
     `is_nsfw`                  TINYINT      NOT NULL DEFAULT 0,
     `title`                    VARCHAR(255) NOT NULL,
     `title_slug`               VARCHAR(255) NOT NULL,
-    `post_body`                TEXT,
+    `post_body`                TEXT         NULL,
     `public_key`               TEXT         NOT NULL,
     `private_key`              TEXT         NULL,
     `created_at`               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
@@ -406,3 +406,56 @@ CREATE TABLE `comment_reads`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE UNIQUE INDEX `IDX_COMMENT_READ_COMMENT_ID_PERSON_ID` ON `comment_reads` (`comment_id`, `person_id`);
+
+/**
+  Moderation Logs table
+ */
+CREATE TABLE `moderation_logs`
+(
+    `id`                   BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `instance_id`          BIGINT                                    NOT NULL,
+    `action_type`          VARCHAR(255)                              NOT NULL,
+    `reason`               VARCHAR(255)                              NULL,
+    `entity_id`            BIGINT                                    NOT NULL,
+    `admin_person_id`      BIGINT                                    NULL,
+    `post_id`              BIGINT                                    NULL,
+    `community_id`         BIGINT                                    NULL,
+    `moderation_person_id` BIGINT                                    NULL,
+    `other_person_id`      BIGINT                                    NULL,
+    `removed`              TINYINT                                   NULL,
+    `hidden`               TINYINT                                   NULL,
+    `locked`               TINYINT                                   NULL,
+    `banned`               TINYINT                                   NULL,
+    `featured`             TINYINT                                   NULL,
+    `expires`              TIMESTAMP(3)                              NULL,
+    `created_at`           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE UNIQUE INDEX `IDX_MODERATION_LOGS_INSTANCE_ID_ACTION_TYPE_ENTITY_ID` ON `moderation_logs` (`instance_id`, `action_type`, `entity_id`);
+
+/**
+  Post Post Cross Post table
+ */
+CREATE TABLE `post_post_cross_post`
+(
+    `post_id`       BIGINT NOT NULL,
+    `cross_post_id` BIGINT NOT NULL,
+    PRIMARY KEY (`post_id`, `cross_post_id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Post Cross Posts table
+ */
+CREATE TABLE `post_cross_posts`
+(
+    `id`       BIGINT AUTO_INCREMENT PRIMARY KEY,
+    `md5_hash` CHAR(32) CHARACTER SET 'latin1' NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_POST_CROSS_POST_MD5_HASH` ON `post_cross_posts` (`md5_hash`);
