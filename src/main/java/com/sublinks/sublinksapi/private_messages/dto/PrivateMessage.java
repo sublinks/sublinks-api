@@ -1,27 +1,25 @@
 package com.sublinks.sublinksapi.private_messages.dto;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentLike;
-import com.sublinks.sublinksapi.instance.dto.Instance;
-import com.sublinks.sublinksapi.language.dto.Language;
-import com.sublinks.sublinksapi.person.dto.*;
-import com.sublinks.sublinksapi.person.enums.ListingType;
-import com.sublinks.sublinksapi.person.enums.SortType;
-import com.sublinks.sublinksapi.post.dto.PostLike;
-import com.sublinks.sublinksapi.post.dto.PostRead;
-import com.sublinks.sublinksapi.post.dto.PostSave;
-import jakarta.persistence.*;
-import lombok.*;
+import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
+import com.sublinks.sublinksapi.person.dto.Person;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.security.Principal;
-import java.util.Collection;
 import java.util.Date;
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -29,8 +27,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "private_message")
-public class PrivateMessage {
+@Table(name = "private_messages")
+public class PrivateMessage implements AuthorizationEntityInterface {
     /**
      * Relationships
      */
@@ -53,17 +51,27 @@ public class PrivateMessage {
     private String content;
 
     @Column(nullable = false, name = "is_local")
-    private boolean local;
+    private boolean isLocal;
 
-    @Column(nullable = false, name = "read")
-    private boolean read;
+    @Column(nullable = false, name = "is_read")
+    private boolean isRead;
 
+    @Column(nullable = false, name = "is_deleted")
+    private boolean isDeleted;
+
+    @CreationTimestamp
     @Column(updatable = false, nullable = false, name = "created_at")
-    private Date publishedAt;
+    private Date createdAt;
 
+    @UpdateTimestamp
     @Column(updatable = false, nullable = false, name = "updated_at")
     private Date updatedAt;
 
-    @Column(nullable = false, name = "deleted")
-    private boolean deleted;
+    @Column(nullable = false, name = "activity_pub_id")
+    private String activityPubId;
+
+    @Override
+    public AuthorizedEntityType entityType() {
+        return AuthorizedEntityType.message;
+    }
 }

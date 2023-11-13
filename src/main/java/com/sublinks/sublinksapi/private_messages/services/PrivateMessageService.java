@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.private_messages.dto.PrivateMessage;
 import com.sublinks.sublinksapi.private_messages.events.PrivateMessageCreatedPublisher;
 import com.sublinks.sublinksapi.private_messages.events.PrivateMessageUpdatedPublisher;
@@ -20,6 +21,13 @@ public class PrivateMessageService {
     private final PrivateMessageRepository privateMessageRepository;
     private final PrivateMessageCreatedPublisher privateMessageCreatedPublisher;
     private final PrivateMessageUpdatedPublisher privateMessageUpdatedPublisher;
+    private final LocalInstanceContext localInstanceContext;
+
+    public String generateActivityPubId(final com.sublinks.sublinksapi.private_messages.dto.PrivateMessage privateMessage) {
+
+        String domain = localInstanceContext.instance().getDomain();
+        return String.format("%s/private_message/%d", domain, privateMessage.getId());
+    }
 
     @Transactional
     public void createPrivateMessage(final PrivateMessage privateMessage) {
@@ -31,5 +39,10 @@ public class PrivateMessageService {
     public void updatePrivateMessage(final PrivateMessage comment) {
             privateMessageRepository.save(comment);
             privateMessageUpdatedPublisher.publish(comment);
+    }
+
+    @Transactional
+    public void deletePrivateMessage(final PrivateMessage privateMessage) {
+        privateMessageRepository.delete(privateMessage);
     }
 }
