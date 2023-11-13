@@ -90,7 +90,20 @@ public class PostController {
             communityView = lemmyCommunityService.communityViewFromCommunity(community, (Person) person.getPrincipal());
         }
         final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
-        final List<PostView> crossPosts = new ArrayList<>();//@todo cross post
+        Set<PostView> crossPosts = new LinkedHashSet<>();
+        if (post.getCrossPost() != null && post.getCrossPost().getPosts() != null) {
+            for (Post crossPostPost : post.getCrossPost().getPosts()) {
+                if (post.equals(crossPostPost)) {
+                    continue;
+                }
+                if (person != null) {
+                    crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost, (Person) person.getPrincipal()));
+                } else {
+                    crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost));
+                }
+            }
+        }
+
         return GetPostResponse.builder()
                 .post_view(postView)
                 .community_view(communityView)
