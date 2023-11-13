@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,7 @@ public class PostCreatedListener implements ApplicationListener<PostCreatedEvent
 
     @Override
     @Transactional
-    public void onApplicationEvent(PostCreatedEvent event) {
+    public void onApplicationEvent(@NonNull PostCreatedEvent event) {
         try {
             markPostRead(event.getPost());
         } catch (Exception ignored) {
