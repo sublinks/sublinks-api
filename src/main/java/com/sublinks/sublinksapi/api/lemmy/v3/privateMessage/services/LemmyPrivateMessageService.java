@@ -23,7 +23,7 @@ public class LemmyPrivateMessageService {
     ) {
         final PrivateMessage lemmyPrivateComment = conversionService.convert(privateMessage, PrivateMessage.class);
 
-        final com.sublinks.sublinksapi.person.dto.Person sender = privateMessage.getRecipient();
+        final com.sublinks.sublinksapi.person.dto.Person sender = privateMessage.getSender();
         final Person lemmySender = conversionService.convert(sender, Person.class);
 
         final com.sublinks.sublinksapi.person.dto.Person recipient = privateMessage.getRecipient();

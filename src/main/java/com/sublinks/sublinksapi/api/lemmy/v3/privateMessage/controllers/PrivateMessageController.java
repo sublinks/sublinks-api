@@ -52,9 +52,7 @@ public class PrivateMessageController {
 
         final List<PrivateMessage> privateMessages = privateMessageRepository.allPrivateMessagesBySearchCriteria(privateMessageSearchCriteria);
         final List<PrivateMessageView> privateMessageViews = new ArrayList<>();
-        privateMessages.forEach(privateMessage -> {
-            privateMessageViews.add(lemmyPrivateMessageService.createPrivateMessageView(privateMessage));
-        });
+        privateMessages.forEach(privateMessage -> privateMessageViews.add(lemmyPrivateMessageService.createPrivateMessageView(privateMessage)));
 
         return PrivateMessagesResponse.builder().private_messages(privateMessageViews).build();
     }
