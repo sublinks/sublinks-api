@@ -107,3 +107,10 @@ ALTER TABLE `comment_likes`
 ALTER TABLE `post_post_cross_post`
     ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
     ADD FOREIGN KEY (`cross_post_id`) REFERENCES `post_cross_posts` (`id`) ON DELETE CASCADE;
+
+/**
+  Private Messages table
+ */
+ALTER TABLE `private_messages`
+    ADD FOREIGN KEY ('sender_id') REFERENCES `people` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY ('recipient_id') REFERENCES `people` (`id`) ON DELETE CASCADE;
