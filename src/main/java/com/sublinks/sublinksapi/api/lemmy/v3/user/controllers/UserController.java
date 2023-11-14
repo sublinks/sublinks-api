@@ -25,7 +25,6 @@ import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
 import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
-import com.sublinks.sublinksapi.person.services.PersonMentionService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -83,6 +82,7 @@ public class UserController {
 
     @GetMapping("mention")
     GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm, final JwtPerson principal) {
+
         final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
                 .sort(getPersonMentionsForm.sort())
                 .unreadOnly(getPersonMentionsForm.unread_only().orElse(false))
@@ -101,6 +101,7 @@ public class UserController {
 
     @PostMapping("mention/mark_as_read")
     PersonMentionResponse mentionMarkAsRead(@Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm, final JwtPerson principal) {
+
         final PersonMention personMention = personMentionRepository
                 .findById((long) markPersonMentionAsReadForm.person_mention_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
