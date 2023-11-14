@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 @Component
 public class UrlUtil {
     public String normalizeUrl(final String providedUrl) {
+
         try {
             final URL url = new URL(providedUrl);
             final String normalizedQueryString = removeTrackingParameters(url.getQuery());
@@ -28,6 +29,7 @@ public class UrlUtil {
     }
 
     private String removeTrackingParameters(final String queryString) {
+
         if (queryString == null || queryString.isEmpty()) {
             return "";
         }
@@ -49,6 +51,7 @@ public class UrlUtil {
     }
 
     public void checkUrlProtocol(String providedUrl) {
+
         try {
             final URL url = new URL(providedUrl);
             if (!List.of("http", "https", "magnet").contains(url.getProtocol())) {

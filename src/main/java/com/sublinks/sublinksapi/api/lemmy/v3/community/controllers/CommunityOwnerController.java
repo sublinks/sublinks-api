@@ -97,6 +97,7 @@ public class CommunityOwnerController {
 
     @PutMapping
     CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm, final JwtPerson principal) {
+
         Person person = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         Community community = communityRepository.findById(editCommunityForm.community_id())

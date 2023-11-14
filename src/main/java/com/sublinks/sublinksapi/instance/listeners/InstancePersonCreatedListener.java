@@ -16,6 +16,7 @@ public class InstancePersonCreatedListener implements ApplicationListener<Person
             final InstanceAggregateRepository instanceAggregateRepository,
             LocalInstanceContext localInstanceContext
     ) {
+
         this.instanceAggregateRepository = instanceAggregateRepository;
         this.localInstanceContext = localInstanceContext;
     }

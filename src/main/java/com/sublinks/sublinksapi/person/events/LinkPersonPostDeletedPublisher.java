@@ -9,6 +9,7 @@ public class LinkPersonPostDeletedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public LinkPersonPostDeletedPublisher(ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

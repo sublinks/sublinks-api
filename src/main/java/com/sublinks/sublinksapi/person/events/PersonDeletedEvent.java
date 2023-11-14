@@ -9,6 +9,7 @@ public class PersonDeletedEvent extends ApplicationEvent {
     private final Person person;
 
     public PersonDeletedEvent(final Object source, final Person person) {
+
         super(source);
         this.person = person;
     }

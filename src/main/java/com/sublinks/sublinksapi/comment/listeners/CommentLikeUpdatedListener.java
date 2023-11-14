@@ -16,6 +16,7 @@ public class CommentLikeUpdatedListener implements ApplicationListener<CommentLi
     @Override
     @Transactional
     public void onApplicationEvent(CommentLikeUpdatedEvent event) {
+
         final CommentAggregate commentAggregate = event.getCommentLike().getComment().getCommentAggregate();
         switch (event.getAction()) {
             case FROM_UP_TO_DOWN -> {

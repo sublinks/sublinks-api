@@ -16,6 +16,7 @@ public class PostLikeCreatedListener implements ApplicationListener<PostLikeCrea
     @Override
     @Transactional
     public void onApplicationEvent(PostLikeCreatedEvent event) {
+
         final PostAggregate postAggregate = event.getPostLike().getPost().getPostAggregate();
         if (event.getPostLike().isUpVote()) {
             postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() + 1);

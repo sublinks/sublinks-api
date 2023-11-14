@@ -9,6 +9,7 @@ public class CommunityCreatedEvent extends ApplicationEvent {
     private final Community community;
 
     public CommunityCreatedEvent(Object source, Community community) {
+
         super(source);
         this.community = community;
     }

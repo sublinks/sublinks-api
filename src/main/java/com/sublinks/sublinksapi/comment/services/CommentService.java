@@ -34,6 +34,12 @@ public class CommentService {
     }
 
     @Transactional
+    public void updateCommentQuietly(final Comment comment) {
+
+        commentRepository.save(comment);
+    }
+
+    @Transactional
     public void updateComment(final Comment comment) {
 
         commentRepository.save(comment);

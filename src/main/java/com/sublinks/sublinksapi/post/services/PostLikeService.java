@@ -72,19 +72,19 @@ public class PostLikeService {
         if (postLike.isUpVote()) {
             if (score == -1) {
                 action = PostLikeUpdatedEvent.Action.FROM_UP_TO_DOWN;
-            } else if(score == 0) {
+            } else if (score == 0) {
                 action = PostLikeUpdatedEvent.Action.FROM_UP_TO_NEUTRAL;
             }
         } else if (postLike.isDownVote()) {
-           if (score == 1) {
+            if (score == 1) {
                 action = PostLikeUpdatedEvent.Action.FROM_DOWN_TO_UP;
-            } else if(score == 0) {
+            } else if (score == 0) {
                 action = PostLikeUpdatedEvent.Action.FROM_DOWN_TO_NEUTRAL;
             }
         } else {
-           if (score == 1) {
+            if (score == 1) {
                 action = PostLikeUpdatedEvent.Action.FROM_NEUTRAL_TO_UP;
-            } else if(score == -1) {
+            } else if (score == -1) {
                 action = PostLikeUpdatedEvent.Action.FROM_NEUTRAL_TO_DOWN;
             }
         }

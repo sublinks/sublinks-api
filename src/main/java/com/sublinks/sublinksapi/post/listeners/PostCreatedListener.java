@@ -27,6 +27,7 @@ public class PostCreatedListener implements ApplicationListener<PostCreatedEvent
     @Override
     @Transactional
     public void onApplicationEvent(@NonNull PostCreatedEvent event) {
+
         try {
             markPostRead(event.getPost());
         } catch (Exception ignored) {
@@ -66,6 +67,7 @@ public class PostCreatedListener implements ApplicationListener<PostCreatedEvent
 
     @Transactional
     public void markPostRead(Post post) {
+
         Person creator = postService.getPostCreator(post);
         postReadService.markPostReadByPerson(post, creator);
     }

@@ -9,6 +9,7 @@ public class PostCreatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public PostCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
