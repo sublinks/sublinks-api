@@ -66,12 +66,14 @@ public class AuthorizationService {
         private Long entityId;
 
         public EntityPolicy(final ActionType actionType, final AclRepository aclRepository) {
+
             this.person = Person.builder().build();
             this.actionType = actionType;
             this.aclRepository = aclRepository;
         }
 
         public EntityPolicy(final Person person, final ActionType actionType, final AclRepository aclRepository) {
+
             this.person = person;
             this.actionType = actionType;
             this.aclRepository = aclRepository;

@@ -17,6 +17,7 @@ public class InstanceCommentCreatedListener implements ApplicationListener<Comme
             final InstanceAggregateRepository instanceAggregateRepository,
             final LocalInstanceContext localInstanceContext
     ) {
+
         this.instanceAggregateRepository = instanceAggregateRepository;
         this.localInstanceContext = localInstanceContext;
     }

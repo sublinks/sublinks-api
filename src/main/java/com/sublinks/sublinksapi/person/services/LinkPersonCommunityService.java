@@ -24,6 +24,7 @@ public class LinkPersonCommunityService {
     private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
 
     public boolean hasLink(Person person, Community community, LinkPersonCommunityType type) {
+
         final Optional<LinkPersonCommunity> linkPersonCommunity =
                 linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
                         community,
@@ -66,6 +67,7 @@ public class LinkPersonCommunityService {
     }
 
     public Collection<Community> getPersonLinkByType(Person person, LinkPersonCommunityType type) {
+
         Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository
                 .getLinkPersonCommunitiesByPersonAndLinkType(person, type);
 

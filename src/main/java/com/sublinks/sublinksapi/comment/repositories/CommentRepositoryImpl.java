@@ -22,6 +22,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     @Override
     public List<Comment> allCommentsBySearchCriteria(CommentSearchCriteria commentSearchCriteria) {
+
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<Comment> cq = cb.createQuery(Comment.class);
 

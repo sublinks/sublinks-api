@@ -16,6 +16,7 @@ public class PersonCommentCreatedListener implements ApplicationListener<Comment
 
     @Override
     public void onApplicationEvent(CommentCreatedEvent event) {
+
         final PersonAggregate personAggregate = event.getComment().getPerson().getPersonAggregate();
         personAggregate.setCommentCount(personAggregate.getCommentCount() + 1);
         personAggregateRepository.save(personAggregate);

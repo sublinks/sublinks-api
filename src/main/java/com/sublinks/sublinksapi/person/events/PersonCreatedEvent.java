@@ -9,6 +9,7 @@ public class PersonCreatedEvent extends ApplicationEvent {
     private final Person person;
 
     public PersonCreatedEvent(final Object source, final Person person) {
+
         super(source);
         this.person = person;
     }

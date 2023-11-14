@@ -9,6 +9,7 @@ public class PostRemovedEvent extends ApplicationEvent {
     private final Post post;
 
     public PostRemovedEvent(final Object source, final Post post) {
+
         super(source);
         this.post = post;
     }

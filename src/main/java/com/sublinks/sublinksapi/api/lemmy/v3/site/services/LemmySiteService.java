@@ -37,7 +37,7 @@ public class LemmySiteService {
                 localInstanceContext.instance(), List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin)
         );
         final Collection<PersonView> adminViews = new LinkedHashSet<>();
-        for (LinkPersonInstance linkPersonInstance: admins) {
+        for (LinkPersonInstance linkPersonInstance : admins) {
             adminViews.add(lemmyPersonService.getPersonView(linkPersonInstance.getPerson()));
         }
         return adminViews;

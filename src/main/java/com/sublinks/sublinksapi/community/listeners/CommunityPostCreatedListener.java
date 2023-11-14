@@ -16,6 +16,7 @@ public class CommunityPostCreatedListener implements ApplicationListener<PostCre
     @Override
     @Transactional
     public void onApplicationEvent(PostCreatedEvent event) {
+
         final CommunityAggregate communityAggregate = event.getPost().getCommunity().getCommunityAggregate();
         communityAggregate.setPostCount(communityAggregate.getPostCount() + 1);
         communityAggregateRepository.save(communityAggregate);

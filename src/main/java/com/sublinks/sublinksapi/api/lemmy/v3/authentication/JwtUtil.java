@@ -25,6 +25,7 @@ public class JwtUtil implements Serializable {
     private final String secret;
 
     public JwtUtil(@Value("${jwt.secret}") final String secret) {
+
         this.secret = secret;
     }
 

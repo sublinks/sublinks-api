@@ -9,6 +9,7 @@ public class PostCreatedEvent extends ApplicationEvent {
     final private Post post;
 
     public PostCreatedEvent(final Object source, final Post post) {
+
         super(source);
         this.post = post;
     }
