@@ -9,6 +9,7 @@ public class PostUpdatedEvent extends ApplicationEvent {
     private final Post post;
 
     public PostUpdatedEvent(final Object source, final Post post) {
+
         super(source);
         this.post = post;
     }

@@ -11,6 +11,7 @@ public class LinkPersonPostCreatedPublisher {
     public LinkPersonPostCreatedPublisher(
             final ApplicationEventPublisher applicationEventPublisher
     ) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

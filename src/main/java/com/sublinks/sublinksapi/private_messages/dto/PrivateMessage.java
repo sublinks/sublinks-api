@@ -72,6 +72,7 @@ public class PrivateMessage implements AuthorizationEntityInterface {
 
     @Override
     public AuthorizedEntityType entityType() {
+
         return AuthorizedEntityType.message;
     }
 }

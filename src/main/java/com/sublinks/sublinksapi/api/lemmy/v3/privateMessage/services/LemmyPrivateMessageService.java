@@ -15,12 +15,14 @@ public class LemmyPrivateMessageService {
     public PrivateMessageView createPrivateMessageView(
             final com.sublinks.sublinksapi.private_messages.dto.PrivateMessage privateMessage
     ) {
+
         return privateMessageViewBuilder(privateMessage).build();
     }
 
     private PrivateMessageView.PrivateMessageViewBuilder privateMessageViewBuilder(
             final com.sublinks.sublinksapi.private_messages.dto.PrivateMessage privateMessage
     ) {
+
         final PrivateMessage lemmyPrivateComment = conversionService.convert(privateMessage, PrivateMessage.class);
 
         final com.sublinks.sublinksapi.person.dto.Person sender = privateMessage.getSender();

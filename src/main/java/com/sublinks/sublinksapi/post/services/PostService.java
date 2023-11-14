@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 @Service
@@ -39,7 +40,7 @@ public class PostService {
         }
 
         try {
-            final byte[] bytesOfLink = urlUtil.normalizeUrl(post.getLinkUrl()).getBytes("UTF-8");
+            final byte[] bytesOfLink = urlUtil.normalizeUrl(post.getLinkUrl()).getBytes(StandardCharsets.UTF_8);
             final MessageDigest md = MessageDigest.getInstance("MD5");
             final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
             return new BigInteger(1, bytesOfMD5Link).toString(16);

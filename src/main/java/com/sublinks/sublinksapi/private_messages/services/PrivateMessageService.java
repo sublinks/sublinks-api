@@ -1,11 +1,5 @@
 package com.sublinks.sublinksapi.private_messages.services;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
-import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
-import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
-import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
-import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.private_messages.dto.PrivateMessage;
 import com.sublinks.sublinksapi.private_messages.events.PrivateMessageCreatedPublisher;
@@ -31,6 +25,7 @@ public class PrivateMessageService {
 
     @Transactional
     public void createPrivateMessage(final PrivateMessage privateMessage) {
+
         privateMessageRepository.save(privateMessage);
         privateMessage.setActivityPubId(this.generateActivityPubId(privateMessage));
         privateMessageRepository.save(privateMessage);
@@ -40,12 +35,14 @@ public class PrivateMessageService {
 
     @Transactional
     public void updatePrivateMessage(final PrivateMessage comment) {
-            privateMessageRepository.save(comment);
-            privateMessageUpdatedPublisher.publish(comment);
+
+        privateMessageRepository.save(comment);
+        privateMessageUpdatedPublisher.publish(comment);
     }
 
     @Transactional
     public void deletePrivateMessage(final PrivateMessage privateMessage) {
+
         privateMessageRepository.delete(privateMessage);
     }
 }

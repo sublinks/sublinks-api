@@ -12,6 +12,7 @@ public class LinkPersonCommunityDeletedEvent extends ApplicationEvent {
             final Object source,
             final LinkPersonCommunity linkPersonCommunity
     ) {
+
         super(source);
         this.linkPersonCommunity = linkPersonCommunity;
     }

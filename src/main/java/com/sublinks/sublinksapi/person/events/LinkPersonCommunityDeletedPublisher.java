@@ -11,6 +11,7 @@ public class LinkPersonCommunityDeletedPublisher {
     public LinkPersonCommunityDeletedPublisher(
             final ApplicationEventPublisher applicationEventPublisher
     ) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

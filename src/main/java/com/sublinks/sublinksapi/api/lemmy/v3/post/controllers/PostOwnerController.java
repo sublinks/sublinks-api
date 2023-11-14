@@ -149,6 +149,7 @@ public class PostOwnerController {
 
     @PostMapping("delete")
     PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
+
         Post post = postRepository.findById((long) deletePostForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         Person person = (Person) principal.getPrincipal();

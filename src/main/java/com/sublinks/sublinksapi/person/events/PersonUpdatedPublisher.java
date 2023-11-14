@@ -9,6 +9,7 @@ public class PersonUpdatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public PersonUpdatedPublisher(ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

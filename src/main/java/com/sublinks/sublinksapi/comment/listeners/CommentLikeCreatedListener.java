@@ -16,6 +16,7 @@ public class CommentLikeCreatedListener implements ApplicationListener<CommentLi
     @Override
     @Transactional
     public void onApplicationEvent(CommentLikeCreatedEvent event) {
+
         final CommentAggregate commentAggregate = event.getCommentLike().getComment().getCommentAggregate();
         if (event.getCommentLike().isUpVote()) {
             commentAggregate.setUpVotes(commentAggregate.getUpVotes() + 1);

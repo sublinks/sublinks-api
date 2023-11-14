@@ -19,6 +19,7 @@ public class PersonPostCreatedListener implements ApplicationListener<PostCreate
 
     @Override
     public void onApplicationEvent(PostCreatedEvent event) {
+
         final Person person = postService.getPostCreator(event.getPost());
         final PersonAggregate personAggregate = person.getPersonAggregate();
         personAggregate.setPostCount(personAggregate.getPostCount() + 1);
