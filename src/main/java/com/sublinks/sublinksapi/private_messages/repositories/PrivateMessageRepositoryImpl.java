@@ -23,9 +23,7 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
 
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<PrivateMessage> cq = cb.createQuery(PrivateMessage.class);
-
         final Root<PrivateMessage> privateMessageTable = cq.from(PrivateMessage.class);
-
         final List<Predicate> predicates = new ArrayList<>();
 
         if (privateMessageSearchCriteria.unresolvedOnly()) {
