@@ -10,6 +10,7 @@ public class JwtPerson extends AbstractAuthenticationToken {
     private final Person person;
 
     public JwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
+
         super(authorities);
         this.person = person;
         setAuthenticated(false);

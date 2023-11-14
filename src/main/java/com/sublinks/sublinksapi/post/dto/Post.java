@@ -67,7 +67,7 @@ public class Post implements AuthorizationEntityInterface {
     private List<PostLike> postLikes;
 
     @ManyToOne
-            @JoinTable(
+    @JoinTable(
             name = "post_post_cross_post",
             joinColumns = @JoinColumn(name = "post_id"),
             inverseJoinColumns = @JoinColumn(name = "cross_post_id")
@@ -141,11 +141,13 @@ public class Post implements AuthorizationEntityInterface {
 
     @Override
     public AuthorizedEntityType entityType() {
+
         return AuthorizedEntityType.post;
     }
 
     @Override
     public boolean equals(Object o) {
+
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -157,6 +159,7 @@ public class Post implements AuthorizationEntityInterface {
 
     @Override
     public int hashCode() {
+
         int result = getId() != null ? getId().hashCode() : 0;
         result = 31 * result + (getTitleSlug() != null ? getTitleSlug().hashCode() : 0);
         return result;

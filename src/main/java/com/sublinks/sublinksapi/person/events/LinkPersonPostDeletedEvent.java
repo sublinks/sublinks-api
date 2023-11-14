@@ -12,6 +12,7 @@ public class LinkPersonPostDeletedEvent extends ApplicationEvent {
             final Object source,
             final LinkPersonPost linkPersonPost
     ) {
+
         super(source);
         this.linkPersonPost = linkPersonPost;
     }

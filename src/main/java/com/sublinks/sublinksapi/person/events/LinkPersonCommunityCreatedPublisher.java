@@ -11,6 +11,7 @@ public class LinkPersonCommunityCreatedPublisher {
     public LinkPersonCommunityCreatedPublisher(
             final ApplicationEventPublisher applicationEventPublisher
     ) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

@@ -9,6 +9,7 @@ public class CommentLikeCreatedEvent extends ApplicationEvent {
     private final CommentLike commentLike;
 
     public CommentLikeCreatedEvent(final Object source, final CommentLike commentLike) {
+
         super(source);
         this.commentLike = commentLike;
     }

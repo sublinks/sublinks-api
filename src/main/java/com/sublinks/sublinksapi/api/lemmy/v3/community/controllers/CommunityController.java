@@ -120,23 +120,23 @@ public class CommunityController {
     @PostMapping("block")
     BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person)principal.getPrincipal())
+        Person person = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         Community community = communityRepository.findById(blockCommunityForm.community_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         if (blockCommunityForm.block()) {
-             if (linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.follower)) {
+            if (linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.follower)) {
                 linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.follower);
             }
-           linkPersonCommunityService.addLink(person, community, LinkPersonCommunityType.blocked);
+            linkPersonCommunityService.addLink(person, community, LinkPersonCommunityType.blocked);
         } else {
-           linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.blocked);
+            linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.blocked);
         }
 
-       return BlockCommunityResponse.builder()
-               .community_view(lemmyCommunityService.communityViewFromCommunity(community, person))
-               .blocked(blockCommunityForm.block())
-               .build();
+        return BlockCommunityResponse.builder()
+                .community_view(lemmyCommunityService.communityViewFromCommunity(community, person))
+                .blocked(blockCommunityForm.block())
+                .build();
     }
 }

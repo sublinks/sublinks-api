@@ -9,6 +9,7 @@ public class CommunityCreatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public CommunityCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
