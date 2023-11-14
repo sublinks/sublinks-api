@@ -2,13 +2,10 @@ package com.sublinks.sublinksapi.person.listeners;
 
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.events.CommentCreatedEvent;
-import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonMention;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonMentionService;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
 import com.sublinks.sublinksapi.utils.MentionUtils;
 import com.sublinks.sublinksapi.utils.models.Mention;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +25,18 @@ public class PersonMentionCommentCreationListener implements ApplicationListener
 
     @Override
     @Transactional
-    public void onApplicationEvent(CommentCreatedEvent event ) {
+    public void onApplicationEvent(CommentCreatedEvent event) {
+
         Comment comment = event.getComment();
         final List<Mention> mentions = mentionUtils.getPersonMentions(comment.getCommentBody());
         if (mentions != null) {
             for (Mention mention : mentions) {
                 Person recipient = personRepository.findOneByName(mention.name());
 
-                if(recipient == null) {
+                if (recipient == null) {
                     // Person is not found:
                     continue;
-                } else if(Objects.equals(recipient, comment.getPerson())) {
+                } else if (Objects.equals(recipient, comment.getPerson())) {
                     // Person is the same as the commenter:
                     continue;
                 }

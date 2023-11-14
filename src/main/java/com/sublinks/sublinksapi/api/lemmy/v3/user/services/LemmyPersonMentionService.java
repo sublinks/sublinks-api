@@ -1,28 +1,19 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentAggregates;
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionView;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
 import com.sublinks.sublinksapi.comment.dto.CommentLike;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
-import com.sublinks.sublinksapi.comment.services.CommentService;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonMention;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +23,9 @@ public class LemmyPersonMentionService {
     private final LemmyCommunityService lemmyCommunityService;
     private final CommentLikeService commentLikeService;
     private final LemmyCommentService lemmyCommentService;
+
     public PersonMentionView getPersonMentionView(PersonMention personMention) {
+
         final Comment comment = personMention.getComment();
         final Person creator = comment.getPerson();
         final CommentAggregate commentAggregates = comment.getCommentAggregate();
