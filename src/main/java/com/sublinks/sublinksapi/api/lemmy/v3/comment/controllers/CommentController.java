@@ -100,7 +100,7 @@ public class CommentController {
         }
         comment.setPath(path);
         comment.setActivityPubId(lemmyCommentService.generateActivityPubId(comment));
-        commentRepository.save(comment);
+        commentService.updateCommentQuietly(comment);
 
         commentLikeService.updateOrCreateCommentLikeLike(comment, person);
 
