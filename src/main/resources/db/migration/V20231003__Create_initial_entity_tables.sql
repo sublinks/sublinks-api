@@ -474,9 +474,9 @@ CREATE TABLE `people_mentions`
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
-  
-  CREATE INDEX `IDX_PRIVATE_MESSAGES_SENDER_ID` ON `private_messages` (`sender_id`);
-  CREATE INDEX `IDX_PRIVATE_MESSAGES_RECIPIENT_ID` ON `private_messages` (`recipient_id`);
+
+CREATE UNIQUE INDEX `IDX_POST_MENTION_RECIPIENT_ID` ON `people_mentions` (`recipient_id`);
+
 /**
   Private Message
  */
@@ -496,4 +496,6 @@ CREATE TABLE `private_messages`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-CREATE UNIQUE INDEX `IDX_POST_MENTION_RECIPIENT_ID` ON `people_mentions` (`recipient_id`);
+
+CREATE INDEX `IDX_PRIVATE_MESSAGES_SENDER_ID` ON `private_messages` (`sender_id`);
+CREATE INDEX `IDX_PRIVATE_MESSAGES_RECIPIENT_ID` ON `private_messages` (`recipient_id`);
