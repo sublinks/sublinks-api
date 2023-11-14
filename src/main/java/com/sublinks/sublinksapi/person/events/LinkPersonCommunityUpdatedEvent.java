@@ -9,6 +9,7 @@ public class LinkPersonCommunityUpdatedEvent extends ApplicationEvent {
     private final LinkPersonCommunity linkPersonCommunity;
 
     public LinkPersonCommunityUpdatedEvent(final Object source, final LinkPersonCommunity linkPersonCommunity) {
+
         super(source);
         this.linkPersonCommunity = linkPersonCommunity;
     }

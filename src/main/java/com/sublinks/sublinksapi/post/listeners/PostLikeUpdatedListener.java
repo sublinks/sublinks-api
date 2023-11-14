@@ -16,6 +16,7 @@ public class PostLikeUpdatedListener implements ApplicationListener<PostLikeUpda
     @Override
     @Transactional
     public void onApplicationEvent(PostLikeUpdatedEvent event) {
+
         final PostAggregate postAggregate = event.getPostLike().getPost().getPostAggregate();
         switch (event.getAction()) {
             case FROM_UP_TO_DOWN -> {

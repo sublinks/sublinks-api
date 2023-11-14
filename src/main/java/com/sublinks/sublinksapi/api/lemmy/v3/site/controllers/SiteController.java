@@ -47,6 +47,7 @@ public class SiteController {
 
     @GetMapping
     public GetSiteResponse getSite(final JwtPerson jwtPerson) {
+
         Person person = null;
         if (jwtPerson != null) {
             person = (Person) jwtPerson.getPrincipal();

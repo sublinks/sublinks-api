@@ -9,6 +9,7 @@ public class CommentUpdatedEvent extends ApplicationEvent {
     private final Comment comment;
 
     public CommentUpdatedEvent(final Object source, final Comment comment) {
+
         super(source);
         this.comment = comment;
     }

@@ -17,6 +17,7 @@ public class InstanceCommunityCreatedListener implements ApplicationListener<Com
             final InstanceAggregateRepository instanceAggregateRepository,
             LocalInstanceContext localInstanceContext
     ) {
+
         this.instanceAggregateRepository = instanceAggregateRepository;
         this.localInstanceContext = localInstanceContext;
     }

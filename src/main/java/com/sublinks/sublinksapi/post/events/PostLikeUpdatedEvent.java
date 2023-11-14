@@ -10,6 +10,7 @@ public class PostLikeUpdatedEvent extends ApplicationEvent {
     private final Action action;
 
     public PostLikeUpdatedEvent(final Object source, final PostLike postLike, final Action action) {
+
         super(source);
         this.postLike = postLike;
         this.action = action;

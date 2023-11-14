@@ -9,6 +9,7 @@ public class PrivateMessageUpdatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public PrivateMessageUpdatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

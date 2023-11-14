@@ -208,41 +208,49 @@ public class Person implements UserDetails, Principal {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+
         return null; // @todo
     }
 
     @Override
     public String getPassword() {
+
         return this.password;
     }
 
     @Override
     public String getUsername() {
+
         return getName();
     }
 
     @Override
     public boolean isAccountNonExpired() {
+
         return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
+
         return isBanned();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
+
         return true;
     }
 
     @Override
     public boolean isEnabled() {
+
         return !isBanned();
     }
 
     @Override
     public final boolean equals(Object o) {
+
         if (this == o) return true;
         if (o == null) return false;
         Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
@@ -254,6 +262,7 @@ public class Person implements UserDetails, Principal {
 
     @Override
     public final int hashCode() {
+
         return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
 }

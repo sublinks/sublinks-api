@@ -9,6 +9,7 @@ public class PrivateMessageDeletedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public PrivateMessageDeletedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 

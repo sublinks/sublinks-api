@@ -21,6 +21,7 @@ public class LemmyPersonService {
     private final LemmyPostService lemmyPostService;
 
     public PersonView getPersonView(Person person) {
+
         return PersonView.builder()
                 .person(conversionService.convert(person, com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
                 .counts(conversionService.convert(person.getPersonAggregate(), PersonAggregates.class))
@@ -28,18 +29,21 @@ public class LemmyPersonService {
     }
 
     public Collection<PostView> getPersonPosts(Person person) {
+
         Collection<PostView> postViews = new ArrayList<>();
         // @todo person posts
         return postViews;
     }
 
     public Collection<CommunityModeratorView> getPersonModerates(Person person) {
+
         Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
         // @todo communities moderated
         return communityModeratorViews;
     }
 
     public Collection<CommentView> getPersonComments(Person person) {
+
         Collection<CommentView> commentViews = new ArrayList<>();
         // @todo comment view
         return commentViews;

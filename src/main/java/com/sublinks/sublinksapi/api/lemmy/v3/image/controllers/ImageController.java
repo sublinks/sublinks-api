@@ -39,6 +39,7 @@ public class ImageController {
         Resource resource = new ByteArrayResource(image.getBytes()) {
             @Override
             public String getFilename() {
+
                 return image.getOriginalFilename();
             }
         };
