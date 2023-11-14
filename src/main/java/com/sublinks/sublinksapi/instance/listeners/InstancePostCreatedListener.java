@@ -16,6 +16,7 @@ public class InstancePostCreatedListener implements ApplicationListener<PostCrea
             final InstanceAggregateRepository instanceAggregateRepository,
             LocalInstanceContext localInstanceContext
     ) {
+
         this.instanceAggregateRepository = instanceAggregateRepository;
         this.localInstanceContext = localInstanceContext;
     }

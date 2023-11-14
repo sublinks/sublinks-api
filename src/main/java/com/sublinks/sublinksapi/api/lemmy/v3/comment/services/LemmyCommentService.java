@@ -53,6 +53,7 @@ public class LemmyCommentService {
             final com.sublinks.sublinksapi.comment.dto.Comment comment,
             final com.sublinks.sublinksapi.person.dto.Person person
     ) {
+
         CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
 
         final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(

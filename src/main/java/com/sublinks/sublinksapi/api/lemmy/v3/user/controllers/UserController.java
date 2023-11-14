@@ -107,7 +107,7 @@ public class UserController {
     @PutMapping("save_user_settings")
     public LoginResponse saveUserSettings(@Valid @RequestBody SaveUserSettings saveUserSettingsForm, JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person)principal.getPrincipal())
+        Person person = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         // @todo expand form validation to check for email formatting, etc.
@@ -116,15 +116,15 @@ public class UserController {
         // @todo add auto expand media
         // @todo show bot accounts
         person.setShowScores(saveUserSettingsForm.show_scores() != null && saveUserSettingsForm.show_scores());
-        person.setDefaultTheme(saveUserSettingsForm.theme() != null? saveUserSettingsForm.theme(): "");
+        person.setDefaultTheme(saveUserSettingsForm.theme() != null ? saveUserSettingsForm.theme() : "");
         person.setDefaultSortType(conversionService.convert(saveUserSettingsForm.default_sort_type(), SortType.class));
         person.setDefaultListingType(conversionService.convert(saveUserSettingsForm.default_listing_type(), ListingType.class));
-        person.setInterfaceLanguage(saveUserSettingsForm.interface_language() != null ? saveUserSettingsForm.interface_language(): "");
+        person.setInterfaceLanguage(saveUserSettingsForm.interface_language() != null ? saveUserSettingsForm.interface_language() : "");
         person.setAvatarImageUrl(saveUserSettingsForm.avatar());
         person.setBannerImageUrl(saveUserSettingsForm.banner());
-        person.setDisplayName(saveUserSettingsForm.display_name() != null ? saveUserSettingsForm.display_name(): "");
+        person.setDisplayName(saveUserSettingsForm.display_name() != null ? saveUserSettingsForm.display_name() : "");
         person.setEmail(saveUserSettingsForm.email()); // @todo verify email again?
-        person.setBiography(saveUserSettingsForm.bio() != null ? saveUserSettingsForm.bio(): "");
+        person.setBiography(saveUserSettingsForm.bio() != null ? saveUserSettingsForm.bio() : "");
         // @todo matrix user
         person.setShowAvatars(saveUserSettingsForm.show_avatars() != null && saveUserSettingsForm.show_avatars());
         person.setSendNotificationsToEmail(saveUserSettingsForm.send_notifications_to_email() != null && saveUserSettingsForm.send_notifications_to_email());

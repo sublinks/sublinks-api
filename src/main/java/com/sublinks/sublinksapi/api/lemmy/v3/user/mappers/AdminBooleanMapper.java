@@ -11,6 +11,7 @@ import java.util.Arrays;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class AdminBooleanMapper {
     boolean mapAdmin(@NonNull Person person) {
+
         return Arrays
                 .asList(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin)
                 .contains(person.getLinkPersonInstance().getLinkType());

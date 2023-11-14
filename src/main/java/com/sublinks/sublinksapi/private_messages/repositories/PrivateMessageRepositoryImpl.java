@@ -20,6 +20,7 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
 
     @Override
     public List<PrivateMessage> allPrivateMessagesBySearchCriteria(PrivateMessageSearchCriteria privateMessageSearchCriteria) {
+
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<PrivateMessage> cq = cb.createQuery(PrivateMessage.class);
 
@@ -27,11 +28,11 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
 
         final List<Predicate> predicates = new ArrayList<>();
 
-        if(privateMessageSearchCriteria.unresolvedOnly()) {
+        if (privateMessageSearchCriteria.unresolvedOnly()) {
             predicates.add(cb.equal(privateMessageTable.get("resolved"), false));
         }
 
-        if(privateMessageSearchCriteria.person() != null) {
+        if (privateMessageSearchCriteria.person() != null) {
             predicates.add(cb.or(cb.equal(privateMessageTable.get("recipient"), privateMessageSearchCriteria.person()), cb.equal(privateMessageTable.get("sender"), privateMessageSearchCriteria.person())));
         }
 

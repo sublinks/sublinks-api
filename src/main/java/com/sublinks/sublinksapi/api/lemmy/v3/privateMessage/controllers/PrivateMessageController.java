@@ -48,6 +48,7 @@ public class PrivateMessageController {
 
     @GetMapping("list")
     PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm, final JwtPerson principal) {
+
         Person sender = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -71,6 +72,7 @@ public class PrivateMessageController {
 
     @PostMapping
     PrivateMessageResponse create(@Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm, final JwtPerson principal) {
+
         Person sender = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -93,6 +95,7 @@ public class PrivateMessageController {
 
     @PutMapping
     PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm, final JwtPerson principal) {
+
         Person person = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -115,6 +118,7 @@ public class PrivateMessageController {
 
     @PostMapping("delete")
     PrivateMessageResponse delete(@Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm, final JwtPerson principal) {
+
         Person person = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -134,6 +138,7 @@ public class PrivateMessageController {
 
     @PostMapping("mark_as_read")
     PrivateMessageResponse markAsRead(@Valid @RequestBody MarkPrivateMessageAsRead markPrivateMessageAsReadForm, final JwtPerson principal) {
+
         Person person = Optional.ofNullable((Person) principal.getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 

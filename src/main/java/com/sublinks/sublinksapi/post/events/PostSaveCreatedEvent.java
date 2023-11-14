@@ -9,6 +9,7 @@ public class PostSaveCreatedEvent extends ApplicationEvent {
     private final PostSave postSave;
 
     public PostSaveCreatedEvent(final Object source, final PostSave postSave) {
+
         super(source);
         this.postSave = postSave;
     }

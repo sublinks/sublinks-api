@@ -12,6 +12,7 @@ public class LinkPersonCommunityCreatedEvent extends ApplicationEvent {
             final Object source,
             final LinkPersonCommunity linkPersonCommunity
     ) {
+
         super(source);
         this.linkPersonCommunity = linkPersonCommunity;
     }

@@ -120,6 +120,7 @@ public class Community implements Serializable, AuthorizationEntityInterface {
 
     @Override
     public AuthorizedEntityType entityType() {
+
         return AuthorizedEntityType.community;
     }
 }

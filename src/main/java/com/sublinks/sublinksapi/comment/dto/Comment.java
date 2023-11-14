@@ -103,6 +103,7 @@ public class Comment implements Serializable, AuthorizationEntityInterface {
 
     @Override
     public AuthorizedEntityType entityType() {
+
         return AuthorizedEntityType.comment;
     }
 }

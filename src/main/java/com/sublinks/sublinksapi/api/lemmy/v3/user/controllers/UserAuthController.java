@@ -53,6 +53,7 @@ public class UserAuthController {
 
     @GetMapping("get_captcha")
     GetCaptchaResponse captcha() {
+
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 

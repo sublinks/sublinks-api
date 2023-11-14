@@ -12,6 +12,7 @@ public class LinkPersonPostCreatedEvent extends ApplicationEvent {
             final Object source,
             final LinkPersonPost linkPersonPost
     ) {
+
         super(source);
         this.linkPersonPost = linkPersonPost;
     }
