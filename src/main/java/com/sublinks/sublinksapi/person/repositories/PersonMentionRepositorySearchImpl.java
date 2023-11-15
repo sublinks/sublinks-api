@@ -19,6 +19,7 @@ public class PersonMentionRepositorySearchImpl implements PersonMentionRepositor
 
     @Override
     public List<PersonMention> allPersonMentionBySearchCriteria(PersonMentionSearchCriteria personMentionSearchCriteria) {
+
         final CriteriaBuilder cb = em.getCriteriaBuilder();
         final CriteriaQuery<PersonMention> cq = cb.createQuery(PersonMention.class);
 

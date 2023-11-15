@@ -19,12 +19,14 @@ public class PersonMentionService {
 
     @Transactional
     public void createPersonMention(final PersonMention personMention) {
+
         personMentionsRepository.save(personMention);
         personMentionCreatedPublisher.publish(personMention);
     }
 
     @Transactional
     public void updatePersonMention(final PersonMention personMention) {
+
         personMentionsRepository.save(personMention);
         personUpdatedPublisher.publish(personMention);
     }

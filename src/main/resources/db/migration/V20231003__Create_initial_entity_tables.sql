@@ -475,7 +475,7 @@ CREATE TABLE `people_mentions`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-CREATE UNIQUE INDEX `IDX_POST_MENTION_RECIPIENT_ID` ON `people_mentions` (`recipient_id`);
+CREATE UNIQUE INDEX `IDX_PEOPLE_MENTIONS_RECIPIENT_ID` ON `people_mentions` (`recipient_id`);
 
 /**
   Private Message
