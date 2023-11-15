@@ -33,11 +33,7 @@ public class PersonMentionCommentCreationListener implements ApplicationListener
             for (Mention mention : mentions) {
                 Person recipient = personRepository.findOneByName(mention.name());
 
-                if (recipient == null) {
-                    // Person is not found:
-                    continue;
-                } else if (Objects.equals(recipient, comment.getPerson())) {
-                    // Person is the same as the commenter:
+                if (recipient == null || Objects.equals(recipient, comment.getPerson())) {
                     continue;
                 }
 
