@@ -9,6 +9,7 @@ public class PersonMentionupdatedEvent extends ApplicationEvent {
     private final PersonMention personMention;
 
     public PersonMentionupdatedEvent(final Object source, final PersonMention personMention) {
+
         super(source);
         this.personMention = personMention;
     }

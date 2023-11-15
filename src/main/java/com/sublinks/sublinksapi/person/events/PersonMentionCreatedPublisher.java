@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonMention;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -10,6 +9,7 @@ public class PersonMentionCreatedPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     public PersonMentionCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
