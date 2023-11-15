@@ -48,27 +48,20 @@ public class SiteController {
     @GetMapping
     public GetSiteResponse getSite(final JwtPerson jwtPerson) {
 
-        Person person = null;
-        if (jwtPerson != null) {
-            person = (Person) jwtPerson.getPrincipal();
-        }
+        Optional<Person> person = Optional.ofNullable((Person) jwtPerson.getPrincipal());
 
         GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
-                .version("0.19.0")
-                .taglines(new ArrayList<>())
+                .version("0.19.0") // @todo grab this from config?
+                .taglines(new ArrayList<>()) // @todo taglines
                 .site_view(lemmySiteService.getSiteView())
                 .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
                 .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
                 .custom_emojis(lemmySiteService.customEmojis())
                 .admins(lemmySiteService.admins());
 
-        if (person != null) {
-            builder.my_user(myUserInfoService.getMyUserInfo(person));
-        }
+        person.ifPresent(value -> builder.my_user(myUserInfoService.getMyUserInfo(value)));
 
         return builder.build();
-
-
     }
 
     @PostMapping
@@ -115,10 +108,11 @@ public class SiteController {
     @Transactional
     public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final Principal principal) {
 
-        // @todo ensure they are an admin or authorized to block an instance
-        if (!(principal instanceof JwtPerson)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
+        final Person person = Optional.ofNullable((Person)((JwtPerson) principal).getPrincipal())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        // @todo ensure user is admin/has permission to perform this action
+
         final Optional<Instance> instance = instanceRepository.findById((long) blockInstanceForm.instance_id());
         if (instance.isEmpty()) {
             return new BlockInstanceResponse(false);
