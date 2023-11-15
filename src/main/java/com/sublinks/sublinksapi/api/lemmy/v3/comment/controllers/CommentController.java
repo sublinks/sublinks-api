@@ -87,21 +87,15 @@ public class CommentController {
                 .language(language.get())
                 .build();
 
-        commentService.createComment(comment);
-        String path = null;
         if (createCommentForm.parent_id() != null) {
             Optional<Comment> parentComment = commentRepository.findById((long) createCommentForm.parent_id());
-            if (parentComment.isPresent()) {
-                path = String.format("%s.%d", parentComment.get().getPath(), comment.getId());
+            if (parentComment.isEmpty()) {
+                throw new RuntimeException("Invalid comment parent.");
             }
+            commentService.createComment(comment, parentComment.get());
+        } else {
+            commentService.createComment(comment);
         }
-        if (path == null) {
-            path = String.format("0.%d", comment.getId());
-        }
-        comment.setPath(path);
-        comment.setActivityPubId(lemmyCommentService.generateActivityPubId(comment));
-        commentService.updateCommentQuietly(comment);
-
         commentLikeService.updateOrCreateCommentLikeLike(comment, person);
 
         final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
