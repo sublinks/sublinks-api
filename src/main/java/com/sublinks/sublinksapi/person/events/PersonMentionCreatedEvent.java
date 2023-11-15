@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonMention;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
@@ -10,6 +9,7 @@ public class PersonMentionCreatedEvent extends ApplicationEvent {
     private final PersonMention personMention;
 
     public PersonMentionCreatedEvent(final Object source, final PersonMention personMention) {
+
         super(source);
         this.personMention = personMention;
     }
