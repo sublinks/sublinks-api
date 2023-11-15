@@ -27,9 +27,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -146,22 +148,20 @@ public class Post implements AuthorizationEntityInterface {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public final boolean equals(Object o) {
 
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (o == null) return false;
+        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
+        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
+        if (thisEffectiveClass != oEffectiveClass) return false;
         Post post = (Post) o;
-
-        if (getId() != null ? !getId().equals(post.getId()) : post.getId() != null) return false;
-        return getTitleSlug() != null ? getTitleSlug().equals(post.getTitleSlug()) : post.getTitleSlug() == null;
+        return getId() != null && Objects.equals(getId(), post.getId());
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
 
-        int result = getId() != null ? getId().hashCode() : 0;
-        result = 31 * result + (getTitleSlug() != null ? getTitleSlug().hashCode() : 0);
-        return result;
+        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
     }
 }
