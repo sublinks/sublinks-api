@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.image.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.image.models.PictrsParams;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/pictrs/image")
+@Tag(name = "pictrs/image", description = "the image API")
 public class ImageController {
     @Value("${sublinks.pictrs.url}")
     private String pictrsUri;

@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.post.services.PostService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.SlugUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
+@Tag(name = "post", description = "the post API")
 public class PostOwnerController {
     private final LocalInstanceContext localInstanceContext;
     private final AuthorizationService authorizationService;

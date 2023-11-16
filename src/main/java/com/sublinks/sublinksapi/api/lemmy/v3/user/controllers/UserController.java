@@ -19,6 +19,7 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -41,6 +42,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/user")
+@Tag(name = "user", description = "the user API")
 public class UserController {
     private final LemmyPersonService lemmyPersonService;
     private final PersonRepository personRepository;
