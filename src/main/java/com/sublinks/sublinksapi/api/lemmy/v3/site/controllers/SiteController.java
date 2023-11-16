@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.dto.Person;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
+@Tag(name = "site", description = "the site API")
 public class SiteController {
     private final LocalInstanceContext localInstanceContext;
     private final LemmySiteService lemmySiteService;
@@ -48,7 +50,11 @@ public class SiteController {
     @GetMapping
     public GetSiteResponse getSite(final JwtPerson jwtPerson) {
 
-        Optional<Person> person = Optional.ofNullable((Person) jwtPerson.getPrincipal());
+        Optional<Person> person = Optional.empty();
+
+        if(jwtPerson != null) {
+            person = Optional.ofNullable((Person) jwtPerson.getPrincipal());
+        }
 
         GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
                 .version("0.19.0") // @todo grab this from config?

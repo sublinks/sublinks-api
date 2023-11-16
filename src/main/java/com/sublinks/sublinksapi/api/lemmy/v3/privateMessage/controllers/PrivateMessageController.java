@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.private_messages.enums.PrivateMessageSortType;
 import com.sublinks.sublinksapi.private_messages.models.PrivateMessageSearchCriteria;
 import com.sublinks.sublinksapi.private_messages.repositories.PrivateMessageRepository;
 import com.sublinks.sublinksapi.private_messages.services.PrivateMessageService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/private_message")
+@Tag(name = "private_message", description = "the private message API")
 public class PrivateMessageController {
     private final PrivateMessageService privateMessageService;
     private final PrivateMessageRepository privateMessageRepository;

@@ -33,6 +33,7 @@ import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -57,6 +58,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
+@Tag(name = "post", description = "the post API")
 public class PostController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LemmyPostService lemmyPostService;
