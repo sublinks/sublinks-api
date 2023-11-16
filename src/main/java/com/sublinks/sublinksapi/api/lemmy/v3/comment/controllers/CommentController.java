@@ -27,6 +27,7 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -47,6 +48,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
+@Tag(name = "comment", description = "the comment API")
 public class CommentController {
     private final CommentRepository commentRepository;
     private final CommentService commentService;

@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/user")
+@Tag(name = "user", description = "the user API")
 public class UserModActionsController {
     @PostMapping("ban")
     BanPersonResponse ban() {

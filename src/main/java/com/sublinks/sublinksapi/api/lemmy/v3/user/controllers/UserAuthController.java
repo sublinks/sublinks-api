@@ -13,6 +13,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import java.util.Objects;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/user")
+@Tag(name = "user", description = "the user API")
 public class UserAuthController {
     private final JwtUtil jwtUtil;
     private final PersonService personService;
