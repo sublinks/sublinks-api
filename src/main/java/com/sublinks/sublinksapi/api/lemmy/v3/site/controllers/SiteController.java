@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstance;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstanceResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.CreateSite;
@@ -19,7 +20,6 @@ import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,16 +27,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
-public class SiteController {
+public class SiteController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final LemmySiteService lemmySiteService;
     private final InstanceService instanceService;
@@ -46,9 +44,7 @@ public class SiteController {
     private final MyUserInfoService myUserInfoService;
 
     @GetMapping
-    public GetSiteResponse getSite(final JwtPerson jwtPerson) {
-
-        Optional<Person> person = Optional.ofNullable((Person) jwtPerson.getPrincipal());
+    public GetSiteResponse getSite(final JwtPerson principal) {
 
         GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
                 .version("0.19.0") // @todo grab this from config?
@@ -59,15 +55,17 @@ public class SiteController {
                 .custom_emojis(lemmySiteService.customEmojis())
                 .admins(lemmySiteService.admins());
 
-        person.ifPresent(value -> builder.my_user(myUserInfoService.getMyUserInfo(value)));
+        getOptionalPerson(principal).ifPresent((person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
 
         return builder.build();
     }
 
     @PostMapping
     @Transactional
-    public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm) {
+    public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm, final JwtPerson principal) {
 
+        // @todo authorized and ensure only runs when site is not created
+        final Person person = getPersonOrThrowUnauthorized(principal);
         final Instance instance = localInstanceContext.instance();
         instance.setName(createSiteForm.name());
         instance.setDomain(localInstanceContext.settings().getBaseUrl());
@@ -88,8 +86,10 @@ public class SiteController {
 
     @PutMapping
     @Transactional
-    public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm) {
+    public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm, final JwtPerson principal) {
 
+        // @todo authorized person
+        final Person person = getPersonOrThrowUnauthorized(principal);
         final Instance instance = localInstanceContext.instance();
         instance.setName(editSiteForm.name());
         instance.setDescription(editSiteForm.description() == null ? null : editSiteForm.description());
@@ -106,13 +106,10 @@ public class SiteController {
 
     @PostMapping("/block")
     @Transactional
-    public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final Principal principal) {
-
-        final Person person = Optional.ofNullable((Person)((JwtPerson) principal).getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
 
         // @todo ensure user is admin/has permission to perform this action
-
+        final Person person = getPersonOrThrowUnauthorized(principal);
         final Optional<Instance> instance = instanceRepository.findById((long) blockInstanceForm.instance_id());
         if (instance.isEmpty()) {
             return new BlockInstanceResponse(false);

@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.EditPost;
@@ -39,7 +40,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
-public class PostOwnerController {
+public class PostOwnerController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final AuthorizationService authorizationService;
     private final PostRepository postRepository;
@@ -58,10 +59,7 @@ public class PostOwnerController {
 
         final Community community = communityRepository.findById((long) createPostForm.community_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        Person person = null;
-        if (principal != null) {
-            person = (Person) principal.getPrincipal();
-        }
+        final Person person = getPersonOrThrowUnauthorized(principal);
         authorizationService
                 .canPerson(person)
                 .performTheAction(AuthorizeAction.create)
@@ -89,7 +87,7 @@ public class PostOwnerController {
             metadata = siteMetadataUtil.fetchSiteMetadata(url);
         }
 
-        Post.PostBuilder postBuilder = Post.builder()
+        final Post.PostBuilder postBuilder = Post.builder()
                 .instance(localInstanceContext.instance())
                 .community(community)
                 .language(language.get())
@@ -108,7 +106,7 @@ public class PostOwnerController {
             }
         }
 
-        Post post = postBuilder.build();
+        final Post post = postBuilder.build();
 
         postService.createPost(post, person);
 
@@ -120,13 +118,11 @@ public class PostOwnerController {
     @PutMapping
     PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
-        Post post = postRepository.findById((long) editPostForm.post_id())
+        final Post post = postRepository.findById((long) editPostForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-        Person person = null;
-        if (principal != null) {
-            person = (Person) principal.getPrincipal();
-        }
+        final Person person = getPersonOrThrowUnauthorized(principal);
+
         authorizationService
                 .canPerson(person)
                 .defaultingToDecline()
@@ -150,9 +146,9 @@ public class PostOwnerController {
     @PostMapping("delete")
     PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
 
-        Post post = postRepository.findById((long) deletePostForm.post_id())
+        final Post post = postRepository.findById((long) deletePostForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        Person person = (Person) principal.getPrincipal();
+        final Person person = getPersonOrThrowUnauthorized(principal);
 
         authorizationService
                 .canPerson(person)

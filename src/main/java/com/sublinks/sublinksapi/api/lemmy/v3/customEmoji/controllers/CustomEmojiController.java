@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.CreateCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.CustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.DeleteCustomEmoji;
@@ -14,7 +15,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(path = "/api/v3/custom_emoji")
-public class CustomEmojiController {
+public class CustomEmojiController extends AbstractLemmyApiController {
     @PostMapping
     CustomEmojiResponse create(@Valid final CreateCustomEmoji createCustomEmojiForm) {
 
