@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.image.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.image.models.PictrsParams;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,12 +30,14 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/pictrs/image")
-public class ImageController {
+public class ImageController extends AbstractLemmyApiController {
     @Value("${sublinks.pictrs.url}")
     private String pictrsUri;
 
     @PostMapping
     Mono<ResponseEntity<String>> upload(@RequestParam("images[]") MultipartFile image) throws IOException {
+
+        // @todo log who is uploading and what they uploaded
 
         Resource resource = new ByteArrayResource(image.getBytes()) {
             @Override
