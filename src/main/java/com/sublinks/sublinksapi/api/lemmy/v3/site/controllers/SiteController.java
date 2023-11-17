@@ -68,7 +68,7 @@ public class SiteController extends AbstractLemmyApiController {
     @Transactional
     public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm, final JwtPerson principal) {
 
-        if (localInstanceContext.instance().getDomain() != null) {
+        if (!localInstanceContext.instance().getDomain().isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         }
         final Person person = getPersonOrThrowUnauthorized(principal);
