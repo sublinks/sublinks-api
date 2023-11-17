@@ -81,7 +81,7 @@ public class UserController {
     }
 
     @GetMapping("mention")
-    GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm, final JwtPerson principal) {
+    GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm) {
 
         final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
                 .sort(getPersonMentionsForm.sort())
@@ -100,7 +100,7 @@ public class UserController {
     }
 
     @PostMapping("mention/mark_as_read")
-    PersonMentionResponse mentionMarkAsRead(@Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm, final JwtPerson principal) {
+    PersonMentionResponse mentionMarkAsRead(@Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm) {
 
         final PersonMention personMention = personMentionRepository
                 .findById((long) markPersonMentionAsReadForm.person_mention_id())
