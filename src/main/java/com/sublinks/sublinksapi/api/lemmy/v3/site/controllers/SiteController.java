@@ -48,8 +48,6 @@ public class SiteController {
     @GetMapping
     public GetSiteResponse getSite(final JwtPerson jwtPerson) {
 
-        Optional<Person> person = Optional.ofNullable((Person) jwtPerson.getPrincipal());
-
         GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
                 .version("0.19.0") // @todo grab this from config?
                 .taglines(new ArrayList<>()) // @todo taglines
@@ -59,7 +57,10 @@ public class SiteController {
                 .custom_emojis(lemmySiteService.customEmojis())
                 .admins(lemmySiteService.admins());
 
-        person.ifPresent(value -> builder.my_user(myUserInfoService.getMyUserInfo(value)));
+        Optional.ofNullable(jwtPerson).ifPresent((token -> {
+            Optional<Person> person = Optional.ofNullable((Person) token.getPrincipal());
+            person.ifPresent(value -> builder.my_user(myUserInfoService.getMyUserInfo(value)));
+        }));
 
         return builder.build();
     }
@@ -108,7 +109,7 @@ public class SiteController {
     @Transactional
     public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final Principal principal) {
 
-        final Person person = Optional.ofNullable((Person)((JwtPerson) principal).getPrincipal())
+        final Person person = Optional.ofNullable((Person) ((JwtPerson) principal).getPrincipal())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         // @todo ensure user is admin/has permission to perform this action
