@@ -14,9 +14,17 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.List;
 
+/**
+ * Application Boot
+ */
 @SpringBootApplication
 public class SublinksApiApplication {
 
+    /**
+     * Main boot method
+     *
+     * @param args Boot arguments
+     */
     public static void main(String[] args) {
 
         SpringApplication.run(SublinksApiApplication.class, args);
