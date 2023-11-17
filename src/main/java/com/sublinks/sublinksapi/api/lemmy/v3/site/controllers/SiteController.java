@@ -80,8 +80,8 @@ public class SiteController {
         instance.setActivityPubId(localInstanceContext.settings().getBaseUrl());
         instance.setSoftware("sublinks");
         instance.setVersion("0.1.0");
-        instance.setDescription(createSiteForm.description() == null ? null : createSiteForm.description());
-        instance.setSidebar(createSiteForm.sidebar() == null ? null : createSiteForm.sidebar());
+        instance.setDescription(createSiteForm.description());
+        instance.setSidebar(createSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
         instance.setBannerUrl(createSiteForm.banner());
         instance.setIconUrl(createSiteForm.icon());
@@ -98,11 +98,11 @@ public class SiteController {
 
         final Instance instance = localInstanceContext.instance();
         instance.setName(editSiteForm.name());
-        instance.setDescription(editSiteForm.description() == null ? null : editSiteForm.description());
-        instance.setSidebar(editSiteForm.sidebar() == null ? null : editSiteForm.sidebar());
+        instance.setDescription(editSiteForm.description());
+        instance.setSidebar(editSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
-        instance.setBannerUrl(editSiteForm.banner()); // @todo image
-        instance.setIconUrl(editSiteForm.icon()); // @todo image
+        instance.setBannerUrl(editSiteForm.banner());
+        instance.setIconUrl(editSiteForm.icon());
         instanceService.updateInstance(instance);
         return SiteResponse.builder()
                 .site_view(lemmySiteService.getSiteView())
