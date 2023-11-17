@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
+import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -20,6 +21,7 @@ import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -42,6 +45,7 @@ public class SiteController extends AbstractLemmyApiController {
     private final InstanceRepository instanceRepository;
     private final InstanceBlockRepository instanceBlockRepository;
     private final MyUserInfoService myUserInfoService;
+    private final AuthorizationService authorizationService;
 
     @GetMapping
     public GetSiteResponse getSite(final JwtPerson principal) {
@@ -64,8 +68,12 @@ public class SiteController extends AbstractLemmyApiController {
     @Transactional
     public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm, final JwtPerson principal) {
 
-        // @todo authorized and ensure only runs when site is not created
+        if (localInstanceContext.instance().getDomain() != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
         final Person person = getPersonOrThrowUnauthorized(principal);
+        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
         final Instance instance = localInstanceContext.instance();
         instance.setName(createSiteForm.name());
         instance.setDomain(localInstanceContext.settings().getBaseUrl());
@@ -88,8 +96,9 @@ public class SiteController extends AbstractLemmyApiController {
     @Transactional
     public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm, final JwtPerson principal) {
 
-        // @todo authorized person
         final Person person = getPersonOrThrowUnauthorized(principal);
+        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
         final Instance instance = localInstanceContext.instance();
         instance.setName(editSiteForm.name());
         instance.setDescription(editSiteForm.description() == null ? null : editSiteForm.description());
@@ -108,8 +117,8 @@ public class SiteController extends AbstractLemmyApiController {
     @Transactional
     public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
 
-        // @todo ensure user is admin/has permission to perform this action
         final Person person = getPersonOrThrowUnauthorized(principal);
+        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         final Optional<Instance> instance = instanceRepository.findById((long) blockInstanceForm.instance_id());
         if (instance.isEmpty()) {
             return new BlockInstanceResponse(false);
