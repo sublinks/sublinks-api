@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.MarkCommentReplyAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
@@ -27,7 +28,6 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -48,8 +48,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
-@Tag(name = "comment", description = "the comment API")
-public class CommentController {
+public class CommentController extends AbstractLemmyApiController {
     private final CommentRepository commentRepository;
     private final CommentService commentService;
     private final LemmyCommentService lemmyCommentService;
@@ -66,7 +65,7 @@ public class CommentController {
     public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm, final JwtPerson principal) {
 
         // @todo auth service
-        final Person person = (Person) principal.getPrincipal();
+        final Person person = getPersonOrThrowUnauthorized(principal);
         final Post post = postRepository.findById((long) createCommentForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         // Language
@@ -110,8 +109,7 @@ public class CommentController {
     @PutMapping
     CommentResponse update(@Valid @RequestBody final EditComment editCommentForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        final Person person = getPersonOrThrowUnauthorized(principal);
         Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         authorizationService
@@ -150,14 +148,12 @@ public class CommentController {
     @PostMapping("mark_as_read")
     CommentResponse markAsRead(@Valid @RequestBody final MarkCommentReplyAsRead markCommentReplyAsRead, final JwtPerson principal) {
 
-        Optional<Comment> comment = commentRepository.findById((long) markCommentReplyAsRead.comment_reply_id());
-        if (comment.isEmpty() || principal == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        final Person person = (Person) principal.getPrincipal();
-        commentReadService.markCommentReadByPerson(comment.get(), person);
+        final Comment comment = commentRepository.findById((long) markCommentReplyAsRead.comment_reply_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        final Person person = getPersonOrThrowBadRequest(principal);
+        commentReadService.markCommentReadByPerson(comment, person);
 
-        final CommentView commentView = lemmyCommentService.createCommentView(comment.get(), person);
+        final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
         return CommentResponse.builder()
                 .comment_view(commentView)
                 .recipient_ids(new ArrayList<>())
@@ -165,19 +161,19 @@ public class CommentController {
     }
 
     @PostMapping("like")
-    CommentResponse like(@Valid @RequestBody CreateCommentLike createCommentLikeForm, JwtPerson jwtPerson) {
+    CommentResponse like(@Valid @RequestBody CreateCommentLike createCommentLikeForm, JwtPerson principal) {
 
-        final Person person = (Person) jwtPerson.getPrincipal();
-        final Optional<Comment> comment = commentRepository.findById(createCommentLikeForm.comment_id());
+        final Person person = getPersonOrThrowUnauthorized(principal);
+        final Comment comment = commentRepository.findById(createCommentLikeForm.comment_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         if (createCommentLikeForm.score() == 1) {
-            commentLikeService.updateOrCreateCommentLikeLike(comment.get(), person);
+            commentLikeService.updateOrCreateCommentLikeLike(comment, person);
         } else if (createCommentLikeForm.score() == -1) {
-            commentLikeService.updateOrCreateCommentLikeDislike(comment.get(), person);
+            commentLikeService.updateOrCreateCommentLikeDislike(comment, person);
         } else {
-            commentLikeService.updateOrCreateCommentLikeNeutral(comment.get(), person);
+            commentLikeService.updateOrCreateCommentLikeNeutral(comment, person);
         }
-
-        final CommentView commentView = lemmyCommentService.createCommentView(comment.get(), person);
+        final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
         return CommentResponse.builder()
                 .comment_view(commentView)
                 .recipient_ids(new ArrayList<>())
@@ -196,10 +192,7 @@ public class CommentController {
         final Post post = postRepository.findById((long) getCommentsForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-        Person person = null;
-        if (principal != null) {
-            person = (Person) principal.getPrincipal();
-        }
+        Optional<Person> person = getOptionalPerson(principal);
 
         final CommentSortType sortType = conversionService.convert(getCommentsForm.sort(), CommentSortType.class);
         final ListingType listingType = conversionService.convert(getCommentsForm.type_(), ListingType.class);
@@ -216,9 +209,9 @@ public class CommentController {
         final List<CommentView> commentViews = new ArrayList<>();
         for (Comment comment : comments) {
             CommentView commentView;
-            if (person != null) {
-                commentView = lemmyCommentService.createCommentView(comment, person);
-                commentReadService.markCommentReadByPerson(comment, person);
+            if (person.isPresent()) {
+                commentView = lemmyCommentService.createCommentView(comment, person.get());
+                commentReadService.markCommentReadByPerson(comment, person.get());
             } else {
                 commentView = lemmyCommentService.createCommentView(comment);
             }

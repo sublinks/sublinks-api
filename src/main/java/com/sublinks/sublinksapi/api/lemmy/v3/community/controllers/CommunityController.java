@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BlockCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BlockCommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
@@ -19,7 +20,6 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -40,8 +40,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/community")
-@Tag(name = "community", description = "the community API")
-public class CommunityController {
+public class CommunityController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final CommunityRepository communityRepository;
     private final LemmyCommunityService lemmyCommunityService;
@@ -51,13 +50,13 @@ public class CommunityController {
     @GetMapping
     public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm, final JwtPerson principal) {
 
-        final Community community = communityRepository.findCommunityByIdOrTitleSlug(
+        final Community community = Optional.ofNullable(communityRepository.findCommunityByIdOrTitleSlug(
                 getCommunityForm.id(), getCommunityForm.name()
-        );
+        )).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        final Optional<Person> person = getOptionalPerson(principal);
         CommunityView communityView;
-        if (principal != null) {
-            Person person = (Person) principal.getPrincipal();
-            communityView = lemmyCommunityService.communityViewFromCommunity(community, person);
+        if (person.isPresent()) {
+            communityView = lemmyCommunityService.communityViewFromCommunity(community, person.get());
         } else {
             communityView = lemmyCommunityService.communityViewFromCommunity(community);
         }
@@ -75,13 +74,13 @@ public class CommunityController {
     public ListCommunitiesResponse list(@Valid final ListCommunities listCommunitiesForm, final JwtPerson principal) {
 
         final Collection<CommunityView> communityViews = new LinkedHashSet<>();
+        final Optional<Person> person = getOptionalPerson(principal);
 
         final Collection<Community> communities = communityRepository.findAll(); // @todo apply filters
         for (Community community : communities) {
             CommunityView communityView;
-            if (principal != null) {
-                Person person = (Person) principal.getPrincipal();
-                communityView = lemmyCommunityService.communityViewFromCommunity(community, person);
+            if (person.isPresent()) {
+                communityView = lemmyCommunityService.communityViewFromCommunity(community, person.get());
             } else {
                 communityView = lemmyCommunityService.communityViewFromCommunity(community);
             }
@@ -96,7 +95,7 @@ public class CommunityController {
     @PostMapping("follow")
     CommunityResponse follow(@Valid @RequestBody final FollowCommunity followCommunityForm, final JwtPerson principal) {
 
-        final Person person = (Person) principal.getPrincipal();
+        final Person person = getPersonOrThrowUnauthorized(principal);
 
         final Optional<Community> community = communityRepository.findById((long) followCommunityForm.community_id());
 
@@ -122,8 +121,7 @@ public class CommunityController {
     @PostMapping("block")
     BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        Person person = getPersonOrThrowUnauthorized(principal);
         Community community = communityRepository.findById(blockCommunityForm.community_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 

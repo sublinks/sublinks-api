@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
@@ -33,7 +34,6 @@ import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -58,8 +58,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
-@Tag(name = "post", description = "the post API")
-public class PostController {
+public class PostController extends AbstractLemmyApiController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LemmyPostService lemmyPostService;
     private final PostLikeService postLikeService;
@@ -72,24 +71,23 @@ public class PostController {
     private final SiteMetadataUtil siteMetadataUtil;
 
     @GetMapping
-    GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson person) {
+    GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal) {
 
-        Post post = postRepository.findById((long) getPostForm.id())
+        final Post post = postRepository.findById((long) getPostForm.id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         final Community community = post.getCommunity();
 
+        Optional<Person> person = getOptionalPerson(principal);
+
         PostView postView;
-        if (person != null) {
-            postView = lemmyPostService.postViewFromPost(post, (Person) person.getPrincipal());
-            postReadService.markPostReadByPerson(post, (Person) person.getPrincipal());
-        } else {
-            postView = lemmyPostService.postViewFromPost(post);
-        }
         final CommunityView communityView;
-        if (person == null) {
-            communityView = lemmyCommunityService.communityViewFromCommunity(community);
+        if (person.isPresent()) {
+            communityView = lemmyCommunityService.communityViewFromCommunity(community, person.get());
+            postView = lemmyPostService.postViewFromPost(post, person.get());
+            postReadService.markPostReadByPerson(post, person.get());
         } else {
-            communityView = lemmyCommunityService.communityViewFromCommunity(community, (Person) person.getPrincipal());
+            communityView = lemmyCommunityService.communityViewFromCommunity(community);
+            postView = lemmyPostService.postViewFromPost(post);
         }
         final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
         Set<PostView> crossPosts = new LinkedHashSet<>();
@@ -98,8 +96,8 @@ public class PostController {
                 if (post.equals(crossPostPost)) {
                     continue;
                 }
-                if (person != null) {
-                    crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost, (Person) person.getPrincipal()));
+                if (person.isPresent()) {
+                    crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost, person.get()));
                 } else {
                     crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost));
                 }
@@ -117,14 +115,12 @@ public class PostController {
     @PostMapping("mark_as_read")
     PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm, final JwtPerson principal) {
 
-        Optional<Post> post = postRepository.findById((long) markPostAsReadForm.post_id());
-        if (post.isEmpty() || principal == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        final Person person = (Person) principal.getPrincipal();
-        postReadService.markPostReadByPerson(post.get(), person);
+        final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        final Person person = getPersonOrThrowBadRequest(principal);
+        postReadService.markPostReadByPerson(post, person);
         return PostResponse.builder()
-                .post_view(lemmyPostService.postViewFromPost(post.get(), person))
+                .post_view(lemmyPostService.postViewFromPost(post, person))
                 .build();
     }
 
@@ -132,10 +128,7 @@ public class PostController {
     @Transactional(readOnly = true)
     public GetPostsResponse index(@Valid final GetPosts getPostsForm, final JwtPerson principal) {
 
-        Person person = null;
-        if (principal != null) {
-            person = (Person) principal.getPrincipal();
-        }
+        final Optional<Person> person = getOptionalPerson(principal);
 
         final List<Long> communityIds = new ArrayList<>();
         Community community = null;
@@ -148,10 +141,10 @@ public class PostController {
             communityIds.add(community.getId());
         }
 
-        if (person != null && getPostsForm.type_() != null) {
+        if (person.isPresent() && getPostsForm.type_() != null) {
             switch (getPostsForm.type_()) {
                 case Subscribed -> {
-                    final Set<LinkPersonCommunity> personCommunities = person.getLinkPersonCommunity();
+                    final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
                     for (LinkPersonCommunity l : personCommunities) {
                         if (l.getLinkType() == LinkPersonCommunityType.follower) {
                             communityIds.add(l.getCommunity().getId());
@@ -186,15 +179,18 @@ public class PostController {
                 .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
                 .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
                 .sortType(sortType)
-                .person(person)
+                .person(person.orElse(null))
                 .communityIds(communityIds)
                 .build();
 
         final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
         final Collection<PostView> postViewCollection = new LinkedHashSet<>();
         for (Post post : posts) {
-            final PostView postView = lemmyPostService.postViewFromPost(post, person);
-            postViewCollection.add(postView);
+            if (person.isPresent()) {
+                postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
+            } else {
+                postViewCollection.add(lemmyPostService.postViewFromPost(post));
+            }
         }
 
         return GetPostsResponse.builder()
@@ -203,9 +199,9 @@ public class PostController {
     }
 
     @PostMapping("like")
-    PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson jwtPerson) {
+    PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
 
-        final Person person = (Person) jwtPerson.getPrincipal();
+        final Person person = getPersonOrThrowUnauthorized(principal);
         final Post post = postRepository.findById(createPostLikeForm.post_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
         if (createPostLikeForm.score() == 1) {
@@ -224,18 +220,16 @@ public class PostController {
     @PutMapping("save")
     public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
-        Optional<Post> post = postRepository.findById((long) savePostForm.post_id());
-        if (post.isEmpty() || jwtPerson == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        final Person person = (Person) jwtPerson.getPrincipal();
+        final Post post = postRepository.findById((long) savePostForm.post_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        final Person person = getPersonOrThrowUnauthorized(jwtPerson);
         if (savePostForm.save()) {
-            postSaveService.createPostSave(post.get(), person);
+            postSaveService.createPostSave(post, person);
         } else {
-            postSaveService.deletePostSave(post.get(), person);
+            postSaveService.deletePostSave(post, person);
         }
         return PostResponse.builder()
-                .post_view(lemmyPostService.postViewFromPost(post.get(), person))
+                .post_view(lemmyPostService.postViewFromPost(post, person))
                 .build();
     }
 
