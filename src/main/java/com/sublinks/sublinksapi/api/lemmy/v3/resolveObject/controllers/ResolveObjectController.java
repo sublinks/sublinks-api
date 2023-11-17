@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.resolveObject.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.GetModlogResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.resolveObject.models.ResolveObject;
 import jakarta.validation.Valid;
@@ -11,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(path = "/api/v3/resolve_object")
-public class ResolveObjectController {
+public class ResolveObjectController extends AbstractLemmyApiController {
     @GetMapping
     GetModlogResponse index(@Valid final ResolveObject resolveObjectForm) {
 
