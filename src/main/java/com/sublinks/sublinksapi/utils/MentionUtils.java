@@ -14,6 +14,7 @@ public class MentionUtils {
       "@(?<name>[\\w.]+)@(?<domain>[a-zA-Z0-9._:-]+)", Pattern.CASE_INSENSITIVE);
 
   public List<Mention> getPersonMentions(String text) {
+
     final Matcher matcher = PERSON_MENTION_REGEX.matcher(text);
     List<Mention> mentions = new ArrayList<>();
 
