@@ -1,18 +1,18 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.errorHandler;
 
 import lombok.Getter;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 import java.util.Collections;
 import java.util.List;
 
 @Getter
 public class ApiError {
-    private final HttpStatus status;
+    private final HttpStatusCode status;
     private final String message;
     private final List<String> errors;
 
-    public ApiError(final HttpStatus status, final String message, final List<String> errors) {
+    public ApiError(final HttpStatusCode status, final String message, final List<String> errors) {
 
         super();
         this.status = status;
@@ -20,7 +20,7 @@ public class ApiError {
         this.errors = errors;
     }
 
-    public ApiError(final HttpStatus status, final String message, final String error) {
+    public ApiError(final HttpStatusCode status, final String message, final String error) {
 
         super();
         this.status = status;

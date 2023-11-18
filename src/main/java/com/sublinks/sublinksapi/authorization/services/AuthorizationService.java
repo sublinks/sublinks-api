@@ -5,11 +5,16 @@ import com.sublinks.sublinksapi.authorization.dto.Acl;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.authorization.repositories.AclRepository;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -17,6 +22,31 @@ import java.util.function.Supplier;
 @RequiredArgsConstructor
 public class AuthorizationService {
     private final AclRepository aclRepository;
+    private final LocalInstanceContext localInstanceContext;
+    private final LinkPersonInstanceRepository linkPersonInstanceRepository;
+
+    public boolean isAdmin(final Person person) {
+
+        if (person == null) {
+            return false;
+        }
+
+        Collection<LinkPersonInstance> linkPersonInstances = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsInAndPerson(
+                localInstanceContext.instance(),
+                List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin),
+                person
+        );
+
+        return !linkPersonInstances.isEmpty();
+    }
+
+
+    public <X extends Throwable> void isAdminElseThrow(Person person, Supplier<? extends X> exceptionSupplier) throws X {
+
+        if (!isAdmin(person)) {
+            throw exceptionSupplier.get();
+        }
+    }
 
     public EntityPolicy canPerson(final Person person) {
 
