@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstance;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstanceResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.CreateSite;
@@ -9,6 +10,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
+import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -30,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -38,7 +39,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
 @Tag(name = "site", description = "the site API")
-public class SiteController {
+public class SiteController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final LemmySiteService lemmySiteService;
     private final InstanceService instanceService;
@@ -46,15 +47,10 @@ public class SiteController {
     private final InstanceRepository instanceRepository;
     private final InstanceBlockRepository instanceBlockRepository;
     private final MyUserInfoService myUserInfoService;
+    private final AuthorizationService authorizationService;
 
     @GetMapping
-    public GetSiteResponse getSite(final JwtPerson jwtPerson) {
-
-        Optional<Person> person = Optional.empty();
-
-        if(jwtPerson != null) {
-            person = Optional.ofNullable((Person) jwtPerson.getPrincipal());
-        }
+    public GetSiteResponse getSite(final JwtPerson principal) {
 
         GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
                 .version("0.19.0") // @todo grab this from config?
@@ -65,14 +61,20 @@ public class SiteController {
                 .custom_emojis(lemmySiteService.customEmojis())
                 .admins(lemmySiteService.admins());
 
-        person.ifPresent(value -> builder.my_user(myUserInfoService.getMyUserInfo(value)));
+        getOptionalPerson(principal).ifPresent((person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
 
         return builder.build();
     }
 
     @PostMapping
     @Transactional
-    public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm) {
+    public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm, final JwtPerson principal) {
+
+        if (!localInstanceContext.instance().getDomain().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+        final Person person = getPersonOrThrowUnauthorized(principal);
+        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         final Instance instance = localInstanceContext.instance();
         instance.setName(createSiteForm.name());
@@ -80,8 +82,8 @@ public class SiteController {
         instance.setActivityPubId(localInstanceContext.settings().getBaseUrl());
         instance.setSoftware("sublinks");
         instance.setVersion("0.1.0");
-        instance.setDescription(createSiteForm.description() == null ? null : createSiteForm.description());
-        instance.setSidebar(createSiteForm.sidebar() == null ? null : createSiteForm.sidebar());
+        instance.setDescription(createSiteForm.description());
+        instance.setSidebar(createSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
         instance.setBannerUrl(createSiteForm.banner());
         instance.setIconUrl(createSiteForm.icon());
@@ -94,15 +96,18 @@ public class SiteController {
 
     @PutMapping
     @Transactional
-    public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm) {
+    public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm, final JwtPerson principal) {
+
+        final Person person = getPersonOrThrowUnauthorized(principal);
+        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         final Instance instance = localInstanceContext.instance();
         instance.setName(editSiteForm.name());
-        instance.setDescription(editSiteForm.description() == null ? null : editSiteForm.description());
-        instance.setSidebar(editSiteForm.sidebar() == null ? null : editSiteForm.sidebar());
+        instance.setDescription(editSiteForm.description());
+        instance.setSidebar(editSiteForm.sidebar());
         instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
-        instance.setBannerUrl(editSiteForm.banner()); // @todo image
-        instance.setIconUrl(editSiteForm.icon()); // @todo image
+        instance.setBannerUrl(editSiteForm.banner());
+        instance.setIconUrl(editSiteForm.icon());
         instanceService.updateInstance(instance);
         return SiteResponse.builder()
                 .site_view(lemmySiteService.getSiteView())
@@ -112,13 +117,10 @@ public class SiteController {
 
     @PostMapping("/block")
     @Transactional
-    public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final Principal principal) {
+    public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
 
-        final Person person = Optional.ofNullable((Person)((JwtPerson) principal).getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
-        // @todo ensure user is admin/has permission to perform this action
-
+        final Person person = getPersonOrThrowUnauthorized(principal);
+        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
         final Optional<Instance> instance = instanceRepository.findById((long) blockInstanceForm.instance_id());
         if (instance.isEmpty()) {
             return new BlockInstanceResponse(false);

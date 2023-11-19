@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.ListRegistrationApplic
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.PurgeItemResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.RegistrationApplicationResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.PurgeComment;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.PurgeCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PurgePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PurgePerson;
@@ -25,7 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping(path = "/api/v3/admin")
 @Tag(name = "admin", description = "the admin API")
-public class AdminController {
+public class AdminController extends AbstractLemmyApiController {
     @PostMapping("add")
     AddAdminResponse create(@Valid final AddAdmin addAdminForm) {
 

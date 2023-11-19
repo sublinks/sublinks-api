@@ -114,3 +114,11 @@ ALTER TABLE `post_post_cross_post`
 ALTER TABLE `private_messages`
     ADD FOREIGN KEY (`sender_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
     ADD FOREIGN KEY (`recipient_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Person Mention table
+ */
+ALTER TABLE `people_mentions`
+    ADD FOREIGN KEY (`recipient_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+    ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE
+    

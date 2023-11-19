@@ -5,18 +5,25 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetails;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonMentions;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonMentionsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetRepliesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetUnreadCountResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.MarkPersonMentionAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SaveUserSettings;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonMentionService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.PersonMention;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
+import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
+import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -46,9 +53,12 @@ import java.util.Optional;
 public class UserController {
     private final LemmyPersonService lemmyPersonService;
     private final PersonRepository personRepository;
+    private final PersonMentionRepository personMentionRepository;
     private final ConversionService conversionService;
     private final PersonService personService;
     private final LocalInstanceContext localInstanceContext;
+    private final LemmyPersonMentionService lemmyPersonMentionService;
+
 
     @GetMapping()
     GetPersonDetailsResponse show(@Valid final GetPersonDetails getPersonDetailsForm) {
@@ -73,15 +83,38 @@ public class UserController {
     }
 
     @GetMapping("mention")
-    GetPersonMentionsResponse mention() {
+    GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm) {
 
-        return GetPersonMentionsResponse.builder().build();
+        final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
+                .sort(getPersonMentionsForm.sort())
+                .unreadOnly(getPersonMentionsForm.unread_only().orElse(false))
+                .page(getPersonMentionsForm.page())
+                .perPage(getPersonMentionsForm.limit())
+                .build();
+
+        final List<PersonMention> personMentions = personMentionRepository.allPersonMentionBySearchCriteria(criteria);
+
+        final List<PersonMentionView> personMentionViews = new ArrayList<>();
+
+        personMentions.forEach(personMention -> personMentionViews.add(lemmyPersonMentionService.getPersonMentionView(personMention)));
+
+        return GetPersonMentionsResponse.builder().mentions(personMentionViews).build();
     }
 
     @PostMapping("mention/mark_as_read")
-    PersonMentionResponse mentionMarkAsRead() {
+    PersonMentionResponse mentionMarkAsRead(@Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm) {
 
-        return PersonMentionResponse.builder().build();
+        final PersonMention personMention = personMentionRepository
+                .findById((long) markPersonMentionAsReadForm.person_mention_id())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
+
+        personMention.setRead(markPersonMentionAsReadForm.read());
+
+        personMentionRepository.save(personMention);
+
+        final PersonMentionView personMentionView = conversionService.convert(personMention, PersonMentionView.class);
+
+        return PersonMentionResponse.builder().person_mention_view(personMentionView).build();
     }
 
     @GetMapping("replies")

@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.AddModToCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.AddModToCommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.BanFromCommunityResponse;
@@ -22,7 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping(path = "/api/v3/community")
 @Tag(name = "community", description = "the community API")
-public class CommunityModActionsController {
+public class CommunityModActionsController extends AbstractLemmyApiController {
     @PutMapping("hide")
     CommunityResponse hide(@Valid final HideCommunity hideCommunityForm) {
 

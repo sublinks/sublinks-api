@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.comment.controllers;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReportsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,7 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
 @Tag(name = "comment", description = "the comment API")
-public class CommentModActionsController {
+public class CommentModActionsController extends AbstractLemmyApiController {
 
     @PostMapping("remove")
     CommentResponse remove() {

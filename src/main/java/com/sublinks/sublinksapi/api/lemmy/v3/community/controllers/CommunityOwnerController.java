@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.EditCommunity;
@@ -40,7 +41,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/community")
 @Tag(name = "community", description = "the community API")
-public class CommunityOwnerController {
+public class CommunityOwnerController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
     private final CommunityService communityService;
@@ -53,7 +54,7 @@ public class CommunityOwnerController {
     @Transactional
     public CommunityResponse create(@Valid @RequestBody final CreateCommunity createCommunityForm, JwtPerson principal) {
 
-        Person person = (Person) principal.getPrincipal();
+        Person person = getPersonOrThrowUnauthorized(principal);
         authorizationService
                 .canPerson(person)
                 .performTheAction(AuthorizeAction.create)
@@ -100,8 +101,7 @@ public class CommunityOwnerController {
     @PutMapping
     CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        Person person = getPersonOrThrowUnauthorized(principal);
         Community community = communityRepository.findById(editCommunityForm.community_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 

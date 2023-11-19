@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.CreatePrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.DeletePrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.EditPrivateMessage;
@@ -35,13 +36,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/private_message")
 @Tag(name = "private_message", description = "the private message API")
-public class PrivateMessageController {
+public class PrivateMessageController extends AbstractLemmyApiController {
     private final PrivateMessageService privateMessageService;
     private final PrivateMessageRepository privateMessageRepository;
     private final LemmyPrivateMessageService lemmyPrivateMessageService;
@@ -51,9 +51,7 @@ public class PrivateMessageController {
     @GetMapping("list")
     PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm, final JwtPerson principal) {
 
-        Person sender = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
+        final Person sender = getPersonOrThrowUnauthorized(principal);
 
         // @todo: add support for other sort types
         final PrivateMessageSortType sortType = PrivateMessageSortType.New;
@@ -75,9 +73,7 @@ public class PrivateMessageController {
     @PostMapping
     PrivateMessageResponse create(@Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm, final JwtPerson principal) {
 
-        Person sender = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
+        final Person sender = getPersonOrThrowUnauthorized(principal);
 
         final Person recipient = personRepository.findById((long) createPrivateMessageForm.recipient_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "recipient_not_found"));
@@ -98,8 +94,7 @@ public class PrivateMessageController {
     @PutMapping
     PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final Person person = getPersonOrThrowUnauthorized(principal);
 
         PrivateMessage privateMessage = privateMessageRepository.findById((long) editPrivateMessageForm.private_message_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
@@ -121,8 +116,7 @@ public class PrivateMessageController {
     @PostMapping("delete")
     PrivateMessageResponse delete(@Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final Person person = getPersonOrThrowUnauthorized(principal);
 
         PrivateMessage privateMessage = privateMessageRepository.findById((long) deletePrivateMessageForm.private_message_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
@@ -141,8 +135,7 @@ public class PrivateMessageController {
     @PostMapping("mark_as_read")
     PrivateMessageResponse markAsRead(@Valid @RequestBody MarkPrivateMessageAsRead markPrivateMessageAsReadForm, final JwtPerson principal) {
 
-        Person person = Optional.ofNullable((Person) principal.getPrincipal())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        final Person person = getPersonOrThrowUnauthorized(principal);
 
         PrivateMessage privateMessage = privateMessageRepository.findById((long) markPrivateMessageAsReadForm.private_message_id())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
