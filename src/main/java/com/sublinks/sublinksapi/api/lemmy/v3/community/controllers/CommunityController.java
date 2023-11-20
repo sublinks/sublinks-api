@@ -13,6 +13,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetCommunityRespon
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunities;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunitiesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -20,10 +21,17 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,6 +48,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/community")
+@Tag(name = "Community")
 public class CommunityController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final CommunityRepository communityRepository;
@@ -47,6 +56,15 @@ public class CommunityController extends AbstractLemmyApiController {
     private final LinkPersonCommunityService linkPersonCommunityService;
     private final ConversionService conversionService;
 
+    @Operation(summary = "Get / fetch a community.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = GetCommunityResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Community Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @GetMapping
     public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm, final JwtPerson principal) {
 
@@ -69,6 +87,12 @@ public class CommunityController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "List communities, with various filters.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ListCommunitiesResponse.class))})
+    })
     @GetMapping("list")
     @Transactional
     public ListCommunitiesResponse list(@Valid final ListCommunities listCommunitiesForm, final JwtPerson principal) {
@@ -92,6 +116,15 @@ public class CommunityController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Follow / subscribe to a community.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommunityResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Community Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("follow")
     CommunityResponse follow(@Valid @RequestBody final FollowCommunity followCommunityForm, final JwtPerson principal) {
 
@@ -118,6 +151,15 @@ public class CommunityController extends AbstractLemmyApiController {
         );
     }
 
+    @Operation(summary = "Block a community.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = BlockCommunityResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Community Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("block")
     BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm, final JwtPerson principal) {
 
