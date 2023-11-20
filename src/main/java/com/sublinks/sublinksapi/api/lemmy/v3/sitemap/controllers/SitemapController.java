@@ -7,16 +7,17 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@Tag(name = "sitemap", description = "the sitemap API")
+@Tag(name = "Miscellaneous")
 public class SitemapController extends AbstractLemmyApiController {
-    @Operation(summary = "Gets the sitemap", tags = { "sitemap" })
+    @Operation(summary = "Gets the sitemap.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "successful operation", content = { @Content(mediaType = "application/xml") })
+            @ApiResponse(responseCode = "200", description = "OK", content = { @Content(mediaType = MediaType.APPLICATION_XML_VALUE) })
     })
     @GetMapping("api/v3/sitemap.xml")
     String index() {

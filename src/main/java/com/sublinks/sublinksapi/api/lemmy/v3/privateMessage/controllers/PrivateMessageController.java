@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.CreatePrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.DeletePrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models.EditPrivateMessage;
@@ -22,10 +23,16 @@ import com.sublinks.sublinksapi.private_messages.enums.PrivateMessageSortType;
 import com.sublinks.sublinksapi.private_messages.models.PrivateMessageSearchCriteria;
 import com.sublinks.sublinksapi.private_messages.repositories.PrivateMessageRepository;
 import com.sublinks.sublinksapi.private_messages.services.PrivateMessageService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -40,7 +47,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/private_message")
-@Tag(name = "private_message", description = "the private message API")
+@Tag(name = "PrivateMessage")
 public class PrivateMessageController extends AbstractLemmyApiController {
     private final PrivateMessageService privateMessageService;
     private final PrivateMessageRepository privateMessageRepository;
@@ -48,6 +55,12 @@ public class PrivateMessageController extends AbstractLemmyApiController {
     private final PersonRepository personRepository;
     private final AuthorizationService authorizationService;
 
+    @Operation(summary = "Get / fetch private messages.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessagesResponse.class))})
+    })
     @GetMapping("list")
     PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm, final JwtPerson principal) {
 
@@ -70,6 +83,15 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         return PrivateMessagesResponse.builder().private_messages(privateMessageViews).build();
     }
 
+    @Operation(summary = "Create a private message.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Recipient Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping
     PrivateMessageResponse create(@Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm, final JwtPerson principal) {
 
@@ -91,6 +113,15 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
     }
 
+    @Operation(summary = "Edit a private message.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Private Message Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PutMapping
     PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm, final JwtPerson principal) {
 
@@ -113,6 +144,15 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
     }
 
+    @Operation(summary = "Delete a private message.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Private Message Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("delete")
     PrivateMessageResponse delete(@Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm, final JwtPerson principal) {
 
@@ -132,6 +172,15 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
     }
 
+    @Operation(summary = "Mark a private message as read.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Private Message Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("mark_as_read")
     PrivateMessageResponse markAsRead(@Valid @RequestBody MarkPrivateMessageAsRead markPrivateMessageAsReadForm, final JwtPerson principal) {
 
@@ -154,18 +203,36 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
     }
 
+    @Operation(summary = "Create a report for a private message.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessageReportResponse.class))})
+    })
     @PostMapping("report")
     PrivateMessageReportResponse report() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Operation(summary = "Resolve a report for a private message.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PrivateMessageReportResponse.class))})
+    })
     @PutMapping("report/resolve")
     PrivateMessageReportResponse reportResolve() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Operation(summary = "List private message reports.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ListPrivateMessageReportsResponse.class))})
+    })
     @GetMapping("report/list")
     ListPrivateMessageReportsResponse reportList() {
 

@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.comment.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.RegistrationApplicationResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
@@ -28,11 +29,17 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,7 +56,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
-@Tag(name = "comment", description = "the comment API")
+@Tag(name = "Comment")
 public class CommentController extends AbstractLemmyApiController {
     private final CommentRepository commentRepository;
     private final CommentService commentService;
@@ -62,6 +69,12 @@ public class CommentController extends AbstractLemmyApiController {
     private final CommentReadService commentReadService;
     private final AuthorizationService authorizationService;
 
+    @Operation(summary = "Create a comment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentResponse.class))})
+    })
     @PostMapping
     @Transactional
     public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm, final JwtPerson principal) {
@@ -108,6 +121,12 @@ public class CommentController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Edit a comment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentResponse.class))})
+    })
     @PutMapping
     CommentResponse update(@Valid @RequestBody final EditComment editCommentForm, final JwtPerson principal) {
 
@@ -141,12 +160,24 @@ public class CommentController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Delete a comment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentResponse.class))})
+    })
     @PostMapping("delete")
     CommentResponse delete() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Operation(summary = "Mark a comment as read.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentResponse.class))})
+    })
     @PostMapping("mark_as_read")
     CommentResponse markAsRead(@Valid @RequestBody final MarkCommentReplyAsRead markCommentReplyAsRead, final JwtPerson principal) {
 
@@ -162,6 +193,12 @@ public class CommentController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Like / Vote on a comment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentResponse.class))})
+    })
     @PostMapping("like")
     CommentResponse like(@Valid @RequestBody CreateCommentLike createCommentLikeForm, JwtPerson principal) {
 
@@ -182,12 +219,24 @@ public class CommentController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Save a comment for later.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentResponse.class))})
+    })
     @PutMapping("save")
     CommentResponse saveForLater() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Operation(summary = "Get / fetch comments.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = GetCommentsResponse.class))})
+    })
     @GetMapping("list")
     GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
@@ -222,6 +271,12 @@ public class CommentController extends AbstractLemmyApiController {
         return GetCommentsResponse.builder().comments(commentViews).build();
     }
 
+    @Operation(summary = "Report a comment.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommentReportResponse.class))})
+    })
     @PostMapping("report")
     CommentReportResponse report() {
 

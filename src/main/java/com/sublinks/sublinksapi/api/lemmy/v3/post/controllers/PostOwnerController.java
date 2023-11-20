@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.EditPost;
@@ -23,10 +24,16 @@ import com.sublinks.sublinksapi.post.services.PostService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.SlugUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -41,7 +48,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
-@Tag(name = "post", description = "the post API")
+@Tag(name = "Post")
 public class PostOwnerController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final AuthorizationService authorizationService;
@@ -55,6 +62,15 @@ public class PostOwnerController extends AbstractLemmyApiController {
     private final SiteMetadataUtil siteMetadataUtil;
     private final UrlUtil urlUtil;
 
+    @Operation(summary = "Create a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Community Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping
     @Transactional
     public PostResponse create(@Valid @RequestBody final CreatePost createPostForm, JwtPerson principal) {
@@ -117,6 +133,15 @@ public class PostOwnerController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Edit a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Post Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PutMapping
     PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
@@ -145,6 +170,15 @@ public class PostOwnerController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Delete a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Post Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("delete")
     PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
 
