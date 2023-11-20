@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApi
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePostLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
@@ -34,10 +35,17 @@ import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,6 +66,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
+@Tag(name = "Post")
 public class PostController extends AbstractLemmyApiController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LemmyPostService lemmyPostService;
@@ -70,6 +79,15 @@ public class PostController extends AbstractLemmyApiController {
     private final ConversionService conversionService;
     private final SiteMetadataUtil siteMetadataUtil;
 
+    @Operation(summary = "Get / fetch a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = GetPostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Post Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @GetMapping
     GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal) {
 
@@ -112,6 +130,15 @@ public class PostController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Mark a post as read.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Post Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("mark_as_read")
     PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm, final JwtPerson principal) {
 
@@ -124,6 +151,12 @@ public class PostController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Get / fetch posts, with various filters.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = GetPostsResponse.class))})
+    })
     @GetMapping("list")
     @Transactional(readOnly = true)
     public GetPostsResponse index(@Valid final GetPosts getPostsForm, final JwtPerson principal) {
@@ -198,6 +231,15 @@ public class PostController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Like / vote on a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Post Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PostMapping("like")
     PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
 
@@ -217,6 +259,15 @@ public class PostController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Save a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Post Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PutMapping("save")
     public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
@@ -233,12 +284,24 @@ public class PostController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Report a post.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PostReportResponse.class))})
+    })
     @PostMapping("report")
     PostReportResponse report() {
 
         throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
     }
 
+    @Operation(summary = "Fetch metadata for any given site.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = GetSiteMetadataResponse.class))})
+    })
     @GetMapping("site_metadata")
     public GetSiteMetadataResponse siteMetadata(@Valid GetSiteMetadata getSiteMetadataForm) {
 

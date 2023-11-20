@@ -2,6 +2,9 @@ package com.sublinks.sublinksapi.api.lemmy.v3.image.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.image.models.PictrsParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +37,10 @@ public class ImageController extends AbstractLemmyApiController {
     @Value("${sublinks.pictrs.url}")
     private String pictrsUri;
 
+    @Operation(summary = "Uploads an image.", hidden = true)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK")}
+    )
     @PostMapping
     Mono<ResponseEntity<String>> upload(@RequestParam("images[]") MultipartFile image) throws IOException {
 
@@ -56,6 +63,10 @@ public class ImageController extends AbstractLemmyApiController {
                 .toEntity(String.class);
     }
 
+    @Operation(summary = "Gets the full resolution image.", hidden = true)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK")}
+    )
     @GetMapping("{filename}")
     Mono<ResponseEntity<ByteArrayResource>> fullResImage(@Valid PictrsParams pictrsParams, @PathVariable String filename) {
 
@@ -83,6 +94,10 @@ public class ImageController extends AbstractLemmyApiController {
 
     }
 
+    @Operation(summary = "Deletes an image.", hidden = true)
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK")}
+    )
     @GetMapping("delete/{token}/{filename}")
     String delete(@PathVariable String token, @PathVariable String filename) {
 

@@ -19,9 +19,16 @@ import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.dto.Person;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +44,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
+@Tag(name = "Site")
 public class SiteController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final LemmySiteService lemmySiteService;
@@ -47,6 +55,12 @@ public class SiteController extends AbstractLemmyApiController {
     private final MyUserInfoService myUserInfoService;
     private final AuthorizationService authorizationService;
 
+    @Operation(summary = "Gets the site, and your user data.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = GetSiteResponse.class))})
+    })
     @GetMapping
     public GetSiteResponse getSite(final JwtPerson principal) {
 
@@ -64,6 +78,12 @@ public class SiteController extends AbstractLemmyApiController {
         return builder.build();
     }
 
+    @Operation(summary = "Create your site.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = SiteResponse.class))})
+    })
     @PostMapping
     @Transactional
     public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm, final JwtPerson principal) {
@@ -92,6 +112,12 @@ public class SiteController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Edit your site.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = SiteResponse.class))})
+    })
     @PutMapping
     @Transactional
     public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm, final JwtPerson principal) {
@@ -113,6 +139,12 @@ public class SiteController extends AbstractLemmyApiController {
                 .build();
     }
 
+    @Operation(summary = "Block an instance.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = BlockInstanceResponse.class))})
+    })
     @PostMapping("/block")
     @Transactional
     public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {

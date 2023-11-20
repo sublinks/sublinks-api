@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.EditCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
@@ -19,9 +20,16 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import com.sublinks.sublinksapi.utils.SlugUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -39,6 +47,7 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/community")
+@Tag(name = "Community")
 public class CommunityOwnerController extends AbstractLemmyApiController {
     private final LocalInstanceContext localInstanceContext;
     private final LinkPersonCommunityRepository linkPersonCommunityRepository;
@@ -48,6 +57,12 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     private final SlugUtil slugUtil;
     private final CommunityRepository communityRepository;
 
+    @Operation(summary = "Create a new community.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommunityResponse.class))})
+    })
     @PostMapping
     @Transactional
     public CommunityResponse create(@Valid @RequestBody final CreateCommunity createCommunityForm, JwtPerson principal) {
@@ -96,6 +111,15 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
         return lemmyCommunityService.createCommunityResponse(community, person);
     }
 
+    @Operation(summary = "Edit a community.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "OK",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = CommunityResponse.class))}),
+            @ApiResponse(responseCode = "400", description = "Community Not Found",
+                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ApiError.class))})
+    })
     @PutMapping
     CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm, final JwtPerson principal) {
 
