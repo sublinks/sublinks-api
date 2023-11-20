@@ -109,7 +109,7 @@ public class AdminController extends AbstractLemmyApiController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = RegistrationApplicationResponse.class))})
+                            schema = @Schema(implementation = PurgeItemResponse.class))})
     })
     @PostMapping("purge/post")
     PurgeItemResponse purgePost(@Valid final PurgePost purgePostForm) {
@@ -121,7 +121,7 @@ public class AdminController extends AbstractLemmyApiController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK",
                     content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = RegistrationApplicationResponse.class))})
+                            schema = @Schema(implementation = PurgeItemResponse.class))})
     })
     @PostMapping("purge/comment")
     PurgeItemResponse purgeComment(@Valid final PurgeComment purgeCommentForm) {
