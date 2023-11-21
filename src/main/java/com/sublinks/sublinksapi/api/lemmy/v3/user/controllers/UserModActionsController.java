@@ -24,51 +24,52 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/user")
 @Tag(name = "User")
 public class UserModActionsController {
-    @Operation(summary = "Ban a person from your site.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BanPersonResponse.class))})
-    })
-    @PostMapping("ban")
-    BanPersonResponse ban() {
 
-        return BanPersonResponse.builder().build();
-    }
+  @Operation(summary = "Ban a person from your site.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = BanPersonResponse.class))})
+  })
+  @PostMapping("ban")
+  BanPersonResponse ban() {
 
-    @Operation(summary = "Block a person.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BlockPersonResponse.class))})
-    })
-    @PostMapping("block")
-    BlockPersonResponse block() {
+    return BanPersonResponse.builder().build();
+  }
 
-        return BlockPersonResponse.builder().build();
-    }
+  @Operation(summary = "Block a person.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = BlockPersonResponse.class))})
+  })
+  @PostMapping("block")
+  BlockPersonResponse block() {
 
-    @Operation(summary = "Get counts for your reports.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetReportCountResponse.class))})
-    })
-    @GetMapping("report_count")
-    GetReportCountResponse reportCount() {
+    return BlockPersonResponse.builder().build();
+  }
 
-        return GetReportCountResponse.builder().build();
-    }
+  @Operation(summary = "Get counts for your reports.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetReportCountResponse.class))})
+  })
+  @GetMapping("report_count")
+  GetReportCountResponse reportCount() {
 
-    @Operation(summary = "Leave the Site admins.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetSiteResponse.class))})
-    })
-    @PostMapping("leave_admin")
-    GetSiteResponse leaveAdmin() {
+    return GetReportCountResponse.builder().build();
+  }
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Leave the Site admins.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetSiteResponse.class))})
+  })
+  @PostMapping("leave_admin")
+  GetSiteResponse leaveAdmin() {
+
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

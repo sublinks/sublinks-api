@@ -3,7 +3,9 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.models;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GenerateTotpSecretResponse(
-        String totp_secret_url
+    String totp_secret_url
 ) {
+
 }

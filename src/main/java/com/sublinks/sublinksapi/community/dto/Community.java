@@ -21,6 +21,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,12 +35,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -44,103 +43,115 @@ import java.util.Set;
 @Entity
 @Table(name = "communities")
 public class Community implements Serializable, AuthorizationEntityInterface {
-    @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
-    Set<LinkPersonCommunity> linkPersonCommunity;
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    @JoinColumn(name = "instance_id")
-    private Instance instance;
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
-    @PrimaryKeyJoinColumn
-    private List<Comment> comments;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @PrimaryKeyJoinColumn
-    private CommunityAggregate communityAggregate;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "community_languages",
-            joinColumns = @JoinColumn(name = "community_id"),
-            inverseJoinColumns = @JoinColumn(name = "language_id")
-    )
-    private List<Language> languages;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
+  Set<LinkPersonCommunity> linkPersonCommunity;
+  /**
+   * Relationships.
+   */
+  @ManyToOne
+  @JoinColumn(name = "instance_id")
+  private Instance instance;
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
+  @PrimaryKeyJoinColumn
+  private List<Comment> comments;
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @PrimaryKeyJoinColumn
+  private CommunityAggregate communityAggregate;
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @JoinTable(
+      name = "community_languages",
+      joinColumns = @JoinColumn(name = "community_id"),
+      inverseJoinColumns = @JoinColumn(name = "language_id")
+  )
+  private List<Language> languages;
 
-    @Column(nullable = false, name = "activity_pub_id")
-    private String activityPubId;
+  /**
+   * Attributes.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String title;
+  @Column(nullable = false, name = "activity_pub_id")
+  private String activityPubId;
 
-    @Column(nullable = false, name = "title_slug")
-    private String titleSlug;
+  @Column(nullable = false)
+  private String title;
 
-    @Column(nullable = false)
-    private String description;
+  @Column(nullable = false, name = "title_slug")
+  private String titleSlug;
 
-    @Column(nullable = false, name = "is_deleted")
-    private boolean isDeleted;
+  @Column(nullable = false)
+  private String description;
 
-    @Column(nullable = false, name = "is_removed")
-    private boolean isRemoved;
+  @Column(nullable = false, name = "is_deleted")
+  private boolean isDeleted;
 
-    @Column(nullable = false, name = "is_local")
-    private boolean isLocal;
+  @Column(nullable = false, name = "is_removed")
+  private boolean isRemoved;
 
-    @Column(nullable = false, name = "is_nsfw")
-    private boolean isNsfw;
+  @Column(nullable = false, name = "is_local")
+  private boolean isLocal;
 
-    @Column(nullable = false, name = "is_posting_restricted_to_mods")
-    private boolean isPostingRestrictedToMods;
+  @Column(nullable = false, name = "is_nsfw")
+  private boolean isNsfw;
 
-    @Column(nullable = false, name = "icon_image_url")
-    private String iconImageUrl;
+  @Column(nullable = false, name = "is_posting_restricted_to_mods")
+  private boolean isPostingRestrictedToMods;
 
-    @Column(nullable = false, name = "banner_image_url")
-    private String bannerImageUrl;
+  @Column(nullable = false, name = "icon_image_url")
+  private String iconImageUrl;
 
-    @Column(nullable = false, name = "public_key")
-    private String publicKey;
+  @Column(nullable = false, name = "banner_image_url")
+  private String bannerImageUrl;
 
-    @Column(nullable = true, name = "private_key")
-    private String privateKey;
+  @Column(nullable = false, name = "public_key")
+  private String publicKey;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  @Column(nullable = true, name = "private_key")
+  private String privateKey;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-    @Override
-    public AuthorizedEntityType entityType() {
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
 
-        return AuthorizedEntityType.community;
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.community;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        Community community = (Community) o;
-        return getId() != null && Objects.equals(getId(), community.getId());
+    if (o == null) {
+      return false;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    Class<?> objectEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != objectEffectiveClass) {
+      return false;
     }
+    Community community = (Community) o;
+    return getId() != null && Objects.equals(getId(), community.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetCaptchaResponse(
-        CaptchaResponse ok
+    CaptchaResponse ok
 ) {
+
 }

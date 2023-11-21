@@ -14,54 +14,55 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-    private final CommentRepository commentRepository;
-    private final CommentAggregateRepository commentAggregateRepository;
-    private final CommentCreatedPublisher commentCreatedPublisher;
-    private final CommentUpdatedPublisher commentUpdatedPublisher;
-    private final LocalInstanceContext localInstanceContext;
 
-    public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+  private final CommentRepository commentRepository;
+  private final CommentAggregateRepository commentAggregateRepository;
+  private final CommentCreatedPublisher commentCreatedPublisher;
+  private final CommentUpdatedPublisher commentUpdatedPublisher;
+  private final LocalInstanceContext localInstanceContext;
 
-        String domain = localInstanceContext.instance().getDomain();
-        return String.format("%s/comment/%d", domain, comment.getId());
+  public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+
+    String domain = localInstanceContext.instance().getDomain();
+    return String.format("%s/comment/%d", domain, comment.getId());
+  }
+
+  @Transactional
+  public void createComment(final Comment comment) {
+
+    if (comment.getPath().isBlank()) {
+      comment.setPath(String.format("0.%d", comment.getId()));
     }
+    comment.setActivityPubId(generateActivityPubId(comment));
 
-    @Transactional
-    public void createComment(final Comment comment) {
+    CommentAggregate commentAggregate = CommentAggregate.builder()
+        .comment(comment)
+        .build();
 
-        if (comment.getPath().isBlank()) {
-            comment.setPath(String.format("0.%d", comment.getId()));
-        }
-        comment.setActivityPubId(generateActivityPubId(comment));
+    commentAggregateRepository.save(commentAggregate);
+    comment.setCommentAggregate(commentAggregate);
 
-        CommentAggregate commentAggregate = CommentAggregate.builder()
-                .comment(comment)
-                .build();
+    commentCreatedPublisher.publish(comment);
+  }
 
-        commentAggregateRepository.save(commentAggregate);
-        comment.setCommentAggregate(commentAggregate);
+  @Transactional
+  public void createComment(final Comment comment, final Comment parent) {
 
-        commentCreatedPublisher.publish(comment);
-    }
+    commentRepository.save(comment);
+    comment.setPath(String.format("%s.%d", parent.getPath(), comment.getId()));
+    createComment(comment);
+  }
 
-    @Transactional
-    public void createComment(final Comment comment, final Comment parent) {
+  @Transactional
+  public void updateCommentQuietly(final Comment comment) {
 
-        commentRepository.save(comment);
-        comment.setPath(String.format("%s.%d", parent.getPath(), comment.getId()));
-        createComment(comment);
-    }
+    commentRepository.save(comment);
+  }
 
-    @Transactional
-    public void updateCommentQuietly(final Comment comment) {
+  @Transactional
+  public void updateComment(final Comment comment) {
 
-        commentRepository.save(comment);
-    }
-
-    @Transactional
-    public void updateComment(final Comment comment) {
-
-        commentRepository.save(comment);
-        commentUpdatedPublisher.publish(comment);
-    }
+    commentRepository.save(comment);
+    commentUpdatedPublisher.publish(comment);
+  }
 }

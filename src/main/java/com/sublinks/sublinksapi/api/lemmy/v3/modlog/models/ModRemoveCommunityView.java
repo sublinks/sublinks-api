@@ -5,9 +5,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record ModRemoveCommunityView(
-        ModRemoveCommunity mod_remove_community,
-        Person moderator,
-        Community community
+    ModRemoveCommunity mod_remove_community,
+    Person moderator,
+    Community community
 ) {
+
 }

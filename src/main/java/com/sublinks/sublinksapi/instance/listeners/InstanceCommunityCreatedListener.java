@@ -9,29 +9,31 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class InstanceCommunityCreatedListener implements ApplicationListener<CommunityCreatedEvent> {
-    private final InstanceAggregateRepository instanceAggregateRepository;
-    private final LocalInstanceContext localInstanceContext;
+public class InstanceCommunityCreatedListener implements
+    ApplicationListener<CommunityCreatedEvent> {
 
-    public InstanceCommunityCreatedListener(
-            final InstanceAggregateRepository instanceAggregateRepository,
-            LocalInstanceContext localInstanceContext
-    ) {
+  private final InstanceAggregateRepository instanceAggregateRepository;
+  private final LocalInstanceContext localInstanceContext;
 
-        this.instanceAggregateRepository = instanceAggregateRepository;
-        this.localInstanceContext = localInstanceContext;
+  public InstanceCommunityCreatedListener(
+      final InstanceAggregateRepository instanceAggregateRepository,
+      LocalInstanceContext localInstanceContext
+  ) {
+
+    this.instanceAggregateRepository = instanceAggregateRepository;
+    this.localInstanceContext = localInstanceContext;
+  }
+
+  @Override
+  @Transactional
+  public void onApplicationEvent(CommunityCreatedEvent event) {
+
+    if (!event.getCommunity().isLocal()) {
+      return;
     }
 
-    @Override
-    @Transactional
-    public void onApplicationEvent(CommunityCreatedEvent event) {
-
-        if (!event.getCommunity().isLocal()) {
-            return;
-        }
-
-        final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
-        instanceAggregate.setCommunityCount(instanceAggregate.getCommunityCount() + 1);
-        instanceAggregateRepository.save(instanceAggregate);
-    }
+    final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
+    instanceAggregate.setCommunityCount(instanceAggregate.getCommunityCount() + 1);
+    instanceAggregateRepository.save(instanceAggregate);
+  }
 }

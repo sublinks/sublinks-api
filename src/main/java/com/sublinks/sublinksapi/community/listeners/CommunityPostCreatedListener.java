@@ -11,14 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class CommunityPostCreatedListener implements ApplicationListener<PostCreatedEvent> {
-    private final CommunityAggregateRepository communityAggregateRepository;
 
-    @Override
-    @Transactional
-    public void onApplicationEvent(PostCreatedEvent event) {
+  private final CommunityAggregateRepository communityAggregateRepository;
 
-        final CommunityAggregate communityAggregate = event.getPost().getCommunity().getCommunityAggregate();
-        communityAggregate.setPostCount(communityAggregate.getPostCount() + 1);
-        communityAggregateRepository.save(communityAggregate);
-    }
+  @Override
+  @Transactional
+  public void onApplicationEvent(PostCreatedEvent event) {
+
+    final CommunityAggregate communityAggregate = event.getPost().getCommunity()
+        .getCommunityAggregate();
+    communityAggregate.setPostCount(communityAggregate.getPostCount() + 1);
+    communityAggregateRepository.save(communityAggregate);
+  }
 }

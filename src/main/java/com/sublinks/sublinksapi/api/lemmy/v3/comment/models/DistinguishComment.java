@@ -3,8 +3,10 @@ package com.sublinks.sublinksapi.api.lemmy.v3.comment.models;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record DistinguishComment(
-        Integer comment_id,
-        Boolean distinguished
+    Integer comment_id,
+    Boolean distinguished
 ) {
+
 }

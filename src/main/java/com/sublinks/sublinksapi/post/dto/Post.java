@@ -20,6 +20,10 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,11 +33,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -42,126 +41,138 @@ import java.util.Set;
 @Entity
 @Table(name = "posts")
 public class Post implements AuthorizationEntityInterface {
-    /**
-     * Relationships
-     */
-    @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
-    Set<LinkPersonPost> linkPersonPost;
 
-    @ManyToOne
-    @JoinColumn(name = "community_id")
-    private Community community;
+  /**
+   * Relationships.
+   */
+  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+  Set<LinkPersonPost> linkPersonPost;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
-    private List<Comment> comments;
+  @ManyToOne
+  @JoinColumn(name = "community_id")
+  private Community community;
 
-    @ManyToOne
-    private Instance instance;
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
+  private List<Comment> comments;
 
-    @ManyToOne
-    @JoinColumn(name = "language_id")
-    private Language language;
+  @ManyToOne
+  private Instance instance;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
-    private PostAggregate postAggregate;
+  @ManyToOne
+  @JoinColumn(name = "language_id")
+  private Language language;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-    private List<PostLike> postLikes;
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
+  private PostAggregate postAggregate;
 
-    @ManyToOne
-    @JoinTable(
-            name = "post_post_cross_post",
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "cross_post_id")
-    )
-    CrossPost crossPost;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<PostLike> postLikes;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @ManyToOne
+  @JoinTable(
+      name = "post_post_cross_post",
+      joinColumns = @JoinColumn(name = "post_id"),
+      inverseJoinColumns = @JoinColumn(name = "cross_post_id")
+  )
+  CrossPost crossPost;
 
-    @Column(nullable = false, name = "activity_pub_id")
-    private String activityPubId;
+  /**
+   * Attributes.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, name = "is_deleted")
-    private boolean isDeleted;
+  @Column(nullable = false, name = "activity_pub_id")
+  private String activityPubId;
 
-    @Column(nullable = false, name = "is_removed")
-    private boolean isRemoved;
+  @Column(nullable = false, name = "is_deleted")
+  private boolean isDeleted;
 
-    @Column(nullable = false, name = "is_local")
-    private boolean isLocal;
+  @Column(nullable = false, name = "is_removed")
+  private boolean isRemoved;
 
-    @Column(nullable = false, name = "is_featured")
-    private boolean isFeatured;
+  @Column(nullable = false, name = "is_local")
+  private boolean isLocal;
 
-    @Column(nullable = false, name = "is_featured_in_community")
-    private boolean isFeaturedInCommunity;
+  @Column(nullable = false, name = "is_featured")
+  private boolean isFeatured;
 
-    @Column(nullable = false, name = "link_url")
-    private String linkUrl;
+  @Column(nullable = false, name = "is_featured_in_community")
+  private boolean isFeaturedInCommunity;
 
-    @Column(nullable = false, name = "link_title")
-    private String linkTitle;
+  @Column(nullable = false, name = "link_url")
+  private String linkUrl;
 
-    @Column(nullable = false, name = "link_description")
-    private String linkDescription;
+  @Column(nullable = false, name = "link_title")
+  private String linkTitle;
 
-    @Column(nullable = false, name = "link_thumbnail_url")
-    private String linkThumbnailUrl;
+  @Column(nullable = false, name = "link_description")
+  private String linkDescription;
 
-    @Column(nullable = false, name = "link_video_url")
-    private String linkVideoUrl;
+  @Column(nullable = false, name = "link_thumbnail_url")
+  private String linkThumbnailUrl;
 
-    @Column(nullable = false, name = "is_nsfw")
-    private boolean isNsfw;
+  @Column(nullable = false, name = "link_video_url")
+  private String linkVideoUrl;
 
-    private String title;
+  @Column(nullable = false, name = "is_nsfw")
+  private boolean isNsfw;
 
-    @Column(nullable = false, name = "title_slug")
-    private String titleSlug;
+  private String title;
 
-    @Column(nullable = false, name = "post_body")
-    private String postBody;
+  @Column(nullable = false, name = "title_slug")
+  private String titleSlug;
 
-    @Column(nullable = false, name = "public_key")
-    private String publicKey;
+  @Column(nullable = false, name = "post_body")
+  private String postBody;
 
-    @Column(nullable = true, name = "private_key")
-    private String privateKey;
+  @Column(nullable = false, name = "public_key")
+  private String publicKey;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  @Column(nullable = true, name = "private_key")
+  private String privateKey;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-    @Override
-    public AuthorizedEntityType entityType() {
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
 
-        return AuthorizedEntityType.post;
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.post;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        Post post = (Post) o;
-        return getId() != null && Objects.equals(getId(), post.getId());
+    if (o == null) {
+      return false;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    Class<?> objectEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != objectEffectiveClass) {
+      return false;
     }
+    Post post = (Post) o;
+    return getId() != null && Objects.equals(getId(), post.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

@@ -1,11 +1,12 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.admin.models;
 
+import java.util.List;
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record ListRegistrationApplicationsResponse(
-        List<RegistrationApplicationView> registration_applications
+    List<RegistrationApplicationView> registration_applications
 ) {
+
 }

@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record VerifyEmail(
-        String token
+    String token
 ) {
+
 }

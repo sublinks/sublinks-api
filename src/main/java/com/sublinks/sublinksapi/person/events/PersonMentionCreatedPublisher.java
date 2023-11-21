@@ -6,16 +6,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PersonMentionCreatedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public PersonMentionCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+  public PersonMentionCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 
-    public void publish(PersonMention person) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
 
-        PersonMentionCreatedEvent personMentionCreatedEvent = new PersonMentionCreatedEvent(this, person);
-        applicationEventPublisher.publishEvent(personMentionCreatedEvent);
-    }
+  public void publish(PersonMention person) {
+
+    PersonMentionCreatedEvent personMentionCreatedEvent = new PersonMentionCreatedEvent(this,
+        person);
+    applicationEventPublisher.publishEvent(personMentionCreatedEvent);
+  }
 }

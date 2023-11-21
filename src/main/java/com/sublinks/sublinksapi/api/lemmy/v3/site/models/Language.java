@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record Language(
-        Long id,
-        String code,
-        String name
+    Long id,
+    String code,
+    String name
 ) {
+
 }

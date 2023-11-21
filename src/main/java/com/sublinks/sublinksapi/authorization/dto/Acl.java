@@ -10,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,9 +21,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.util.Date;
-import java.util.Objects;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -30,50 +29,62 @@ import java.util.Objects;
 @Entity
 @Table(name = "acl")
 public class Acl {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(updatable = false, nullable = false, name = "person_id")
-    private Long personId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(updatable = false, nullable = false, name = "entity_type")
-    @Enumerated(EnumType.STRING)
-    private AuthorizedEntityType entityType;
+  @Column(updatable = false, nullable = false, name = "person_id")
+  private Long personId;
 
-    @Column(updatable = true, nullable = false, name = "entity_id")
-    private Long entityId;
+  @Column(updatable = false, nullable = false, name = "entity_type")
+  @Enumerated(EnumType.STRING)
+  private AuthorizedEntityType entityType;
 
-    @Column(updatable = true, nullable = false, name = "authorized_action")
-    @Enumerated(EnumType.STRING)
-    private AuthorizeAction authorizedAction;
+  @Column(updatable = true, nullable = false, name = "entity_id")
+  private Long entityId;
 
-    @Column(updatable = true, nullable = false, name = "is_permitted")
-    private boolean permitted;
+  @Column(updatable = true, nullable = false, name = "authorized_action")
+  @Enumerated(EnumType.STRING)
+  private AuthorizeAction authorizedAction;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  @Column(updatable = true, nullable = false, name = "is_permitted")
+  private boolean permitted;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-    @Override
-    public final boolean equals(Object o) {
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
 
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        Acl acl = (Acl) o;
-        return getId() != null && Objects.equals(getId(), acl.getId());
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    if (o == null) {
+      return false;
     }
+    Class<?> objectEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != objectEffectiveClass) {
+      return false;
+    }
+    Acl acl = (Acl) o;
+    return getId() != null && Objects.equals(getId(), acl.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

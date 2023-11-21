@@ -22,15 +22,16 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/search")
 @Tag(name = "Miscellaneous")
 public class SearchController extends AbstractLemmyApiController {
-    @Operation(summary = "Search lemmy.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PostResponse.class))})
-    })
-    @GetMapping
-    GetModlogResponse index(@Valid final Search searchForm) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Search lemmy.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PostResponse.class))})
+  })
+  @GetMapping
+  GetModlogResponse index(@Valid final Search searchForm) {
+
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

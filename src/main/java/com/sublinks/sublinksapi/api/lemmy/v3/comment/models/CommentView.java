@@ -7,16 +7,18 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record CommentView(
-        Comment comment,
-        Person creator,
-        Post post,
-        Community community,
-        CommentAggregates counts,
-        boolean creator_banned_from_community,
-        SubscribedType subscribed,
-        boolean saved,
-        boolean creator_blocked,
-        int my_vote
+    Comment comment,
+    Person creator,
+    Post post,
+    Community community,
+    CommentAggregates counts,
+    boolean creator_banned_from_community,
+    SubscribedType subscribed,
+    boolean saved,
+    boolean creator_blocked,
+    int my_vote
 ) {
+
 }

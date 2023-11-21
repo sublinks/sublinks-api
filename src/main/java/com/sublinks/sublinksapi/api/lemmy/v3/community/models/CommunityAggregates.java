@@ -3,17 +3,19 @@ package com.sublinks.sublinksapi.api.lemmy.v3.community.models;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record CommunityAggregates(
-        Long id,
-        Long community_id,
-        Long subscribers,
-        Long posts,
-        Long comments,
-        String published,
-        Long users_active_day,
-        Long users_active_week,
-        Long users_active_month,
-        Long users_active_half_year,
-        Long hot_rank
+    Long id,
+    Long community_id,
+    Long subscribers,
+    Long posts,
+    Long comments,
+    String published,
+    Long users_active_day,
+    Long users_active_week,
+    Long users_active_month,
+    Long users_active_half_year,
+    Long hot_rank
 ) {
+
 }

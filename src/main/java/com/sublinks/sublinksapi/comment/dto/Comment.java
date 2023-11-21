@@ -19,6 +19,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,11 +32,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -41,89 +40,101 @@ import java.util.Objects;
 @Entity
 @Table(name = "comments")
 public class Comment implements Serializable, AuthorizationEntityInterface {
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
 
-    @ManyToOne
-    @JoinColumn(name = "person_id")
-    private Person person;
+  /**
+   * Relationships.
+   */
+  @ManyToOne
+  @JoinColumn(name = "post_id")
+  private Post post;
 
-    @ManyToOne
-    @JoinColumn(name = "community_id")
-    private Community community;
+  @ManyToOne
+  @JoinColumn(name = "person_id")
+  private Person person;
 
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
-    private List<CommentLike> likes;
+  @ManyToOne
+  @JoinColumn(name = "community_id")
+  private Community community;
 
-    @ManyToOne
-    @JoinColumn(name = "language_id")
-    private Language language;
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+  private List<CommentLike> likes;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @PrimaryKeyJoinColumn
-    private CommentAggregate commentAggregate;
+  @ManyToOne
+  @JoinColumn(name = "language_id")
+  private Language language;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @PrimaryKeyJoinColumn
+  private CommentAggregate commentAggregate;
 
-    @Column(nullable = false, name = "activity_pub_id")
-    private String activityPubId;
+  /**
+   * Attributes.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, name = "is_deleted")
-    private boolean isDeleted;
+  @Column(nullable = false, name = "activity_pub_id")
+  private String activityPubId;
 
-    @Column(nullable = false, name = "is_removed")
-    private boolean isRemoved;
+  @Column(nullable = false, name = "is_deleted")
+  private boolean isDeleted;
 
-    @Column(nullable = false, name = "is_local")
-    private boolean isLocal;
+  @Column(nullable = false, name = "is_removed")
+  private boolean isRemoved;
 
-    @Column(nullable = false, name = "is_featured")
-    private boolean isFeatured;
+  @Column(nullable = false, name = "is_local")
+  private boolean isLocal;
 
-    @Column(nullable = false, name = "comment_body")
-    private String commentBody;
+  @Column(nullable = false, name = "is_featured")
+  private boolean isFeatured;
 
-    @Column(nullable = false)
-    private String path;
+  @Column(nullable = false, name = "comment_body")
+  private String commentBody;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  @Column(nullable = false)
+  private String path;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-    @Override
-    public AuthorizedEntityType entityType() {
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
 
-        return AuthorizedEntityType.comment;
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.comment;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        Comment comment = (Comment) o;
-        return getId() != null && Objects.equals(getId(), comment.getId());
+    if (o == null) {
+      return false;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    Class<?> objectEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != objectEffectiveClass) {
+      return false;
     }
+    Comment comment = (Comment) o;
+    return getId() != null && Objects.equals(getId(), comment.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

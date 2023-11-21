@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record UserJoinResponse(
-        boolean joined
+    boolean joined
 ) {
+
 }
