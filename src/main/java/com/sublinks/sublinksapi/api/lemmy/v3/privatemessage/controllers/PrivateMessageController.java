@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
-import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.CreatePrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.DeletePrivateMessage;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.EditPrivateMessage;

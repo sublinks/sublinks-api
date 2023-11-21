@@ -5,7 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CreateCustomEmoj
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.DeleteCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.EditCustomEmoji;
-import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
