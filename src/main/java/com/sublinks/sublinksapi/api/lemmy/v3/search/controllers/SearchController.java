@@ -61,7 +61,7 @@ public class SearchController extends AbstractLemmyApiController {
 
     final int page = (searchForm.page() == null ? 0 : Integer.parseInt(searchForm.page())) - 1;
     final int pLimit = Integer.parseInt(searchForm.limit());
-    final int limit = Math.min(pLimit, 25);
+    final int limit = Math.min(pLimit, 20);
     if (searchForm.type_() == null) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
