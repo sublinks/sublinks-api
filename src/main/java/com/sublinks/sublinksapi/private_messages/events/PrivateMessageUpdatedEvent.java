@@ -6,11 +6,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class PrivateMessageUpdatedEvent extends ApplicationEvent {
-    private final PrivateMessage privateMessage;
 
-    public PrivateMessageUpdatedEvent(final Object source, final PrivateMessage privateMessage) {
+  private final PrivateMessage privateMessage;
 
-        super(source);
-        this.privateMessage = privateMessage;
-    }
+  public PrivateMessageUpdatedEvent(final Object source, final PrivateMessage privateMessage) {
+
+    super(source);
+    this.privateMessage = privateMessage;
+  }
 }

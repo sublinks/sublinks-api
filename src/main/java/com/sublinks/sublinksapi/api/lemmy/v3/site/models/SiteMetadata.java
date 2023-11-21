@@ -4,9 +4,10 @@ import lombok.Builder;
 
 @Builder
 public record SiteMetadata(
-        String title,
-        String description,
-        String image,
-        String embed_video_url
+    String title,
+    String description,
+    String image,
+    String embed_video_url
 ) {
+
 }

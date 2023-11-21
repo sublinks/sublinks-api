@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record DeleteCustomEmoji(
-        Integer id
+    Integer id
 ) {
+
 }

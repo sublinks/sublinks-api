@@ -7,8 +7,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface ListTypeMapper extends Converter<ListingType, com.sublinks.sublinksapi.person.enums.ListingType> {
+public interface ListTypeMapper extends
+    Converter<ListingType, com.sublinks.sublinksapi.person.enums.ListingType> {
 
-    @Override
-    com.sublinks.sublinksapi.person.enums.ListingType convert(@Nullable ListingType listingType);
+  @Override
+  com.sublinks.sublinksapi.person.enums.ListingType convert(@Nullable ListingType listingType);
 }

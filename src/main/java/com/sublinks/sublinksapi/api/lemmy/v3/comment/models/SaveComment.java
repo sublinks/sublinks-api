@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record SaveComment(
-        Integer comment_id,
-        Boolean save
+    Integer comment_id,
+    Boolean save
 ) {
+
 }

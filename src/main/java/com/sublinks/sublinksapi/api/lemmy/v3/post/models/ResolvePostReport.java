@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ResolvePostReport(
-        Integer report_id,
-        Boolean resolved
+    Integer report_id,
+    Boolean resolved
 ) {
+
 }

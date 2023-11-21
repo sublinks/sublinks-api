@@ -42,6 +42,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -55,266 +61,263 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 @RestController
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/api/v3/post")
 @Tag(name = "Post")
 public class PostController extends AbstractLemmyApiController {
-    private final LemmyCommunityService lemmyCommunityService;
-    private final LemmyPostService lemmyPostService;
-    private final PostLikeService postLikeService;
-    private final PostSaveService postSaveService;
-    private final CommunityRepository communityRepository;
-    private final PostRepository postRepository;
-    private final UrlUtil urlUtil;
-    private final PostReadService postReadService;
-    private final ConversionService conversionService;
-    private final SiteMetadataUtil siteMetadataUtil;
 
-    @Operation(summary = "Get / fetch a post.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetPostResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Post Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @GetMapping
-    GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal) {
+  private final LemmyCommunityService lemmyCommunityService;
+  private final LemmyPostService lemmyPostService;
+  private final PostLikeService postLikeService;
+  private final PostSaveService postSaveService;
+  private final CommunityRepository communityRepository;
+  private final PostRepository postRepository;
+  private final UrlUtil urlUtil;
+  private final PostReadService postReadService;
+  private final ConversionService conversionService;
+  private final SiteMetadataUtil siteMetadataUtil;
 
-        final Post post = postRepository.findById((long) getPostForm.id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        final Community community = post.getCommunity();
+  @Operation(summary = "Get / fetch a post.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetPostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @GetMapping
+  GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal) {
 
-        Optional<Person> person = getOptionalPerson(principal);
+    final Post post = postRepository.findById((long) getPostForm.id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Community community = post.getCommunity();
 
-        PostView postView;
-        final CommunityView communityView;
+    Optional<Person> person = getOptionalPerson(principal);
+
+    PostView postView;
+    final CommunityView communityView;
+    if (person.isPresent()) {
+      communityView = lemmyCommunityService.communityViewFromCommunity(community, person.get());
+      postView = lemmyPostService.postViewFromPost(post, person.get());
+      postReadService.markPostReadByPerson(post, person.get());
+    } else {
+      communityView = lemmyCommunityService.communityViewFromCommunity(community);
+      postView = lemmyPostService.postViewFromPost(post);
+    }
+    final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(
+        community);
+    Set<PostView> crossPosts = new LinkedHashSet<>();
+    if (post.getCrossPost() != null && post.getCrossPost().getPosts() != null) {
+      for (Post crossPostPost : post.getCrossPost().getPosts()) {
+        if (post.equals(crossPostPost)) {
+          continue;
+        }
         if (person.isPresent()) {
-            communityView = lemmyCommunityService.communityViewFromCommunity(community, person.get());
-            postView = lemmyPostService.postViewFromPost(post, person.get());
-            postReadService.markPostReadByPerson(post, person.get());
+          crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost, person.get()));
         } else {
-            communityView = lemmyCommunityService.communityViewFromCommunity(community);
-            postView = lemmyPostService.postViewFromPost(post);
+          crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost));
         }
-        final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(community);
-        Set<PostView> crossPosts = new LinkedHashSet<>();
-        if (post.getCrossPost() != null && post.getCrossPost().getPosts() != null) {
-            for (Post crossPostPost : post.getCrossPost().getPosts()) {
-                if (post.equals(crossPostPost)) {
-                    continue;
-                }
-                if (person.isPresent()) {
-                    crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost, person.get()));
-                } else {
-                    crossPosts.add(lemmyPostService.postViewFromPost(crossPostPost));
-                }
+      }
+    }
+
+    return GetPostResponse.builder()
+        .post_view(postView)
+        .community_view(communityView)
+        .moderators(moderators)
+        .cross_posts(crossPosts)
+        .build();
+  }
+
+  @Operation(summary = "Mark a post as read.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PostMapping("mark_as_read")
+  PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
+      final JwtPerson principal) {
+
+    final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Person person = getPersonOrThrowBadRequest(principal);
+    postReadService.markPostReadByPerson(post, person);
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
+        .build();
+  }
+
+  @Operation(summary = "Get / fetch posts, with various filters.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetPostsResponse.class))})
+  })
+  @GetMapping("list")
+  @Transactional(readOnly = true)
+  public GetPostsResponse index(@Valid final GetPosts getPostsForm, final JwtPerson principal) {
+
+    final Optional<Person> person = getOptionalPerson(principal);
+
+    final List<Long> communityIds = new ArrayList<>();
+    Community community = null;
+    if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
+      Long communityId =
+          getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
+      community = communityRepository.findCommunityByIdOrTitleSlug(
+          communityId,
+          getPostsForm.community_name()
+      );
+      communityIds.add(community.getId());
+    }
+
+    if (person.isPresent() && getPostsForm.type_() != null) {
+      switch (getPostsForm.type_()) {
+        case Subscribed -> {
+          final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
+          for (LinkPersonCommunity l : personCommunities) {
+            if (l.getLinkType() == LinkPersonCommunityType.follower) {
+              communityIds.add(l.getCommunity().getId());
             }
+          }
         }
-
-        return GetPostResponse.builder()
-                .post_view(postView)
-                .community_view(communityView)
-                .moderators(moderators)
-                .cross_posts(crossPosts)
-                .build();
+        case Local -> {
+          for (Community c : communityRepository.findAll()) { // @todo find local
+            communityIds.add(c.getId());
+          }
+        }
+        case All, ModeratorView -> {
+          // @todo only non deleted communities
+          // fall through for now
+        }
+      }
     }
 
-    @Operation(summary = "Mark a post as read.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PostResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Post Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PostMapping("mark_as_read")
-    PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm, final JwtPerson principal) {
-
-        final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        final Person person = getPersonOrThrowBadRequest(principal);
-        postReadService.markPostReadByPerson(post, person);
-        return PostResponse.builder()
-                .post_view(lemmyPostService.postViewFromPost(post, person))
-                .build();
+    SortType sortType = null; // @todo set to site default
+    if (getPostsForm.sort() != null) {
+      sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
+    }
+    ListingType listingType = null; // @todo set to site default
+    if (getPostsForm.type_() != null) {
+      listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
 
-    @Operation(summary = "Get / fetch posts, with various filters.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetPostsResponse.class))})
-    })
-    @GetMapping("list")
-    @Transactional(readOnly = true)
-    public GetPostsResponse index(@Valid final GetPosts getPostsForm, final JwtPerson principal) {
+    final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
+        .page(1)
+        .listingType(listingType)
+        .perPage(20)
+        .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
+        .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
+        .sortType(sortType)
+        .person(person.orElse(null))
+        .communityIds(communityIds)
+        .build();
 
-        final Optional<Person> person = getOptionalPerson(principal);
-
-        final List<Long> communityIds = new ArrayList<>();
-        Community community = null;
-        if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
-            Long communityId = getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
-            community = communityRepository.findCommunityByIdOrTitleSlug(
-                    communityId,
-                    getPostsForm.community_name()
-            );
-            communityIds.add(community.getId());
-        }
-
-        if (person.isPresent() && getPostsForm.type_() != null) {
-            switch (getPostsForm.type_()) {
-                case Subscribed -> {
-                    final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
-                    for (LinkPersonCommunity l : personCommunities) {
-                        if (l.getLinkType() == LinkPersonCommunityType.follower) {
-                            communityIds.add(l.getCommunity().getId());
-                        }
-                    }
-                }
-                case Local -> {
-                    for (Community c : communityRepository.findAll()) { // @todo find local
-                        communityIds.add(c.getId());
-                    }
-                }
-                case All, ModeratorView -> {
-                    // @todo only non deleted communities
-                    // fall through for now
-                }
-            }
-        }
-
-        SortType sortType = null; // @todo set to site default
-        if (getPostsForm.sort() != null) {
-            sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
-        }
-        ListingType listingType = null; // @todo set to site default
-        if (getPostsForm.type_() != null) {
-            listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
-        }
-
-        final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
-                .page(1)
-                .listingType(listingType)
-                .perPage(20)
-                .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
-                .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
-                .sortType(sortType)
-                .person(person.orElse(null))
-                .communityIds(communityIds)
-                .build();
-
-        final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
-        final Collection<PostView> postViewCollection = new LinkedHashSet<>();
-        for (Post post : posts) {
-            if (person.isPresent()) {
-                postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
-            } else {
-                postViewCollection.add(lemmyPostService.postViewFromPost(post));
-            }
-        }
-
-        return GetPostsResponse.builder()
-                .posts(postViewCollection)
-                .build();
+    final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
+    final Collection<PostView> postViewCollection = new LinkedHashSet<>();
+    for (Post post : posts) {
+      if (person.isPresent()) {
+        postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
+      } else {
+        postViewCollection.add(lemmyPostService.postViewFromPost(post));
+      }
     }
 
-    @Operation(summary = "Like / vote on a post.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PostResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Post Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PostMapping("like")
-    PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
+    return GetPostsResponse.builder()
+        .posts(postViewCollection)
+        .build();
+  }
 
-        final Person person = getPersonOrThrowUnauthorized(principal);
-        final Post post = postRepository.findById(createPostLikeForm.post_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        if (createPostLikeForm.score() == 1) {
-            postLikeService.updateOrCreatePostLikeLike(post, person);
-        } else if (createPostLikeForm.score() == -1) {
-            postLikeService.updateOrCreatePostLikeDislike(post, person);
-        } else {
-            postLikeService.updateOrCreatePostLikeNeutral(post, person);
-        }
+  @Operation(summary = "Like / vote on a post.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PostMapping("like")
+  PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
 
-        return PostResponse.builder()
-                .post_view(lemmyPostService.postViewFromPost(post, person))
-                .build();
+    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Post post = postRepository.findById(createPostLikeForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    if (createPostLikeForm.score() == 1) {
+      postLikeService.updateOrCreatePostLikeLike(post, person);
+    } else if (createPostLikeForm.score() == -1) {
+      postLikeService.updateOrCreatePostLikeDislike(post, person);
+    } else {
+      postLikeService.updateOrCreatePostLikeNeutral(post, person);
     }
 
-    @Operation(summary = "Save a post.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PostResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Post Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PutMapping("save")
-    public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
+        .build();
+  }
 
-        final Post post = postRepository.findById((long) savePostForm.post_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        final Person person = getPersonOrThrowUnauthorized(jwtPerson);
-        if (savePostForm.save()) {
-            postSaveService.createPostSave(post, person);
-        } else {
-            postSaveService.deletePostSave(post, person);
-        }
-        return PostResponse.builder()
-                .post_view(lemmyPostService.postViewFromPost(post, person))
-                .build();
+  @Operation(summary = "Save a post.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PutMapping("save")
+  public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
+
+    final Post post = postRepository.findById((long) savePostForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+    if (savePostForm.save()) {
+      postSaveService.createPostSave(post, person);
+    } else {
+      postSaveService.deletePostSave(post, person);
     }
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
+        .build();
+  }
 
-    @Operation(summary = "Report a post.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PostReportResponse.class))})
-    })
-    @PostMapping("report")
-    PostReportResponse report() {
+  @Operation(summary = "Report a post.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PostReportResponse.class))})
+  })
+  @PostMapping("report")
+  PostReportResponse report() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-    @Operation(summary = "Fetch metadata for any given site.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetSiteMetadataResponse.class))})
-    })
-    @GetMapping("site_metadata")
-    public GetSiteMetadataResponse siteMetadata(@Valid GetSiteMetadata getSiteMetadataForm) {
+  @Operation(summary = "Fetch metadata for any given site.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetSiteMetadataResponse.class))})
+  })
+  @GetMapping("site_metadata")
+  public GetSiteMetadataResponse siteMetadata(@Valid GetSiteMetadata getSiteMetadataForm) {
 
-        String normalizedUrl = urlUtil.normalizeUrl(getSiteMetadataForm.url());
-        SiteMetadataUtil.SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
+    String normalizedUrl = urlUtil.normalizeUrl(getSiteMetadataForm.url());
+    SiteMetadataUtil.SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
 
-        return GetSiteMetadataResponse.builder()
-                .metadata(SiteMetadata.builder()
-                        .title(siteMetadata.title())
-                        .description(siteMetadata.description())
-                        .image(siteMetadata.imageUrl())
-                        .embed_video_url(siteMetadata.videoUrl())
-                        .build())
-                .build();
-    }
+    return GetSiteMetadataResponse.builder()
+        .metadata(SiteMetadata.builder()
+            .title(siteMetadata.title())
+            .description(siteMetadata.description())
+            .image(siteMetadata.imageUrl())
+            .embed_video_url(siteMetadata.videoUrl())
+            .build())
+        .build();
+  }
 }

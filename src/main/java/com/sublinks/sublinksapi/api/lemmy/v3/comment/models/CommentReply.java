@@ -4,10 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record CommentReply(
-        Long id,
-        Long recipient_id,
-        Long comment_id,
-        boolean read,
-        String published
+    Long id,
+    Long recipient_id,
+    Long comment_id,
+    boolean read,
+    String published
 ) {
+
 }

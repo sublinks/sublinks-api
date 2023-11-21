@@ -6,11 +6,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class CommentUpdatedEvent extends ApplicationEvent {
-    private final Comment comment;
 
-    public CommentUpdatedEvent(final Object source, final Comment comment) {
+  private final Comment comment;
 
-        super(source);
-        this.comment = comment;
-    }
+  public CommentUpdatedEvent(final Object source, final Comment comment) {
+
+    super(source);
+    this.comment = comment;
+  }
 }

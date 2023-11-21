@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class PostRemovedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void publish(Post post) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        PostRemovedEvent postRemovedEvent = new PostRemovedEvent(this, post);
-        applicationEventPublisher.publishEvent(postRemovedEvent);
-    }
+  public void publish(Post post) {
+
+    PostRemovedEvent postRemovedEvent = new PostRemovedEvent(this, post);
+    applicationEventPublisher.publishEvent(postRemovedEvent);
+  }
 }

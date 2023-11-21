@@ -5,8 +5,9 @@ import lombok.Builder;
 
 @Builder
 public record PrivateMessageView(
-        PrivateMessage private_message,
-        Person creator,
-        Person recipient
+    PrivateMessage private_message,
+    Person creator,
+    Person recipient
 ) {
+
 }

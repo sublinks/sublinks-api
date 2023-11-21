@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record CommentReportResponse(
-        CommentReportView comment_report_view
+    CommentReportView comment_report_view
 ) {
+
 }

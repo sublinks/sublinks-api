@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record DeleteComment(
-        Integer comment_id,
-        Boolean deleted
+    Integer comment_id,
+    Boolean deleted
 ) {
+
 }

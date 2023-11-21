@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PostReportResponse(
-        PostReportView post_report_view
+    PostReportView post_report_view
 ) {
+
 }

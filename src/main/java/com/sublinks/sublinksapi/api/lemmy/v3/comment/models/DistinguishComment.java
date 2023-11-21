@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record DistinguishComment(
-        Integer comment_id,
-        Boolean distinguished
+    Integer comment_id,
+    Boolean distinguished
 ) {
+
 }

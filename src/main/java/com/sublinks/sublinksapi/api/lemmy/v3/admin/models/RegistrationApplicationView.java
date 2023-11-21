@@ -6,9 +6,10 @@ import lombok.Builder;
 
 @Builder
 public record RegistrationApplicationView(
-        RegistrationApplication registration_application,
-        LocalUser creator_local_user,
-        Person creator,
-        Person admin
+    RegistrationApplication registration_application,
+    LocalUser creator_local_user,
+    Person creator,
+    Person admin
 ) {
+
 }

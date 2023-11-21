@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PersonMentionResponse(
-        PersonMentionView person_mention_view
+    PersonMentionView person_mention_view
 ) {
+
 }

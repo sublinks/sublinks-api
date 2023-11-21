@@ -30,6 +30,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -41,201 +43,221 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/private_message")
 @Tag(name = "PrivateMessage")
 public class PrivateMessageController extends AbstractLemmyApiController {
-    private final PrivateMessageService privateMessageService;
-    private final PrivateMessageRepository privateMessageRepository;
-    private final LemmyPrivateMessageService lemmyPrivateMessageService;
-    private final PersonRepository personRepository;
-    private final AuthorizationService authorizationService;
 
-    @Operation(summary = "Get / fetch private messages.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessagesResponse.class))})
-    })
-    @GetMapping("list")
-    PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm, final JwtPerson principal) {
+  private final PrivateMessageService privateMessageService;
+  private final PrivateMessageRepository privateMessageRepository;
+  private final LemmyPrivateMessageService lemmyPrivateMessageService;
+  private final PersonRepository personRepository;
+  private final AuthorizationService authorizationService;
 
-        final Person sender = getPersonOrThrowUnauthorized(principal);
+  @Operation(summary = "Get / fetch private messages.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessagesResponse.class))})
+  })
+  @GetMapping("list")
+  PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm,
+      final JwtPerson principal) {
 
-        // @todo: add support for other sort types
-        final PrivateMessageSortType sortType = PrivateMessageSortType.New;
+    final Person sender = getPersonOrThrowUnauthorized(principal);
 
-        final PrivateMessageSearchCriteria privateMessageSearchCriteria = PrivateMessageSearchCriteria.builder()
-                .page(getPrivateMessagesForm.page() == null ? 1 : getPrivateMessagesForm.page())
-                .perPage(getPrivateMessagesForm.limit() == null ? 20 : getPrivateMessagesForm.limit())
-                .commentSortType(sortType)
-                .person(sender)
-                .build();
+    // @todo: add support for other sort types
+    final PrivateMessageSortType sortType = PrivateMessageSortType.New;
 
-        final List<PrivateMessage> privateMessages = privateMessageRepository.allPrivateMessagesBySearchCriteria(privateMessageSearchCriteria);
-        final List<PrivateMessageView> privateMessageViews = new ArrayList<>();
-        privateMessages.forEach(privateMessage -> privateMessageViews.add(lemmyPrivateMessageService.createPrivateMessageView(privateMessage)));
+    final PrivateMessageSearchCriteria privateMessageSearchCriteria = PrivateMessageSearchCriteria.builder()
+        .page(getPrivateMessagesForm.page() == null ? 1 : getPrivateMessagesForm.page())
+        .perPage(getPrivateMessagesForm.limit() == null ? 20 : getPrivateMessagesForm.limit())
+        .commentSortType(sortType)
+        .person(sender)
+        .build();
 
-        return PrivateMessagesResponse.builder().private_messages(privateMessageViews).build();
-    }
+    final List<PrivateMessage> privateMessages = privateMessageRepository.allPrivateMessagesBySearchCriteria(
+        privateMessageSearchCriteria);
+    final List<PrivateMessageView> privateMessageViews = new ArrayList<>();
+    privateMessages.forEach(privateMessage -> privateMessageViews.add(
+        lemmyPrivateMessageService.createPrivateMessageView(privateMessage)));
 
-    @Operation(summary = "Create a private message.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Recipient Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PostMapping
-    PrivateMessageResponse create(@Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm, final JwtPerson principal) {
+    return PrivateMessagesResponse.builder().private_messages(privateMessageViews).build();
+  }
 
-        final Person sender = getPersonOrThrowUnauthorized(principal);
+  @Operation(summary = "Create a private message.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessageResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Recipient Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PostMapping
+  PrivateMessageResponse create(
+      @Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm,
+      final JwtPerson principal) {
 
-        final Person recipient = personRepository.findById((long) createPrivateMessageForm.recipient_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "recipient_not_found"));
+    final Person sender = getPersonOrThrowUnauthorized(principal);
 
-        final PrivateMessage privateMessage = PrivateMessage.builder()
-                .content(createPrivateMessageForm.content())
-                .sender(sender)
-                .recipient(recipient)
-                .isLocal(recipient.isLocal())
-                .build();
-        privateMessageService.createPrivateMessage(privateMessage);
+    final Person recipient = personRepository.findById(
+            (long) createPrivateMessageForm.recipient_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "recipient_not_found"));
 
-        final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(privateMessage);
+    final PrivateMessage privateMessage = PrivateMessage.builder()
+        .content(createPrivateMessageForm.content())
+        .sender(sender)
+        .recipient(recipient)
+        .isLocal(recipient.isLocal())
+        .build();
+    privateMessageService.createPrivateMessage(privateMessage);
 
-        return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
-    }
+    final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
+        privateMessage);
 
-    @Operation(summary = "Edit a private message.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Private Message Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PutMapping
-    PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm, final JwtPerson principal) {
+    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+  }
 
-        final Person person = getPersonOrThrowUnauthorized(principal);
+  @Operation(summary = "Edit a private message.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessageResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Private Message Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PutMapping
+  PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm,
+      final JwtPerson principal) {
 
-        PrivateMessage privateMessage = privateMessageRepository.findById((long) editPrivateMessageForm.private_message_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+    final Person person = getPersonOrThrowUnauthorized(principal);
 
-        authorizationService
-                .canPerson(person)
-                .performTheAction(AuthorizeAction.update)
-                .onEntity(privateMessage)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    PrivateMessage privateMessage = privateMessageRepository.findById(
+            (long) editPrivateMessageForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
-        privateMessage.setContent(editPrivateMessageForm.content());
+    authorizationService
+        .canPerson(person)
+        .performTheAction(AuthorizeAction.update)
+        .onEntity(privateMessage)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        privateMessageService.updatePrivateMessage(privateMessage);
+    privateMessage.setContent(editPrivateMessageForm.content());
 
-        final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(privateMessage);
-        return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
-    }
+    privateMessageService.updatePrivateMessage(privateMessage);
 
-    @Operation(summary = "Delete a private message.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Private Message Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PostMapping("delete")
-    PrivateMessageResponse delete(@Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm, final JwtPerson principal) {
+    final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
+        privateMessage);
+    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+  }
 
-        final Person person = getPersonOrThrowUnauthorized(principal);
+  @Operation(summary = "Delete a private message.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessageResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Private Message Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PostMapping("delete")
+  PrivateMessageResponse delete(
+      @Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm,
+      final JwtPerson principal) {
 
-        PrivateMessage privateMessage = privateMessageRepository.findById((long) deletePrivateMessageForm.private_message_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+    final Person person = getPersonOrThrowUnauthorized(principal);
 
-        authorizationService
-                .canPerson(person)
-                .performTheAction(AuthorizeAction.delete)
-                .onEntity(privateMessage);
+    PrivateMessage privateMessage = privateMessageRepository.findById(
+            (long) deletePrivateMessageForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
-        privateMessageService.deletePrivateMessage(privateMessage);
+    authorizationService
+        .canPerson(person)
+        .performTheAction(AuthorizeAction.delete)
+        .onEntity(privateMessage);
 
-        final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(privateMessage);
-        return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
-    }
+    privateMessageService.deletePrivateMessage(privateMessage);
 
-    @Operation(summary = "Mark a private message as read.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessageResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Private Message Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PostMapping("mark_as_read")
-    PrivateMessageResponse markAsRead(@Valid @RequestBody MarkPrivateMessageAsRead markPrivateMessageAsReadForm, final JwtPerson principal) {
+    final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
+        privateMessage);
+    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+  }
 
-        final Person person = getPersonOrThrowUnauthorized(principal);
+  @Operation(summary = "Mark a private message as read.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessageResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Private Message Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PostMapping("mark_as_read")
+  PrivateMessageResponse markAsRead(
+      @Valid @RequestBody MarkPrivateMessageAsRead markPrivateMessageAsReadForm,
+      final JwtPerson principal) {
 
-        PrivateMessage privateMessage = privateMessageRepository.findById((long) markPrivateMessageAsReadForm.private_message_id())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+    final Person person = getPersonOrThrowUnauthorized(principal);
 
-        authorizationService
-                .canPerson(person)
-                .performTheAction(AuthorizeAction.read)
-                .onEntity(privateMessage)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    PrivateMessage privateMessage = privateMessageRepository.findById(
+            (long) markPrivateMessageAsReadForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
-        privateMessage.setRead(markPrivateMessageAsReadForm.read());
+    authorizationService
+        .canPerson(person)
+        .performTheAction(AuthorizeAction.read)
+        .onEntity(privateMessage)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        privateMessageService.updatePrivateMessage(privateMessage);
+    privateMessage.setRead(markPrivateMessageAsReadForm.read());
 
-        final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(privateMessage);
-        return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
-    }
+    privateMessageService.updatePrivateMessage(privateMessage);
 
-    @Operation(summary = "Create a report for a private message.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessageReportResponse.class))})
-    })
-    @PostMapping("report")
-    PrivateMessageReportResponse report() {
+    final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
+        privateMessage);
+    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+  }
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Create a report for a private message.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessageReportResponse.class))})
+  })
+  @PostMapping("report")
+  PrivateMessageReportResponse report() {
 
-    @Operation(summary = "Resolve a report for a private message.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = PrivateMessageReportResponse.class))})
-    })
-    @PutMapping("report/resolve")
-    PrivateMessageReportResponse reportResolve() {
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Resolve a report for a private message.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = PrivateMessageReportResponse.class))})
+  })
+  @PutMapping("report/resolve")
+  PrivateMessageReportResponse reportResolve() {
 
-    @Operation(summary = "List private message reports.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ListPrivateMessageReportsResponse.class))})
-    })
-    @GetMapping("report/list")
-    ListPrivateMessageReportsResponse reportList() {
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "List private message reports.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ListPrivateMessageReportsResponse.class))})
+  })
+  @GetMapping("report/list")
+  ListPrivateMessageReportsResponse reportList() {
+
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

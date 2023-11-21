@@ -25,51 +25,51 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "Comment")
 public class CommentModActionsController extends AbstractLemmyApiController {
 
-    @Operation(summary = "A moderator remove for a comment.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CommentResponse.class))})
-    })
-    @PostMapping("remove")
-    CommentResponse remove() {
+  @Operation(summary = "A moderator remove for a comment.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CommentResponse.class))})
+  })
+  @PostMapping("remove")
+  CommentResponse remove() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-    @Operation(summary = "Distinguishes a comment (speak as moderator).")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CommentResponse.class))})
-    })
-    @PostMapping("distinguish")
-    CommentResponse distinguish() {
+  @Operation(summary = "Distinguishes a comment (speak as moderator).")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CommentResponse.class))})
+  })
+  @PostMapping("distinguish")
+  CommentResponse distinguish() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-    @Operation(summary = "Resolve a comment report. Only a mod can do this.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CommentReportResponse.class))})
-    })
-    @PutMapping("report/resolve")
-    CommentReportResponse reportResolve() {
+  @Operation(summary = "Resolve a comment report. Only a mod can do this.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CommentReportResponse.class))})
+  })
+  @PutMapping("report/resolve")
+  CommentReportResponse reportResolve() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-    @Operation(summary = "List comment reports.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ListCommentReportsResponse.class))})
-    })
-    @PostMapping("report/list")
-    ListCommentReportsResponse reportList() {
+  @Operation(summary = "List comment reports.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ListCommentReportsResponse.class))})
+  })
+  @PostMapping("report/list")
+  ListCommentReportsResponse reportList() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

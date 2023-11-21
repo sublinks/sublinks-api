@@ -4,10 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record ModLockPost(
-        Long id,
-        Long mod_person_id,
-        Long post_id,
-        boolean locked,
-        String when_
+    Long id,
+    Long mod_person_id,
+    Long post_id,
+    boolean locked,
+    String when_
 ) {
+
 }

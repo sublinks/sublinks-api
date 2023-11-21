@@ -5,12 +5,13 @@ import lombok.Builder;
 
 @Builder
 public record GetPersonDetails(
-        Integer person_id,
-        String username,
-        SortType sort,
-        Integer page,
-        Integer limit,
-        Integer community_id,
-        Boolean saved_only
+    Integer person_id,
+    String username,
+    SortType sort,
+    Integer page,
+    Integer limit,
+    Integer community_id,
+    Boolean saved_only
 ) {
+
 }

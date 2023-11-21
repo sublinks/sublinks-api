@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,9 +17,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
-
-import java.util.Date;
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -27,73 +26,85 @@ import java.util.Objects;
 @Entity
 @Table(name = "moderation_logs")
 public class ModerationLog {
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    private Instance instance;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  /**
+   * Relationships
+   */
+  @ManyToOne
+  private Instance instance;
 
-    @Column(nullable = false, name = "action_type")
-    private String actionType;
+  /**
+   * Attributes
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String reason;
+  @Column(nullable = false, name = "action_type")
+  private String actionType;
 
-    @Column(name = "entity_id")
-    private long entityId;
+  private String reason;
 
-    @Column(name = "admin_person_id")
-    private long adminPersonId;
+  @Column(name = "entity_id")
+  private long entityId;
 
-    @Column(name = "post_id")
-    private long postId;
+  @Column(name = "admin_person_id")
+  private long adminPersonId;
 
-    @Column(name = "community_id")
-    private long communityId;
+  @Column(name = "post_id")
+  private long postId;
 
-    @Column(name = "moderation_person_id")
-    private long moderationPersonId;
+  @Column(name = "community_id")
+  private long communityId;
 
-    @Column(name = "other_person_id")
-    private long otherPersonId;
+  @Column(name = "moderation_person_id")
+  private long moderationPersonId;
 
-    private boolean removed;
+  @Column(name = "other_person_id")
+  private long otherPersonId;
 
-    private boolean hidden;
+  private boolean removed;
 
-    private boolean locked;
+  private boolean hidden;
 
-    private boolean banned;
+  private boolean locked;
 
-    private boolean featured;
+  private boolean banned;
 
-    private Date expires;
+  private boolean featured;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  private Date expires;
 
-    @Override
-    public final boolean equals(Object o) {
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        ModerationLog that = (ModerationLog) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    if (o == null) {
+      return false;
     }
+    Class<?> oEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) {
+      return false;
+    }
+    ModerationLog that = (ModerationLog) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

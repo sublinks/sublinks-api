@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record CreateCommentLike(
-        Long comment_id,
-        int score
+    Long comment_id,
+    int score
 ) {
+
 }

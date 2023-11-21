@@ -12,22 +12,23 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class PersonMentionService {
-    private final KeyGeneratorUtil keyGeneratorUtil;
-    private final PersonMentionRepository personMentionsRepository;
-    private final PersonMentionCreatedPublisher personMentionCreatedPublisher;
-    private final PersonMentionUpdatedPublisher personUpdatedPublisher;
 
-    @Transactional
-    public void createPersonMention(final PersonMention personMention) {
+  private final KeyGeneratorUtil keyGeneratorUtil;
+  private final PersonMentionRepository personMentionsRepository;
+  private final PersonMentionCreatedPublisher personMentionCreatedPublisher;
+  private final PersonMentionUpdatedPublisher personUpdatedPublisher;
 
-        personMentionsRepository.save(personMention);
-        personMentionCreatedPublisher.publish(personMention);
-    }
+  @Transactional
+  public void createPersonMention(final PersonMention personMention) {
 
-    @Transactional
-    public void updatePersonMention(final PersonMention personMention) {
+    personMentionsRepository.save(personMention);
+    personMentionCreatedPublisher.publish(personMention);
+  }
 
-        personMentionsRepository.save(personMention);
-        personUpdatedPublisher.publish(personMention);
-    }
+  @Transactional
+  public void updatePersonMention(final PersonMention personMention) {
+
+    personMentionsRepository.save(personMention);
+    personUpdatedPublisher.publish(personMention);
+  }
 }

@@ -14,32 +14,34 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
-    private final CommunityRepository communityRepository;
-    private final CommunityAggregateRepository communityAggregateRepository;
-    private final CommunityCreatedPublisher communityCreatedPublisher;
-    private final KeyGeneratorUtil keyGeneratorUtil;
-    private final LocalInstanceContext localInstanceContext;
 
-    public void createCommunity(Community community) {
+  private final CommunityRepository communityRepository;
+  private final CommunityAggregateRepository communityAggregateRepository;
+  private final CommunityCreatedPublisher communityCreatedPublisher;
+  private final KeyGeneratorUtil keyGeneratorUtil;
+  private final LocalInstanceContext localInstanceContext;
 
-        KeyStore keys = keyGeneratorUtil.generate();
-        community.setPrivateKey(keys.privateKey());
-        community.setPublicKey(keys.publicKey());
-        community.setActivityPubId(localInstanceContext.instance().getDomain() + "/" + community.getTitleSlug());
-        community.setLocal(true);
-        communityRepository.save(community);
-        final CommunityAggregate communityAggregate = CommunityAggregate.builder()
-                .community(community)
-                .subscriberCount(1)
-                .build();
-        communityAggregateRepository.save(communityAggregate);
-        community.setCommunityAggregate(communityAggregate);
-        communityCreatedPublisher.publish(community);
-    }
+  public void createCommunity(Community community) {
 
-    public void updateCommunity(Community community) {
+    KeyStore keys = keyGeneratorUtil.generate();
+    community.setPrivateKey(keys.privateKey());
+    community.setPublicKey(keys.publicKey());
+    community.setActivityPubId(
+        localInstanceContext.instance().getDomain() + "/" + community.getTitleSlug());
+    community.setLocal(true);
+    communityRepository.save(community);
+    final CommunityAggregate communityAggregate = CommunityAggregate.builder()
+        .community(community)
+        .subscriberCount(1)
+        .build();
+    communityAggregateRepository.save(communityAggregate);
+    community.setCommunityAggregate(communityAggregate);
+    communityCreatedPublisher.publish(community);
+  }
 
-        communityRepository.save(community);
-        // @todo publish edit
-    }
+  public void updateCommunity(Community community) {
+
+    communityRepository.save(community);
+    // @todo publish edit
+  }
 }

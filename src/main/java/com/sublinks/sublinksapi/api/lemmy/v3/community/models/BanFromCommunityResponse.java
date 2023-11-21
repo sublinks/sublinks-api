@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record BanFromCommunityResponse(
-        PersonView person_view,
-        boolean banned
+    PersonView person_view,
+    boolean banned
 ) {
+
 }

@@ -6,8 +6,9 @@ import lombok.Builder;
 
 @Builder
 public record AdminPurgeCommentView(
-        AdminPurgeComment admin_purge_comment,
-        Person admin,
-        Post post
+    AdminPurgeComment admin_purge_comment,
+    Person admin,
+    Post post
 ) {
+
 }

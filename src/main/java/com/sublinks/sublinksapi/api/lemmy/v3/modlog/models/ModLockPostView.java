@@ -7,9 +7,10 @@ import lombok.Builder;
 
 @Builder
 public record ModLockPostView(
-        ModLockPost mod_lock_post,
-        Person moderator,
-        Post post,
-        Community community
+    ModLockPost mod_lock_post,
+    Person moderator,
+    Post post,
+    Community community
 ) {
+
 }

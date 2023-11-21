@@ -6,8 +6,9 @@ import lombok.Builder;
 
 @Builder
 public record ModRemovePostView(
-        ModRemovePost mod_remove_post,
-        Post post,
-        Community community
+    ModRemovePost mod_remove_post,
+    Post post,
+    Community community
 ) {
+
 }

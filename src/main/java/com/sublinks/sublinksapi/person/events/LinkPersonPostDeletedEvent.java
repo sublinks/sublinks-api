@@ -6,14 +6,15 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class LinkPersonPostDeletedEvent extends ApplicationEvent {
-    private final LinkPersonPost linkPersonPost;
 
-    public LinkPersonPostDeletedEvent(
-            final Object source,
-            final LinkPersonPost linkPersonPost
-    ) {
+  private final LinkPersonPost linkPersonPost;
 
-        super(source);
-        this.linkPersonPost = linkPersonPost;
-    }
+  public LinkPersonPostDeletedEvent(
+      final Object source,
+      final LinkPersonPost linkPersonPost
+  ) {
+
+    super(source);
+    this.linkPersonPost = linkPersonPost;
+  }
 }

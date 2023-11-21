@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record PersonView(
-        Person person,
-        PersonAggregates counts
+    Person person,
+    PersonAggregates counts
 ) {
+
 }

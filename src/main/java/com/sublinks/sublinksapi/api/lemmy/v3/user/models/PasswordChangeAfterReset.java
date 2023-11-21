@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record PasswordChangeAfterReset(
-        String token,
-        String password,
-        String password_verify
+    String token,
+    String password,
+    String password_verify
 ) {
+
 }

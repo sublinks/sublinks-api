@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record AddModToCommunity(
-        Integer community_id,
-        Integer person_id,
-        Boolean added
+    Integer community_id,
+    Integer person_id,
+    Boolean added
 ) {
+
 }

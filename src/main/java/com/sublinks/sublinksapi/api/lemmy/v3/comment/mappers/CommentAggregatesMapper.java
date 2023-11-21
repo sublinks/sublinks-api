@@ -10,13 +10,14 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CommentAggregatesMapper extends Converter<CommentAggregate, CommentAggregates> {
-    @Override
-    @Mapping(target = "upvotes", source = "commentAggregate.upVotes")
-    @Mapping(target = "score", source = "commentAggregate.score")
-    @Mapping(target = "published", source = "commentAggregate.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-    @Mapping(target = "hot_rank", source = "commentAggregate.hotRank")
-    @Mapping(target = "downvotes", source = "commentAggregate.downVotes")
-    @Mapping(target = "comment_id", source = "commentAggregate.comment.id")
-    @Mapping(target = "child_count", source = "commentAggregate.childrenCount")
-    CommentAggregates convert(@Nullable CommentAggregate commentAggregate);
+
+  @Override
+  @Mapping(target = "upvotes", source = "commentAggregate.upVotes")
+  @Mapping(target = "score", source = "commentAggregate.score")
+  @Mapping(target = "published", source = "commentAggregate.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "hot_rank", source = "commentAggregate.hotRank")
+  @Mapping(target = "downvotes", source = "commentAggregate.downVotes")
+  @Mapping(target = "comment_id", source = "commentAggregate.comment.id")
+  @Mapping(target = "child_count", source = "commentAggregate.childrenCount")
+  CommentAggregates convert(@Nullable CommentAggregate commentAggregate);
 }

@@ -14,15 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @RequiredArgsConstructor
 public class PersonPostCreatedListener implements ApplicationListener<PostCreatedEvent> {
-    private final PersonAggregateRepository personAggregateRepository;
-    private final PostService postService;
 
-    @Override
-    public void onApplicationEvent(PostCreatedEvent event) {
+  private final PersonAggregateRepository personAggregateRepository;
+  private final PostService postService;
 
-        final Person person = postService.getPostCreator(event.getPost());
-        final PersonAggregate personAggregate = person.getPersonAggregate();
-        personAggregate.setPostCount(personAggregate.getPostCount() + 1);
-        personAggregateRepository.save(personAggregate);
-    }
+  @Override
+  public void onApplicationEvent(PostCreatedEvent event) {
+
+    final Person person = postService.getPostCreator(event.getPost());
+    final PersonAggregate personAggregate = person.getPersonAggregate();
+    personAggregate.setPostCount(personAggregate.getPostCount() + 1);
+    personAggregateRepository.save(personAggregate);
+  }
 }

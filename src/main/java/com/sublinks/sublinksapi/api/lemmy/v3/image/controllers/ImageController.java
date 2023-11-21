@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -27,81 +28,84 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-
 @RestController
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/pictrs/image")
 public class ImageController extends AbstractLemmyApiController {
-    @Value("${sublinks.pictrs.url}")
-    private String pictrsUri;
 
-    @Operation(summary = "Uploads an image.", hidden = true)
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK")}
-    )
-    @PostMapping
-    Mono<ResponseEntity<String>> upload(@RequestParam("images[]") MultipartFile image) throws IOException {
+  @Value("${sublinks.pictrs.url}")
+  private String pictrsUri;
 
-        // @todo log who is uploading and what they uploaded
+  @Operation(summary = "Uploads an image.", hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK")}
+  )
+  @PostMapping
+  Mono<ResponseEntity<String>> upload(@RequestParam("images[]") MultipartFile image)
+      throws IOException {
 
-        Resource resource = new ByteArrayResource(image.getBytes()) {
-            @Override
-            public String getFilename() {
+    // @todo log who is uploading and what they uploaded
 
-                return image.getOriginalFilename();
-            }
-        };
+    Resource resource = new ByteArrayResource(image.getBytes()) {
+      @Override
+      public String getFilename() {
 
-        WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
+        return image.getOriginalFilename();
+      }
+    };
 
-        return webClient.post().uri("/image")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData("images[]", resource))
-                .retrieve()
-                .toEntity(String.class);
+    WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
+
+    return webClient.post().uri("/image")
+        .contentType(MediaType.MULTIPART_FORM_DATA)
+        .body(BodyInserters.fromMultipartData("images[]", resource))
+        .retrieve()
+        .toEntity(String.class);
+  }
+
+  @Operation(summary = "Gets the full resolution image.", hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK")}
+  )
+  @GetMapping("{filename}")
+  Mono<ResponseEntity<ByteArrayResource>> fullResImage(@Valid PictrsParams pictrsParams,
+      @PathVariable String filename) {
+
+    WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
+
+    String url;
+    if (pictrsParams.format() == null && pictrsParams.thumbnail() == null) {
+      url = "image/original/" + filename;
+    } else {
+      String format = pictrsParams.format() == null ? "jpg" : pictrsParams.format();
+      url = "image/process.%s?src=%s".formatted(format, filename);
+      if (pictrsParams.thumbnail() != null) {
+        url += "&thumbnail=%d".formatted(pictrsParams.thumbnail());
+      }
     }
 
-    @Operation(summary = "Gets the full resolution image.", hidden = true)
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK")}
-    )
-    @GetMapping("{filename}")
-    Mono<ResponseEntity<ByteArrayResource>> fullResImage(@Valid PictrsParams pictrsParams, @PathVariable String filename) {
+    return webClient.get()
+        .uri(url)
+        .retrieve() // Retrieve the response
+        .bodyToMono(byte[].class) // Convert the response body to a byte array
+        .map(bytes -> ResponseEntity.ok()
+            .contentType(
+                MediaType.IMAGE_JPEG) // Set the appropriate content type, e.g., MediaType.IMAGE_JPEG
+            .header(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"image.jpeg\"") // Set the Content-Disposition header if you want the image to be downloadable
+            .body(new ByteArrayResource(bytes))); // Wrap the byte array in a ByteArrayResource
 
-        WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
+  }
 
-        String url;
-        if (pictrsParams.format() == null && pictrsParams.thumbnail() == null) {
-            url = "image/original/" + filename;
-        } else {
-            String format = pictrsParams.format() == null ? "jpg" : pictrsParams.format();
-            url = "image/process.%s?src=%s".formatted(format, filename);
-            if (pictrsParams.thumbnail() != null) {
-                url += "&thumbnail=%d".formatted(pictrsParams.thumbnail());
-            }
-        }
+  @Operation(summary = "Deletes an image.", hidden = true)
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK")}
+  )
+  @GetMapping("delete/{token}/{filename}")
+  String delete(@PathVariable String token, @PathVariable String filename) {
 
-        return webClient.get()
-                .uri(url)
-                .retrieve() // Retrieve the response
-                .bodyToMono(byte[].class) // Convert the response body to a byte array
-                .map(bytes -> ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG) // Set the appropriate content type, e.g., MediaType.IMAGE_JPEG
-                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"image.jpeg\"") // Set the Content-Disposition header if you want the image to be downloadable
-                        .body(new ByteArrayResource(bytes))); // Wrap the byte array in a ByteArrayResource
-
-    }
-
-    @Operation(summary = "Deletes an image.", hidden = true)
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK")}
-    )
-    @GetMapping("delete/{token}/{filename}")
-    String delete(@PathVariable String token, @PathVariable String filename) {
-
-        // @todo delete images
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+    // @todo delete images
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

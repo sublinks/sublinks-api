@@ -8,11 +8,12 @@ import lombok.Builder;
 
 @Builder
 public record ModRemoveCommentView(
-        ModRemoveComment mod_remove_comment,
-        Person moderator,
-        Comment comment,
-        Person commenter,
-        Post post,
-        Community community
+    ModRemoveComment mod_remove_comment,
+    Person moderator,
+    Comment comment,
+    Person commenter,
+    Post post,
+    Community community
 ) {
+
 }

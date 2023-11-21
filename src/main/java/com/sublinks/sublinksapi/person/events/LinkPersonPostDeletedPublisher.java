@@ -6,16 +6,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class LinkPersonPostDeletedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public LinkPersonPostDeletedPublisher(ApplicationEventPublisher applicationEventPublisher) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+  public LinkPersonPostDeletedPublisher(ApplicationEventPublisher applicationEventPublisher) {
 
-    public void publish(LinkPersonPost linkPersonPost) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
 
-        LinkPersonPostDeletedEvent linkPersonPostDeletedEvent = new LinkPersonPostDeletedEvent(this, linkPersonPost);
-        applicationEventPublisher.publishEvent(linkPersonPostDeletedEvent);
-    }
+  public void publish(LinkPersonPost linkPersonPost) {
+
+    LinkPersonPostDeletedEvent linkPersonPostDeletedEvent = new LinkPersonPostDeletedEvent(this,
+        linkPersonPost);
+    applicationEventPublisher.publishEvent(linkPersonPostDeletedEvent);
+  }
 }

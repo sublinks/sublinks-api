@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record PersonBlockView(
-        Person person,
-        Person target
+    Person person,
+    Person target
 ) {
+
 }

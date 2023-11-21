@@ -6,16 +6,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CommunityCreatedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public CommunityCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+  public CommunityCreatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 
-    public void publish(final Community community) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
 
-        final CommunityCreatedEvent communityCreatedEvent = new CommunityCreatedEvent(this, community);
-        applicationEventPublisher.publishEvent(communityCreatedEvent);
-    }
+  public void publish(final Community community) {
+
+    final CommunityCreatedEvent communityCreatedEvent = new CommunityCreatedEvent(this, community);
+    applicationEventPublisher.publishEvent(communityCreatedEvent);
+  }
 }

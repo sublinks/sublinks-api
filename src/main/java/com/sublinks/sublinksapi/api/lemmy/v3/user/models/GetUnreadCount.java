@@ -6,4 +6,5 @@ import lombok.Builder;
 public record GetUnreadCount(
 
 ) {
+
 }

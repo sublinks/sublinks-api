@@ -6,8 +6,9 @@ import lombok.Builder;
 
 @Builder
 public record ModHideCommunityView(
-        ModHideCommunity mod_hide_community,
-        Person admin,
-        Community community
+    ModHideCommunity mod_hide_community,
+    Person admin,
+    Community community
 ) {
+
 }

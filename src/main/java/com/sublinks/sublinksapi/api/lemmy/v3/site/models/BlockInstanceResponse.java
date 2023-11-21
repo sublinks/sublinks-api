@@ -4,4 +4,5 @@ import lombok.Builder;
 
 @Builder
 public record BlockInstanceResponse(boolean blocked) {
+
 }
