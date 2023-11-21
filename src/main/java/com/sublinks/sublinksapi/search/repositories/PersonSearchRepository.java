@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface PersonSearchRepository extends JpaRepository<Person, Long> {
 
-   @Query(value = "SELECT p.* FROM people p  WHERE MATCH(p.name, p.display_name) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
+   @Query(value = "SELECT p.*, lpi.instance_id FROM people p LEFT JOIN link_person_instances lpi ON lpi.person_id = p.id WHERE MATCH(p.name, p.display_name) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
            nativeQuery = true)
     Page<Person> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }
