@@ -11,8 +11,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.search.models.Search;
 import com.sublinks.sublinksapi.api.lemmy.v3.search.models.SearchResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.search.services.SearchService;
 import jakarta.validation.Valid;
@@ -36,6 +39,7 @@ public class SearchController extends AbstractLemmyApiController {
     private final LemmyCommunityService lemmyCommunityService;
     private final LemmyCommentService lemmyCommentService;
     private final LemmyPostService lemmyPostService;
+    private final LemmyPersonService lemmyPersonService;
 
     @GetMapping
     SearchResponse search(@Valid final Search searchForm) {
@@ -77,6 +81,21 @@ public class SearchController extends AbstractLemmyApiController {
             List<CommunityView> commentViewList = communities.stream().map(lemmyCommunityService::communityViewFromCommunity).toList();
 
             responseBuilder.communities(commentViewList);
+        }
+        if(searchForm.type_() == SearchType.Users || isAll)
+        {
+            List<Person> people = searchService.seearchPerson(searchForm.q(), page, limit, sort).getContent();
+            List<PersonView> peopleViewList = people.stream().map(lemmyPersonService::getPersonView).toList();
+
+            responseBuilder.users(peopleViewList);
+        }
+
+        if(searchForm.type_() == SearchType.Url || isAll)
+        {
+            List<Post> posts = searchService.searchPostByUrl(searchForm.q(), page, limit, sort).getContent();
+            List<PostView> commentViewList = posts.stream().map(lemmyPostService::postViewFromPost).toList();
+
+            responseBuilder.posts(commentViewList);
         }
 
         return responseBuilder.build();
