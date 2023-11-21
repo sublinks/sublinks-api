@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.comment.repositories;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.community.dto.Community;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -11,6 +12,8 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,5 +48,9 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
         cq.orderBy(cb.desc(commentTable.get("updatedAt")));
 
         return em.createQuery(cq).getResultList();
+    }
+
+    public Page<Comment> searchCommentsByKeyword(String keyword, Pageable pageable) {
+        return null;
     }
 }

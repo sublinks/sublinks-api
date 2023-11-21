@@ -21,7 +21,9 @@ repositories {
     mavenCentral()
 }
 
+
 dependencies {
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.flywaydb:flyway-core'
@@ -29,7 +31,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation:3.1.4'
     implementation 'org.springframework.boot:spring-boot-starter-security:3.1.4'
 
-    // Hibernate
     annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.3.1.Final"
 
     implementation 'io.jsonwebtoken:jjwt-api:0.12.2'
