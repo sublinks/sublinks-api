@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetSiteMetadata(
-        String url
+    String url
 ) {
+
 }

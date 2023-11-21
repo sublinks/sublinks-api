@@ -14,23 +14,23 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class InstanceService {
 
-    private final InstanceRepository instanceRepository;
-    private final InstanceAggregateRepository instanceAggregateRepository;
+  private final InstanceRepository instanceRepository;
+  private final InstanceAggregateRepository instanceAggregateRepository;
 
-    private final KeyGeneratorUtil keyGeneratorUtil;
+  private final KeyGeneratorUtil keyGeneratorUtil;
 
-    @Transactional
-    public void createInstance(@NotNull Instance instance) {
+  @Transactional
+  public void createInstance(@NotNull Instance instance) {
 
-        KeyStore keys = keyGeneratorUtil.generate();
-        instance.setPublicKey(keys.publicKey());
-        instance.setPrivateKey(keys.privateKey());
-        instanceRepository.save(instance);
-    }
+    KeyStore keys = keyGeneratorUtil.generate();
+    instance.setPublicKey(keys.publicKey());
+    instance.setPrivateKey(keys.privateKey());
+    instanceRepository.save(instance);
+  }
 
-    @Transactional
-    public void updateInstance(@NotNull Instance instance) {
+  @Transactional
+  public void updateInstance(@NotNull Instance instance) {
 
-        instanceRepository.save(instance);
-    }
+    instanceRepository.save(instance);
+  }
 }

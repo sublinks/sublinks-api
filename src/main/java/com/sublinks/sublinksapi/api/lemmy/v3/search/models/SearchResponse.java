@@ -5,16 +5,17 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SearchType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
+import java.util.List;
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record SearchResponse(
-        SearchType type_,
-        List<CommentView> comments,
-        List<PostView> posts,
-        List<CommunityView> communities,
-        List<PersonView> users
+    SearchType type_,
+    List<CommentView> comments,
+    List<PostView> posts,
+    List<CommunityView> communities,
+    List<PersonView> users
 ) {
+
 }

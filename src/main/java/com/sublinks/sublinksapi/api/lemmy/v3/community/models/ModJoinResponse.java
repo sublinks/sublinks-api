@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ModJoinResponse(
-        boolean joined
+    boolean joined
 ) {
+
 }

@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record CaptchaResponse(
-        String png,
-        String wav,
-        String uuid
+    String png,
+    String wav,
+    String uuid
 ) {
+
 }

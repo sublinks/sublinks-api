@@ -22,21 +22,22 @@ import lombok.Setter;
 @Entity
 @Table(name = "instance_languages")
 public class InstanceLanguage {
-    /**
-     * Relationships
-     */
-    @OneToOne
-    @JoinColumn(name = "instance_id")
-    private Instance instance;
 
-    @OneToOne
-    @JoinColumn(name = "language_id")
-    private Language language;
+  /**
+   * Relationships.
+   */
+  @OneToOne
+  @JoinColumn(name = "instance_id")
+  private Instance instance;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @OneToOne
+  @JoinColumn(name = "language_id")
+  private Language language;
+
+  /**
+   * Attributes.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 }

@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class LinkPersonCommunityUpdatedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void publish(LinkPersonCommunity linkPersonCommunity) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        final LinkPersonCommunityUpdatedEvent linkPersonCommunityUpdatedEvent = new LinkPersonCommunityUpdatedEvent(this, linkPersonCommunity);
-        applicationEventPublisher.publishEvent(linkPersonCommunityUpdatedEvent);
-    }
+  public void publish(LinkPersonCommunity linkPersonCommunity) {
+
+    final LinkPersonCommunityUpdatedEvent linkPersonCommunityUpdatedEvent = new LinkPersonCommunityUpdatedEvent(
+        this, linkPersonCommunity);
+    applicationEventPublisher.publishEvent(linkPersonCommunityUpdatedEvent);
+  }
 }

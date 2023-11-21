@@ -1,0 +1,17 @@
+package com.sublinks.sublinksapi.privatemessages.events;
+
+import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
+import lombok.Getter;
+import org.springframework.context.ApplicationEvent;
+
+@Getter
+public class PrivateMessageCreatedEvent extends ApplicationEvent {
+
+  private final PrivateMessage privateMessage;
+
+  public PrivateMessageCreatedEvent(final Object source, final PrivateMessage privateMessage) {
+
+    super(source);
+    this.privateMessage = privateMessage;
+  }
+}

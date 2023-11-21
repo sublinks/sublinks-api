@@ -6,16 +6,17 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PersonDeletedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public PersonDeletedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+  public PersonDeletedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 
-    public void publish(Person person) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
 
-        PersonDeletedEvent personDeletedEvent = new PersonDeletedEvent(this, person);
-        applicationEventPublisher.publishEvent(personDeletedEvent);
-    }
+  public void publish(Person person) {
+
+    PersonDeletedEvent personDeletedEvent = new PersonDeletedEvent(this, person);
+    applicationEventPublisher.publishEvent(personDeletedEvent);
+  }
 }

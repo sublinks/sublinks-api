@@ -1,14 +1,11 @@
 package com.sublinks.sublinksapi.community.repositories;
 
 import com.sublinks.sublinksapi.community.dto.Community;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
-public interface CommunityRepository extends JpaRepository<Community, Long>, CommunitySearchRepository {
-    Community findCommunityByIdOrTitleSlug(Long id, String titleSlug);
+public interface CommunityRepository extends JpaRepository<Community, Long> {
 
-    Community findCommunityByTitleSlug(String titleSlug);
+  Community findCommunityByIdOrTitleSlug(Long id, String titleSlug);
+
+  Community findCommunityByTitleSlug(String titleSlug);
 }

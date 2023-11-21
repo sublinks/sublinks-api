@@ -1,15 +1,16 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.models;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
+import java.util.List;
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetCommunityResponse(
-        CommunityView community_view,
-        Site site,
-        List<CommunityModeratorView> moderators,
-        List<Long> discussion_languages
+    CommunityView community_view,
+    Site site,
+    List<CommunityModeratorView> moderators,
+    List<Long> discussion_languages
 ) {
+
 }

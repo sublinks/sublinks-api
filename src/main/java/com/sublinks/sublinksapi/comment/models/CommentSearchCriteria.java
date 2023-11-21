@@ -10,15 +10,15 @@ import lombok.Builder;
 
 @Builder
 public record CommentSearchCriteria(
-        ListingType listingType,
-        CommentSortType commentSortType,
-        int perPage,
-        int page,
-        Community community,
-        Post post,
-        Comment parent,
-        boolean savedOnly,
-        Person person
+    ListingType listingType,
+    CommentSortType commentSortType,
+    int perPage,
+    int page,
+    Community community,
+    Post post,
+    Comment parent,
+    boolean savedOnly,
+    Person person
 ) {
 
 }

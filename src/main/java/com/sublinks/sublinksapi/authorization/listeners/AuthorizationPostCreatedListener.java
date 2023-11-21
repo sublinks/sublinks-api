@@ -12,16 +12,17 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class AuthorizationPostCreatedListener implements ApplicationListener<PostCreatedEvent> {
-    private final AuthorizationService authorizationService;
-    private final PostService postService;
 
-    @Override
-    public void onApplicationEvent(PostCreatedEvent event) {
+  private final AuthorizationService authorizationService;
+  private final PostService postService;
 
-        Person person = postService.getPostCreator(event.getPost());
-        authorizationService.allowPerson(person)
-                .performTheAction(AuthorizeAction.delete)
-                .performTheAction(AuthorizeAction.update)
-                .onEntity(event.getPost());
-    }
+  @Override
+  public void onApplicationEvent(PostCreatedEvent event) {
+
+    Person person = postService.getPostCreator(event.getPost());
+    authorizationService.allowPerson(person)
+        .performTheAction(AuthorizeAction.delete)
+        .performTheAction(AuthorizeAction.update)
+        .onEntity(event.getPost());
+  }
 }

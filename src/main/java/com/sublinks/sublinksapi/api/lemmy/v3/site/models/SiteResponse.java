@@ -1,12 +1,13 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.models;
 
+import java.util.List;
 import lombok.Builder;
 
-import java.util.List;
-
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record SiteResponse(
-        SiteView site_view,
-        List<Tagline> tag_lines
+    SiteView site_view,
+    List<Tagline> tag_lines
 ) {
+
 }

@@ -1,30 +1,30 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
 import com.sublinks.sublinksapi.person.dto.Person;
+import java.util.Collection;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.util.Collection;
-
 public class JwtPerson extends AbstractAuthenticationToken {
-    private final Person person;
 
-    public JwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
+  private final Person person;
 
-        super(authorities);
-        this.person = person;
-        setAuthenticated(false);
-    }
+  public JwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
 
-    @Override
-    public Object getCredentials() {
+    super(authorities);
+    this.person = person;
+    setAuthenticated(false);
+  }
 
-        return null;
-    }
+  @Override
+  public Object getCredentials() {
 
-    @Override
-    public Object getPrincipal() {
+    return null;
+  }
 
-        return this.person;
-    }
+  @Override
+  public Object getPrincipal() {
+
+    return this.person;
+  }
 }

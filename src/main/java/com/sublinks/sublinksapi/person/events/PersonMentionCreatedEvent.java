@@ -6,11 +6,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class PersonMentionCreatedEvent extends ApplicationEvent {
-    private final PersonMention personMention;
 
-    public PersonMentionCreatedEvent(final Object source, final PersonMention personMention) {
+  private final PersonMention personMention;
 
-        super(source);
-        this.personMention = personMention;
-    }
+  public PersonMentionCreatedEvent(final Object source, final PersonMention personMention) {
+
+    super(source);
+    this.personMention = personMention;
+  }
 }

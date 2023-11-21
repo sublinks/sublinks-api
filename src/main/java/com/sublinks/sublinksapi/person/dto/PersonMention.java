@@ -9,14 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -26,28 +25,29 @@ import java.util.Date;
 @Entity
 @Table(name = "people_mentions")
 public class PersonMention {
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    @JoinColumn(name = "recipient_id")
-    private Person recipient;
 
-    @ManyToOne
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
+  /**
+   * Relationships.
+   */
+  @ManyToOne
+  @JoinColumn(name = "recipient_id")
+  private Person recipient;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @ManyToOne
+  @JoinColumn(name = "comment_id")
+  private Comment comment;
 
-    @Column(name = "is_read")
-    private boolean isRead;
+  /**
+   * Attributes.
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private Date createdAt;
+  @Column(name = "is_read")
+  private boolean isRead;
+
+  @CreationTimestamp
+  @Column(updatable = false, name = "created_at")
+  private Date createdAt;
 }

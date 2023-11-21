@@ -5,11 +5,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record ListCommunities(
-        ListingType type_,
-        SortType sort,
-        Boolean show_nsfw,
-        Integer page,
-        Integer limit
+    ListingType type_,
+    SortType sort,
+    Boolean show_nsfw,
+    Integer page,
+    Integer limit
 ) {
+
 }

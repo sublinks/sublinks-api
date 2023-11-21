@@ -8,43 +8,44 @@ import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonMentionService;
 import com.sublinks.sublinksapi.utils.MentionUtils;
 import com.sublinks.sublinksapi.utils.models.Mention;
+import java.util.List;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-
 @Component
 @RequiredArgsConstructor
-public class PersonMentionCommentCreationListener implements ApplicationListener<CommentCreatedEvent> {
-    private final MentionUtils mentionUtils;
-    private final PersonMentionService personMentionService;
-    private final PersonRepository personRepository;
+public class PersonMentionCommentCreationListener implements
+    ApplicationListener<CommentCreatedEvent> {
 
-    @Override
-    @Transactional
-    public void onApplicationEvent(CommentCreatedEvent event) {
+  private final MentionUtils mentionUtils;
+  private final PersonMentionService personMentionService;
+  private final PersonRepository personRepository;
 
-        Comment comment = event.getComment();
-        final List<Mention> mentions = mentionUtils.getPersonMentions(comment.getCommentBody());
-        if (mentions != null) {
-            for (Mention mention : mentions) {
-                Person recipient = personRepository.findOneByName(mention.name());
+  @Override
+  @Transactional
+  public void onApplicationEvent(CommentCreatedEvent event) {
 
-                if (recipient == null || Objects.equals(recipient, comment.getPerson())) {
-                    continue;
-                }
+    Comment comment = event.getComment();
+    final List<Mention> mentions = mentionUtils.getPersonMentions(comment.getCommentBody());
+    if (mentions != null) {
+      for (Mention mention : mentions) {
+        Person recipient = personRepository.findOneByName(mention.name());
 
-                PersonMention personMention = PersonMention.builder()
-                        .comment(comment)
-                        .recipient(recipient)
-                        .build();
-
-                personMentionService.createPersonMention(personMention);
-            }
+        if (recipient == null || Objects.equals(recipient, comment.getPerson())) {
+          continue;
         }
 
+        PersonMention personMention = PersonMention.builder()
+            .comment(comment)
+            .recipient(recipient)
+            .build();
+
+        personMentionService.createPersonMention(personMention);
+      }
     }
+
+  }
 }

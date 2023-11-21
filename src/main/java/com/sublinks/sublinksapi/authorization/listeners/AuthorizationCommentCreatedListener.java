@@ -10,17 +10,19 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class AuthorizationCommentCreatedListener implements ApplicationListener<CommentCreatedEvent> {
-    private final AuthorizationService authorizationService;
+public class AuthorizationCommentCreatedListener implements
+    ApplicationListener<CommentCreatedEvent> {
+
+  private final AuthorizationService authorizationService;
 
 
-    @Override
-    public void onApplicationEvent(CommentCreatedEvent event) {
+  @Override
+  public void onApplicationEvent(CommentCreatedEvent event) {
 
-        Person person = event.getComment().getPerson();
-        authorizationService.allowPerson(person)
-                .performTheAction(AuthorizeAction.delete)
-                .performTheAction(AuthorizeAction.update)
-                .onEntity(event.getComment());
-    }
+    Person person = event.getComment().getPerson();
+    authorizationService.allowPerson(person)
+        .performTheAction(AuthorizeAction.delete)
+        .performTheAction(AuthorizeAction.update)
+        .onEntity(event.getComment());
+  }
 }

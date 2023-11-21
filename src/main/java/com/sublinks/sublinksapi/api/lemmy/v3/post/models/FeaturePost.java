@@ -4,9 +4,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.PostFeatureType;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record FeaturePost(
-        Integer post_id,
-        Boolean featured,
-        PostFeatureType feature_type
+    Integer post_id,
+    Boolean featured,
+    PostFeatureType feature_type
 ) {
+
 }

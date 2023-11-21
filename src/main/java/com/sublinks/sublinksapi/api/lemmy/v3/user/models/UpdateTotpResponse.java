@@ -4,4 +4,5 @@ import lombok.Builder;
 
 @Builder
 public record UpdateTotpResponse(boolean enabled) {
+
 }
