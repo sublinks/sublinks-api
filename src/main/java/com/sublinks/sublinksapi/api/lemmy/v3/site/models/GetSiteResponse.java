@@ -1,12 +1,13 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.models;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.CustomEmojiView;
+import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.MyUserInfo;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import java.util.Collection;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetSiteResponse(
     SiteView site_view,
     Collection<PersonView> admins,

@@ -68,13 +68,13 @@ public class Acl {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     Acl acl = (Acl) o;

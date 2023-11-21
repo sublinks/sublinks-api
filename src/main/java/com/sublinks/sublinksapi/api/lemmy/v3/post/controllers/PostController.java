@@ -107,8 +107,8 @@ public class PostController extends AbstractLemmyApiController {
       communityView = lemmyCommunityService.communityViewFromCommunity(community);
       postView = lemmyPostService.postViewFromPost(post);
     }
-    final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(
-        community);
+    final List<CommunityModeratorView> moderators
+        = lemmyCommunityService.communityModeratorViewList(community);
     Set<PostView> crossPosts = new LinkedHashSet<>();
     if (post.getCrossPost() != null && post.getCrossPost().getPosts() != null) {
       for (Post crossPostPost : post.getCrossPost().getPosts()) {

@@ -30,7 +30,7 @@ import org.hibernate.proxy.HibernateProxy;
 public class PostRead {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "post_id")
@@ -41,7 +41,7 @@ public class PostRead {
   private Person person;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,13 +60,13 @@ public class PostRead {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     PostRead postRead = (PostRead) o;

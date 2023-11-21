@@ -26,14 +26,14 @@ import org.hibernate.annotations.CreationTimestamp;
 public class InstanceBlock {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToOne
   @JoinColumn(name = "instance_id")
   private Instance instance;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

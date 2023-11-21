@@ -53,7 +53,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 public class Person implements UserDetails, Principal {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
   Set<LinkPersonCommunity> linkPersonCommunity;
@@ -109,7 +109,7 @@ public class Person implements UserDetails, Principal {
   private List<Language> languages;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -257,13 +257,13 @@ public class Person implements UserDetails, Principal {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     Person person = (Person) o;

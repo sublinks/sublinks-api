@@ -24,7 +24,7 @@ import lombok.Setter;
 public class InstanceLanguage {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToOne
   @JoinColumn(name = "instance_id")
@@ -35,7 +35,7 @@ public class InstanceLanguage {
   private Language language;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

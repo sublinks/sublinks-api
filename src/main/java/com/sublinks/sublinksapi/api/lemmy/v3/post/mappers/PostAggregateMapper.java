@@ -14,10 +14,13 @@ public interface PostAggregateMapper extends Converter<PostAggregate, PostAggreg
   @Override
   @Mapping(target = "upvotes", source = "postAggregate.upVoteCount")
   @Mapping(target = "score", source = "postAggregate.score")
-  @Mapping(target = "published", source = "post.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "post.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "post_id", source = "postAggregate.post.id")
-  @Mapping(target = "newest_comment_time_necro", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-  @Mapping(target = "newest_comment_time", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "newest_comment_time_necro", source = "post.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "newest_comment_time", source = "post.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "hot_rank_active", source = "postAggregate.hotRankActive")
   @Mapping(target = "hot_rank", source = "postAggregate.hotRank")
   @Mapping(target = "featured_local", source = "post.featured")

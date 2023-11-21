@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record RegistrationApplicationView(
     RegistrationApplication registration_application,
     LocalUser creator_local_user,

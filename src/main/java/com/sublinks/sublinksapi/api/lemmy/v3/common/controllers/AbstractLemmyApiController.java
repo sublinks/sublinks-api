@@ -6,8 +6,19 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Base controller for Lemmy api controllers.
+ * Contains repeated functions for example authentication checks
+ */
 public abstract class AbstractLemmyApiController {
 
+  /**
+   * Get the person object or throw a 400 Bad Request exception.
+   *
+   * @param principal JwtPerson object that contains the person as it's principal
+   * @return Person
+   * @throws ResponseStatusException Exception thrown when Person not present
+   */
   public Person getPersonOrThrowBadRequest(JwtPerson principal) throws ResponseStatusException {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
@@ -15,6 +26,13 @@ public abstract class AbstractLemmyApiController {
     );
   }
 
+  /**
+   * Get the person object or throw a 401 Unauthorized exception.
+   *
+   * @param principal JwtPerson object that contains the person as it's principal
+   * @return Person
+   * @throws ResponseStatusException Exception thrown when Person not present
+   */
   public Person getPersonOrThrowUnauthorized(JwtPerson principal) throws ResponseStatusException {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(

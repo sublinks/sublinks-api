@@ -33,7 +33,7 @@ import org.hibernate.proxy.HibernateProxy;
 public class CommentLike implements Serializable {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToOne
   @JoinColumn(name = "post_id")
@@ -48,7 +48,7 @@ public class CommentLike implements Serializable {
   private Comment comment;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,13 +80,13 @@ public class CommentLike implements Serializable {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     CommentLike that = (CommentLike) o;

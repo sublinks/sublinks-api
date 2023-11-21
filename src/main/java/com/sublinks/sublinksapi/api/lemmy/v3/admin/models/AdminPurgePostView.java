@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record AdminPurgePostView(
     AdminPurgePost admin_purge_post,
     Person admin,

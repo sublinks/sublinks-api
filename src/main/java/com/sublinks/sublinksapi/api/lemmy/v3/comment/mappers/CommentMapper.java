@@ -12,8 +12,10 @@ public interface CommentMapper extends
     Converter<com.sublinks.sublinksapi.comment.dto.Comment, Comment> {
 
   @Override
-  @Mapping(target = "updated", source = "comment.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-  @Mapping(target = "published", source = "comment.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "updated", source = "comment.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "comment.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "post_id", source = "comment.post.id")
   @Mapping(target = "local", constant = "false")
   @Mapping(target = "language_id", source = "comment.language.id")

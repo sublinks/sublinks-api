@@ -16,7 +16,8 @@ public class CommentReadService {
 
   public void markCommentReadByPerson(Comment comment, Person person) {
 
-    Optional<CommentRead> currentCommentRead = commentReadRepository.getCommentReadByCommentAndPerson(
+    Optional<CommentRead> currentCommentRead
+        = commentReadRepository.getCommentReadByCommentAndPerson(
         comment, person);
     if (currentCommentRead.isEmpty()) {
       CommentRead commentRead = CommentRead.builder()

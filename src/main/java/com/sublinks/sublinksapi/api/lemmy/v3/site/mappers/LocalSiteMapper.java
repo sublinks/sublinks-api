@@ -17,8 +17,10 @@ public interface LocalSiteMapper extends Converter<LocalInstanceContext, LocalSi
   @Mapping(target = "site_setup", expression = "java(!context.instance().getDomain().isEmpty())")
   @Mapping(target = "enable_downvotes", source = "context.settings.enableDownVotes")
   @Mapping(target = "enable_nsfw", source = "context.settings.enableNsfw")
-  @Mapping(target = "published", source = "context.instance.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-  @Mapping(target = "updated", source = "context.instance.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "context.instance.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "updated", source = "context.instance.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "actor_name_max_length", source = "context.settings.actorNameMaxLength")
   @Mapping(target = "private_instance", source = "context.settings.isPrivateInstance")
   @Mapping(target = "community_creation_admin_only", constant = "false")

@@ -14,7 +14,7 @@ import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
- * Announcement entity
+ * Announcement entity.
  */
 @Getter
 @Setter
@@ -42,13 +42,13 @@ public class Announcement {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     Announcement that = (Announcement) o;
@@ -56,7 +56,7 @@ public class Announcement {
   }
 
   /**
-   * Object hashCode
+   * Object hashCode.
    *
    * @return int
    */

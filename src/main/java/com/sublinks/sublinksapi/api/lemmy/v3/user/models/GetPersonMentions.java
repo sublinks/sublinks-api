@@ -5,6 +5,7 @@ import java.util.Optional;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetPersonMentions(
     CommentSortType sort,
     Integer page,

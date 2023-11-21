@@ -38,7 +38,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Instance {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "instance")
   @PrimaryKeyJoinColumn
@@ -65,7 +65,7 @@ public class Instance {
   private List<Language> languages;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,6 +7,7 @@ import java.util.Collection;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record MyUserInfo(
     LocalUserView local_user_view,
     Collection<CommunityFollowerView> follows,

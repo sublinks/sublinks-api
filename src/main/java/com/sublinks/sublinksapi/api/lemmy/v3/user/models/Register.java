@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record Register(
     @NotEmpty
     String username,

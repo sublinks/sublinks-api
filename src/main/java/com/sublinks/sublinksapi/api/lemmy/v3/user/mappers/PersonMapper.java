@@ -14,11 +14,14 @@ public interface PersonMapper extends
   @Override
   @Mapping(target = "id", source = "person.id")
   @Mapping(target = "name", source = "person.name")
-  @Mapping(target = "display_name", source = "person.displayName", conditionExpression = "java(!person.getDisplayName().isEmpty())")
+  @Mapping(target = "display_name", source = "person.displayName",
+      conditionExpression = "java(!person.getDisplayName().isEmpty())")
   @Mapping(target = "avatar", source = "person.avatarImageUrl")
   @Mapping(target = "banned", source = "person.banned")
-  @Mapping(target = "published", source = "person.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-  @Mapping(target = "updated", source = "person.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "person.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "updated", source = "person.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "actor_id", source = "person.activityPubId")
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "local", source = "person.local")

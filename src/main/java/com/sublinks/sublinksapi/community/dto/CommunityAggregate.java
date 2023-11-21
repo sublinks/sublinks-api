@@ -26,14 +26,14 @@ import org.hibernate.proxy.HibernateProxy;
 public class CommunityAggregate {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToOne
   @JoinColumn(name = "community_id")
   private Community community;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -69,13 +69,13 @@ public class CommunityAggregate {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     CommunityAggregate that = (CommunityAggregate) o;

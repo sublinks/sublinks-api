@@ -29,7 +29,7 @@ import org.hibernate.proxy.HibernateProxy;
 public class CrossPost {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @Singular
   @OneToMany
@@ -41,7 +41,7 @@ public class CrossPost {
   private Set<Post> posts;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,13 +59,13 @@ public class CrossPost {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     CrossPost crossPost = (CrossPost) o;

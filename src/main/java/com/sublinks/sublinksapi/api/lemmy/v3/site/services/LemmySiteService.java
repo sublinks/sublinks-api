@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.services;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.customEmoji.models.CustomEmojiView;
+import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiView;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Language;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.LocalSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.LocalSiteRateLimit;
@@ -33,7 +33,8 @@ public class LemmySiteService {
   // @todo finish admin list
   public Collection<PersonView> admins() {
 
-    Collection<LinkPersonInstance> admins = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsIn(
+    Collection<LinkPersonInstance> admins
+        = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsIn(
         localInstanceContext.instance(),
         List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin)
     );
