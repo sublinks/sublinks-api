@@ -15,8 +15,10 @@ public interface LocalSiteRateLimitMapper extends
   @Override
   @Mapping(target = "id", source = "context.instance.id")
   @Mapping(target = "local_site_id", source = "context.instance.id")
-  @Mapping(target = "updated", source = "context.instance.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-  @Mapping(target = "published", source = "context.instance.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "updated", source = "context.instance.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "context.instance.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "search_per_second", source = "context.rateLimits.searchPerSecond")
   @Mapping(target = "search", source = "context.rateLimits.search")
   @Mapping(target = "register_per_second", source = "context.rateLimits.registerPerSecond")

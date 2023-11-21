@@ -28,7 +28,7 @@ import org.hibernate.proxy.HibernateProxy;
 public class Language {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @ManyToMany(mappedBy = "languages")
   private List<Person> people;
@@ -40,7 +40,7 @@ public class Language {
   private List<Community> communities;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,13 +59,13 @@ public class Language {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     Language language = (Language) o;

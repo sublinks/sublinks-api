@@ -23,7 +23,8 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
   @Mapping(target = "person_id", source = "person.id")
   @Mapping(target = "email", source = "person.email")
   @Mapping(target = "theme", source = "person.defaultTheme")
-  @Mapping(target = "validator_time", constant = "2023-06-09T02:35:26.397746Z", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "validator_time", constant = "2023-06-09T02:35:26.397746Z",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "totp_2fa_url", constant = "")
   @Mapping(target = "interface_language", source = "person.interfaceLanguage")
   @Mapping(target = "default_sort_type", source = "person.defaultSortType")

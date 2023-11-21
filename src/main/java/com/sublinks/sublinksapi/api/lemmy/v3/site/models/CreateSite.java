@@ -4,6 +4,7 @@ import java.util.Collection;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record CreateSite(
 
     String name,

@@ -24,14 +24,14 @@ import lombok.Setter;
 public class InstanceAggregate {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToOne
   @JoinColumn(name = "instance_id")
   private Instance instance;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

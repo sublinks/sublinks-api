@@ -16,8 +16,10 @@ public interface CommunityMapper extends
   @Mapping(target = "name", source = "community.titleSlug")
   @Mapping(target = "instance_id", source = "community.instance.id")
   @Mapping(target = "hidden", constant = "false")
-  @Mapping(target = "updated", source = "community.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
-  @Mapping(target = "published", source = "community.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "updated", source = "community.updatedAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "community.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "actor_id", source = "activityPubId")
   @Mapping(target = "banner", source = "community.bannerImageUrl")
   @Mapping(target = "icon", source = "community.iconImageUrl")

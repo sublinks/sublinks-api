@@ -7,6 +7,7 @@ import java.util.Set;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetPostResponse(
     PostView post_view,
     CommunityView community_view,

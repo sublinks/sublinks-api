@@ -87,14 +87,13 @@ public class ImageController extends AbstractLemmyApiController {
 
     return webClient.get()
         .uri(url)
-        .retrieve() // Retrieve the response
-        .bodyToMono(byte[].class) // Convert the response body to a byte array
+        .retrieve()
+        .bodyToMono(byte[].class)
         .map(bytes -> ResponseEntity.ok()
-            .contentType(
-                MediaType.IMAGE_JPEG) // Set the appropriate content type, e.g., MediaType.IMAGE_JPEG
+            .contentType(MediaType.IMAGE_JPEG)
             .header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"image.jpeg\"") // Set the Content-Disposition header if you want the image to be downloadable
-            .body(new ByteArrayResource(bytes))); // Wrap the byte array in a ByteArrayResource
+                "attachment; filename=\"image.jpeg\"")
+            .body(new ByteArrayResource(bytes)));
 
   }
 

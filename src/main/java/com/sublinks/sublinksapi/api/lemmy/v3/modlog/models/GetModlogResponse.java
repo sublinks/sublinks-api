@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetModlogResponse(
     List<ModRemovePostView> removed_posts,
     List<ModLockPostView> locked_posts,

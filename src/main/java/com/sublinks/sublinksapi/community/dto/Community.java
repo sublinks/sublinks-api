@@ -47,7 +47,7 @@ public class Community implements Serializable, AuthorizationEntityInterface {
   @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
   Set<LinkPersonCommunity> linkPersonCommunity;
   /**
-   * Relationships
+   * Relationships.
    */
   @ManyToOne
   @JoinColumn(name = "instance_id")
@@ -67,7 +67,7 @@ public class Community implements Serializable, AuthorizationEntityInterface {
   private List<Language> languages;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -135,13 +135,13 @@ public class Community implements Serializable, AuthorizationEntityInterface {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     Community community = (Community) o;

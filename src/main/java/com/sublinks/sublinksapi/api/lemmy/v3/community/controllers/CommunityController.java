@@ -80,8 +80,8 @@ public class CommunityController extends AbstractLemmyApiController {
     } else {
       communityView = lemmyCommunityService.communityViewFromCommunity(community);
     }
-    final List<CommunityModeratorView> moderatorViews = lemmyCommunityService.communityModeratorViewList(
-        community);
+    final List<CommunityModeratorView> moderatorViews
+        = lemmyCommunityService.communityModeratorViewList(community);
     return GetCommunityResponse.builder()
         .community_view(communityView)
         .site(conversionService.convert(localInstanceContext, Site.class))

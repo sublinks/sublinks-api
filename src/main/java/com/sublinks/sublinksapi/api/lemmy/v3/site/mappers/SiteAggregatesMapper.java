@@ -12,10 +12,14 @@ import org.springframework.lang.Nullable;
 public interface SiteAggregatesMapper extends Converter<LocalInstanceContext, SiteAggregates> {
 
   @Override
-  @Mapping(target = "users_active_week", source = "context.instanceAggregate.activeWeeklyUserCount")
-  @Mapping(target = "users_active_month", source = "context.instanceAggregate.activeMonthlyUserCount")
-  @Mapping(target = "users_active_half_year", source = "context.instanceAggregate.activeHalfYearUserCount")
-  @Mapping(target = "users_active_day", source = "context.instanceAggregate.activeDailyUserCount")
+  @Mapping(target = "users_active_week",
+      source = "context.instanceAggregate.activeWeeklyUserCount")
+  @Mapping(target = "users_active_month",
+      source = "context.instanceAggregate.activeMonthlyUserCount")
+  @Mapping(target = "users_active_half_year",
+      source = "context.instanceAggregate.activeHalfYearUserCount")
+  @Mapping(target = "users_active_day",
+      source = "context.instanceAggregate.activeDailyUserCount")
   @Mapping(target = "users", source = "context.instanceAggregate.userCount")
   @Mapping(target = "site_id", source = "context.instance.id")
   @Mapping(target = "posts", source = "context.instanceAggregate.postCount")

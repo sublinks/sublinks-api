@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record PersonMentionView(
     PersonMention person_mention,
     Comment comment,

@@ -110,8 +110,8 @@ public class UserController {
         .perPage(getPersonMentionsForm.limit())
         .build();
 
-    final List<PersonMention> personMentions = personMentionRepository.allPersonMentionBySearchCriteria(
-        criteria);
+    final List<PersonMention> personMentions
+        = personMentionRepository.allPersonMentionBySearchCriteria(criteria);
 
     final List<PersonMentionView> personMentionViews = new ArrayList<>();
 

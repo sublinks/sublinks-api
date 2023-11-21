@@ -43,8 +43,8 @@ public class PostService {
       final byte[] bytesOfLink = urlUtil.normalizeUrl(post.getLinkUrl())
           .getBytes(StandardCharsets.UTF_8);
       final MessageDigest md = MessageDigest.getInstance("MD5");
-      final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
-      return new BigInteger(1, bytesOfMD5Link).toString(16);
+      final byte[] bytesOfMd5Link = md.digest(bytesOfLink);
+      return new BigInteger(1, bytesOfMd5Link).toString(16);
     } catch (Exception ignored) {
       return null;
     }

@@ -27,7 +27,7 @@ import org.hibernate.annotations.CreationTimestamp;
 public class PersonMention {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @ManyToOne
   @JoinColumn(name = "recipient_id")
@@ -38,7 +38,7 @@ public class PersonMention {
   private Comment comment;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

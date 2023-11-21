@@ -6,6 +6,7 @@ import java.util.Collection;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record SaveUserSettings(
     Boolean show_nsfw,
     Boolean show_scores,

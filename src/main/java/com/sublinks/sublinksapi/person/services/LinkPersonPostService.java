@@ -49,7 +49,8 @@ public class LinkPersonPostService {
   @Transactional
   public void removeLink(Person person, Post post, LinkPersonPostType type) {
 
-    Optional<LinkPersonPost> linkPersonPost = linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(
+    Optional<LinkPersonPost> linkPersonPost
+        = linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(
         post,
         person,
         type

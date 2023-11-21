@@ -43,7 +43,7 @@ import org.hibernate.proxy.HibernateProxy;
 public class Post implements AuthorizationEntityInterface {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
   Set<LinkPersonPost> linkPersonPost;
@@ -77,7 +77,7 @@ public class Post implements AuthorizationEntityInterface {
   CrossPost crossPost;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -156,13 +156,13 @@ public class Post implements AuthorizationEntityInterface {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     Post post = (Post) o;

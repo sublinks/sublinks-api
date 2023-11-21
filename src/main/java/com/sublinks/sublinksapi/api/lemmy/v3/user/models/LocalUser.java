@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.enums.PostListingMode;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record LocalUser(
     Long id,
     Long person_id,

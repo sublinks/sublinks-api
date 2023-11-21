@@ -14,7 +14,8 @@ public interface CommentAggregatesMapper extends Converter<CommentAggregate, Com
   @Override
   @Mapping(target = "upvotes", source = "commentAggregate.upVotes")
   @Mapping(target = "score", source = "commentAggregate.score")
-  @Mapping(target = "published", source = "commentAggregate.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "commentAggregate.createdAt",
+      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
   @Mapping(target = "hot_rank", source = "commentAggregate.hotRank")
   @Mapping(target = "downvotes", source = "commentAggregate.downVotes")
   @Mapping(target = "comment_id", source = "commentAggregate.comment.id")
