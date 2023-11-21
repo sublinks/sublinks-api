@@ -31,7 +31,8 @@ public class AuthorizationService {
       return false;
     }
 
-    Collection<LinkPersonInstance> linkPersonInstances = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsInAndPerson(
+    Collection<LinkPersonInstance> linkPersonInstances
+        = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsInAndPerson(
         localInstanceContext.instance(),
         List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin),
         person

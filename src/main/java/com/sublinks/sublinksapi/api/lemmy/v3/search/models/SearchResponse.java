@@ -9,6 +9,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record SearchResponse(
     SearchType type_,
     List<CommentView> comments,

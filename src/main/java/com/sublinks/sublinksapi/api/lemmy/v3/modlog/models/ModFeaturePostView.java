@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record ModFeaturePostView(
     ModFeaturePost mod_feature_post,
     Person moderator,

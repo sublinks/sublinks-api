@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetCommunityResponse(
     CommunityView community_view,
     Site site,

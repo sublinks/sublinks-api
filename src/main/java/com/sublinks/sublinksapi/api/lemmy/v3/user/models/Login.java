@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record Login(
     @NotNull
     String username_or_email,

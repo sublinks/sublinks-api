@@ -14,13 +14,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 /**
- * Application Boot
+ * Application Boot.
  */
 @SpringBootApplication
 public class SublinksApiApplication {
 
   /**
-   * Main boot method
+   * Main boot method.
    *
    * @param args Boot arguments
    */

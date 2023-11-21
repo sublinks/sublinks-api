@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record GetComments(
     ListingType type_,
     CommentSortType sort,

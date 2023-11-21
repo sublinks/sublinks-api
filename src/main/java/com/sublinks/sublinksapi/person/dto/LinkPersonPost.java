@@ -32,7 +32,7 @@ import org.hibernate.proxy.HibernateProxy;
 public class LinkPersonPost {
 
   /**
-   * Relationships
+   * Relationships.
    */
   @ManyToOne
   @JoinColumn(name = "person_id")
@@ -43,7 +43,7 @@ public class LinkPersonPost {
   Post post;
 
   /**
-   * Attributes
+   * Attributes.
    */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,13 +66,13 @@ public class LinkPersonPost {
     if (o == null) {
       return false;
     }
-    Class<?> oEffectiveClass =
+    Class<?> objectEffectiveClass =
         o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
             .getPersistentClass() : o.getClass();
     Class<?> thisEffectiveClass =
         this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
             .getPersistentClass() : this.getClass();
-    if (thisEffectiveClass != oEffectiveClass) {
+    if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
     LinkPersonPost that = (LinkPersonPost) o;

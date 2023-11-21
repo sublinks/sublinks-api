@@ -55,8 +55,10 @@ public class LemmyPostService {
 
   private PostView.PostViewBuilder postViewBuilder(final Post post) {
 
-    final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = conversionService.convert(
-        post, com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.class
+    final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost
+        = conversionService.convert(
+        post,
+        com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.class
     );
     final Person creator = conversionService.convert(
         postService.getPostCreator(post), Person.class

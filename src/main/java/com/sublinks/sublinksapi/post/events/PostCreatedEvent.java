@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class PostCreatedEvent extends ApplicationEvent {
 
-  final private Post post;
+  private final Post post;
 
   public PostCreatedEvent(final Object source, final Post post) {
 

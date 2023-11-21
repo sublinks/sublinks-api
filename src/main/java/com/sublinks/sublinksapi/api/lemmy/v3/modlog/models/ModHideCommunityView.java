@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import lombok.Builder;
 
 @Builder
+@SuppressWarnings("RecordComponentName")
 public record ModHideCommunityView(
     ModHideCommunity mod_hide_community,
     Person admin,

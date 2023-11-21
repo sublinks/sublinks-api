@@ -10,12 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class MentionUtils {
 
-  public final Pattern PERSON_MENTION_REGEX = Pattern.compile(
+  public final Pattern personMentionRegex = Pattern.compile(
       "@(?<name>[\\w.]+)@(?<domain>[a-zA-Z0-9._:-]+)", Pattern.CASE_INSENSITIVE);
 
   public List<Mention> getPersonMentions(String text) {
 
-    final Matcher matcher = PERSON_MENTION_REGEX.matcher(text);
+    final Matcher matcher = personMentionRegex.matcher(text);
     List<Mention> mentions = new ArrayList<>();
 
     while (matcher.find()) {

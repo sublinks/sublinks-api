@@ -18,8 +18,8 @@ public class LinkPersonCommunityDeletedPublisher {
 
   public void publish(final LinkPersonCommunity linkPersonCommunity) {
 
-    LinkPersonCommunityDeletedEvent linkPersonCommunityDeletedEvent = new LinkPersonCommunityDeletedEvent(
-        this, linkPersonCommunity);
+    LinkPersonCommunityDeletedEvent linkPersonCommunityDeletedEvent
+        = new LinkPersonCommunityDeletedEvent(this, linkPersonCommunity);
     applicationEventPublisher.publishEvent(linkPersonCommunityDeletedEvent);
   }
 }
