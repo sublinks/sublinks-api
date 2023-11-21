@@ -6,10 +6,11 @@ import lombok.Builder;
 
 @Builder
 public record Login(
-        @NotNull
-        String username_or_email,
-        @NotBlank
-        String password,
-        String totp_2fa_token
+    @NotNull
+    String username_or_email,
+    @NotBlank
+    String password,
+    String totp_2fa_token
 ) {
+
 }

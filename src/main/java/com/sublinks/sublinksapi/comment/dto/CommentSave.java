@@ -10,6 +10,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -19,9 +21,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.util.Date;
-import java.util.Objects;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -30,47 +29,59 @@ import java.util.Objects;
 @Entity
 @Table(name = "comment_saves")
 public class CommentSave {
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    @JoinColumn(name = "comment_id")
-    private Comment comment;
 
-    @OneToOne
-    @JoinColumn(name = "person_id")
-    private Person person;
+  /**
+   * Relationships
+   */
+  @ManyToOne
+  @JoinColumn(name = "comment_id")
+  private Comment comment;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @OneToOne
+  @JoinColumn(name = "person_id")
+  private Person person;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  /**
+   * Attributes
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-    @Override
-    public final boolean equals(Object o) {
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
 
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        CommentSave that = (CommentSave) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    if (o == null) {
+      return false;
     }
+    Class<?> oEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) {
+      return false;
+    }
+    CommentSave that = (CommentSave) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

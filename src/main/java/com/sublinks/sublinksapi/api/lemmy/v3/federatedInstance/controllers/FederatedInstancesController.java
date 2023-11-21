@@ -17,17 +17,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api/v3/federated_instances")
 @Tag(name = "Miscellaneous")
 public class FederatedInstancesController extends AbstractLemmyApiController {
-    @Operation(summary = "Fetch federated instances.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetFederatedInstancesResponse.class))})
-    })
-    @GetMapping
-    GetFederatedInstancesResponse index() {
 
-        return GetFederatedInstancesResponse
-                .builder()
-                .build();
-    }
+  @Operation(summary = "Fetch federated instances.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetFederatedInstancesResponse.class))})
+  })
+  @GetMapping
+  GetFederatedInstancesResponse index() {
+
+    return GetFederatedInstancesResponse
+        .builder()
+        .build();
+  }
 }

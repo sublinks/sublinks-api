@@ -6,9 +6,10 @@ import lombok.Builder;
 
 @Builder
 public record ModTransferCommunityView(
-        ModTransferCommunity mod_transfer_community,
-        Person moderator,
-        Community community,
-        Person modded_person
+    ModTransferCommunity mod_transfer_community,
+    Person moderator,
+    Community community,
+    Person modded_person
 ) {
+
 }

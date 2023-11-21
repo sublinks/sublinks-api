@@ -7,21 +7,22 @@ import org.springframework.stereotype.Component;
 @Component
 @Getter
 public class InstanceSettings {
-    @Value("${sublinks.settings.base_url}")
-    String baseUrl;
 
-    @Value("${sublinks.settings.enable_down_votes}")
-    Boolean enableDownVotes;
+  @Value("${sublinks.settings.base_url}")
+  String baseUrl;
 
-    @Value("${sublinks.settings.enable_nsfw}")
-    Boolean enableNsfw;
+  @Value("${sublinks.settings.enable_down_votes}")
+  Boolean enableDownVotes;
 
-    @Value("${sublinks.settings.hide_modlog_mod_names}")
-    Boolean hideModlogModNames;
+  @Value("${sublinks.settings.enable_nsfw}")
+  Boolean enableNsfw;
 
-    @Value("${sublinks.settings.actor_name_max_length}")
-    Integer actorNameMaxLength;
+  @Value("${sublinks.settings.hide_modlog_mod_names}")
+  Boolean hideModlogModNames;
 
-    @Value("${sublinks.settings.private_instance}")
-    Boolean isPrivateInstance;
+  @Value("${sublinks.settings.actor_name_max_length}")
+  Integer actorNameMaxLength;
+
+  @Value("${sublinks.settings.private_instance}")
+  Boolean isPrivateInstance;
 }

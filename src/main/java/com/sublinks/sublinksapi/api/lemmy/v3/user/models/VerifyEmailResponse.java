@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record VerifyEmailResponse(
-        // Response is null
+    // Response is null
 ) {
+
 }

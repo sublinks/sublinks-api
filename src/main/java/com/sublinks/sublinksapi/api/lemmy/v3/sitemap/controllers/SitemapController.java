@@ -15,13 +15,15 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @Tag(name = "Miscellaneous")
 public class SitemapController extends AbstractLemmyApiController {
-    @Operation(summary = "Gets the sitemap.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = { @Content(mediaType = MediaType.APPLICATION_XML_VALUE) })
-    })
-    @GetMapping("api/v3/sitemap.xml")
-    String index() {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Gets the sitemap.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", content = {
+          @Content(mediaType = MediaType.APPLICATION_XML_VALUE)})
+  })
+  @GetMapping("api/v3/sitemap.xml")
+  String index() {
+
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

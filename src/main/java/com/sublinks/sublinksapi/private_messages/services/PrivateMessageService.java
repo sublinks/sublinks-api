@@ -12,38 +12,40 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class PrivateMessageService {
-    private final PrivateMessageRepository privateMessageRepository;
-    private final PrivateMessageCreatedPublisher privateMessageCreatedPublisher;
-    private final PrivateMessageUpdatedPublisher privateMessageUpdatedPublisher;
-    private final LocalInstanceContext localInstanceContext;
 
-    public String generateActivityPubId(final com.sublinks.sublinksapi.private_messages.dto.PrivateMessage privateMessage) {
+  private final PrivateMessageRepository privateMessageRepository;
+  private final PrivateMessageCreatedPublisher privateMessageCreatedPublisher;
+  private final PrivateMessageUpdatedPublisher privateMessageUpdatedPublisher;
+  private final LocalInstanceContext localInstanceContext;
 
-        String domain = localInstanceContext.instance().getDomain();
-        return String.format("%s/private_message/%d", domain, privateMessage.getId());
-    }
+  public String generateActivityPubId(
+      final com.sublinks.sublinksapi.private_messages.dto.PrivateMessage privateMessage) {
 
-    @Transactional
-    public void createPrivateMessage(final PrivateMessage privateMessage) {
+    String domain = localInstanceContext.instance().getDomain();
+    return String.format("%s/private_message/%d", domain, privateMessage.getId());
+  }
 
-        privateMessage.setActivityPubId("");
-        privateMessageRepository.save(privateMessage);
-        privateMessage.setActivityPubId(this.generateActivityPubId(privateMessage));
-        privateMessageRepository.save(privateMessage);
+  @Transactional
+  public void createPrivateMessage(final PrivateMessage privateMessage) {
 
-        privateMessageCreatedPublisher.publish(privateMessage);
-    }
+    privateMessage.setActivityPubId("");
+    privateMessageRepository.save(privateMessage);
+    privateMessage.setActivityPubId(this.generateActivityPubId(privateMessage));
+    privateMessageRepository.save(privateMessage);
 
-    @Transactional
-    public void updatePrivateMessage(final PrivateMessage comment) {
+    privateMessageCreatedPublisher.publish(privateMessage);
+  }
 
-        privateMessageRepository.save(comment);
-        privateMessageUpdatedPublisher.publish(comment);
-    }
+  @Transactional
+  public void updatePrivateMessage(final PrivateMessage comment) {
 
-    @Transactional
-    public void deletePrivateMessage(final PrivateMessage privateMessage) {
+    privateMessageRepository.save(comment);
+    privateMessageUpdatedPublisher.publish(comment);
+  }
 
-        privateMessageRepository.delete(privateMessage);
-    }
+  @Transactional
+  public void deletePrivateMessage(final PrivateMessage privateMessage) {
+
+    privateMessageRepository.delete(privateMessage);
+  }
 }

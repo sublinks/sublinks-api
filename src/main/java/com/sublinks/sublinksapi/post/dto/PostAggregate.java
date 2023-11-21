@@ -9,14 +9,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.proxy.HibernateProxy;
-
-import java.util.Objects;
 
 @Getter
 @Setter
@@ -26,60 +25,72 @@ import java.util.Objects;
 @Entity
 @Table(name = "post_aggregates")
 public class PostAggregate {
-    /**
-     * Relationships
-     */
-    @OneToOne
-    @JoinColumn(name = "post_id")
-    private Post post;
 
-    @OneToOne
-    @JoinColumn(name = "community_id")
-    private Community community;
+  /**
+   * Relationships
+   */
+  @OneToOne
+  @JoinColumn(name = "post_id")
+  private Post post;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @OneToOne
+  @JoinColumn(name = "community_id")
+  private Community community;
 
-    @Column(nullable = false, name = "comment_count")
-    private int commentCount;
+  /**
+   * Attributes
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, name = "down_vote_count")
-    private int downVoteCount;
+  @Column(nullable = false, name = "comment_count")
+  private int commentCount;
 
-    @Column(nullable = false, name = "up_vote_count")
-    private int upVoteCount;
+  @Column(nullable = false, name = "down_vote_count")
+  private int downVoteCount;
 
-    @Column(nullable = false, name = "score")
-    private int score;
+  @Column(nullable = false, name = "up_vote_count")
+  private int upVoteCount;
 
-    @Column(nullable = false, name = "hot_rank")
-    private int hotRank;
+  @Column(nullable = false, name = "score")
+  private int score;
 
-    @Column(nullable = false, name = "hot_rank_active")
-    private int hotRankActive;
+  @Column(nullable = false, name = "hot_rank")
+  private int hotRank;
 
-    @Column(nullable = false, name = "controversy_rank")
-    private int controversyRank;
+  @Column(nullable = false, name = "hot_rank_active")
+  private int hotRankActive;
 
-    @Override
-    public final boolean equals(Object o) {
+  @Column(nullable = false, name = "controversy_rank")
+  private int controversyRank;
 
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        PostAggregate that = (PostAggregate) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    if (o == null) {
+      return false;
     }
+    Class<?> oEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) {
+      return false;
+    }
+    PostAggregate that = (PostAggregate) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

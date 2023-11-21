@@ -5,8 +5,9 @@ import lombok.Builder;
 
 @Builder
 public record FeaturePost(
-        Integer post_id,
-        Boolean featured,
-        PostFeatureType feature_type
+    Integer post_id,
+    Boolean featured,
+    PostFeatureType feature_type
 ) {
+
 }

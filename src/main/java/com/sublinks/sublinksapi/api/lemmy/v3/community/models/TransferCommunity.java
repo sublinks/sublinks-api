@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record TransferCommunity(
-        Integer community_id,
-        Integer person_id
+    Integer community_id,
+    Integer person_id
 ) {
+
 }

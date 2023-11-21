@@ -26,6 +26,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.ArrayList;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -38,132 +40,140 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.Optional;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
 @Tag(name = "Site")
 public class SiteController extends AbstractLemmyApiController {
-    private final LocalInstanceContext localInstanceContext;
-    private final LemmySiteService lemmySiteService;
-    private final InstanceService instanceService;
-    private final LanguageService languageService;
-    private final InstanceRepository instanceRepository;
-    private final InstanceBlockRepository instanceBlockRepository;
-    private final MyUserInfoService myUserInfoService;
-    private final AuthorizationService authorizationService;
 
-    @Operation(summary = "Gets the site, and your user data.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetSiteResponse.class))})
-    })
-    @GetMapping
-    public GetSiteResponse getSite(final JwtPerson principal) {
+  private final LocalInstanceContext localInstanceContext;
+  private final LemmySiteService lemmySiteService;
+  private final InstanceService instanceService;
+  private final LanguageService languageService;
+  private final InstanceRepository instanceRepository;
+  private final InstanceBlockRepository instanceBlockRepository;
+  private final MyUserInfoService myUserInfoService;
+  private final AuthorizationService authorizationService;
 
-        GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
-                .version("0.19.0") // @todo grab this from config?
-                .taglines(new ArrayList<>()) // @todo taglines
-                .site_view(lemmySiteService.getSiteView())
-                .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
-                .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
-                .custom_emojis(lemmySiteService.customEmojis())
-                .admins(lemmySiteService.admins());
+  @Operation(summary = "Gets the site, and your user data.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetSiteResponse.class))})
+  })
+  @GetMapping
+  public GetSiteResponse getSite(final JwtPerson principal) {
 
-        getOptionalPerson(principal).ifPresent((person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
+    GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
+        .version("0.19.0") // @todo grab this from config?
+        .taglines(new ArrayList<>()) // @todo taglines
+        .site_view(lemmySiteService.getSiteView())
+        .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
+        .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
+        .custom_emojis(lemmySiteService.customEmojis())
+        .admins(lemmySiteService.admins());
 
-        return builder.build();
+    getOptionalPerson(principal).ifPresent(
+        (person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
+
+    return builder.build();
+  }
+
+  @Operation(summary = "Create your site.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = SiteResponse.class))})
+  })
+  @PostMapping
+  @Transactional
+  public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm,
+      final JwtPerson principal) {
+
+    if (!localInstanceContext.instance().getDomain().isBlank()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
+    final Person person = getPersonOrThrowUnauthorized(principal);
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-    @Operation(summary = "Create your site.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SiteResponse.class))})
-    })
-    @PostMapping
-    @Transactional
-    public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm, final JwtPerson principal) {
+    final Instance instance = localInstanceContext.instance();
+    instance.setName(createSiteForm.name());
+    instance.setDomain(localInstanceContext.settings().getBaseUrl());
+    instance.setActivityPubId(localInstanceContext.settings().getBaseUrl());
+    instance.setSoftware("sublinks");
+    instance.setVersion("0.1.0");
+    instance.setDescription(createSiteForm.description());
+    instance.setSidebar(createSiteForm.sidebar());
+    instance.setLanguages(
+        languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
+    instance.setBannerUrl(createSiteForm.banner());
+    instance.setIconUrl(createSiteForm.icon());
+    instanceService.createInstance(instance);
+    return SiteResponse.builder()
+        .site_view(lemmySiteService.getSiteView())
+        .tag_lines(new ArrayList<>())
+        .build();
+  }
 
-        if (!localInstanceContext.instance().getDomain().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-        final Person person = getPersonOrThrowUnauthorized(principal);
-        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+  @Operation(summary = "Edit your site.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = SiteResponse.class))})
+  })
+  @PutMapping
+  @Transactional
+  public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm,
+      final JwtPerson principal) {
 
-        final Instance instance = localInstanceContext.instance();
-        instance.setName(createSiteForm.name());
-        instance.setDomain(localInstanceContext.settings().getBaseUrl());
-        instance.setActivityPubId(localInstanceContext.settings().getBaseUrl());
-        instance.setSoftware("sublinks");
-        instance.setVersion("0.1.0");
-        instance.setDescription(createSiteForm.description());
-        instance.setSidebar(createSiteForm.sidebar());
-        instance.setLanguages(languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
-        instance.setBannerUrl(createSiteForm.banner());
-        instance.setIconUrl(createSiteForm.icon());
-        instanceService.createInstance(instance);
-        return SiteResponse.builder()
-                .site_view(lemmySiteService.getSiteView())
-                .tag_lines(new ArrayList<>())
-                .build();
+    final Person person = getPersonOrThrowUnauthorized(principal);
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    final Instance instance = localInstanceContext.instance();
+    instance.setName(editSiteForm.name());
+    instance.setDescription(editSiteForm.description());
+    instance.setSidebar(editSiteForm.sidebar());
+    instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
+    instance.setBannerUrl(editSiteForm.banner());
+    instance.setIconUrl(editSiteForm.icon());
+    instanceService.updateInstance(instance);
+    return SiteResponse.builder()
+        .site_view(lemmySiteService.getSiteView())
+        .tag_lines(new ArrayList<>())
+        .build();
+  }
+
+  @Operation(summary = "Block an instance.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = BlockInstanceResponse.class))})
+  })
+  @PostMapping("/block")
+  @Transactional
+  public BlockInstanceResponse blockInstance(
+      @Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    final Optional<Instance> instance = instanceRepository.findById(
+        (long) blockInstanceForm.instance_id());
+    if (instance.isEmpty()) {
+      return new BlockInstanceResponse(false);
     }
-
-    @Operation(summary = "Edit your site.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = SiteResponse.class))})
-    })
-    @PutMapping
-    @Transactional
-    public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm, final JwtPerson principal) {
-
-        final Person person = getPersonOrThrowUnauthorized(principal);
-        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
-        final Instance instance = localInstanceContext.instance();
-        instance.setName(editSiteForm.name());
-        instance.setDescription(editSiteForm.description());
-        instance.setSidebar(editSiteForm.sidebar());
-        instance.setLanguages(languageService.languageIdsToEntity(editSiteForm.discussion_languages()));
-        instance.setBannerUrl(editSiteForm.banner());
-        instance.setIconUrl(editSiteForm.icon());
-        instanceService.updateInstance(instance);
-        return SiteResponse.builder()
-                .site_view(lemmySiteService.getSiteView())
-                .tag_lines(new ArrayList<>())
-                .build();
+    final InstanceBlock instanceBlock = instanceBlockRepository.findInstanceBlockByInstance(
+        instance.get());
+    if (blockInstanceForm.block() && instanceBlock == null) {
+      instanceBlockRepository.save(InstanceBlock.builder().instance(instance.get()).build());
+    } else if (!blockInstanceForm.block()) {
+      if (instanceBlock != null) {
+        instanceBlockRepository.delete(instanceBlock);
+      }
+      return new BlockInstanceResponse(false);
     }
-
-    @Operation(summary = "Block an instance.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = BlockInstanceResponse.class))})
-    })
-    @PostMapping("/block")
-    @Transactional
-    public BlockInstanceResponse blockInstance(@Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
-
-        final Person person = getPersonOrThrowUnauthorized(principal);
-        authorizationService.isAdminElseThrow(person, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-        final Optional<Instance> instance = instanceRepository.findById((long) blockInstanceForm.instance_id());
-        if (instance.isEmpty()) {
-            return new BlockInstanceResponse(false);
-        }
-        final InstanceBlock instanceBlock = instanceBlockRepository.findInstanceBlockByInstance(instance.get());
-        if (blockInstanceForm.block() && instanceBlock == null) {
-            instanceBlockRepository.save(InstanceBlock.builder().instance(instance.get()).build());
-        } else if (!blockInstanceForm.block()) {
-            if (instanceBlock != null) {
-                instanceBlockRepository.delete(instanceBlock);
-            }
-            return new BlockInstanceResponse(false);
-        }
-        return new BlockInstanceResponse(true);
-    }
+    return new BlockInstanceResponse(true);
+  }
 }

@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record CustomEmojiResponse(
-        CustomEmojiView custom_emoji
+    CustomEmojiView custom_emoji
 ) {
+
 }

@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record MarkPrivateMessageAsRead(
-        Integer private_message_id,
-        Boolean read
+    Integer private_message_id,
+    Boolean read
 ) {
+
 }

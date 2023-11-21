@@ -6,10 +6,11 @@ import lombok.Builder;
 
 @Builder
 public record ListCommunities(
-        ListingType type_,
-        SortType sort,
-        Boolean show_nsfw,
-        Integer page,
-        Integer limit
+    ListingType type_,
+    SortType sort,
+    Boolean show_nsfw,
+    Integer page,
+    Integer limit
 ) {
+
 }

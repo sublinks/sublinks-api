@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetUnreadRegistrationApplicationCountResponse(
-        int registration_applications
+    int registration_applications
 ) {
+
 }

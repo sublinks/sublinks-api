@@ -5,8 +5,9 @@ import lombok.Builder;
 
 @Builder
 public record ModAddView(
-        ModAdd mod_add,
-        Person moderator,
-        Person modded_person
+    ModAdd mod_add,
+    Person moderator,
+    Person modded_person
 ) {
+
 }

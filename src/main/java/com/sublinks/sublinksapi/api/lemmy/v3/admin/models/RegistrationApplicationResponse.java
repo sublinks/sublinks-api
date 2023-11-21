@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record RegistrationApplicationResponse(
-        RegistrationApplicationView registration_application
+    RegistrationApplicationView registration_application
 ) {
+
 }

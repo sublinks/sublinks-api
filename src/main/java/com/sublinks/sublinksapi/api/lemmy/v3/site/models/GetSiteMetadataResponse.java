@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetSiteMetadataResponse(
-        SiteMetadata metadata
+    SiteMetadata metadata
 ) {
+
 }

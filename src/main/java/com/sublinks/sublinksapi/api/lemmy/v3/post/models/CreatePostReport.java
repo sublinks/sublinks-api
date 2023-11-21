@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record CreatePostReport(
-        Integer post_id,
-        String reason
+    Integer post_id,
+    String reason
 ) {
+
 }

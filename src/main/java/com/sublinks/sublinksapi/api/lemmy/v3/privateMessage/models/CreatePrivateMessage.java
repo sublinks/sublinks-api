@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record CreatePrivateMessage(
-        String content,
-        Integer recipient_id
+    String content,
+    Integer recipient_id
 ) {
+
 }

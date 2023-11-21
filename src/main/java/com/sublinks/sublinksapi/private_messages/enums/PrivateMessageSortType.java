@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.private_messages.enums;
 
 public enum PrivateMessageSortType {
-    Hot,
-    top,
-    New,
-    Old,
+  Hot,
+  top,
+  New,
+  Old,
 }

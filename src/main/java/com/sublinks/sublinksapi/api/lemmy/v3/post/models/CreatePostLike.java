@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record CreatePostLike(
-        Long post_id,
-        Integer score
+    Long post_id,
+    Integer score
 ) {
+
 }

@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record CommunityModeratorView(
-        Community community,
-        Person moderator
+    Community community,
+    Person moderator
 ) {
+
 }

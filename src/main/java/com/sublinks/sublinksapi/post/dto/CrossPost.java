@@ -9,6 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Objects;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,9 +18,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.Singular;
 import org.hibernate.proxy.HibernateProxy;
-
-import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -28,43 +27,55 @@ import java.util.Set;
 @Entity
 @Table(name = "post_cross_posts")
 public class CrossPost {
-    /**
-     * Relationships
-     */
-    @Singular
-    @OneToMany
-    @JoinTable(
-            name = "post_post_cross_post",
-            joinColumns = @JoinColumn(name = "cross_post_id"),
-            inverseJoinColumns = @JoinColumn(name = "post_id")
-    )
-    private Set<Post> posts;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  /**
+   * Relationships
+   */
+  @Singular
+  @OneToMany
+  @JoinTable(
+      name = "post_post_cross_post",
+      joinColumns = @JoinColumn(name = "cross_post_id"),
+      inverseJoinColumns = @JoinColumn(name = "post_id")
+  )
+  private Set<Post> posts;
 
-    @Column(nullable = false, name = "md5_hash")
-    private String md5Hash;
+  /**
+   * Attributes
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Override
-    public final boolean equals(Object o) {
+  @Column(nullable = false, name = "md5_hash")
+  private String md5Hash;
 
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        CrossPost crossPost = (CrossPost) o;
-        return getId() != null && Objects.equals(getId(), crossPost.getId());
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    if (o == null) {
+      return false;
     }
+    Class<?> oEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) {
+      return false;
+    }
+    CrossPost crossPost = (CrossPost) o;
+    return getId() != null && Objects.equals(getId(), crossPost.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record MarkPostAsRead(
-        Integer post_id,
-        Boolean read
+    Integer post_id,
+    Boolean read
 ) {
+
 }

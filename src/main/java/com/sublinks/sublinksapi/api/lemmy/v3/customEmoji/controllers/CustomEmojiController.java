@@ -25,45 +25,46 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/custom_emoji")
 @Tag(name = "CustomEmoji")
 public class CustomEmojiController extends AbstractLemmyApiController {
-    @Operation(summary = "Create a new custom emoji.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomEmojiResponse.class))})
-    })
-    @PostMapping
-    CustomEmojiResponse create(@Valid final CreateCustomEmoji createCustomEmojiForm) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Create a new custom emoji.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CustomEmojiResponse.class))})
+  })
+  @PostMapping
+  CustomEmojiResponse create(@Valid final CreateCustomEmoji createCustomEmojiForm) {
 
-    @Operation(summary = "Edit a custom emoji.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomEmojiResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PutMapping
-    CustomEmojiResponse update(@Valid final EditCustomEmoji editCustomEmojiForm) {
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Edit a custom emoji.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CustomEmojiResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PutMapping
+  CustomEmojiResponse update(@Valid final EditCustomEmoji editCustomEmojiForm) {
 
-    @Operation(summary = "Delete a custom emoji.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomEmojiResponse.class))}),
-            @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ApiError.class))})
-    })
-    @PostMapping("delete")
-    CustomEmojiResponse delete(@Valid final DeleteCustomEmoji deleteCustomEmojiForm) {
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Delete a custom emoji.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = CustomEmojiResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})
+  })
+  @PostMapping("delete")
+  CustomEmojiResponse delete(@Valid final DeleteCustomEmoji deleteCustomEmojiForm) {
+
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }

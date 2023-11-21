@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record DeletePrivateMessage(
-        Integer private_message_id,
-        Boolean deleted
+    Integer private_message_id,
+    Boolean deleted
 ) {
+
 }

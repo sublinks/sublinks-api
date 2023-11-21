@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record BlockPerson(
-        Integer person_id,
-        Boolean block
+    Integer person_id,
+    Boolean block
 ) {
+
 }

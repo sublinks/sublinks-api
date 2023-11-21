@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record AdminPurgePersonView(
-        AdminPurgePerson admin_purge_person,
-        Person admin
+    AdminPurgePerson admin_purge_person,
+    Person admin
 ) {
+
 }

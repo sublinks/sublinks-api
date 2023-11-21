@@ -8,9 +8,10 @@ import lombok.Builder;
 
 @Builder
 public record ResolveObjectResponse(
-        CommentView comment,
-        PostView post,
-        CommunityView community,
-        PersonView person
+    CommentView comment,
+    PostView post,
+    CommunityView community,
+    PersonView person
 ) {
+
 }

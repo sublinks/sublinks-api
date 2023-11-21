@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PrivateMessageReportResponse(
-        PrivateMessageReportView private_message_report_view
+    PrivateMessageReportView private_message_report_view
 ) {
+
 }

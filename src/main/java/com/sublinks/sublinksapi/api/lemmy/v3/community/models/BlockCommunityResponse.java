@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record BlockCommunityResponse(
-        CommunityView community_view,
-        boolean blocked
+    CommunityView community_view,
+    boolean blocked
 ) {
+
 }

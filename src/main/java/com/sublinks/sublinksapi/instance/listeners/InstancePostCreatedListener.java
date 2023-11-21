@@ -9,27 +9,28 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class InstancePostCreatedListener implements ApplicationListener<PostCreatedEvent> {
-    private final InstanceAggregateRepository instanceAggregateRepository;
-    private final LocalInstanceContext localInstanceContext;
 
-    public InstancePostCreatedListener(
-            final InstanceAggregateRepository instanceAggregateRepository,
-            LocalInstanceContext localInstanceContext
-    ) {
+  private final InstanceAggregateRepository instanceAggregateRepository;
+  private final LocalInstanceContext localInstanceContext;
 
-        this.instanceAggregateRepository = instanceAggregateRepository;
-        this.localInstanceContext = localInstanceContext;
+  public InstancePostCreatedListener(
+      final InstanceAggregateRepository instanceAggregateRepository,
+      LocalInstanceContext localInstanceContext
+  ) {
+
+    this.instanceAggregateRepository = instanceAggregateRepository;
+    this.localInstanceContext = localInstanceContext;
+  }
+
+  @Override
+  public void onApplicationEvent(final PostCreatedEvent event) {
+
+    if (!event.getPost().isLocal()) {
+      return;
     }
 
-    @Override
-    public void onApplicationEvent(final PostCreatedEvent event) {
-
-        if (!event.getPost().isLocal()) {
-            return;
-        }
-
-        final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
-        instanceAggregate.setPostCount(instanceAggregate.getPostCount() + 1);
-        instanceAggregateRepository.save(instanceAggregate);
-    }
+    final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
+    instanceAggregate.setPostCount(instanceAggregate.getPostCount() + 1);
+    instanceAggregateRepository.save(instanceAggregate);
+  }
 }

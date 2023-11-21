@@ -19,80 +19,84 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class LemmyCommentService {
-    private final LemmyCommunityService lemmyCommunityService;
-    private final LocalInstanceContext localInstanceContext;
-    private final ConversionService conversionService;
-    private final CommentLikeService commentLikeService;
 
-    public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+  private final LemmyCommunityService lemmyCommunityService;
+  private final LocalInstanceContext localInstanceContext;
+  private final ConversionService conversionService;
+  private final CommentLikeService commentLikeService;
 
-        String domain = localInstanceContext.instance().getDomain();
-        return String.format("%s/comment/%d", domain, comment.getId());
+  public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+
+    String domain = localInstanceContext.instance().getDomain();
+    return String.format("%s/comment/%d", domain, comment.getId());
+  }
+
+
+  @NonNull
+  public CommentView createCommentView(
+      final com.sublinks.sublinksapi.comment.dto.Comment comment,
+      final com.sublinks.sublinksapi.person.dto.Person person
+  ) {
+
+    return commentViewBuilder(comment, person).build();
+  }
+
+  @NonNull
+  public CommentView createCommentView(
+      final com.sublinks.sublinksapi.comment.dto.Comment comment
+  ) {
+
+    return commentViewBuilder(comment).build();
+  }
+
+  @NonNull
+  private CommentView.CommentViewBuilder commentViewBuilder(
+      final com.sublinks.sublinksapi.comment.dto.Comment comment,
+      final com.sublinks.sublinksapi.person.dto.Person person
+  ) {
+
+    CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
+
+    final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
+        person, comment.getCommunity()
+    );
+    final int personVote = commentLikeService.getPersonCommentVote(person, comment);
+
+    commentView.subscribed(subscribedType)
+        .saved(false)// @todo check if saved
+        .my_vote(personVote);
+
+    return commentView;
+  }
+
+  @NonNull
+  private CommentView.CommentViewBuilder commentViewBuilder(
+      final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+
+    final Comment lemmyComment = conversionService.convert(comment, Comment.class);
+
+    final com.sublinks.sublinksapi.person.dto.Person creator = comment.getPerson();
+    final Person lemmyCreator = conversionService.convert(creator, Person.class);
+
+    final Community lemmyCommunity = conversionService.convert(comment.getCommunity(),
+        Community.class);
+    final Post lemmyPost = conversionService.convert(comment.getPost(), Post.class);
+
+    CommentAggregate commentAggregate = comment.getCommentAggregate();
+    if (comment.getCommentAggregate() == null) {
+      commentAggregate = CommentAggregate.builder().build();
     }
 
+    final CommentAggregates lemmyCommentAggregates = conversionService.convert(commentAggregate,
+        CommentAggregates.class);
 
-    @NonNull
-    public CommentView createCommentView(
-            final com.sublinks.sublinksapi.comment.dto.Comment comment,
-            final com.sublinks.sublinksapi.person.dto.Person person
-    ) {
-
-        return commentViewBuilder(comment, person).build();
-    }
-
-    @NonNull
-    public CommentView createCommentView(
-            final com.sublinks.sublinksapi.comment.dto.Comment comment
-    ) {
-
-        return commentViewBuilder(comment).build();
-    }
-
-    @NonNull
-    private CommentView.CommentViewBuilder commentViewBuilder(
-            final com.sublinks.sublinksapi.comment.dto.Comment comment,
-            final com.sublinks.sublinksapi.person.dto.Person person
-    ) {
-
-        CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
-
-        final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
-                person, comment.getCommunity()
-        );
-        final int personVote = commentLikeService.getPersonCommentVote(person, comment);
-
-        commentView.subscribed(subscribedType)
-                .saved(false)// @todo check if saved
-                .my_vote(personVote);
-
-        return commentView;
-    }
-
-    @NonNull
-    private CommentView.CommentViewBuilder commentViewBuilder(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
-
-        final Comment lemmyComment = conversionService.convert(comment, Comment.class);
-
-        final com.sublinks.sublinksapi.person.dto.Person creator = comment.getPerson();
-        final Person lemmyCreator = conversionService.convert(creator, Person.class);
-
-        final Community lemmyCommunity = conversionService.convert(comment.getCommunity(), Community.class);
-        final Post lemmyPost = conversionService.convert(comment.getPost(), Post.class);
-
-        CommentAggregate commentAggregate = comment.getCommentAggregate();
-        if (comment.getCommentAggregate() == null) {
-            commentAggregate = CommentAggregate.builder().build();
-        }
-
-        final CommentAggregates lemmyCommentAggregates = conversionService.convert(commentAggregate, CommentAggregates.class);
-
-        return CommentView.builder()
-                .comment(lemmyComment)
-                .creator(lemmyCreator)
-                .community(lemmyCommunity)
-                .post(lemmyPost)
-                .counts(lemmyCommentAggregates)
-                .creator_banned_from_community(false) // @todo creator checks
-                .creator_blocked(false);
-    }
+    return CommentView.builder()
+        .comment(lemmyComment)
+        .creator(lemmyCreator)
+        .community(lemmyCommunity)
+        .post(lemmyPost)
+        .counts(lemmyCommentAggregates)
+        .creator_banned_from_community(false) // @todo creator checks
+        .creator_blocked(false);
+  }
 }

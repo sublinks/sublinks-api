@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record DeleteCustomEmojiResponse(
-        int id,
-        boolean success
+    int id,
+    boolean success
 ) {
+
 }

@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PasswordReset(
-        String email
+    String email
 ) {
+
 }

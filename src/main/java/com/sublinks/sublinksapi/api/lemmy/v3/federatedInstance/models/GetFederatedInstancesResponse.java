@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GetFederatedInstancesResponse(
-        FederatedInstances federated_instances
+    FederatedInstances federated_instances
 ) {
+
 }

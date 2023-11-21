@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record ResolvePrivateMessageReport(
-        Integer report_id,
-        Boolean resolved
+    Integer report_id,
+    Boolean resolved
 ) {
+
 }

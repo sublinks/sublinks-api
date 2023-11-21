@@ -7,10 +7,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public record LocalInstanceContext(
-        Instance instance,
-        InstanceAggregate instanceAggregate,
-        LanguageRepository languageRepository,
-        InstanceSettings settings,
-        InstanceRateLimits rateLimits
+    Instance instance,
+    InstanceAggregate instanceAggregate,
+    LanguageRepository languageRepository,
+    InstanceSettings settings,
+    InstanceRateLimits rateLimits
 ) {
+
 }

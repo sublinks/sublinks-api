@@ -21,15 +21,16 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/resolve_object")
 @Tag(name = "Miscellaneous")
 public class ResolveObjectController extends AbstractLemmyApiController {
-    @Operation(summary = "Fetch a non-local / federated object.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK",
-                    content = { @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = GetModlogResponse.class))})
-    })
-    @GetMapping
-    GetModlogResponse index(@Valid final ResolveObject resolveObjectForm) {
 
-        throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
-    }
+  @Operation(summary = "Fetch a non-local / federated object.")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = GetModlogResponse.class))})
+  })
+  @GetMapping
+  GetModlogResponse index(@Valid final ResolveObject resolveObjectForm) {
+
+    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+  }
 }
