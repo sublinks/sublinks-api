@@ -14,6 +14,9 @@ import org.hibernate.proxy.HibernateProxy;
 
 import java.util.Objects;
 
+/**
+ * Announcement entity
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -26,6 +29,10 @@ public class Announcement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * @param o Object to compare to
+     * @return boolean
+     */
     @Override
     public final boolean equals(Object o) {
 
@@ -38,6 +45,10 @@ public class Announcement {
         return getId() != null && Objects.equals(getId(), that.getId());
     }
 
+    /**
+     * Object hashCode
+     * @return int
+     */
     @Override
     public final int hashCode() {
 
