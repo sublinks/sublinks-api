@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;

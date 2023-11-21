@@ -13,7 +13,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetCommunityRespon
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunities;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunitiesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
-import com.sublinks.sublinksapi.api.lemmy.v3.errorHandler.ApiError;
+import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
