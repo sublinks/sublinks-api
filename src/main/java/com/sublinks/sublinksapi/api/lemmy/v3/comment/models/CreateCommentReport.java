@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record CreateCommentReport(
-        Integer comment_id,
-        String reason
+    Integer comment_id,
+    String reason
 ) {
+
 }

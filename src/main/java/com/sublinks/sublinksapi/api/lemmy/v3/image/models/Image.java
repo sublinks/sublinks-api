@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record Image(
-        String file,
-        String delete_token
+    String file,
+    String delete_token
 ) {
+
 }

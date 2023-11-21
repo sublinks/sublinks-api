@@ -11,17 +11,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class CommunityLinkPersonCommunityDeletedListener implements ApplicationListener<LinkPersonCommunityDeletedEvent> {
-    private final CommunityAggregateRepository communityAggregateRepository;
+public class CommunityLinkPersonCommunityDeletedListener implements
+    ApplicationListener<LinkPersonCommunityDeletedEvent> {
 
-    @Override
-    @Transactional
-    public void onApplicationEvent(LinkPersonCommunityDeletedEvent event) {
+  private final CommunityAggregateRepository communityAggregateRepository;
 
-        if (event.getLinkPersonCommunity().getLinkType() == LinkPersonCommunityType.follower) {
-            final CommunityAggregate communityAggregate = event.getLinkPersonCommunity().getCommunity().getCommunityAggregate();
-            communityAggregate.setSubscriberCount(communityAggregate.getSubscriberCount() - 1);
-            communityAggregateRepository.save(communityAggregate);
-        }
+  @Override
+  @Transactional
+  public void onApplicationEvent(LinkPersonCommunityDeletedEvent event) {
+
+    if (event.getLinkPersonCommunity().getLinkType() == LinkPersonCommunityType.follower) {
+      final CommunityAggregate communityAggregate = event.getLinkPersonCommunity().getCommunity()
+          .getCommunityAggregate();
+      communityAggregate.setSubscriberCount(communityAggregate.getSubscriberCount() - 1);
+      communityAggregateRepository.save(communityAggregate);
     }
+  }
 }

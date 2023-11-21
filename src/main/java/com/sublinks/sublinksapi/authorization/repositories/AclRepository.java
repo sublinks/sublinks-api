@@ -7,15 +7,22 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AclRepository extends JpaRepository<Acl, Long> {
 
-    boolean existsByPersonIdAndEntityTypeAndAuthorizedAction(Long personId, AuthorizedEntityType entityType, AuthorizeAction authorizedAction);
+  boolean existsByPersonIdAndEntityTypeAndAuthorizedAction(Long personId,
+      AuthorizedEntityType entityType, AuthorizeAction authorizedAction);
 
-    boolean existsByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(Long personId, AuthorizedEntityType entityType, Long entityId, AuthorizeAction authorizedAction);
+  boolean existsByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(Long personId,
+      AuthorizedEntityType entityType, Long entityId, AuthorizeAction authorizedAction);
 
-    Acl findAclByPersonIdAndEntityTypeAndAuthorizedAction(Long personId, AuthorizedEntityType entityType, AuthorizeAction authorizedAction);
+  Acl findAclByPersonIdAndEntityTypeAndAuthorizedAction(Long personId,
+      AuthorizedEntityType entityType, AuthorizeAction authorizedAction);
 
-    Acl findAclByPersonIdAndEntityTypeAndAuthorizedActionAndPermitted(Long personId, AuthorizedEntityType entityType, AuthorizeAction authorizedAction, boolean isPermitted);
+  Acl findAclByPersonIdAndEntityTypeAndAuthorizedActionAndPermitted(Long personId,
+      AuthorizedEntityType entityType, AuthorizeAction authorizedAction, boolean isPermitted);
 
-    Acl findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(Long personId, AuthorizedEntityType entityType, Long entityId, AuthorizeAction authorizedAction);
+  Acl findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(Long personId,
+      AuthorizedEntityType entityType, Long entityId, AuthorizeAction authorizedAction);
 
-    Acl findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(Long personId, AuthorizedEntityType entityType, Long entityId, AuthorizeAction authorizedAction, boolean isPermitted);
+  Acl findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(Long personId,
+      AuthorizedEntityType entityType, Long entityId, AuthorizeAction authorizedAction,
+      boolean isPermitted);
 }

@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record GenerateTotpSecretResponse(
-        String totp_secret_url
+    String totp_secret_url
 ) {
+
 }

@@ -11,6 +11,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,9 +22,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-import java.util.Date;
-import java.util.Objects;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -31,68 +30,80 @@ import java.util.Objects;
 @Entity
 @Table(name = "private_messages")
 public class PrivateMessage implements AuthorizationEntityInterface {
-    /**
-     * Relationships
-     */
-    @ManyToOne
-    @JoinColumn(name = "recipient_id")
-    Person recipient;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
-    Person sender;
+  /**
+   * Relationships
+   */
+  @ManyToOne
+  @JoinColumn(name = "recipient_id")
+  Person recipient;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @ManyToOne
+  @JoinColumn(name = "sender_id")
+  Person sender;
 
-    @Column(nullable = false, name = "content")
-    private String content;
+  /**
+   * Attributes
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false, name = "is_local")
-    private boolean isLocal;
+  @Column(nullable = false, name = "content")
+  private String content;
 
-    @Column(nullable = false, name = "is_read")
-    private boolean isRead;
+  @Column(nullable = false, name = "is_local")
+  private boolean isLocal;
 
-    @Column(nullable = false, name = "is_deleted")
-    private boolean isDeleted;
+  @Column(nullable = false, name = "is_read")
+  private boolean isRead;
 
-    @CreationTimestamp
-    @Column(updatable = false, nullable = false, name = "created_at")
-    private Date createdAt;
+  @Column(nullable = false, name = "is_deleted")
+  private boolean isDeleted;
 
-    @UpdateTimestamp
-    @Column(updatable = false, nullable = false, name = "updated_at")
-    private Date updatedAt;
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
 
-    @Column(nullable = false, name = "activity_pub_id")
-    private String activityPubId;
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
 
-    @Override
-    public AuthorizedEntityType entityType() {
+  @Column(nullable = false, name = "activity_pub_id")
+  private String activityPubId;
 
-        return AuthorizedEntityType.message;
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.message;
+  }
+
+  @Override
+  public final boolean equals(Object o) {
+
+    if (this == o) {
+      return true;
     }
-
-    @Override
-    public final boolean equals(Object o) {
-
-        if (this == o) return true;
-        if (o == null) return false;
-        Class<?> oEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer().getPersistentClass() : o.getClass();
-        Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass() : this.getClass();
-        if (thisEffectiveClass != oEffectiveClass) return false;
-        PrivateMessage that = (PrivateMessage) o;
-        return getId() != null && Objects.equals(getId(), that.getId());
+    if (o == null) {
+      return false;
     }
-
-    @Override
-    public final int hashCode() {
-
-        return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer().getPersistentClass().hashCode() : getClass().hashCode();
+    Class<?> oEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
+    if (thisEffectiveClass != oEffectiveClass) {
+      return false;
     }
+    PrivateMessage that = (PrivateMessage) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
+  }
+
+  @Override
+  public final int hashCode() {
+
+    return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+        .getPersistentClass().hashCode() : getClass().hashCode();
+  }
 }

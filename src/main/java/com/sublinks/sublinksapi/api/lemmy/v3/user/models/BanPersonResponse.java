@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record BanPersonResponse(
-        PersonView person_view,
-        boolean banned
+    PersonView person_view,
+    boolean banned
 ) {
+
 }

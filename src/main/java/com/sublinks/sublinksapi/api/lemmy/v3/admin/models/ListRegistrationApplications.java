@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record ListRegistrationApplications(
-        Boolean unread_only,
-        Integer page,
-        Integer limit
+    Boolean unread_only,
+    Integer page,
+    Integer limit
 ) {
+
 }

@@ -5,9 +5,10 @@ import lombok.Builder;
 
 @Builder
 public record CommunityView(
-        Community community,
-        SubscribedType subscribed,
-        boolean blocked,
-        CommunityAggregates counts
+    Community community,
+    SubscribedType subscribed,
+    boolean blocked,
+    CommunityAggregates counts
 ) {
+
 }

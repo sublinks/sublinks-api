@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record LocalUserView(
-        LocalUser local_user,
-        Person person,
-        PersonAggregates counts
+    LocalUser local_user,
+    Person person,
+    PersonAggregates counts
 ) {
+
 }

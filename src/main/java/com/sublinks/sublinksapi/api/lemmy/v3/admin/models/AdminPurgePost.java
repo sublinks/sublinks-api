@@ -4,10 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record AdminPurgePost(
-        Long id,
-        Long admin_person_id,
-        Long community_id,
-        String reason,
-        String when_
+    Long id,
+    Long admin_person_id,
+    Long community_id,
+    String reason,
+    String when_
 ) {
+
 }

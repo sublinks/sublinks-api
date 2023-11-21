@@ -4,9 +4,10 @@ import lombok.Builder;
 
 @Builder
 public record ListPostReports(
-        Integer page,
-        Integer limit,
-        Boolean unresolved_only,
-        Integer community_id
+    Integer page,
+    Integer limit,
+    Boolean unresolved_only,
+    Integer community_id
 ) {
+
 }

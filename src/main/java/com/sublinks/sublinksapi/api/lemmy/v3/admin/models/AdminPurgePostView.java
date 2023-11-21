@@ -6,8 +6,9 @@ import lombok.Builder;
 
 @Builder
 public record AdminPurgePostView(
-        AdminPurgePost admin_purge_post,
-        Person admin,
-        Community community
+    AdminPurgePost admin_purge_post,
+    Person admin,
+    Community community
 ) {
+
 }

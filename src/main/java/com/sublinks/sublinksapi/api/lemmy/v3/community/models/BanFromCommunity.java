@@ -4,11 +4,12 @@ import lombok.Builder;
 
 @Builder
 public record BanFromCommunity(
-        Integer community_id,
-        Integer person_id,
-        Boolean ban,
-        Boolean remove_data,
-        String reason,
-        Integer expires
+    Integer community_id,
+    Integer person_id,
+    Boolean ban,
+    Boolean remove_data,
+    String reason,
+    Integer expires
 ) {
+
 }

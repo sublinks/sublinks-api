@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record BlockCommunity(
-        Long community_id,
-        Boolean block
+    Long community_id,
+    Boolean block
 ) {
+
 }

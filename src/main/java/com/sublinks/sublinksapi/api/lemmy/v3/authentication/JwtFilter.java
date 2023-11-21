@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -14,52 +15,51 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
-    private final JwtUtil jwtUtil;
-    private final PersonRepository personRepository;
 
-    @Override
-    protected void doFilterInternal(
-            final HttpServletRequest request,
-            final HttpServletResponse response,
-            final FilterChain filterChain) throws ServletException, IOException {
+  private final JwtUtil jwtUtil;
+  private final PersonRepository personRepository;
 
-        final String authorizationHeader = request.getHeader("Authorization");
+  @Override
+  protected void doFilterInternal(
+      final HttpServletRequest request,
+      final HttpServletResponse response,
+      final FilterChain filterChain) throws ServletException, IOException {
 
-        String token = null;
-        String userName = null;
+    final String authorizationHeader = request.getHeader("Authorization");
 
-        try {
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-                token = authorizationHeader.substring(7);
-                userName = jwtUtil.extractUsername(token);
-            }
-        } catch (ExpiredJwtException ex) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
+    String token = null;
+    String userName = null;
 
-        if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            Person person = personRepository.findOneByName(userName);
-            if (person == null) {
-                throw new UsernameNotFoundException("Invalid name");
-            }
-
-            if (jwtUtil.validateToken(token, person)) {
-                final JwtPerson authenticationToken = new JwtPerson(person, person.getAuthorities());
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-        }
-        filterChain.doFilter(request, response);
+    try {
+      if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        token = authorizationHeader.substring(7);
+        userName = jwtUtil.extractUsername(token);
+      }
+    } catch (ExpiredJwtException ex) {
+      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+    if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+      Person person = personRepository.findOneByName(userName);
+      if (person == null) {
+        throw new UsernameNotFoundException("Invalid name");
+      }
 
-        return !request.getServletPath().startsWith("/api/v3");
+      if (jwtUtil.validateToken(token, person)) {
+        final JwtPerson authenticationToken = new JwtPerson(person, person.getAuthorities());
+        authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+      }
     }
+    filterChain.doFilter(request, response);
+  }
+
+  @Override
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+
+    return !request.getServletPath().startsWith("/api/v3");
+  }
 }

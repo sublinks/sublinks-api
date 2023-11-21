@@ -12,13 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Transactional
 public class CommunityCommentCreatedListener implements ApplicationListener<CommentCreatedEvent> {
-    private final CommunityAggregateRepository communityAggregateRepository;
 
-    @Override
-    public void onApplicationEvent(CommentCreatedEvent event) {
+  private final CommunityAggregateRepository communityAggregateRepository;
 
-        final CommunityAggregate communityAggregate = event.getComment().getCommunity().getCommunityAggregate();
-        communityAggregate.setCommentCount(communityAggregate.getCommentCount() + 1);
-        communityAggregateRepository.save(communityAggregate);
-    }
+  @Override
+  public void onApplicationEvent(CommentCreatedEvent event) {
+
+    final CommunityAggregate communityAggregate = event.getComment().getCommunity()
+        .getCommunityAggregate();
+    communityAggregate.setCommentCount(communityAggregate.getCommentCount() + 1);
+    communityAggregateRepository.save(communityAggregate);
+  }
 }

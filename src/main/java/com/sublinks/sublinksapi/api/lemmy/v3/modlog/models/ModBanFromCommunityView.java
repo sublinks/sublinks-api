@@ -6,9 +6,10 @@ import lombok.Builder;
 
 @Builder
 public record ModBanFromCommunityView(
-        ModBanFromCommunity mod_ban_from_community,
-        Person moderator,
-        Community community,
-        Person banned_person
+    ModBanFromCommunity mod_ban_from_community,
+    Person moderator,
+    Community community,
+    Person banned_person
 ) {
+
 }

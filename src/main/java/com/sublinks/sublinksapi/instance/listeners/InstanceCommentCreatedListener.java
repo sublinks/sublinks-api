@@ -10,28 +10,29 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class InstanceCommentCreatedListener implements ApplicationListener<CommentCreatedEvent> {
-    private final InstanceAggregateRepository instanceAggregateRepository;
-    private final LocalInstanceContext localInstanceContext;
 
-    public InstanceCommentCreatedListener(
-            final InstanceAggregateRepository instanceAggregateRepository,
-            final LocalInstanceContext localInstanceContext
-    ) {
+  private final InstanceAggregateRepository instanceAggregateRepository;
+  private final LocalInstanceContext localInstanceContext;
 
-        this.instanceAggregateRepository = instanceAggregateRepository;
-        this.localInstanceContext = localInstanceContext;
+  public InstanceCommentCreatedListener(
+      final InstanceAggregateRepository instanceAggregateRepository,
+      final LocalInstanceContext localInstanceContext
+  ) {
+
+    this.instanceAggregateRepository = instanceAggregateRepository;
+    this.localInstanceContext = localInstanceContext;
+  }
+
+  @Override
+  @Transactional
+  public void onApplicationEvent(final CommentCreatedEvent event) {
+
+    if (!event.getComment().isLocal()) {
+      return;
     }
 
-    @Override
-    @Transactional
-    public void onApplicationEvent(final CommentCreatedEvent event) {
-
-        if (!event.getComment().isLocal()) {
-            return;
-        }
-
-        final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
-        instanceAggregate.setCommentCount(instanceAggregate.getCommentCount() + 1);
-        instanceAggregateRepository.save(instanceAggregate);
-    }
+    final InstanceAggregate instanceAggregate = localInstanceContext.instanceAggregate();
+    instanceAggregate.setCommentCount(instanceAggregate.getCommentCount() + 1);
+    instanceAggregateRepository.save(instanceAggregate);
+  }
 }

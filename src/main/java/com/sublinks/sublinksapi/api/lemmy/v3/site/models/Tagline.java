@@ -4,10 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record Tagline(
-        Long id,
-        Long local_site_id,
-        String content,
-        String published,
-        String updated
+    Long id,
+    Long local_site_id,
+    String content,
+    String published,
+    String updated
 ) {
+
 }

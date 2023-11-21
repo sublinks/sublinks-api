@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record BlockPersonResponse(
-        PersonView person_view,
-        boolean blocked
+    PersonView person_view,
+    boolean blocked
 ) {
+
 }

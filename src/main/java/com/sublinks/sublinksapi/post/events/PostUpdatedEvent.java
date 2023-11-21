@@ -6,11 +6,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class PostUpdatedEvent extends ApplicationEvent {
-    private final Post post;
 
-    public PostUpdatedEvent(final Object source, final Post post) {
+  private final Post post;
 
-        super(source);
-        this.post = post;
-    }
+  public PostUpdatedEvent(final Object source, final Post post) {
+
+    super(source);
+    this.post = post;
+  }
 }

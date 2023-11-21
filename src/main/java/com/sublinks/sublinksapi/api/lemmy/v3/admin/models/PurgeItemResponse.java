@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record PurgeItemResponse(
-        boolean success
+    boolean success
 ) {
+
 }

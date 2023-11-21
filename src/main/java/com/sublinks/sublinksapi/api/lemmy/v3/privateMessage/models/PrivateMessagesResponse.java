@@ -1,11 +1,11 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.privateMessage.models;
 
-import lombok.Builder;
-
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 public record PrivateMessagesResponse(
-        List<PrivateMessageView> private_messages
+    List<PrivateMessageView> private_messages
 ) {
+
 }

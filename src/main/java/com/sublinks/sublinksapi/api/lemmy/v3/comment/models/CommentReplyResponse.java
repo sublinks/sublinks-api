@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record CommentReplyResponse(
-        CommentReplyView comment_reply_view
+    CommentReplyView comment_reply_view
 ) {
+
 }

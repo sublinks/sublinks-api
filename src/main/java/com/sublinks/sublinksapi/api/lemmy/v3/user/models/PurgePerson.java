@@ -4,7 +4,8 @@ import lombok.Builder;
 
 @Builder
 public record PurgePerson(
-        Integer person_id,
-        String reason
+    Integer person_id,
+    String reason
 ) {
+
 }

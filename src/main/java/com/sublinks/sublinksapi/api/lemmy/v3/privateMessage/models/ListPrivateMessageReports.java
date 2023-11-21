@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record ListPrivateMessageReports(
-        Integer page,
-        Integer limit,
-        Boolean unresolved_only
+    Integer page,
+    Integer limit,
+    Boolean unresolved_only
 ) {
+
 }

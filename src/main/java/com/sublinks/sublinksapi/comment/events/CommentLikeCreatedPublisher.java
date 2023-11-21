@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CommentLikeCreatedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public void publish(CommentLike commentLike) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        final CommentLikeCreatedEvent commentLikeCreatedEvent = new CommentLikeCreatedEvent(this, commentLike);
-        applicationEventPublisher.publishEvent(commentLikeCreatedEvent);
-    }
+  public void publish(CommentLike commentLike) {
+
+    final CommentLikeCreatedEvent commentLikeCreatedEvent = new CommentLikeCreatedEvent(this,
+        commentLike);
+    applicationEventPublisher.publishEvent(commentLikeCreatedEvent);
+  }
 }

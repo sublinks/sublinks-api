@@ -6,11 +6,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class PrivateMessageDeletedEvent extends ApplicationEvent {
-    private final PrivateMessage privateMessage;
 
-    public PrivateMessageDeletedEvent(final Object source, final PrivateMessage privateMessage) {
+  private final PrivateMessage privateMessage;
 
-        super(source);
-        this.privateMessage = privateMessage;
-    }
+  public PrivateMessageDeletedEvent(final Object source, final PrivateMessage privateMessage) {
+
+    super(source);
+    this.privateMessage = privateMessage;
+  }
 }

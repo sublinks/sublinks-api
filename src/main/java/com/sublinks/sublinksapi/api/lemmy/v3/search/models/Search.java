@@ -5,14 +5,15 @@ import lombok.Builder;
 
 @Builder
 public record Search(
-        String q,
-        Integer community_id,
-        String community_name,
-        Integer creator_id,
-        SearchType type_,
-        String sort,
-        String listing_type,
-        String page,
-        String limit
+    String q,
+    Integer community_id,
+    String community_name,
+    Integer creator_id,
+    SearchType type_,
+    String sort,
+    String listing_type,
+    String page,
+    String limit
 ) {
+
 }

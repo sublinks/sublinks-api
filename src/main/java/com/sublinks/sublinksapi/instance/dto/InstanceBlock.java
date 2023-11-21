@@ -8,14 +8,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
-import java.util.Date;
 
 @Getter
 @Setter
@@ -25,22 +24,23 @@ import java.util.Date;
 @Entity
 @Table(name = "instance_blocks")
 public class InstanceBlock {
-    /**
-     * Relationships
-     */
-    @OneToOne
-    @JoinColumn(name = "instance_id")
-    private Instance instance;
 
-    /**
-     * Attributes
-     */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  /**
+   * Relationships
+   */
+  @OneToOne
+  @JoinColumn(name = "instance_id")
+  private Instance instance;
 
-    @CreationTimestamp
-    @Column(nullable = false, name = "created_at")
-    private Date createdAt;
+  /**
+   * Attributes
+   */
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @CreationTimestamp
+  @Column(nullable = false, name = "created_at")
+  private Date createdAt;
 
 }

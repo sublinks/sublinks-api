@@ -4,8 +4,9 @@ import lombok.Builder;
 
 @Builder
 public record RemovePost(
-        Integer post_id,
-        Boolean removed,
-        String reason
+    Integer post_id,
+    Boolean removed,
+    String reason
 ) {
+
 }

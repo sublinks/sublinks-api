@@ -5,9 +5,10 @@ import lombok.Builder;
 
 @Builder
 public record GetReplies(
-        CommentSortType sort,
-        Integer page,
-        Integer limit,
-        Boolean unread_only
+    CommentSortType sort,
+    Integer page,
+    Integer limit,
+    Boolean unread_only
 ) {
+
 }

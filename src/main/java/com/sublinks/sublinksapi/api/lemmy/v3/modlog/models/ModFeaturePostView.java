@@ -7,9 +7,10 @@ import lombok.Builder;
 
 @Builder
 public record ModFeaturePostView(
-        ModFeaturePost mod_feature_post,
-        Person moderator,
-        Post post,
-        Community community
+    ModFeaturePost mod_feature_post,
+    Person moderator,
+    Post post,
+    Community community
 ) {
+
 }

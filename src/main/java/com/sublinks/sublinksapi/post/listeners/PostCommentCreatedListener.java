@@ -11,18 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class PostCommentCreatedListener implements ApplicationListener<CommentCreatedEvent> {
-    private final PostAggregateRepository postAggregateRepository;
 
-    @Override
-    @Transactional
-    public void onApplicationEvent(final CommentCreatedEvent event) {
+  private final PostAggregateRepository postAggregateRepository;
 
-        if (!event.getComment().isLocal()) {
-            return;
-        }
+  @Override
+  @Transactional
+  public void onApplicationEvent(final CommentCreatedEvent event) {
 
-        final PostAggregate postAggregate = event.getComment().getPost().getPostAggregate();
-        postAggregate.setCommentCount(postAggregate.getCommentCount() + 1);
-        postAggregateRepository.save(postAggregate);
+    if (!event.getComment().isLocal()) {
+      return;
     }
+
+    final PostAggregate postAggregate = event.getComment().getPost().getPostAggregate();
+    postAggregate.setCommentCount(postAggregate.getCommentCount() + 1);
+    postAggregateRepository.save(postAggregate);
+  }
 }

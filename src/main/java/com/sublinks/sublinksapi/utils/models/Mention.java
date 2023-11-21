@@ -7,4 +7,5 @@ public record Mention(
     String name,
     String domain
 ) {
+
 }

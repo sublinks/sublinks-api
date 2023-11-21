@@ -6,16 +6,18 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class PrivateMessageUpdatedPublisher {
-    private final ApplicationEventPublisher applicationEventPublisher;
 
-    public PrivateMessageUpdatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+  private final ApplicationEventPublisher applicationEventPublisher;
 
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
+  public PrivateMessageUpdatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 
-    public void publish(final PrivateMessage privateMessage) {
+    this.applicationEventPublisher = applicationEventPublisher;
+  }
 
-        final PrivateMessageUpdatedEvent privateMessageUpdatedEvent = new PrivateMessageUpdatedEvent(this, privateMessage);
-        applicationEventPublisher.publishEvent(privateMessageUpdatedEvent);
-    }
+  public void publish(final PrivateMessage privateMessage) {
+
+    final PrivateMessageUpdatedEvent privateMessageUpdatedEvent = new PrivateMessageUpdatedEvent(
+        this, privateMessage);
+    applicationEventPublisher.publishEvent(privateMessageUpdatedEvent);
+  }
 }

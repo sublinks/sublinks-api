@@ -6,11 +6,12 @@ import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class CommentLikeCreatedEvent extends ApplicationEvent {
-    private final CommentLike commentLike;
 
-    public CommentLikeCreatedEvent(final Object source, final CommentLike commentLike) {
+  private final CommentLike commentLike;
 
-        super(source);
-        this.commentLike = commentLike;
-    }
+  public CommentLikeCreatedEvent(final Object source, final CommentLike commentLike) {
+
+    super(source);
+    this.commentLike = commentLike;
+  }
 }
