@@ -49,6 +49,21 @@ public class PostService {
         }
     }
 
+    public String getStringMd5Hash(final String post) {
+
+        if (post == null || post.isEmpty()) {
+            return null;
+        }
+
+        try {
+            final byte[] bytesOfLink = urlUtil.normalizeUrl(post).getBytes(StandardCharsets.UTF_8);
+            final MessageDigest md = MessageDigest.getInstance("MD5");
+            final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
+            return new BigInteger(1, bytesOfMD5Link).toString(16);
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
     public Person getPostCreator(final Post post) {
 
         if (post.getLinkPersonPost() == null || post.getLinkPersonPost().isEmpty()) {
