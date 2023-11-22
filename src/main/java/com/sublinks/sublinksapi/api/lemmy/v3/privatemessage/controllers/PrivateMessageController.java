@@ -251,12 +251,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "private_message_report_not_found"));
 
-    authorizationService.canPerson(person).performTheAction(AuthorizeAction.update)
-        .onEntity(privateMessageReport)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
-
-    privateMessageReport.setResolved(privateMessageReport.isResolved());
-
+    privateMessageReport.setResolved(privateMessageReportForm.resolved());
+    privateMessageReport.setResolver(person);
     privateMessageReportService.updatePrivateMessage(privateMessageReport);
 
     final PrivateMessageReportView privateMessageReportView = lemmyPrivateMessageReportService.createPrivateMessageReportView(
@@ -282,7 +278,10 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         PrivateMessageReportSearchCriteria.builder().page(
                 listPrivateMessageReportsForm.page() == null ? 1 : listPrivateMessageReportsForm.page())
             .perPage(listPrivateMessageReportsForm.limit() == null ? 20
-                : listPrivateMessageReportsForm.limit()).build());
+                : listPrivateMessageReportsForm.limit()).unresolvedOnly(
+                listPrivateMessageReportsForm.unresolved_only() == null ? false
+                    : listPrivateMessageReportsForm.unresolved_only()).build());
+
 
     final List<PrivateMessageReportView> privateMessageReportViews = new ArrayList<>();
     privateMessageReports.forEach(privateMessageReport -> privateMessageReportViews.add(
