@@ -5,12 +5,10 @@ import com.sublinks.sublinksapi.privatemessages.enums.PrivateMessageSortType;
 import lombok.Builder;
 
 @Builder
-public record PrivateMessageSearchCriteria(
-    PrivateMessageSortType privateMessageSortType,
+public record PrivateMessageReportSearchCriteria(
     int perPage,
     int page,
-    boolean unresolvedOnly,
-    Person person
+    boolean unresolvedOnly
 ) {
 
 }
