@@ -37,10 +37,10 @@ public class PrivateMessageService {
   }
 
   @Transactional
-  public void updatePrivateMessage(final PrivateMessage comment) {
+  public void updatePrivateMessage(final PrivateMessage privateMessage) {
 
-    privateMessageRepository.save(comment);
-    privateMessageUpdatedPublisher.publish(comment);
+    privateMessageRepository.save(privateMessage);
+    privateMessageUpdatedPublisher.publish(privateMessage);
   }
 
   @Transactional

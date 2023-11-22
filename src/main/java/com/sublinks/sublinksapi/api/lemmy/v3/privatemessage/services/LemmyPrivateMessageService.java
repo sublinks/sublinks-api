@@ -24,7 +24,7 @@ public class LemmyPrivateMessageService {
       final com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage privateMessage
   ) {
 
-    final PrivateMessage lemmyPrivateComment = conversionService.convert(privateMessage,
+    final PrivateMessage lemmyPrivateMessage = conversionService.convert(privateMessage,
         PrivateMessage.class);
 
     final com.sublinks.sublinksapi.person.dto.Person sender = privateMessage.getSender();
@@ -34,7 +34,7 @@ public class LemmyPrivateMessageService {
     final Person lemmyRecipient = conversionService.convert(recipient, Person.class);
 
     return PrivateMessageView.builder()
-        .private_message(lemmyPrivateComment).creator(lemmySender).recipient(lemmyRecipient);
+        .private_message(lemmyPrivateMessage).creator(lemmySender).recipient(lemmyRecipient);
   }
 
 }
