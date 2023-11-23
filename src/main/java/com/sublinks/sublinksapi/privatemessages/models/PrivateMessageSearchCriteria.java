@@ -6,7 +6,7 @@ import lombok.Builder;
 
 @Builder
 public record PrivateMessageSearchCriteria(
-    PrivateMessageSortType commentSortType,
+    PrivateMessageSortType privateMessageSortType,
     int perPage,
     int page,
     boolean unresolvedOnly,
