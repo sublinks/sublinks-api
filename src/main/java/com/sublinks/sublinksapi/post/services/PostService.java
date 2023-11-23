@@ -34,11 +34,6 @@ public class PostService {
   private final UrlUtil urlUtil;
 
   public String getPostMd5Hash(final Post post) {
-
-    if (post.getLinkUrl() == null || post.getLinkUrl().isEmpty()) {
-      return null;
-    }
-
     return getStringMd5Hash(post.getLinkUrl());
   }
 
