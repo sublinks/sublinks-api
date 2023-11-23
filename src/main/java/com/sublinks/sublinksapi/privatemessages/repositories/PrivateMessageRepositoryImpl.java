@@ -1,8 +1,10 @@
 package com.sublinks.sublinksapi.privatemessages.repositories;
 
+import com.sublinks.sublinksapi.person.dto.PersonMention;
 import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageSearchCriteria;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -38,8 +40,25 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    // @todo determine sort/pagination
-    cq.orderBy(cb.desc(privateMessageTable.get("updatedAt")));
-    return em.createQuery(cq).getResultList();
+    switch (privateMessageSearchCriteria.privateMessageSortType()) {
+      case New:
+        cq.orderBy(cb.desc(privateMessageTable.get("createdAt")));
+        break;
+      case Old:
+        cq.orderBy(cb.asc(privateMessageTable.get("createdAt")));
+        break;
+      default:
+        cq.orderBy(cb.desc(privateMessageTable.get("createdAt")));
+        break;
+    }
+
+    int perPage = Math.min(Math.abs(privateMessageSearchCriteria.perPage()), 20);
+    int page = Math.max(privateMessageSearchCriteria.page() - 1, 0);
+
+    TypedQuery<PrivateMessage> query = em.createQuery(cq);
+    query.setMaxResults(perPage);
+    query.setFirstResult(page * perPage);
+
+    return query.getResultList();
   }
 }
