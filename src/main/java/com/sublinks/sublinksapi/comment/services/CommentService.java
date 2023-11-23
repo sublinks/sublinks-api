@@ -29,7 +29,6 @@ public class CommentService {
 
   @Transactional
   public void createComment(final Comment comment) {
-    System.out.println(comment);
     if (comment.getPath() == null || comment.getPath().isBlank()) {
       comment.setPath(String.format("0.%d", comment.getId()));
     }
