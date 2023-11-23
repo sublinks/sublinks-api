@@ -502,3 +502,21 @@ CREATE TABLE `private_messages`
 
 CREATE INDEX `IDX_PRIVATE_MESSAGES_SENDER_ID` ON `private_messages` (`sender_id`);
 CREATE INDEX `IDX_PRIVATE_MESSAGES_RECIPIENT_ID` ON `private_messages` (`recipient_id`);
+
+CREATE TABLE `comment_reports`
+(
+  `id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `creator_id`       BIGINT                                    NOT NULL,
+  `resolver_id`      BIGINT                                    NULL,
+  `comment_id`       BIGINT                                    NOT NULL,
+  `original_content` TEXT                                      NOT NULL,
+  `reason`           TEXT                                      NOT NULL,
+  `resolved`         BOOLEAN      DEFAULT FALSE                NOT NULL,
+  `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+
+CREATE INDEX `IDX_COMMENT_REPORTS_CREATOR_ID` ON `comment_reports` (`creator_id`);
