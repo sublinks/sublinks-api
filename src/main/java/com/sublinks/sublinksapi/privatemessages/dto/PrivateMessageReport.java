@@ -74,7 +74,7 @@ public class PrivateMessageReport implements AuthorizationEntityInterface {
   @Override
   public AuthorizedEntityType entityType() {
 
-    return AuthorizedEntityType.message;
+    return AuthorizedEntityType.report;
   }
 
   @Override
