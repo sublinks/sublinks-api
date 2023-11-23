@@ -39,33 +39,26 @@ public class PostService {
       return null;
     }
 
+    return getStringMd5Hash(post.getLinkUrl());
+  }
+
+  public String getStringMd5Hash(final String post) {
+
+    if (post == null || post.isEmpty()) {
+      return null;
+    }
+
     try {
-      final byte[] bytesOfLink = urlUtil.normalizeUrl(post.getLinkUrl())
-          .getBytes(StandardCharsets.UTF_8);
+      final byte[] bytesOfLink = urlUtil.normalizeUrl(post).getBytes(StandardCharsets.UTF_8);
       final MessageDigest md = MessageDigest.getInstance("MD5");
-      final byte[] bytesOfMd5Link = md.digest(bytesOfLink);
-      return new BigInteger(1, bytesOfMd5Link).toString(16);
+      final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
+      return new BigInteger(1, bytesOfMD5Link).toString(16);
     } catch (Exception ignored) {
       return null;
     }
   }
 
-    public String getStringMd5Hash(final String post) {
-
-        if (post == null || post.isEmpty()) {
-            return null;
-        }
-
-        try {
-            final byte[] bytesOfLink = urlUtil.normalizeUrl(post).getBytes(StandardCharsets.UTF_8);
-            final MessageDigest md = MessageDigest.getInstance("MD5");
-            final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
-            return new BigInteger(1, bytesOfMD5Link).toString(16);
-        } catch (Exception ignored) {
-            return null;
-        }
-    }
-    public Person getPostCreator(final Post post) {
+  public Person getPostCreator(final Post post) {
 
     if (post.getLinkPersonPost() == null || post.getLinkPersonPost().isEmpty()) {
       return null;
