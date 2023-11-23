@@ -36,9 +36,7 @@ public class SearchService {
     private final UrlUtil urlUtil;
 
     public Page<Community> searchCommunity(final String query, final int page, final int pageSize, final Sort sort) {
-        Page<Community> p = communitySearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
-        System.out.println(p.getContent().get(0));
-        return p;
+        return communitySearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
     }
 
     public Page<Post> searchPost(final String query, final int page, final int pageSize, final Sort sort) {
