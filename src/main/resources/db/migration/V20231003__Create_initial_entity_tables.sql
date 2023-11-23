@@ -1,5 +1,5 @@
 /**
-  Comments table
+ * Comments table
  */
 CREATE TABLE `comments`
 (
@@ -27,7 +27,7 @@ CREATE INDEX `IDX_COMMENTS_COMMUNITY_ID` ON `comments` (`community_id`);
 CREATE INDEX `IDX_COMMENTS_POST_ID` ON `comments` (`post_id`);
 
 /**
-  Comment Likes table
+ Comment Likes table
  */
 CREATE TABLE `comment_likes`
 (
@@ -48,7 +48,7 @@ CREATE INDEX `IDX_COMMENT_ID` ON `comment_likes` (`comment_id`);
 CREATE INDEX `IDX_PERSON_ID` ON `comment_likes` (`person_id`);
 
 /**
-  Comment Saves table
+ Comment Saves table
  */
 CREATE TABLE `comment_saves`
 (
@@ -66,7 +66,7 @@ CREATE INDEX `IDX_COMMENT_SAVES_PERSON_ID` ON `comment_saves` (`person_id`);
 CREATE INDEX `IDX_COMMENT_SAVES_COMMENT_ID` ON `comment_saves` (`comment_id`);
 
 /**
-  Communities table
+ Communities table
  */
 CREATE TABLE `communities`
 (
@@ -99,9 +99,8 @@ CREATE INDEX `IDX_COMMUNITIES_IS_LOCAL` ON `communities` (`is_local`);
 CREATE INDEX `IDX_COMMUNITIES_IS_NSFW` ON `communities` (`is_nsfw`);
 CREATE INDEX `IDX_COMMUNITIES_IS_POSTING_RESTRICTED_TO_MODS` ON `communities` (`is_posting_restricted_to_mods`);
 
-
 /**
-  Community Languages table
+ Community Languages table
  */
 CREATE TABLE `community_languages`
 (
@@ -113,7 +112,7 @@ CREATE TABLE `community_languages`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Instances table
+ Instances table
  */
 CREATE TABLE `instances`
 (
@@ -136,14 +135,14 @@ CREATE TABLE `instances`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Person Instance table
+ Person Instance table
  */
 CREATE TABLE `link_person_instances`
 (
   `id`          BIGINT AUTO_INCREMENT PRIMARY KEY,
   `person_id`   BIGINT                                    NOT NULL,
   `instance_id` BIGINT                                    NOT NULL,
-  `link_type`   ENUM ('super_admin', 'admin', 'user')     NOT NULL,
+  `link_type`   ENUM ('super_admin','admin','user')       NOT NULL,
   `created_at`  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
@@ -151,9 +150,8 @@ CREATE TABLE `link_person_instances`
 
 CREATE UNIQUE INDEX `IDX_LINK_PERSON_INSTANCE_PERSON_ID_INSTANCE_ID` ON `link_person_instances` (`person_id`, `instance_id`);
 
-
 /**
-  Instance Languages table
+ Instance Languages table
  */
 CREATE TABLE `instance_languages`
 (
@@ -165,7 +163,7 @@ CREATE TABLE `instance_languages`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Blocked Instances table
+ Blocked Instances table
  */
 CREATE TABLE `instance_blocks`
 (
@@ -177,7 +175,7 @@ CREATE TABLE `instance_blocks`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Languages table
+ Languages table
  */
 CREATE TABLE `languages`
 (
@@ -189,7 +187,7 @@ CREATE TABLE `languages`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  People table
+ People table
  */
 CREATE TABLE `people`
 (
@@ -209,10 +207,10 @@ CREATE TABLE `people`
   `biography`                      TEXT         NULL,
   `interface_language`             VARCHAR(20)  NULL,
   `default_theme`                  VARCHAR(255) NULL,
-  `default_listing_type`           ENUM ('All', 'Local', 'Subscribed', 'ModeratorView'),
-  `default_sort_type`              ENUM ('Active', 'Hot', 'New', 'Old', 'TopDay', 'TopWeek',
-    'TopMonth', 'TopYear', 'TopAll', 'MostComments', 'NewComments', 'TopHour', 'TopSixHour',
-    'TopTwelveHour', 'TopThreeMonths', 'TopSixMonths', 'TopNineMonths', 'Controversial', 'Scaled'),
+  `default_listing_type`           ENUM ('All','Local','Subscribed','ModeratorView'),
+  `default_sort_type`              ENUM ('Active','Hot','New','Old','TopDay','TopWeek',
+    'TopMonth','TopYear','TopAll','MostComments','NewComments','TopHour','TopSixHour',
+    'TopTwelveHour','TopThreeMonths','TopSixMonths','TopNineMonths','Controversial','Scaled'),
   `is_show_scores`                 TINYINT      NOT NULL DEFAULT 0,
   `is_show_read_posts`             TINYINT      NOT NULL DEFAULT 0,
   `is_show_nsfw`                   TINYINT      NOT NULL DEFAULT 0,
@@ -245,15 +243,15 @@ CREATE TABLE `person_languages`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Link Person Communities table
+ Link Person Communities table
  */
 CREATE TABLE `link_person_communities`
 (
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `person_id`    BIGINT                                                               NOT NULL,
-  `community_id` BIGINT                                                               NOT NULL,
-  `link_type`    ENUM ('owner', 'moderator', 'follower', 'pending_follow', 'blocked') NOT NULL,
-  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)                            NOT NULL
+  `person_id`    BIGINT                                                           NOT NULL,
+  `community_id` BIGINT                                                           NOT NULL,
+  `link_type`    ENUM ('owner','moderator','follower','pending_follow','blocked') NOT NULL,
+  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)                        NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
@@ -262,7 +260,7 @@ CREATE INDEX `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID` ON `link_perso
 CREATE UNIQUE INDEX `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID_LINK_TYPE` ON `link_person_communities` (`person_id`, `community_id`, `link_type`);
 
 /**
-  Posts table
+ Posts table
  */
 CREATE TABLE `posts`
 (
@@ -303,7 +301,7 @@ CREATE INDEX `IDX_POSTS_IS_FEATURED_IN_COMMUNITY` ON `posts` (`is_featured_in_co
 CREATE INDEX `IDX_POSTS_TITLE_SLUG` ON `posts` (`title_slug`);
 
 /**
-  Post Likes table
+ Post Likes table
  */
 CREATE TABLE `post_likes`
 (
@@ -322,7 +320,7 @@ CREATE TABLE `post_likes`
 CREATE INDEX `IDX_POST_LIKES_POST_ID` ON `post_likes` (`post_id`);
 
 /**
-  Post Saves table
+ Post Saves table
  */
 CREATE TABLE `post_saves`
 (
@@ -341,35 +339,35 @@ CREATE INDEX `IDX_POST_SAVES_POST_ID` ON `post_saves` (`post_id`);
 CREATE UNIQUE INDEX `IDX_POST_SAVES_PERSON_ID_POST_ID` ON `post_saves` (`person_id`, `post_id`);
 
 /**
-  Person Posts table
+ Person Posts table
  */
 CREATE TABLE `link_person_posts`
 (
   `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `person_id`  BIGINT                                         NOT NULL,
-  `post_id`    BIGINT                                         NOT NULL,
-  `link_type`  ENUM ('creator', 'follower', 'pending_follow') NOT NULL,
-  `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)      NOT NULL
+  `person_id`  BIGINT                                       NOT NULL,
+  `post_id`    BIGINT                                       NOT NULL,
+  `link_type`  ENUM ('creator','follower','pending_follow') NOT NULL,
+  `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)    NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Person Access Control List table
+ Person Access Control List table
  */
 CREATE TABLE `acl`
 (
   `id`                BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `person_id`         BIGINT         NOT NULL,
-  `entity_type`       ENUM ('community', 'post', 'comment',
-    'report', 'message', 'instance') NOT NULL,
-  `entity_id`         BIGINT         NULL     DEFAULT NULL,
-  `authorized_action` ENUM ('create', 'read', 'update',
-    'delete', 'post', 'comment', 'message',
-    'ban', 'purge', 'follow')        NOT NULL,
-  `is_permitted`      TINYINT        NOT NULL DEFAULT 0,
-  `created_at`        TIMESTAMP(3)            DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  `updated_at`        TIMESTAMP(3)            DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+  `person_id`         BIGINT       NOT NULL,
+  `entity_type`       ENUM ('community','post','comment',
+    'report','message','instance') NOT NULL,
+  `entity_id`         BIGINT       NULL     DEFAULT NULL,
+  `authorized_action` ENUM ('create','read','update',
+    'delete','post','comment','message',
+    'ban','purge','follow')        NOT NULL,
+  `is_permitted`      TINYINT      NOT NULL DEFAULT 0,
+  `created_at`        TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`        TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
@@ -381,7 +379,7 @@ CREATE UNIQUE INDEX `IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID_AUTHORIZED_ACTION` 
                                                                                           `authorized_action`);
 
 /**
-  Post Read table
+ Post Read table
  */
 CREATE TABLE `post_reads`
 (
@@ -396,7 +394,7 @@ CREATE TABLE `post_reads`
 CREATE UNIQUE INDEX `IDX_POST_READ_POST_ID_PERSON_ID` ON `post_reads` (`post_id`, `person_id`);
 
 /**
-  Comment Read table
+ Comment Read table
  */
 CREATE TABLE `comment_reads`
 (
@@ -411,7 +409,7 @@ CREATE TABLE `comment_reads`
 CREATE UNIQUE INDEX `IDX_COMMENT_READ_COMMENT_ID_PERSON_ID` ON `comment_reads` (`comment_id`, `person_id`);
 
 /**
-  Moderation Logs table
+ Moderation Logs table
  */
 CREATE TABLE `moderation_logs`
 (
@@ -439,7 +437,7 @@ CREATE TABLE `moderation_logs`
 CREATE UNIQUE INDEX `IDX_MODERATION_LOGS_INSTANCE_ID_ACTION_TYPE_ENTITY_ID` ON `moderation_logs` (`instance_id`, `action_type`, `entity_id`);
 
 /**
-  Post Post Cross Post table
+ Post Post Cross Post table
  */
 CREATE TABLE `post_post_cross_post`
 (
@@ -451,7 +449,7 @@ CREATE TABLE `post_post_cross_post`
   COLLATE = 'utf8mb4_unicode_ci';
 
 /**
-  Post Cross Posts table
+ Post Cross Posts table
  */
 CREATE TABLE `post_cross_posts`
 (
@@ -465,7 +463,7 @@ CREATE INDEX `IDX_POST_CROSS_POST_MD5_HASH` ON `post_cross_posts` (`md5_hash`);
 
 /**
 
-  Post Mention table
+ Post Mention table
  */
 CREATE TABLE `people_mentions`
 (
@@ -481,7 +479,7 @@ CREATE TABLE `people_mentions`
 CREATE UNIQUE INDEX `IDX_PEOPLE_MENTIONS_RECIPIENT_ID` ON `people_mentions` (`recipient_id`);
 
 /**
-  Private Message
+ Private Message
  */
 CREATE TABLE `private_messages`
 (
@@ -499,13 +497,11 @@ CREATE TABLE `private_messages`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-
 CREATE INDEX `IDX_PRIVATE_MESSAGES_SENDER_ID` ON `private_messages` (`sender_id`);
 CREATE INDEX `IDX_PRIVATE_MESSAGES_RECIPIENT_ID` ON `private_messages` (`recipient_id`);
 
-
 /**
-  Private Message Report
+ Private Message Report
  */
 CREATE TABLE `private_messages_reports`
 (
@@ -522,6 +518,25 @@ CREATE TABLE `private_messages_reports`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-
 CREATE INDEX `IDX_PRIVATE_MESSAGES_REPORT_CREATOR_ID` ON `private_messages_reports` (`creator_id`);
-CREATE INDEX `IDX_PRIVATE_MESSAGES_PRIVATE_MESSAGE_ID` ON `private_messages_reports` (`private_message_id`);
+CREATE INDEX `IDX_PRIVATE_MESSAGES_REPORT_PRIVATE_MESSAGE_ID` ON `private_messages_reports` (`private_message_id`);
+
+/**
+ Comment Report
+ */
+CREATE TABLE `comment_reports`
+(
+  `id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `creator_id`       BIGINT                                    NOT NULL,
+  `resolver_id`      BIGINT                                    NULL,
+  `comment_id`       BIGINT                                    NOT NULL,
+  `original_content` TEXT                                      NOT NULL,
+  `reason`           TEXT                                      NOT NULL,
+  `resolved`         BOOLEAN      DEFAULT FALSE                NOT NULL,
+  `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_COMMENT_REPORTS_CREATOR_ID` ON `comment_reports` (`creator_id`);
