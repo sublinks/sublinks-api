@@ -34,17 +34,20 @@ public class PostService {
   private final UrlUtil urlUtil;
 
   public String getPostMd5Hash(final Post post) {
+    return getStringMd5Hash(post.getLinkUrl());
+  }
 
-    if (post.getLinkUrl() == null || post.getLinkUrl().isEmpty()) {
+  public String getStringMd5Hash(final String post) {
+
+    if (post == null || post.isEmpty()) {
       return null;
     }
 
     try {
-      final byte[] bytesOfLink = urlUtil.normalizeUrl(post.getLinkUrl())
-          .getBytes(StandardCharsets.UTF_8);
+      final byte[] bytesOfLink = urlUtil.normalizeUrl(post).getBytes(StandardCharsets.UTF_8);
       final MessageDigest md = MessageDigest.getInstance("MD5");
-      final byte[] bytesOfMd5Link = md.digest(bytesOfLink);
-      return new BigInteger(1, bytesOfMd5Link).toString(16);
+      final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
+      return new BigInteger(1, bytesOfMD5Link).toString(16);
     } catch (Exception ignored) {
       return null;
     }
