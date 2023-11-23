@@ -74,7 +74,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         = PrivateMessageSearchCriteria.builder()
         .page(getPrivateMessagesForm.page() == null ? 1 : getPrivateMessagesForm.page())
         .perPage(getPrivateMessagesForm.limit() == null ? 20 : getPrivateMessagesForm.limit())
-        .commentSortType(sortType)
+        .privateMessageSortType(sortType)
         .person(sender)
         .build();
 
