@@ -29,18 +29,19 @@ public class CommentService {
 
   @Transactional
   public void createComment(final Comment comment) {
-
-    if (comment.getPath().isBlank()) {
+    System.out.println(comment);
+    if (comment.getPath() == null || comment.getPath().isBlank()) {
       comment.setPath(String.format("0.%d", comment.getId()));
     }
     comment.setActivityPubId(generateActivityPubId(comment));
+    commentRepository.save(comment);
 
     CommentAggregate commentAggregate = CommentAggregate.builder()
         .comment(comment)
         .build();
-
     commentAggregateRepository.save(commentAggregate);
     comment.setCommentAggregate(commentAggregate);
+    commentRepository.save(comment);
 
     commentCreatedPublisher.publish(comment);
   }
