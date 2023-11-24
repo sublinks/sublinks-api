@@ -50,8 +50,8 @@ public class CommentReply implements Serializable, AuthorizationEntityInterface 
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(name = "read")
-  private Boolean read;
+  @Column(nullable = false, name = "is_read")
+  private Boolean isRead;
 
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")
@@ -64,7 +64,7 @@ public class CommentReply implements Serializable, AuthorizationEntityInterface 
   @Override
   public AuthorizedEntityType entityType() {
 
-    return AuthorizedEntityType.coGmment;
+    return AuthorizedEntityType.comment;
   }
 
   @Override

@@ -549,6 +549,7 @@ CREATE TABLE `comment_replies`
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `recipient_id` BIGINT                                    NOT NULL,
   `comment_id`   BIGINT                                    NOT NULL,
+  `is_read`      BOOLEAN      DEFAULT FALSE                NOT NULL,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB

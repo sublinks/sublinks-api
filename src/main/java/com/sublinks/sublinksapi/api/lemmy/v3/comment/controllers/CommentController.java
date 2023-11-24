@@ -20,14 +20,17 @@ import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApi
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentReadService;
+import com.sublinks.sublinksapi.comment.services.CommentReplyService;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
@@ -83,6 +86,8 @@ public class CommentController extends AbstractLemmyApiController {
   private final CommentReportService commentReportService;
   private final AuthorizationService authorizationService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final CommentReplyRepository commentReplyRepository;
+  private final CommentReplyService commentReplyService;
 
   @Operation(summary = "Create a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -182,6 +187,15 @@ public class CommentController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     final Person person = getPersonOrThrowBadRequest(principal);
     commentReadService.markCommentReadByPerson(comment, person);
+
+    final Optional<CommentReply> commentReply = commentReplyRepository.findById(
+        (long) markCommentReplyAsRead.comment_reply_id());
+
+    if (commentReply.isPresent()) {
+      CommentReply commentReplyEntity = commentReply.get();
+      commentReplyEntity.setIsRead(true);
+      commentReplyService.updateCommentReply(commentReplyEntity);
+    }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
     return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
