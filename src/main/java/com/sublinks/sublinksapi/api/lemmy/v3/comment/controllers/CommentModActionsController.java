@@ -93,7 +93,6 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       if (!isModerator) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
       }
-
     }
 
     commentReport.setResolved(resolveCommentReportForm.resolved());

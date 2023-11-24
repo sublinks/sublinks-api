@@ -540,3 +540,25 @@ CREATE TABLE `comment_reports`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE INDEX `IDX_COMMENT_REPORTS_CREATOR_ID` ON `comment_reports` (`creator_id`);
+
+/**
+ Post Report
+ */
+CREATE TABLE `post_reports`
+(
+  `id`             BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `creator_id`     BIGINT                                    NOT NULL,
+  `resolver_id`    BIGINT                                    NULL,
+  `post_id`        BIGINT                                    NOT NULL,
+  `original_title` TEXT                                      NOT NULL,
+  `original_body`  TEXT                                      NOT NULL,
+  `original_url`   TEXT                                      NOT NULL,
+  `reason`         TEXT                                      NOT NULL,
+  `resolved`       BOOLEAN      DEFAULT FALSE                NOT NULL,
+  `created_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_POST_REPORTS_CREATOR_ID` ON `post_reports` (`creator_id`);
