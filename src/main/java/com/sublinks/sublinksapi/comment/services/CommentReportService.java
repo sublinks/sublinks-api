@@ -37,11 +37,4 @@ public class CommentReportService {
     commentReportRepository.save(commentReport);
     commentReportUpdatedPublisher.publish(commentReport);
   }
-
-  @Transactional
-  public void deleteCommentReport(final CommentReport commentReport) {
-
-    commentReportRepository.delete(commentReport);
-    commentReportUpdatedPublisher.publish(commentReport);
-  }
 }
