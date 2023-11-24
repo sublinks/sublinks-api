@@ -135,5 +135,13 @@ ALTER TABLE `private_messages_reports`
   */
 ALTER TABLE `comment_reports`
   ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
-  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`creator_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`resolver_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Comment Report table
+  */
+ALTER TABLE `post_reports`
+  ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`creator_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`resolver_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
