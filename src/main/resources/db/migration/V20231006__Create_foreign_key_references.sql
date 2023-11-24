@@ -123,9 +123,24 @@ ALTER TABLE `people_mentions`
   ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 
 /**
-  Comment Report table
+  Private Message Report table
  */
+ALTER TABLE `private_messages_reports`
+  ADD FOREIGN KEY (`private_message_id`) REFERENCES `private_messages` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`resolver_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`creator_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Comment Report table
+  */
 ALTER TABLE `comment_reports`
-  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`creator_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`resolver_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Comment Replies table
+  */
+ALTER TABLE `comment_replies`
+  ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`recipient_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
