@@ -7,6 +7,7 @@ import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,22 @@ public class CommentService {
     return String.format("%s/comment/%d", domain, comment.getId());
   }
 
+  public Optional<Comment> getParentComment(final Comment comment) {
+
+    if (comment.getPath() == null) {
+      return Optional.empty();
+    }
+
+    String[] path = comment.getPath().split("\\.");
+    if (path.length == 1) {
+      return Optional.empty();
+    }
+
+    return commentRepository.findById(Long.parseLong(path[path.length - 2]));
+
+  }
+
+
   @Transactional
   public void createComment(final Comment comment) {
 
@@ -37,9 +54,7 @@ public class CommentService {
     comment.setActivityPubId(generateActivityPubId(comment));
     commentRepository.save(comment);
 
-    CommentAggregate commentAggregate = CommentAggregate.builder()
-        .comment(comment)
-        .build();
+    CommentAggregate commentAggregate = CommentAggregate.builder().comment(comment).build();
     commentAggregateRepository.save(commentAggregate);
     comment.setCommentAggregate(commentAggregate);
     commentRepository.save(comment);

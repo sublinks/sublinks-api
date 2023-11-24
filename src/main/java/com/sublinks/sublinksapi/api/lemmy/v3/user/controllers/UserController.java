@@ -2,6 +2,9 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReplyView;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetReplies;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReplyService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetails;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
@@ -16,6 +19,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SaveUserSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonMentionService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.comment.dto.CommentReply;
+import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -64,14 +69,12 @@ public class UserController {
   private final PersonService personService;
   private final LocalInstanceContext localInstanceContext;
   private final LemmyPersonMentionService lemmyPersonMentionService;
-
+  private final CommentReplyRepository commentReplyRepository;
+  private final LemmyCommentReplyService lemmyCommentReplyService;
 
   @Operation(summary = "Get the details for a person.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetPersonDetailsResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetPersonDetailsResponse.class))})})
   @GetMapping()
   GetPersonDetailsResponse show(@Valid final GetPersonDetails getPersonDetailsForm) {
 
@@ -86,32 +89,25 @@ public class UserController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
 
-    return GetPersonDetailsResponse.builder()
-        .person_view(lemmyPersonService.getPersonView(person))
+    return GetPersonDetailsResponse.builder().person_view(lemmyPersonService.getPersonView(person))
         .posts(lemmyPersonService.getPersonPosts(person))
         .moderates(lemmyPersonService.getPersonModerates(person))
-        .comments(lemmyPersonService.getPersonComments(person))
-        .build();
+        .comments(lemmyPersonService.getPersonComments(person)).build();
   }
 
   @Operation(summary = "Get mentions for your user.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetPersonMentionsResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetPersonMentionsResponse.class))})})
   @GetMapping("mention")
   GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm) {
 
     final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
         .sort(getPersonMentionsForm.sort())
         .unreadOnly(getPersonMentionsForm.unread_only().orElse(false))
-        .page(getPersonMentionsForm.page())
-        .perPage(getPersonMentionsForm.limit())
-        .build();
+        .page(getPersonMentionsForm.page()).perPage(getPersonMentionsForm.limit()).build();
 
-    final List<PersonMention> personMentions
-        = personMentionRepository.allPersonMentionBySearchCriteria(criteria);
+    final List<PersonMention> personMentions = personMentionRepository.allPersonMentionBySearchCriteria(
+        criteria);
 
     final List<PersonMentionView> personMentionViews = new ArrayList<>();
 
@@ -122,19 +118,15 @@ public class UserController {
   }
 
   @Operation(summary = "Mark a person mention as read.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = PersonMentionResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PersonMentionResponse.class))})})
   @PostMapping("mention/mark_as_read")
   PersonMentionResponse mentionMarkAsRead(
       @Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm) {
 
-    final PersonMention personMention = personMentionRepository
-        .findById((long) markPersonMentionAsReadForm.person_mention_id())
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
+    final PersonMention personMention = personMentionRepository.findById(
+        (long) markPersonMentionAsReadForm.person_mention_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
 
     personMention.setRead(markPersonMentionAsReadForm.read());
 
@@ -147,38 +139,41 @@ public class UserController {
   }
 
   @Operation(summary = "Get comment replies.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetRepliesResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetRepliesResponse.class))})})
   @GetMapping("replies")
-  GetRepliesResponse replies() {
+  GetRepliesResponse replies(@Valid final GetReplies getReplies, JwtPerson principal) {
 
-    return GetRepliesResponse.builder().build();
+    final Person person = Optional.ofNullable((Person) principal.getPrincipal())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+    final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
+        com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
+            .sortType(getReplies.sort()).unreadOnly(getReplies.unread_only() != null
+                && getReplies.unread_only())
+            .page(getReplies.page()).perPage(getReplies.limit()).build());
+
+    final List<CommentReplyView> commentReplyViews = new ArrayList<>();
+
+    commentReplies.forEach(commentReply -> commentReplyViews.add(
+        lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
+
+    return GetRepliesResponse.builder().replies(commentReplyViews).build();
   }
 
   @Operation(summary = "Get a list of banned users.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = BannedPersonsResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BannedPersonsResponse.class))})})
   @GetMapping("banned")
   BannedPersonsResponse bannedList() {
 
     final Collection<PersonView> bannedPersons = new LinkedHashSet<>();
-    return BannedPersonsResponse.builder()
-        .banned(bannedPersons)
-        .build();
+    return BannedPersonsResponse.builder().banned(bannedPersons).build();
   }
 
   @Operation(summary = "Mark all replies as read.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetRepliesResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetRepliesResponse.class))})})
   @PostMapping("mark_all_as_read")
   GetRepliesResponse markAllAsRead() {
 
@@ -186,11 +181,8 @@ public class UserController {
   }
 
   @Operation(summary = "Save your user settings.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = LoginResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class))})})
   @Transactional
   @PutMapping("save_user_settings")
   public LoginResponse saveUserSettings(@Valid @RequestBody SaveUserSettings saveUserSettingsForm,
@@ -246,19 +238,13 @@ public class UserController {
 
     personService.updatePerson(person);
 
-    return LoginResponse.builder()
-        .jwt(null)
-        .registration_created(false)
-        .verify_email_sent(false)
+    return LoginResponse.builder().jwt(null).registration_created(false).verify_email_sent(false)
         .build();
   }
 
   @Operation(summary = "Get your unread counts.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetUnreadCountResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetUnreadCountResponse.class))})})
   @GetMapping("unread_count")
   GetUnreadCountResponse unreadCount() {
 

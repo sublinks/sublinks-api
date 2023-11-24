@@ -145,3 +145,10 @@ ALTER TABLE `post_reports`
   ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`creator_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`resolver_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Comment Replies table
+  */
+ALTER TABLE `comment_replies`
+  ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`recipient_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;

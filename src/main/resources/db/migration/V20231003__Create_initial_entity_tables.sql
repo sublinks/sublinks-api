@@ -542,8 +542,26 @@ CREATE TABLE `comment_reports`
 CREATE INDEX `IDX_COMMENT_REPORTS_CREATOR_ID` ON `comment_reports` (`creator_id`);
 
 /**
- Post Report
+ Comment Reply
  */
+CREATE TABLE `comment_replies`
+(
+  `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `recipient_id` BIGINT                                    NOT NULL,
+  `comment_id`   BIGINT                                    NOT NULL,
+  `is_read`      BOOLEAN      DEFAULT FALSE                NOT NULL,
+  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+
+CREATE INDEX `IDX_COMMENT_REPLIES_RECIPIENT_ID` ON `comment_replies` (`recipient_id`);
+
+/**
+    Post Report
+    */
 CREATE TABLE `post_reports`
 (
   `id`             BIGINT AUTO_INCREMENT PRIMARY KEY,
