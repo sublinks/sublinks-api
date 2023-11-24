@@ -31,6 +31,7 @@ public class CommentService {
   public void createComment(final Comment comment) {
 
     if (comment.getPath() == null || comment.getPath().isBlank()) {
+      commentRepository.saveAndFlush(comment);
       comment.setPath(String.format("0.%d", comment.getId()));
     }
     comment.setActivityPubId(generateActivityPubId(comment));
@@ -49,7 +50,7 @@ public class CommentService {
   @Transactional
   public void createComment(final Comment comment, final Comment parent) {
 
-    commentRepository.save(comment);
+    commentRepository.saveAndFlush(comment);
     comment.setPath(String.format("%s.%d", parent.getPath(), comment.getId()));
     createComment(comment);
   }
