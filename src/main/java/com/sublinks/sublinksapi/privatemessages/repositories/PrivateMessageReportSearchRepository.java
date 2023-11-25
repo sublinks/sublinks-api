@@ -9,4 +9,6 @@ public interface PrivateMessageReportSearchRepository {
   List<PrivateMessageReport> allPrivateMessageReportsBySearchCriteria(
       PrivateMessageReportSearchCriteria privateMessageSearchCriteria);
 
+  long countAllPrivateMessageReportsByResolvedFalse();
+
 }

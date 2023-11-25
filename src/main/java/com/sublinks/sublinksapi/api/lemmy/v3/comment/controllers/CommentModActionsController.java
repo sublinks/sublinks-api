@@ -119,10 +119,24 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
-      moderatingCommunities.addAll(
-          linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
-      moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
-          LinkPersonCommunityType.moderator));
+
+      if (listCommentReportsForm.community_id() == null) {
+
+        moderatingCommunities.addAll(
+            linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
+        moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
+            LinkPersonCommunityType.moderator));
+      } else {
+        Community community = communityRepository.findById(
+            (long) listCommentReportsForm.community_id()).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+        if (!linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner)
+            && !linkPersonCommunityService.hasLink(person, community,
+            LinkPersonCommunityType.moderator)) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        moderatingCommunities.add(community);
+      }
       commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
           CommentReportSearchCriteria.builder().unresolvedOnly(
                   listCommentReportsForm.unresolved_only() == null
@@ -130,12 +144,24 @@ public class CommentModActionsController extends AbstractLemmyApiController {
               .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
               .community(moderatingCommunities).build()));
     } else {
-      commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-          CommentReportSearchCriteria.builder().unresolvedOnly(
-                  listCommentReportsForm.unresolved_only() != null
-                      && listCommentReportsForm.unresolved_only())
-              .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
-              .build()));
+      if (listCommentReportsForm.community_id() != null) {
+        Community community = communityRepository.findById(
+            (long) listCommentReportsForm.community_id()).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+        commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
+            CommentReportSearchCriteria.builder().unresolvedOnly(
+                    listCommentReportsForm.unresolved_only() != null
+                        && listCommentReportsForm.unresolved_only())
+                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
+                .community(List.of(community)).build()));
+      } else {
+        commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
+            CommentReportSearchCriteria.builder().unresolvedOnly(
+                    listCommentReportsForm.unresolved_only() != null
+                        && listCommentReportsForm.unresolved_only())
+                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
+                .build()));
+      }
     }
 
     List<CommentReportView> commentReportViews = new ArrayList<>();
