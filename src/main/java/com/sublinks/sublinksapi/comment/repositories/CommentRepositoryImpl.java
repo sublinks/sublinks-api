@@ -39,6 +39,10 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
       commentReadJoin.on(cb.equal(commentReadJoin.get("person"), commentSearchCriteria.person()));
     }
 
+    if(commentSearchCriteria.community() != null){
+      predicates.add(cb.equal(commentTable.get("community"), commentSearchCriteria.community()));
+    }
+
     cq.where(predicates.toArray(new Predicate[0]));
 
     // @todo determine sort/pagination
