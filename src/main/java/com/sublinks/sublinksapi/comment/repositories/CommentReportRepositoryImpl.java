@@ -1,9 +1,10 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
 import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
+import com.sublinks.sublinksapi.community.dto.Community;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -28,25 +29,33 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<CommentReport> cq = cb.createQuery(CommentReport.class);
 
-    final Root<CommentReport> commentTable = cq.from(CommentReport.class);
+    final Root<CommentReport> commentReportTable = cq.from(CommentReport.class);
 
     final List<Predicate> predicates = new ArrayList<>();
 
     if (commentReportSearchCriteria.unresolvedOnly()) {
-      predicates.add(cb.equal(commentTable.get("resolved"), false));
+      predicates.add(cb.equal(commentReportTable.get("resolved"), false));
     }
 
     if (commentReportSearchCriteria.community() != null) {
       // Join Comment and check community id
-      final Join<CommentReport, Comment> commentJoin = commentTable.join("comment", JoinType.LEFT);
+      final Join<CommentReport, Comment> commentJoin = commentReportTable.join("comment",
+          JoinType.LEFT);
+
+      List<Predicate> communityPredicates = new ArrayList<>();
+
       commentReportSearchCriteria.community().forEach(community -> {
-        predicates.add(cb.equal(commentJoin.get("community"), community));
+        // Add a Or condition for each community
+
+        communityPredicates.add(cb.equal(commentJoin.get("community"), community));
       });
+
+      predicates.add(cb.or(communityPredicates.toArray(new Predicate[0])));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    cq.orderBy(cb.desc(commentTable.get("createdAt")));
+    cq.orderBy(cb.desc(commentReportTable.get("createdAt")));
 
     int perPage = Math.min(Math.abs(commentReportSearchCriteria.perPage()), 20);
     int page = Math.max(commentReportSearchCriteria.page() - 1, 0);
@@ -56,5 +65,46 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
     query.setFirstResult(page * perPage);
 
     return query.getResultList();
+  }
+
+  @Override
+  public long countAllCommentReportsByResolvedFalseAndCommunity(
+      @Nullable List<Community> communities) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+
+    final Root<CommentReport> commentReportTable = cq.from(CommentReport.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    predicates.add(cb.equal(commentReportTable.get("resolved"), false));
+
+    if (communities != null) {
+      // Join Comment and check community id
+      final Join<CommentReport, Comment> commentJoin = commentReportTable.join("comment",
+          JoinType.LEFT);
+
+      List<Predicate> communityPredicates = new ArrayList<>();
+
+      communities.forEach(community -> {
+        // Add a Or condition for each community
+
+        communityPredicates.add(cb.equal(commentJoin.get("community"), community));
+      });
+
+      predicates.add(cb.or(communityPredicates.toArray(new Predicate[0])));
+
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
+    cq.select(cb.count(commentReportTable));
+    return em.createQuery(cq).getSingleResult();
+  }
+
+  @Override
+  public long countAllCommentReportsByResolvedFalse() {
+
+    return countAllCommentReportsByResolvedFalseAndCommunity(null);
   }
 }

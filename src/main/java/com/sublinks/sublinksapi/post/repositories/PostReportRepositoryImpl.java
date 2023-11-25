@@ -1,8 +1,10 @@
 package com.sublinks.sublinksapi.post.repositories;
 
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.models.PostReportSearchCriteria;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -36,11 +38,14 @@ public class PostReportRepositoryImpl implements PostReportRepositorySearch {
     }
 
     if (postReportSearchCriteria.community() != null) {
-      // Join Comment and check community id
+      // Join PostG and check community id
       final Join<PostReport, Post> postJoin = postTable.join("post", JoinType.LEFT);
+      List<Predicate> communityPredicates = new ArrayList<>();
       postReportSearchCriteria.community().forEach(community -> {
-        predicates.add(cb.equal(postJoin.get("community"), community));
+
+        communityPredicates.add(cb.equal(postJoin.get("community"), community));
       });
+      predicates.add(cb.or(communityPredicates.toArray(new Predicate[0])));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
@@ -55,5 +60,43 @@ public class PostReportRepositoryImpl implements PostReportRepositorySearch {
     query.setFirstResult(page * perPage);
 
     return query.getResultList();
+  }
+
+  @Override
+  public long countAllPostReportsByResolvedFalseAndCommunity(
+      @Nullable List<Community> communities) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+
+    final Root<PostReport> postReportTable = cq.from(PostReport.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    predicates.add(cb.equal(postReportTable.get("resolved"), false));
+
+    if (communities != null) {
+      // Join Comment or check community id
+      final Join<PostReport, Post> postJoin = postReportTable.join("post", JoinType.LEFT);
+      List<Predicate> communityPredicates = new ArrayList<>();
+      communities.forEach(community -> {
+        // Add a Or condition for each community
+
+        communityPredicates.add(cb.equal(postJoin.get("community"), community));
+      });
+      predicates.add(cb.or(communityPredicates.toArray(new Predicate[0])));
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
+
+    cq.select(cb.count(postReportTable));
+
+    return em.createQuery(cq).getSingleResult();
+  }
+
+  @Override
+  public long countAllPostReportsReportsByResolvedFalse() {
+
+    return countAllPostReportsByResolvedFalseAndCommunity(null);
   }
 }

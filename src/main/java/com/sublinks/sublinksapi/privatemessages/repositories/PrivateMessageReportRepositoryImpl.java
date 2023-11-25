@@ -1,11 +1,10 @@
 package com.sublinks.sublinksapi.privatemessages.repositories;
 
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageReportSearchCriteria;
-import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageSearchCriteria;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -46,5 +45,22 @@ public class PrivateMessageReportRepositoryImpl implements PrivateMessageReportS
     query.setFirstResult(page * perPage);
 
     return query.getResultList();
+  }
+
+  @Override
+  public long countAllPrivateMessageReportsByResolvedFalse() {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+    final Root<PrivateMessageReport> privateMessageTable = cq.from(PrivateMessageReport.class);
+    final List<Predicate> predicates = new ArrayList<>();
+
+    predicates.add(cb.equal(privateMessageTable.get("resolved"), false));
+
+    cq.where(predicates.toArray(new Predicate[0]));
+
+    cq.select(cb.count(privateMessageTable));
+
+    return em.createQuery(cq).getSingleResult();
   }
 }

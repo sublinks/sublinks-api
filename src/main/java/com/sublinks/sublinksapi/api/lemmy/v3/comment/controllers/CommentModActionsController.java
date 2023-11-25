@@ -4,16 +4,22 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReportView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.DistinguishComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReports;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReportsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.RemoveComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ResolveCommentReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReportService;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
+import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
+import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -46,28 +52,56 @@ import org.springframework.web.server.ResponseStatusException;
 public class CommentModActionsController extends AbstractLemmyApiController {
 
   private final LemmyCommentReportService lemmyCommentReportService;
+  private final LemmyCommentService lemmyCommentService;
   private final CommentReportRepository commentReportRepository;
   private final CommentReportService commentReportService;
   private final AuthorizationService authorizationService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommunityRepository communityRepository;
+  private final CommentRepository commentRepository;
+  private final CommentService commentService;
 
   @Operation(summary = "A moderator remove for a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
+      @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class)))})
   @PostMapping("remove")
-  CommentResponse remove() {
+  CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    comment.setRemoved(removeCommentForm.removed());
+
+    commentService.updateComment(comment);
+
+    //@todo: Add the reason to the modlogs
+
+    return CommentResponse.builder()
+        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();
   }
 
   @Operation(summary = "Distinguishes a comment (speak as moderator).")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
+      @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class)))})
   @PostMapping("distinguish")
-  CommentResponse distinguish() {
+  CommentResponse distinguish(@Valid @RequestBody DistinguishComment distinguishCommentForm,
+      JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    final Comment comment = commentRepository.findById((long) distinguishCommentForm.comment_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    comment.setFeatured(distinguishCommentForm.distinguished());
+
+    commentService.updateComment(comment);
+
+    return CommentResponse.builder()
+        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();
   }
 
   @Operation(summary = "Resolve a comment report. Only a mod can do this.")
@@ -119,10 +153,24 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
-      moderatingCommunities.addAll(
-          linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
-      moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
-          LinkPersonCommunityType.moderator));
+
+      if (listCommentReportsForm.community_id() == null) {
+
+        moderatingCommunities.addAll(
+            linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
+        moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
+            LinkPersonCommunityType.moderator));
+      } else {
+        Community community = communityRepository.findById(
+            (long) listCommentReportsForm.community_id()).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+        if (!linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner)
+            && !linkPersonCommunityService.hasLink(person, community,
+            LinkPersonCommunityType.moderator)) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        moderatingCommunities.add(community);
+      }
       commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
           CommentReportSearchCriteria.builder().unresolvedOnly(
                   listCommentReportsForm.unresolved_only() == null
@@ -130,12 +178,24 @@ public class CommentModActionsController extends AbstractLemmyApiController {
               .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
               .community(moderatingCommunities).build()));
     } else {
-      commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-          CommentReportSearchCriteria.builder().unresolvedOnly(
-                  listCommentReportsForm.unresolved_only() != null
-                      && listCommentReportsForm.unresolved_only())
-              .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
-              .build()));
+      if (listCommentReportsForm.community_id() != null) {
+        Community community = communityRepository.findById(
+            (long) listCommentReportsForm.community_id()).orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+        commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
+            CommentReportSearchCriteria.builder().unresolvedOnly(
+                    listCommentReportsForm.unresolved_only() != null
+                        && listCommentReportsForm.unresolved_only())
+                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
+                .community(List.of(community)).build()));
+      } else {
+        commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
+            CommentReportSearchCriteria.builder().unresolvedOnly(
+                    listCommentReportsForm.unresolved_only() != null
+                        && listCommentReportsForm.unresolved_only())
+                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
+                .build()));
+      }
     }
 
     List<CommentReportView> commentReportViews = new ArrayList<>();
