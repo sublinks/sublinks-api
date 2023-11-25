@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsRespons
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonMentions;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonMentionsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetRepliesResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetUnreadCount;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetUnreadCountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.MarkPersonMentionAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionResponse;
@@ -31,6 +32,7 @@ import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
 import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -71,6 +73,7 @@ public class UserController {
   private final LemmyPersonMentionService lemmyPersonMentionService;
   private final CommentReplyRepository commentReplyRepository;
   private final LemmyCommentReplyService lemmyCommentReplyService;
+  private final PrivateMessageRepository privateMessageRepository;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -149,8 +152,8 @@ public class UserController {
 
     final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
         com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
-            .sortType(getReplies.sort()).unreadOnly(getReplies.unread_only() != null
-                && getReplies.unread_only())
+            .sortType(getReplies.sort())
+            .unreadOnly(getReplies.unread_only() != null && getReplies.unread_only())
             .page(getReplies.page()).perPage(getReplies.limit()).build());
 
     final List<CommentReplyView> commentReplyViews = new ArrayList<>();
@@ -246,8 +249,18 @@ public class UserController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetUnreadCountResponse.class))})})
   @GetMapping("unread_count")
-  GetUnreadCountResponse unreadCount() {
+  GetUnreadCountResponse unreadCount(@Valid final GetUnreadCount getUnreadCountForm,
+      JwtPerson principal) {
 
-    return GetUnreadCountResponse.builder().build();
+    final Person person = Optional.ofNullable((Person) principal.getPrincipal())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    GetUnreadCountResponse.GetUnreadCountResponseBuilder builder = GetUnreadCountResponse.builder();
+
+    builder.mentions((int) personMentionRepository.countByRecipientAndIsReadFalse(person));
+    builder.replies((int) commentReplyRepository.countByRecipientAndIsReadFalse(person));
+    builder.private_messages((int) privateMessageRepository.countByRecipientAndIsReadFalse(person));
+
+    return builder.build();
   }
 }
