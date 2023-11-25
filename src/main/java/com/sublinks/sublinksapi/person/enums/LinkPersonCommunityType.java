@@ -5,5 +5,6 @@ public enum LinkPersonCommunityType {
   moderator,
   follower,
   pending_follow,
-  blocked
+  blocked,
+  banned
 }
