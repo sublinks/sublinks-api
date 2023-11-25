@@ -41,9 +41,16 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
       // Join Comment and check community id
       final Join<CommentReport, Comment> commentJoin = commentReportTable.join("comment",
           JoinType.LEFT);
+
+      List<Predicate> communityPredicates = new ArrayList<>();
+
       commentReportSearchCriteria.community().forEach(community -> {
-        predicates.add(cb.equal(commentJoin.get("community"), community));
+        // Add a Or condition for each community
+
+        communityPredicates.add(cb.equal(commentJoin.get("community"), community));
       });
+
+      predicates.add(cb.or(communityPredicates.toArray(new Predicate[0])));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
@@ -61,7 +68,8 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
   }
 
   @Override
-  public long countAllCommentReportsByResolvedFalseAndCommunity(@Nullable Community community) {
+  public long countAllCommentReportsByResolvedFalseAndCommunity(
+      @Nullable List<Community> communities) {
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Long> cq = cb.createQuery(Long.class);
@@ -72,11 +80,21 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
 
     predicates.add(cb.equal(commentReportTable.get("resolved"), false));
 
-    if (community != null) {
+    if (communities != null) {
       // Join Comment and check community id
       final Join<CommentReport, Comment> commentJoin = commentReportTable.join("comment",
           JoinType.LEFT);
-      predicates.add(cb.equal(commentJoin.get("community"), community));
+
+      List<Predicate> communityPredicates = new ArrayList<>();
+
+      communities.forEach(community -> {
+        // Add a Or condition for each community
+
+        communityPredicates.add(cb.equal(commentJoin.get("community"), community));
+      });
+
+      predicates.add(cb.or(communityPredicates.toArray(new Predicate[0])));
+
     }
 
     cq.where(predicates.toArray(new Predicate[0]));

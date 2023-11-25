@@ -48,17 +48,12 @@ public class PrivateMessageReportRepositoryImpl implements PrivateMessageReportS
   }
 
   @Override
-  public long countAllPrivateMessageReportsByResolvedFalseAndCommunity(
-      @Nullable Community community) {
+  public long countAllPrivateMessageReportsByResolvedFalse() {
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Long> cq = cb.createQuery(Long.class);
     final Root<PrivateMessageReport> privateMessageTable = cq.from(PrivateMessageReport.class);
     final List<Predicate> predicates = new ArrayList<>();
-
-    if (community != null) {
-      predicates.add(cb.equal(privateMessageTable.get("community"), community));
-    }
 
     predicates.add(cb.equal(privateMessageTable.get("resolved"), false));
 
@@ -67,11 +62,5 @@ public class PrivateMessageReportRepositoryImpl implements PrivateMessageReportS
     cq.select(cb.count(privateMessageTable));
 
     return em.createQuery(cq).getSingleResult();
-  }
-
-  @Override
-  public long countAllPrivateMessageReportsByResolvedFalse() {
-
-    return countAllPrivateMessageReportsByResolvedFalseAndCommunity(null);
   }
 }
