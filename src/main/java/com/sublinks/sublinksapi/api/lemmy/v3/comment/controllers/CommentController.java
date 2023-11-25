@@ -11,8 +11,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.EditComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReports;
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentReportsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.MarkCommentReplyAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
@@ -23,7 +21,6 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
-import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
@@ -33,11 +30,9 @@ import com.sublinks.sublinksapi.comment.services.CommentReadService;
 import com.sublinks.sublinksapi.comment.services.CommentReplyService;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
-import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
@@ -101,6 +96,15 @@ public class CommentController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
     final Post post = postRepository.findById((long) createCommentForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+    if (post.isLocked()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_locked");
+    }
+
+    if (post.isDeleted() || post.isRemoved()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found");
+    }
+
     // Language
     Optional<Language> language;
     if (createCommentForm.language_id() != null) {
@@ -108,9 +112,11 @@ public class CommentController extends AbstractLemmyApiController {
     } else {
       language = personService.getPersonDefaultPostLanguage(person, post.getCommunity());
     }
+
     if (language.isEmpty()) {
       throw new RuntimeException("No language selected");
     }
+
     final Comment comment = Comment.builder().person(person).isLocal(true)
         .commentBody(createCommentForm.content()).activityPubId("").post(post)
         .community(post.getCommunity()).language(language.get()).build();

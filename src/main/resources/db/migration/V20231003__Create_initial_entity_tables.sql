@@ -271,6 +271,7 @@ CREATE TABLE `posts`
   `is_deleted`               TINYINT      NOT NULL DEFAULT 0,
   `is_removed`               TINYINT      NOT NULL DEFAULT 0,
   `is_local`                 TINYINT      NOT NULL DEFAULT 0,
+  `is_locked`                TINYINT      NOT NULL DEFAULT 0,
   `community_id`             BIGINT       NOT NULL,
   `is_featured`              TINYINT      NOT NULL DEFAULT 0,
   `is_featured_in_community` TINYINT      NOT NULL DEFAULT 0,
