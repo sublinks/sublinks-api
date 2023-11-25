@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.comment.repositories;
 
 import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria;
+import com.sublinks.sublinksapi.community.dto.Community;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;

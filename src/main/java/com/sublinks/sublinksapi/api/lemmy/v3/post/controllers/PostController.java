@@ -46,12 +46,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -273,14 +275,11 @@ public class PostController extends AbstractLemmyApiController {
     final Post post = postRepository.findById((long) createPostReportForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found"));
 
-    final PostReport postReport = PostReport.builder()
-        .post(post)
-        .creator(person)
+    final PostReport postReport = PostReport.builder().post(post).creator(person)
         .reason(createPostReportForm.reason())
-        .originalBody(post.getPostBody())
-        .originalTitle(post.getTitle())
-        .originalUrl(post.getLinkUrl())
-        .build();
+        .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
+        .originalTitle(post.getTitle() == null ? "" : post.getTitle())
+        .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl()).build();
 
     postReportService.createPostReport(postReport);
 
