@@ -1,8 +1,10 @@
 package com.sublinks.sublinksapi.post.repositories;
 
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.models.PostReportSearchCriteria;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -55,5 +57,36 @@ public class PostReportRepositoryImpl implements PostReportRepositorySearch {
     query.setFirstResult(page * perPage);
 
     return query.getResultList();
+  }
+
+  @Override
+  public long countAllPostReportsByResolvedFalseAndCommunity(@Nullable Community community) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+
+    final Root<PostReport> postReportTable = cq.from(PostReport.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    predicates.add(cb.equal(postReportTable.get("resolved"), false));
+
+    if (community != null) {
+      // Join Comment and check community id
+      final Join<PostReport, Post> postJoin = postReportTable.join("post", JoinType.LEFT);
+      predicates.add(cb.equal(postJoin.get("community"), community));
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
+
+    cq.select(cb.count(postReportTable));
+
+    return em.createQuery(cq).getSingleResult();
+  }
+
+  @Override
+  public long countAllPostReportsReportsByResolvedFalse() {
+
+    return countAllPostReportsByResolvedFalseAndCommunity(null);
   }
 }
