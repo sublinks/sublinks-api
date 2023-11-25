@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.post.services;
 
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
@@ -34,6 +35,7 @@ public class PostService {
   private final UrlUtil urlUtil;
 
   public String getPostMd5Hash(final Post post) {
+
     return getStringMd5Hash(post.getLinkUrl());
   }
 
@@ -81,10 +83,8 @@ public class PostService {
     post.setPrivateKey(keys.privateKey());
 
     post.setLocal(true);
-    final PostAggregate postAggregate = PostAggregate.builder()
-        .post(post)
-        .community(post.getCommunity())
-        .build();
+    final PostAggregate postAggregate = PostAggregate.builder().post(post)
+        .community(post.getCommunity()).build();
     post.setPostAggregate(postAggregate);
     post.setActivityPubId("");
     postRepository.save(post); // @todo fix second save making post look edited right away
@@ -101,5 +101,15 @@ public class PostService {
 
     postRepository.save(post);
     postDeletedPublisher.publish(post);
+  }
+
+  @Transactional
+  public void removeAllPostsFromUser(final Community community, final Person person,
+      final boolean removed) {
+
+    postRepository.allPostsByCommunityAndPerson(community, person).forEach(post -> {
+      post.setRemoved(removed);
+      postRepository.save(post);
+    });
   }
 }

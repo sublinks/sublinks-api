@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedPublishe
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -25,23 +26,24 @@ public class LinkPersonCommunityService {
 
   public boolean hasLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    final Optional<LinkPersonCommunity> linkPersonCommunity =
-        linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
-            community,
-            person,
-            type
-        );
+    final Optional<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
+        community, person, type);
     return linkPersonCommunity.isPresent();
+  }
+
+  public boolean hasAnyLink(Person person, Community community,
+      List<LinkPersonCommunityType> types) {
+
+    final List<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkTypeIsIn(
+        community, person, types);
+    return linkPersonCommunity.isEmpty();
   }
 
   @Transactional
   public void addLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
-        .community(community)
-        .person(person)
-        .linkType(type)
-        .build();
+    final LinkPersonCommunity newLink = LinkPersonCommunity.builder().community(community)
+        .person(person).linkType(type).build();
     person.getLinkPersonCommunity().add(newLink);
     community.getLinkPersonCommunity().add(newLink);
     linkPersonCommunityRepository.save(newLink);
@@ -51,12 +53,8 @@ public class LinkPersonCommunityService {
   @Transactional
   public void removeLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    final Optional<LinkPersonCommunity> linkPersonCommunity =
-        linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
-            community,
-            person,
-            type
-        );
+    final Optional<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
+        community, person, type);
     if (linkPersonCommunity.isEmpty()) {
       return;
     }
@@ -70,8 +68,8 @@ public class LinkPersonCommunityService {
 
   public Collection<Community> getPersonLinkByType(Person person, LinkPersonCommunityType type) {
 
-    Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository
-        .getLinkPersonCommunitiesByPersonAndLinkType(person, type);
+    Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository.getLinkPersonCommunitiesByPersonAndLinkType(
+        person, type);
 
     Collection<Community> communities = new ArrayList<>();
     for (LinkPersonCommunity linkPersonCommunity : linkPersonCommunities) {
@@ -79,4 +77,14 @@ public class LinkPersonCommunityService {
     }
     return communities;
   }
+
+  public Collection<Person> getPersonsFromCommunityAndListTypes(Community community,
+      List<LinkPersonCommunityType> types) {
+
+    Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
+        community, types);
+
+    return linkPersonCommunities.stream().map(LinkPersonCommunity::getPerson).toList();
+  }
+
 }

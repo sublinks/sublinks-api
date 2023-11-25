@@ -4,10 +4,13 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
 import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
+import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import java.util.Optional;
+import com.sublinks.sublinksapi.person.dto.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,5 +84,15 @@ public class CommentService {
 
     commentRepository.save(comment);
     commentUpdatedPublisher.publish(comment);
+  }
+
+  @Transactional
+  public void removeAllCommentsFromUser(final Community community, final Person person,
+      final boolean removed) {
+
+    commentRepository.allCommentsByCommunityAndPerson(community, person).forEach(comment -> {
+      comment.setRemoved(removed);
+      commentRepository.save(comment);
+    });
   }
 }
