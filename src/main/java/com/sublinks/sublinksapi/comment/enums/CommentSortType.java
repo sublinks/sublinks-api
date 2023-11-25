@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.comment.enums;
 
 public enum CommentSortType {
   Hot,
-  top,
+  Top,
   New,
   Old,
 }
