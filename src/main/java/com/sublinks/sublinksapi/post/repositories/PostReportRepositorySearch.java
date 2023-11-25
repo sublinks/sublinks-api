@@ -11,7 +11,7 @@ public interface PostReportRepositorySearch {
   List<PostReport> allPostReportsBySearchCriteria(
       PostReportSearchCriteria postReportSearchCriteria);
 
-  long countAllPostReportsByResolvedFalseAndCommunity(@Nullable Community community);
+  long countAllPostReportsByResolvedFalseAndCommunity(@Nullable List<Community> communities);
 
   long countAllPostReportsReportsByResolvedFalse();
 }
