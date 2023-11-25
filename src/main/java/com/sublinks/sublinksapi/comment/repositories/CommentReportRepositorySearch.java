@@ -11,7 +11,7 @@ public interface CommentReportRepositorySearch {
   List<CommentReport> allCommentReportsBySearchCriteria(
       CommentReportSearchCriteria commentReportSearchCriteria);
 
-  long countAllCommentReportsByResolvedFalseAndCommunity(@Nullable Community community);
+  long countAllCommentReportsByResolvedFalseAndCommunity(@Nullable List<Community> community);
 
   long countAllCommentReportsByResolvedFalse();
 }
