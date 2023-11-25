@@ -69,11 +69,7 @@ public class Post implements AuthorizationEntityInterface {
   private List<PostLike> postLikes;
 
   @ManyToOne
-  @JoinTable(
-      name = "post_post_cross_post",
-      joinColumns = @JoinColumn(name = "post_id"),
-      inverseJoinColumns = @JoinColumn(name = "cross_post_id")
-  )
+  @JoinTable(name = "post_post_cross_post", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "cross_post_id"))
   CrossPost crossPost;
 
   /**
@@ -94,6 +90,9 @@ public class Post implements AuthorizationEntityInterface {
 
   @Column(nullable = false, name = "is_local")
   private boolean isLocal;
+
+  @Column(nullable = false, name = "is_locked")
+  private boolean isLocked;
 
   @Column(nullable = false, name = "is_featured")
   private boolean isFeatured;
