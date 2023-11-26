@@ -4,7 +4,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportView;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
@@ -24,6 +26,8 @@ public class LemmyPostReportService {
   private final PostSaveService postSaveService;
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
+  private final LinkPersonCommunityService linkPersonCommunityService;
+
 
   public PostReportView postReportViewFromPost(final PostReport postReport,
       final com.sublinks.sublinksapi.person.dto.Person person) {
@@ -39,15 +43,20 @@ public class LemmyPostReportService {
 
     final Post lemmyPost = conversionService.convert(postReport.getPost(), Post.class);
 
-    final Person creator = conversionService.convert(postReport.getCreator(), Person.class);
+    final Person creator = postReport.getCreator();
 
-    final Person resolver = conversionService.convert(postReport.getResolver(), Person.class);
+    final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person lemmyCreator = conversionService.convert(
+        creator, com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class);
+
+    final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person resolver = conversionService.convert(
+        postReport.getResolver(), com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class);
 
     final Community community = conversionService.convert(postReport.getPost().getCommunity(),
         Community.class);
 
-    final Person lemmyPostCreator = conversionService.convert(
-        postService.getPostCreator(postReport.getPost()), Person.class);
+    final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person lemmyPostCreator = conversionService.convert(
+        postService.getPostCreator(postReport.getPost()),
+        com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class);
 
     final int personVote = postLikeService.getPostLike(postReport.getPost(), person)
         .map(PostLike::getScore).orElse(0);
@@ -55,9 +64,12 @@ public class LemmyPostReportService {
     final PostAggregates counts = conversionService.convert(postReport.getPost().getPostAggregate(),
         PostAggregates.class);
 
-    // @todo: Check if creator is banned from community
-    return PostReportView.builder().post(lemmyPost).creator(creator).community(community)
+    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+        postReport.getPost().getCommunity(), LinkPersonCommunityType.banned);
+
+    return PostReportView.builder().post(lemmyPost).creator(lemmyCreator).community(community)
         .post_report(lemmyPostReport).post_creator(lemmyPostCreator).my_vote(personVote)
-        .resolver(resolver).counts(counts).creator_banned_from_community(false);
+        .resolver(resolver).counts(counts)
+        .creator_banned_from_community(creatorBannedFromCommunity);
   }
 }
