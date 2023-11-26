@@ -112,4 +112,13 @@ public class PostService {
       postRepository.save(post);
     });
   }
+
+  @Transactional
+  public void removeAllPostsFromUser(final Person person, final boolean removed) {
+
+    postRepository.allPostsByPerson(person).forEach(post -> {
+      post.setRemoved(removed);
+      postRepository.save(post);
+    });
+  }
 }

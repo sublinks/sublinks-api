@@ -94,4 +94,14 @@ public class CommentService {
       commentRepository.save(comment);
     });
   }
+
+  @Transactional
+  public void removeAllCommentsFromUser(final Person person, final boolean removed) {
+
+    commentRepository.allCommentsByPerson(person).forEach(comment -> {
+      comment.setRemoved(removed);
+      commentRepository.save(comment);
+    });
+  }
+
 }
