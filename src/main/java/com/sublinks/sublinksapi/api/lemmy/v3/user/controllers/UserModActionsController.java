@@ -4,18 +4,25 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetReportCount;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
+import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.post.services.PostService;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageReportRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,16 +31,19 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,12 +57,33 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final CommunityRepository communityRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final AuthorizationService authorizationService;
+  private final PersonRepository personRepository;
+  private final PostService postService;
+  private final CommentService commentService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BanPersonResponse.class))})})
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BanPersonResponse.class))}),
+      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class))),})
   @PostMapping("ban")
-  BanPersonResponse ban() {
+  BanPersonResponse ban(@Valid @RequestBody final BanPerson banPersonForm, JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_admin"));
+
+    final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    personToBan.setBanned(banPersonForm.ban());
+
+    if (banPersonForm.remove_data()) {
+      postService.removeAllPostsFromUser(personToBan, true);
+      commentService.removeAllCommentsFromUser(personToBan, true);
+    }
+
+    // @todo: Add to modlog
 
     return BanPersonResponse.builder().build();
   }
