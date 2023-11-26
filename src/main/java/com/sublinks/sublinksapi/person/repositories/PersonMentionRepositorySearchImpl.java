@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 public class PersonMentionRepositorySearchImpl implements PersonMentionRepositorySearch {
 
   @Autowired
@@ -48,11 +50,10 @@ public class PersonMentionRepositorySearchImpl implements PersonMentionRepositor
     }
 
     int perPage = Math.min(Math.abs(personMentionSearchCriteria.perPage()), 20);
-    int page = Math.max(personMentionSearchCriteria.page() - 1, 0);
 
     TypedQuery<PersonMention> query = em.createQuery(cq);
-    query.setMaxResults(perPage);
-    query.setFirstResult(page * perPage);
+
+    applyPagination(query, personMentionSearchCriteria.page(), perPage);
 
     return query.getResultList();
   }
