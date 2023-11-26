@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
@@ -58,11 +60,10 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
     cq.orderBy(cb.desc(commentReportTable.get("createdAt")));
 
     int perPage = Math.min(Math.abs(commentReportSearchCriteria.perPage()), 20);
-    int page = Math.max(commentReportSearchCriteria.page() - 1, 0);
-
+    
     TypedQuery<CommentReport> query = em.createQuery(cq);
-    query.setMaxResults(perPage);
-    query.setFirstResult(page * perPage);
+
+    applyPagination(query, commentReportSearchCriteria.page(), perPage);
 
     return query.getResultList();
   }
