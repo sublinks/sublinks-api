@@ -2,6 +2,9 @@ package com.sublinks.sublinksapi.post.repositories;
 
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
@@ -55,6 +58,33 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     // @todo determine sort/pagination
     cq.orderBy(cb.desc(postTable.get("updatedAt")));
+
+    return em.createQuery(cq).getResultList();
+  }
+
+  @Override
+  public List<Post> allPostsByCommunityAndPerson(Community community, Person person) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
+
+    final Root<Post> postTable = cq.from(Post.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    if (community != null) {
+      predicates.add(cb.equal(postTable.get("community"), community));
+    }
+
+    if (person != null) {
+      final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
+          JoinType.INNER);
+      predicates.add(cb.equal(linkPersonPostJoin.get("person"), person));
+      predicates.add(cb.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
+
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
   }

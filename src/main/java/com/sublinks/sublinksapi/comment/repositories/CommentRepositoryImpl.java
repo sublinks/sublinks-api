@@ -3,6 +3,8 @@ package com.sublinks.sublinksapi.comment.repositories;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -39,7 +41,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
       commentReadJoin.on(cb.equal(commentReadJoin.get("person"), commentSearchCriteria.person()));
     }
 
-    if(commentSearchCriteria.community() != null){
+    if (commentSearchCriteria.community() != null) {
       predicates.add(cb.equal(commentTable.get("community"), commentSearchCriteria.community()));
     }
 
@@ -47,6 +49,29 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     // @todo determine sort/pagination
     cq.orderBy(cb.desc(commentTable.get("updatedAt")));
+
+    return em.createQuery(cq).getResultList();
+  }
+
+  @Override
+  public List<Comment> allCommentsByCommunityAndPerson(Community community, Person person) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Comment> cq = cb.createQuery(Comment.class);
+
+    final Root<Comment> commentTable = cq.from(Comment.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    if (community != null) {
+      predicates.add(cb.equal(commentTable.get("community"), community));
+    }
+
+    if (person != null) {
+      predicates.add(cb.equal(commentTable.get("person"), person));
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
   }

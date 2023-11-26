@@ -8,6 +8,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PostRepository extends JpaRepository<Post, Long>, PostRepositorySearch {
 
-  List<Post> allPostsByCommunityAndPerson(Community community, Person person);
 
 }

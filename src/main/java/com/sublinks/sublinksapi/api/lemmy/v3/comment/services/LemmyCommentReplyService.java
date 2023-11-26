@@ -43,6 +43,7 @@ public class LemmyCommentReplyService {
 
     final com.sublinks.sublinksapi.person.dto.Person creator = commentReply.getComment()
         .getPerson();
+
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
 
     final Comment lemmyComment = conversionService.convert(commentReply.getComment(),
@@ -63,7 +64,10 @@ public class LemmyCommentReplyService {
     final CommentReply lemmyCommentReply = conversionService.convert(commentReply,
         CommentReply.class);
 
-    //@todo: Check if creator is banned or it is saved
+    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+        commentReply.getComment().getCommunity(), LinkPersonCommunityType.banned);
+
+    //@todo: Check if comment is saved or blocked
     return commentReplyViewBuilder
         .comment_reply(lemmyCommentReply)
         .creator(lemmyCreator)
@@ -75,7 +79,7 @@ public class LemmyCommentReplyService {
         .recipient(conversionService.convert(commentReply.getRecipient(), Person.class))
         .subscribed(linkPersonCommunityService.hasLink(Person,
             commentReply.getComment().getCommunity(), LinkPersonCommunityType.follower))
-        .creator_banned_from_community(false)
+        .creator_banned_from_community(creatorBannedFromCommunity)
         .creator_blocked(false)
         .saved(false);
 
