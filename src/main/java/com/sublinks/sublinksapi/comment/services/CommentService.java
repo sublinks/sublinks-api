@@ -86,7 +86,7 @@ public class CommentService {
   }
 
   @Transactional
-  public void removeAllCommentsFromUser(final Community community, final Person person,
+  public void removeAllCommentsFromCommunityAndUser(final Community community, final Person person,
       final boolean removed) {
 
     commentRepository.allCommentsByCommunityAndPerson(community, person).forEach(comment -> {

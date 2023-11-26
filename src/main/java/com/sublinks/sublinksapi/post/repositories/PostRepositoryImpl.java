@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.post.repositories;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
@@ -10,6 +12,7 @@ import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -56,8 +59,50 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    // @todo determine sort/pagination
-    cq.orderBy(cb.desc(postTable.get("updatedAt")));
+    switch (postSearchCriteria.sortType()) {
+      case New:
+        cq.orderBy(cb.desc(postTable.get("createdAt")));
+        break;
+      case Old:
+        cq.orderBy(cb.asc(postTable.get("createdAt")));
+        break;
+      default:
+        cq.orderBy(cb.desc(postTable.get("createdAt")));
+        break;
+    }
+
+    int perPage = Math.min(Math.abs(postSearchCriteria.perPage()), 20);
+
+    TypedQuery<Post> query = em.createQuery(cq);
+
+    applyPagination(query, postSearchCriteria.page(), perPage);
+
+    return query.getResultList();
+  }
+
+  @Override
+  public List<Post> allPostsByCommunityAndPerson(Community community, Person person) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
+
+    final Root<Post> postTable = cq.from(Post.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    if (community != null) {
+      predicates.add(cb.equal(postTable.get("community"), community));
+    }
+
+    if (person != null) {
+      final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
+          JoinType.INNER);
+      predicates.add(cb.equal(linkPersonPostJoin.get("person"), person));
+      predicates.add(cb.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
+
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
   }

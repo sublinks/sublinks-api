@@ -104,7 +104,7 @@ public class PostService {
   }
 
   @Transactional
-  public void removeAllPostsFromUser(final Community community, final Person person,
+  public void removeAllPostsFromCommunityAndUser(final Community community, final Person person,
       final boolean removed) {
 
     postRepository.allPostsByCommunityAndPerson(community, person).forEach(post -> {

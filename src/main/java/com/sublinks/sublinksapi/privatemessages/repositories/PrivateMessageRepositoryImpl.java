@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.privatemessages.repositories;
 
-import com.sublinks.sublinksapi.person.dto.PersonMention;
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageSearchCriteria;
 import jakarta.persistence.EntityManager;
@@ -53,11 +54,10 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
     }
 
     int perPage = Math.min(Math.abs(privateMessageSearchCriteria.perPage()), 20);
-    int page = Math.max(privateMessageSearchCriteria.page() - 1, 0);
 
     TypedQuery<PrivateMessage> query = em.createQuery(cq);
-    query.setMaxResults(perPage);
-    query.setFirstResult(page * perPage);
+
+    applyPagination(query, privateMessageSearchCriteria.page(), perPage);
 
     return query.getResultList();
   }

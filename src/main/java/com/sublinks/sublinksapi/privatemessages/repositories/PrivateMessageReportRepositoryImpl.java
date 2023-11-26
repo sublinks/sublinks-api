@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.privatemessages.repositories;
 
-import com.sublinks.sublinksapi.community.dto.Community;
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageReportSearchCriteria;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -38,11 +38,10 @@ public class PrivateMessageReportRepositoryImpl implements PrivateMessageReportS
     cq.orderBy(cb.desc(privateMessageTable.get("createdAt")));
 
     int perPage = Math.min(Math.abs(privateMessageReportSearchCriteria.perPage()), 20);
-    int page = Math.max(privateMessageReportSearchCriteria.page() - 1, 0);
 
     TypedQuery<PrivateMessageReport> query = em.createQuery(cq);
-    query.setMaxResults(perPage);
-    query.setFirstResult(page * perPage);
+
+    applyPagination(query, privateMessageReportSearchCriteria.page(), perPage);
 
     return query.getResultList();
   }
