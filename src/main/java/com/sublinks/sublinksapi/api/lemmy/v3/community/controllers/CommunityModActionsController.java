@@ -216,8 +216,8 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
     }
 
     if (banPersonForm.remove_data()) {
-      commentService.removeAllCommentsFromUser(community, personToBan, true);
-      postService.removeAllPostsFromUser(community, personToBan, true);
+      commentService.removeAllCommentsFromCommunityAndUser(community, personToBan, true);
+      postService.removeAllPostsFromCommunityAndUser(community, personToBan, true);
     }
 
     return BanFromCommunityResponse.builder().banned(banPersonForm.ban())
