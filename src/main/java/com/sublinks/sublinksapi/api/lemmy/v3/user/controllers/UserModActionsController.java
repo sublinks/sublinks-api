@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
@@ -60,6 +61,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PersonRepository personRepository;
   private final PostService postService;
   private final CommentService commentService;
+  private final LemmyPersonService lemmyPersonService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -85,7 +87,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     // @todo: Add to modlog
 
-    return BanPersonResponse.builder().build();
+    return BanPersonResponse.builder().banned(banPersonForm.ban())
+        .person_view(lemmyPersonService.getPersonView(personToBan)).build();
   }
 
   @Operation(summary = "Block a person.")
