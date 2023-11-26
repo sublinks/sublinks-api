@@ -12,4 +12,7 @@ public interface PostRepositorySearch {
 
   List<Post> allPostsByCommunityAndPerson(Community community, Person person);
 
+
+  List<Post> allPostsByPerson(Person person);
+
 }

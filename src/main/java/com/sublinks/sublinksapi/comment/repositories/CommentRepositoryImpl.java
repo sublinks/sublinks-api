@@ -5,6 +5,10 @@ import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
+import com.sublinks.sublinksapi.post.dto.Post;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -95,5 +99,25 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
+  }
+
+  @Override
+  public List<Comment> allCommentsByPerson(Person person) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<Comment> cq = cb.createQuery(Comment.class);
+
+    final Root<Comment> commentTable = cq.from(Comment.class);
+
+    final List<Predicate> predicates = new ArrayList<>();
+
+    if (person != null) {
+      predicates.add(cb.equal(commentTable.get("person"), person));
+    }
+
+    cq.where(predicates.toArray(new Predicate[0]));
+
+    return em.createQuery(cq).getResultList();
+
   }
 }
