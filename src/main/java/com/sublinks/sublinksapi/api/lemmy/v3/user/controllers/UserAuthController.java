@@ -95,7 +95,8 @@ public class UserAuthController {
   @PostMapping("login")
   LoginResponse login(@Valid @RequestBody final Login loginForm) {
 
-    final Person person = personRepository.findOneByName(loginForm.username_or_email());
+    final Person person = personRepository.findOneByName(loginForm.username_or_email())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
     final String token = jwtUtil.generateToken(person);
     return LoginResponse.builder()
