@@ -8,6 +8,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,13 +44,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      Person person = personRepository.findOneByName(userName);
-      if (person == null) {
+      final Optional<Person> person = personRepository.findOneByName(userName);
+      if (person.isEmpty()) {
         throw new UsernameNotFoundException("Invalid name");
       }
 
-      if (jwtUtil.validateToken(token, person)) {
-        final JwtPerson authenticationToken = new JwtPerson(person, person.getAuthorities());
+      if (jwtUtil.validateToken(token, person.get())) {
+        final JwtPerson authenticationToken = new JwtPerson(person.get(), person.get().getAuthorities());
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
       }
