@@ -8,6 +8,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.NonNull;
@@ -19,6 +21,7 @@ public class LemmyCommentReportService {
 
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   @NonNull
   public CommentReportView createCommentReportView(
@@ -59,6 +62,9 @@ public class LemmyCommentReportService {
     final int personVote = commentLikeService.getPersonCommentVote(Person,
         commentReport.getComment());
 
+    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+        commentReport.getComment().getCommunity(), LinkPersonCommunityType.banned);
+
     return CommentReportView.builder()
         .creator(lemmyCreator)
         .comment(lemmyComment)
@@ -66,9 +72,8 @@ public class LemmyCommentReportService {
         .comment_report(lemmyCommentReport)
         .comment_creator(lemmyCommentCreator)
         .community(lemmyCommunity)
-        .my_vote(personVote)
-        .resolver(lemmyResolver)
+        .my_vote(personVote).resolver(lemmyResolver)
         .counts(commentAggregates)
-        .creator_banned_from_community(false);
+        .creator_banned_from_community(creatorBannedFromCommunity);
   }
 }

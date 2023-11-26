@@ -248,10 +248,10 @@ CREATE TABLE `person_languages`
 CREATE TABLE `link_person_communities`
 (
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `person_id`    BIGINT                                                           NOT NULL,
-  `community_id` BIGINT                                                           NOT NULL,
-  `link_type`    ENUM ('owner','moderator','follower','pending_follow','blocked') NOT NULL,
-  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)                        NOT NULL
+  `person_id`    BIGINT                                                                    NOT NULL,
+  `community_id` BIGINT                                                                    NOT NULL,
+  `link_type`    ENUM ('owner','moderator','follower','pending_follow','blocked','banned') NOT NULL,
+  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3)                                 NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';

@@ -11,6 +11,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.NonNull;
@@ -24,6 +26,7 @@ public class LemmyCommentService {
   private final LocalInstanceContext localInstanceContext;
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
 
@@ -90,13 +93,16 @@ public class LemmyCommentService {
     final CommentAggregates lemmyCommentAggregates = conversionService.convert(commentAggregate,
         CommentAggregates.class);
 
+    final boolean isBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+        comment.getCommunity(), LinkPersonCommunityType.banned);
+
     return CommentView.builder()
         .comment(lemmyComment)
         .creator(lemmyCreator)
         .community(lemmyCommunity)
         .post(lemmyPost)
         .counts(lemmyCommentAggregates)
-        .creator_banned_from_community(false) // @todo creator checks
+        .creator_banned_from_community(isBannedFromCommunity)
         .creator_blocked(false);
   }
 }
