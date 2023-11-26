@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Join;
@@ -13,6 +14,8 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
 public class CommentRepositoryImpl implements CommentRepositorySearch {
 
@@ -39,15 +42,33 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
       commentReadJoin.on(cb.equal(commentReadJoin.get("person"), commentSearchCriteria.person()));
     }
 
-    if(commentSearchCriteria.community() != null){
+    if (commentSearchCriteria.community() != null) {
       predicates.add(cb.equal(commentTable.get("community"), commentSearchCriteria.community()));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    // @todo determine sort/pagination
-    cq.orderBy(cb.desc(commentTable.get("updatedAt")));
+    // @todo determine hot / top / (controversial)
 
-    return em.createQuery(cq).getResultList();
+    switch (commentSearchCriteria.commentSortType()) {
+      case New:
+        cq.orderBy(cb.desc(commentTable.get("createdAt")));
+        break;
+      case Old:
+        cq.orderBy(cb.asc(commentTable.get("createdAt")));
+        break;
+      default:
+        cq.orderBy(cb.desc(commentTable.get("createdAt")));
+        break;
+    }
+
+    final int perPage = Math.min(Math.abs(commentSearchCriteria.perPage()), 20);
+    final int page = Math.max(commentSearchCriteria.page() - 1, 0);
+
+    final TypedQuery<Comment> query = em.createQuery(cq);
+
+    applyPagination(query, commentSearchCriteria.page(), perPage);
+
+    return query.getResultList();
   }
 }
