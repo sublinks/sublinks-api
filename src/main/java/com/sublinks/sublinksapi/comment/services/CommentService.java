@@ -4,7 +4,6 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
 import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
-import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.community.dto.Community;
@@ -87,7 +86,7 @@ public class CommentService {
   }
 
   @Transactional
-  public void removeAllCommentsFromUser(final Community community, final Person person,
+  public void removeAllCommentsFromCommunityAndUser(final Community community, final Person person,
       final boolean removed) {
 
     commentRepository.allCommentsByCommunityAndPerson(community, person).forEach(comment -> {
