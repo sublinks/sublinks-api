@@ -85,9 +85,11 @@ public class UserController {
     Person person = null;
     if (getPersonDetailsForm.person_id() != null) {
       userId = (long) getPersonDetailsForm.person_id();
-      person = personRepository.findById(userId).orElseThrow();
+      person = personRepository.findById(userId)
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
     } else if (getPersonDetailsForm.username() != null) {
-      person = personRepository.findOneByName(getPersonDetailsForm.username());
+      person = personRepository.findOneByName(getPersonDetailsForm.username())
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }

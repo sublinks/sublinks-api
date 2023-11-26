@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.utils.MentionUtils;
 import com.sublinks.sublinksapi.utils.models.Mention;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -32,20 +33,19 @@ public class PersonMentionCommentCreationListener implements
     final List<Mention> mentions = mentionUtils.getPersonMentions(comment.getCommentBody());
     if (mentions != null) {
       for (Mention mention : mentions) {
-        Person recipient = personRepository.findOneByName(mention.name());
+        Optional<Person> recipient = personRepository.findOneByName(mention.name());
 
-        if (recipient == null || Objects.equals(recipient, comment.getPerson())) {
+        if (recipient.isEmpty() || Objects.equals(recipient.get(), comment.getPerson())) {
           continue;
         }
 
         PersonMention personMention = PersonMention.builder()
             .comment(comment)
-            .recipient(recipient)
+            .recipient(recipient.get())
             .build();
 
         personMentionService.createPersonMention(personMention);
       }
     }
-
   }
 }
