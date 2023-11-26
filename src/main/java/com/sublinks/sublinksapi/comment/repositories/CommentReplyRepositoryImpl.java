@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 public class CommentReplyRepositoryImpl implements CommentReplyRepositorySearch {
 
   @Autowired
@@ -47,11 +49,10 @@ public class CommentReplyRepositoryImpl implements CommentReplyRepositorySearch 
     }
 
     int perPage = Math.min(Math.abs(commentReplySearchCriteria.perPage()), 20);
-    int page = Math.max(commentReplySearchCriteria.page() - 1, 0);
 
     TypedQuery<CommentReply> query = em.createQuery(cq);
-    query.setMaxResults(perPage);
-    query.setFirstResult(page * perPage);
+
+    applyPagination(query, commentReplySearchCriteria.page(), perPage);
 
     return query.getResultList();
   }
