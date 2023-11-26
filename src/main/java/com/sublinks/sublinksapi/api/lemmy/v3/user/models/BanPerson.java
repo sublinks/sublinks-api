@@ -4,6 +4,11 @@ import lombok.Builder;
 
 @Builder
 public record BanPerson(
+    Integer person_id,
+    String reason,
+    Boolean ban,
+    Boolean remove_data,
+    Integer expires
 
 ) {
 

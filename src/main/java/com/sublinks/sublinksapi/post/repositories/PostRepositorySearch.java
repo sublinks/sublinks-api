@@ -10,6 +10,6 @@ public interface PostRepositorySearch {
 
   List<Post> allPostsBySearchCriteria(PostSearchCriteria postSearchCriteria);
 
-  List<Post> allPostsByCommunityAndPerson(Community community, Person person);
+  List<Post> allPostsByPerson(Person person);
 
 }
