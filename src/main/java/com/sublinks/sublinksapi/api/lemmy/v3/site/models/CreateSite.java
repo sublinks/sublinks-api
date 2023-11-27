@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.models;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import java.util.Collection;
 import lombok.Builder;
 
@@ -45,7 +46,7 @@ public record CreateSite(
     Collection<String> allowed_instances,
     Collection<String> blocked_instances,
     Collection<String> taglines,
-    String registration_mode
+    RegistrationMode registration_mode
 ) {
 
 }
