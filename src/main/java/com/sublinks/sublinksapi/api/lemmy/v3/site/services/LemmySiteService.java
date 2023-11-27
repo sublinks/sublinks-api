@@ -68,7 +68,6 @@ public class LemmySiteService {
 
     final LocalSite.LocalSiteBuilder builder = localSite.toBuilder();
 
-    // Apply the instance config.
     if (localInstanceContext.instance().getInstanceConfig() != null) {
       builder.application_question(
           localInstanceContext.instance().getInstanceConfig().getRegistrationQuestion());
