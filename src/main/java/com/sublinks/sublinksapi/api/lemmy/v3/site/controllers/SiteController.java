@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstance;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstanceResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.CreateSite;
@@ -13,9 +14,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
+import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
+import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -54,13 +57,11 @@ public class SiteController extends AbstractLemmyApiController {
   private final InstanceBlockRepository instanceBlockRepository;
   private final MyUserInfoService myUserInfoService;
   private final AuthorizationService authorizationService;
+  private final InstanceConfigService instanceConfigService;
 
   @Operation(summary = "Gets the site, and your user data.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetSiteResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetSiteResponse.class))})})
   @GetMapping
   public GetSiteResponse getSite(final JwtPerson principal) {
 
@@ -70,8 +71,7 @@ public class SiteController extends AbstractLemmyApiController {
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
-        .custom_emojis(lemmySiteService.customEmojis())
-        .admins(lemmySiteService.admins());
+        .custom_emojis(lemmySiteService.customEmojis()).admins(lemmySiteService.admins());
 
     getOptionalPerson(principal).ifPresent(
         (person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
@@ -80,11 +80,8 @@ public class SiteController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Create your site.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = SiteResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SiteResponse.class))})})
   @PostMapping
   @Transactional
   public SiteResponse createSite(@Valid @RequestBody final CreateSite createSiteForm,
@@ -110,18 +107,23 @@ public class SiteController extends AbstractLemmyApiController {
     instance.setBannerUrl(createSiteForm.banner());
     instance.setIconUrl(createSiteForm.icon());
     instanceService.createInstance(instance);
-    return SiteResponse.builder()
-        .site_view(lemmySiteService.getSiteView())
-        .tag_lines(new ArrayList<>())
-        .build();
+
+    final InstanceConfig config = InstanceConfig.builder().instance(instance)
+        .registrationMode(createSiteForm.registration_mode())
+        .registrationQuestion(createSiteForm.application_question()).build();
+
+    instanceConfigService.createInstanceConfig(config);
+
+    instance.setInstanceConfig(config);
+    instanceService.updateInstance(instance);
+
+    return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
+        .tag_lines(new ArrayList<>()).build();
   }
 
   @Operation(summary = "Edit your site.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = SiteResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SiteResponse.class))})})
   @PutMapping
   @Transactional
   public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm,
@@ -139,18 +141,25 @@ public class SiteController extends AbstractLemmyApiController {
     instance.setBannerUrl(editSiteForm.banner());
     instance.setIconUrl(editSiteForm.icon());
     instanceService.updateInstance(instance);
-    return SiteResponse.builder()
-        .site_view(lemmySiteService.getSiteView())
-        .tag_lines(new ArrayList<>())
-        .build();
+
+    InstanceConfig config = instance.getInstanceConfig();
+
+    if (config == null) {
+      config = InstanceConfig.builder().build();
+    }
+
+    config.setRegistrationMode(editSiteForm.registration_mode());
+    config.setRegistrationQuestion(editSiteForm.application_question());
+
+    instanceConfigService.updateInstanceConfig(config);
+
+    return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
+        .tag_lines(new ArrayList<>()).build();
   }
 
   @Operation(summary = "Block an instance.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = BlockInstanceResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockInstanceResponse.class))})})
   @PostMapping("/block")
   @Transactional
   public BlockInstanceResponse blockInstance(

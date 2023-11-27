@@ -145,3 +145,29 @@ ALTER TABLE `post_reports`
   ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`creator_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`resolver_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Comment Replies table
+  */
+ALTER TABLE `comment_replies`
+  ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`recipient_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  People Applications table
+  */
+ALTER TABLE `people_applications`
+  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`admin_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Instances Table
+ */
+ALTER TABLE `instances`
+  ADD FOREIGN KEY (`instance_config_id`) REFERENCES `instance_configs` (`id`) ON DELETE SET NULL;
+
+/**
+  Instance Config table
+ */
+ALTER TABLE `instance_configs`
+  ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;

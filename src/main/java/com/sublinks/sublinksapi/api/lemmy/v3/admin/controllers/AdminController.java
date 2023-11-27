@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.admin.controllers;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AddAdmin;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AddAdminResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.ApproveRegistrationApplication;
+import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.GetUnreadRegistrationApplicationCount;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.GetUnreadRegistrationApplicationCountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.ListRegistrationApplications;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.ListRegistrationApplicationsResponse;
@@ -14,13 +15,18 @@ import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApi
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.PurgeCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PurgePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PurgePerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
+import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
+import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -50,7 +56,9 @@ public class AdminController extends AbstractLemmyApiController {
   private final AuthorizationService authorizationService;
   private final LocalInstanceContext localInstanceContext;
   private final PersonRepository personRepository;
-
+  private final PersonRegistrationApplicationRepository personRegistrationApplicationRepository;
+  private final PersonRegistrationApplicationService personRegistrationApplicationService;
+  private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -89,10 +97,18 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetUnreadRegistrationApplicationCountResponse.class))})})
   @GetMapping("registration_application/count")
-  GetUnreadRegistrationApplicationCountResponse registrationApplicationCount() {
+  GetUnreadRegistrationApplicationCountResponse registrationApplicationCount(
+      @Valid GetUnreadRegistrationApplicationCount getUnreadRegistrationApplicationCountForm,
+      JwtPerson principal) {
 
-    return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(0)
-        .build();
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(
+        (int) personRegistrationApplicationRepository.countByApplicationStatus(
+            PersonRegistrationApplicationStatus.pending)).build();
   }
 
   @Operation(summary = "List the registration applications.")
@@ -100,9 +116,21 @@ public class AdminController extends AbstractLemmyApiController {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListRegistrationApplicationsResponse.class))})})
   @GetMapping("registration_application/list")
   ListRegistrationApplicationsResponse registrationApplicationList(
-      @Valid final ListRegistrationApplications listRegistrationApplicationsForm) {
+      @Valid final ListRegistrationApplications listRegistrationApplicationsForm,
+      JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final List<PersonRegistrationApplication> personRegistrationApplications = personRegistrationApplicationRepository.findAllByApplicationStatus(
+        PersonRegistrationApplicationStatus.pending);
+
+    return ListRegistrationApplicationsResponse.builder().registration_applications(
+        personRegistrationApplications.stream()
+            .map(lemmyPersonRegistrationApplicationService::getPersonRegistrationApplicationView)
+            .toList()).build();
   }
 
   @Operation(summary = "Approve a registration application.")
@@ -110,9 +138,31 @@ public class AdminController extends AbstractLemmyApiController {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RegistrationApplicationResponse.class))})})
   @PutMapping("registration_application/approve")
   RegistrationApplicationResponse registrationApplicationApprove(
-      @Valid final ApproveRegistrationApplication approveRegistrationApplicationForm) {
+      @Valid final ApproveRegistrationApplication approveRegistrationApplicationForm,
+      JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final PersonRegistrationApplication personRegistrationApplication = personRegistrationApplicationRepository.findById(
+        (long) approveRegistrationApplicationForm.id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            "registration_application_not_found"));
+
+    personRegistrationApplication.setApplicationStatus(
+        approveRegistrationApplicationForm.approved() ? PersonRegistrationApplicationStatus.approved
+            : PersonRegistrationApplicationStatus.rejected);
+
+    personRegistrationApplication.setAdmin(person);
+
+    personRegistrationApplicationService.updatePersonRegistrationApplication(
+        personRegistrationApplication);
+
+    return RegistrationApplicationResponse.builder().registration_application(
+        lemmyPersonRegistrationApplicationService.getPersonRegistrationApplicationView(
+            personRegistrationApplication)).build();
   }
 
   @Operation(summary = "Purge / Delete a person from the database.")
