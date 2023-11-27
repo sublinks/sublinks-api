@@ -63,3 +63,14 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.named("bootBuildImage") {
+    imageName.set("ghcr.io/participating-online/${project.name}:${project.version}")
+    publish = true
+    docker {
+        publishRegistry {
+            username = System.getenv('DOCKER_USER')
+            password = System.getenv('DOCKER_PASSWORD')
+        }
+    }
+}
