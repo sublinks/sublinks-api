@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
@@ -11,8 +12,15 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
+import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
+import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
+import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -42,20 +50,30 @@ public class UserAuthController {
   private final JwtUtil jwtUtil;
   private final PersonService personService;
   private final PersonRepository personRepository;
+  private final LocalInstanceContext localInstanceContext;
+  private final InstanceConfigRepository instanceConfigRepository;
+  private final InstanceConfigService instanceConfigService;
+  private final PersonRegistrationApplicationService personRegistrationApplicationService;
 
   @Operation(summary = "Register a new user.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = LoginResponse.class,
-                  description = "JWT will be empty if registration " +
-                      "requires email verification or application approval."))}),
-      @ApiResponse(responseCode = "400", description = "Passwords do not match.",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class, description =
+          "JWT will be empty if registration "
+              + "requires email verification or application approval."))}),
+      @ApiResponse(responseCode = "400", description = "Passwords do not match.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("register")
   LoginResponse create(@Valid @RequestBody final Register registerForm) {
+
+    InstanceConfig instanceConfig = localInstanceContext.instance().getInstanceConfig();
+
+    if (instanceConfig != null && instanceConfig.getRegistrationMode() == RegistrationMode.Closed) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "registration_disabled");
+    }
+
+    if (personRepository.findOneByName(registerForm.username()).isPresent()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username_taken");
+    }
 
     final Person person = personService.getDefaultNewUser(registerForm.username());
     if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
@@ -63,20 +81,24 @@ public class UserAuthController {
       // @todo throw lemmy error code
     }
     personService.createPerson(person);
-    final String token = jwtUtil.generateToken(person);
-    return LoginResponse.builder()
-        .jwt(token)
-        .registration_created(false)
-        .verify_email_sent(false)
+    String token = jwtUtil.generateToken(person);
+
+    if (instanceConfig != null
+        && instanceConfig.getRegistrationMode() == RegistrationMode.RequireApplication) {
+      personRegistrationApplicationService.createPersonRegistrationApplication(
+          PersonRegistrationApplication.builder()
+              .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
+              .answer(registerForm.answer()).build());
+      token = "";
+    }
+
+    return LoginResponse.builder().jwt(token).registration_created(true).verify_email_sent(false)
         .build();
   }
 
   @Operation(summary = "Fetch a Captcha.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetCaptchaResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCaptchaResponse.class))})})
   @GetMapping("get_captcha")
   GetCaptchaResponse captcha() {
 
@@ -84,14 +106,10 @@ public class UserAuthController {
   }
 
   @Operation(summary = "Log into lemmy.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetCaptchaResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "A valid user is not found or password is incorrect.",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCaptchaResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "A valid user is not found or password is incorrect.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("login")
   LoginResponse login(@Valid @RequestBody final Login loginForm) {
 
@@ -99,19 +117,15 @@ public class UserAuthController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
     final String token = jwtUtil.generateToken(person);
-    return LoginResponse.builder()
-        .jwt(token)
+    return LoginResponse.builder().jwt(token)
         .registration_created(false) // @todo return true if application created
         .verify_email_sent(false) // @todo return true if welcome email sent for verification
         .build();
   }
 
   @Operation(summary = "Delete your account.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = DeleteAccountResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteAccountResponse.class))})})
   @PostMapping("delete_account")
   DeleteAccountResponse delete() {
 
@@ -119,11 +133,8 @@ public class UserAuthController {
   }
 
   @Operation(summary = "Reset your password.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = PasswordResetResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PasswordResetResponse.class))})})
   @PostMapping("password_reset")
   PasswordResetResponse passwordReset() {
 
@@ -131,11 +142,8 @@ public class UserAuthController {
   }
 
   @Operation(summary = "Change your password from an email / token based reset.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = LoginResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class))})})
   @PostMapping("password_change")
   LoginResponse passwordChange() {
 
@@ -143,11 +151,8 @@ public class UserAuthController {
   }
 
   @Operation(summary = "Verify your email.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = VerifyEmailResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = VerifyEmailResponse.class))})})
   @PostMapping("verify_email")
   VerifyEmailResponse verifyEmail() {
 
@@ -155,11 +160,8 @@ public class UserAuthController {
   }
 
   @Operation(summary = "Change your user password.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = LoginResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class))})})
   @PutMapping("change_password")
   LoginResponse changePassword() {
 
@@ -167,11 +169,8 @@ public class UserAuthController {
   }
 
   @Operation(summary = "Generate a TOTP / two-factor secret.\r\r Afterwards you need to call `/user/totp/update` with a valid token to enable it.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GenerateTotpSecretResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GenerateTotpSecretResponse.class))})})
   @PostMapping("totp/generate")
   GenerateTotpSecretResponse totpGenerate() {
 
@@ -179,14 +178,11 @@ public class UserAuthController {
   }
 
   @Operation(summary =
-      "Enable / Disable TOTP / two-factor authentication.\r\r To enable, you need to first call " +
-          "`/user/totp/generate` and then pass a valid token to this.\r\r " +
-          "Disabling is only possible if 2FA was previously enabled. Again it is necessary to pass a valid token.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = UpdateTotpResponse.class))})
-  })
+      "Enable / Disable TOTP / two-factor authentication.\r\r To enable, you need to first call "
+          + "`/user/totp/generate` and then pass a valid token to this.\r\r "
+          + "Disabling is only possible if 2FA was previously enabled. Again it is necessary to pass a valid token.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
   @PostMapping("totp/update")
   UpdateTotpResponse totpUpdate() {
 
