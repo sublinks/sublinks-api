@@ -8,6 +8,8 @@
 name: Java CI with Gradle
 
 on:
+  schedule:
+    - cron: '29 0 * * *'
   push:
     branches: [ "main" ]
   pull_request:
@@ -15,6 +17,11 @@ on:
 
 permissions:
   contents: read
+  packages: write
+
+env:
+  DOCKER_USER: ${{ github.actor }}
+  DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   build:
@@ -32,3 +39,7 @@ jobs:
       uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
       with:
         arguments: build
+    - name: Build Docker Image
+      uses: gradle/gradle-build-action@bd5760595778326ba7f1441bcf7e88b49de61a25 # v2.6.0
+      with:
+        arguments: bootBuildImage
