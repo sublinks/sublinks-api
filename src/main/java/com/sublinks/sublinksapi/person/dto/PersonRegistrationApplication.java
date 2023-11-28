@@ -29,7 +29,7 @@ import org.hibernate.proxy.HibernateProxy;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "people_applications")
+@Table(name = "person_applications")
 public class PersonRegistrationApplication {
 
   /**

@@ -100,8 +100,7 @@ public class Person implements UserDetails, Principal {
   @JoinTable(name = "person_languages", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
-  @OneToOne
-  @JoinColumn(name = "application_id")
+  @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
   private PersonRegistrationApplication registrationApplication;
 
   /**

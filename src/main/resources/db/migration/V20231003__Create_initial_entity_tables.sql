@@ -116,21 +116,20 @@ CREATE TABLE `community_languages`
  */
 CREATE TABLE `instances`
 (
-  `id`                 BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `activity_pub_id`    TEXT                                      NOT NULL,
-  `domain`             VARCHAR(255)                              NOT NULL,
-  `software`           VARCHAR(255)                              NULL,
-  `version`            VARCHAR(255)                              NULL,
-  `name`               VARCHAR(255)                              NULL,
-  `instance_config_id` BIGINT                                    NULL,
-  `description`        TEXT                                      NULL,
-  `sidebar`            TEXT                                      NULL,
-  `icon_url`           TEXT                                      NULL,
-  `banner_url`         TEXT                                      NULL,
-  `public_key`         TEXT                                      NOT NULL,
-  `private_key`        TEXT                                      NULL,
-  `created_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  `updated_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+  `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `activity_pub_id` TEXT                                      NOT NULL,
+  `domain`          VARCHAR(255)                              NOT NULL,
+  `software`        VARCHAR(255)                              NULL,
+  `version`         VARCHAR(255)                              NULL,
+  `name`            VARCHAR(255)                              NULL,
+  `description`     TEXT                                      NULL,
+  `sidebar`         TEXT                                      NULL,
+  `icon_url`        TEXT                                      NULL,
+  `banner_url`      TEXT                                      NULL,
+  `public_key`      TEXT                                      NOT NULL,
+  `private_key`     TEXT                                      NULL,
+  `created_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
@@ -220,7 +219,6 @@ CREATE TABLE `people`
   `is_show_avatars`                TINYINT      NOT NULL DEFAULT 0,
   `is_send_notifications_to_email` TINYINT      NOT NULL DEFAULT 0,
   `is_open_links_in_new_tab`       TINYINT      NOT NULL DEFAULT 0,
-  `application_id`                 BIGINT       NULL,
   `public_key`                     TEXT         NOT NULL,
   `private_key`                    TEXT         NULL,
   `created_at`                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
@@ -588,7 +586,7 @@ CREATE INDEX `IDX_POST_REPORTS_CREATOR_ID` ON `post_reports` (`creator_id`);
 /**
     Person Registration Application
     */
-CREATE TABLE `people_applications`
+CREATE TABLE `person_applications`
 (
   `id`                 BIGINT AUTO_INCREMENT PRIMARY KEY,
   `admin_id`           BIGINT                                    NULL,
@@ -601,7 +599,7 @@ CREATE TABLE `people_applications`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-CREATE INDEX `IDX_PEOPLE_APPLICATIONS_PERSON_ID` ON `people_applications` (`person_id`);
+CREATE INDEX `IDX_PEOPLE_APPLICATIONS_PERSON_ID` ON `person_applications` (`person_id`);
 
 /**
     Instance Config
