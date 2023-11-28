@@ -156,15 +156,9 @@ ALTER TABLE `comment_replies`
 /**
   People Applications table
   */
-ALTER TABLE `people_applications`
+ALTER TABLE `person_applications`
   ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`admin_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
-
-/**
-  Instances Table
- */
-ALTER TABLE `instances`
-  ADD FOREIGN KEY (`instance_config_id`) REFERENCES `instance_configs` (`id`) ON DELETE SET NULL;
 
 /**
   Instance Config table
