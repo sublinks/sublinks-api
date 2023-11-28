@@ -1,0 +1,89 @@
+version: "3.7"
+
+volumes:
+  letsencrypt:
+
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "50m"
+    max-file: "4"
+
+services:
+  proxy:
+    image: jonasal/nginx-certbot:4.3.0-nginx1.25.1-alpine
+    environment:
+      CERTBOT_EMAIL: <your-email>
+      CERTBOT_AUTHENTICATOR: <certbot-auth-provider>
+      NGINX_ENTRYPOINT_WORKER_PROCESSES_AUTOTUNE: 1
+    ports:
+      - "80:8080"
+      - "443:8443"
+    volumes:
+      - ./nginx_internal.conf:/etc/nginx/user_conf.d/nginx.conf:ro,Z
+      - ./proxy_params:/etc/nginx/proxy_params:ro,Z
+      - letsencrypt:/etc/letsencrypt
+    restart: always
+    logging: *default-logging
+    depends_on:
+      - lemmy-ui
+
+  federation:
+    image: ghcr.io/participating-online/sublinks-federation:main
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      LEMMY_USER: federation
+      LEMMY_PASSWORD: doesntmatter
+    depends_on:
+      - sublinks
+
+  sublinks:
+    image: ghcr.io/participating-online/sublinks-api:0.0.1-snapshot
+    restart: always
+    ports:
+      - "8080"
+    environment:
+      SUBLINKS_DB_URL: jdbc:mysql://db:3306/sublinks
+      SUBLINKS_DB_USERNAME: sublinks
+      SUBLINKS_DB_PASSWORD: sublinks
+      SUBLINKS_JWT_SECRET: <JWT-SECRET>
+      SUBLINKS_BASE_URL: https://demo.sublinks.org
+      SUBLINKS_PICTRS_URL: http://pictrs:8080
+    logging: *default-logging
+    depends_on:
+      - db
+      - pictrs
+  
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sublinks
+      - MYSQL_USER=sublinks
+      - MYSQL_PASSWORD=sublinks
+    restart: always
+    logging: *default-logging
+
+  lemmy-ui:
+    image: dessalines/lemmy-ui:0.19.0-rc.4
+    environment:
+      #- LEMMY_UI_DEBUG=true
+      - LEMMY_UI_DISABLE_CSP=true
+      - LEMMY_UI_LEMMY_INTERNAL_HOST=sublinks:8080
+      - LEMMY_UI_LEMMY_EXTERNAL_HOST=demo.sublinks.org
+    restart: always
+    logging: *default-logging
+    depends_on:
+      - sublinks
+      - federation
+
+  pictrs:
+    image: docker.io/asonix/pictrs:0.4.3
+    hostname: pictrs
+    # we can set options to pictrs like this, here we set max. image size and forced format for conversion
+    # entrypoint: /sbin/tini -- /usr/local/bin/pict-rs -p /mnt -m 4 --image-format webp
+    user: 991:991
+    restart: always
+    logging: *default-logging
