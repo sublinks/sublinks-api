@@ -88,7 +88,8 @@ public class UserAuthController {
       personRegistrationApplicationService.createPersonRegistrationApplication(
           PersonRegistrationApplication.builder()
               .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
-              .answer(registerForm.answer()).build());
+              .question(instanceConfig.getRegistrationQuestion()).answer(registerForm.answer())
+              .build());
       token = "";
     }
 
