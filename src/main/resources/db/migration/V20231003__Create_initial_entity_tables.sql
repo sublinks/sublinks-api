@@ -591,6 +591,7 @@ CREATE TABLE `person_applications`
   `id`                 BIGINT AUTO_INCREMENT PRIMARY KEY,
   `admin_id`           BIGINT                                    NULL,
   `person_id`          BIGINT                                    NOT NULL,
+  `question`           TEXT                                      NULL,
   `answer`             TEXT                                      NULL,
   `application_status` ENUM ('pending','approved','rejected')    NOT NULL,
   `created_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,

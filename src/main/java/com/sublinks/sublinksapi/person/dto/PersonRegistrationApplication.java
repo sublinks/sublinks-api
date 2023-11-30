@@ -50,8 +50,10 @@ public class PersonRegistrationApplication {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column()
+  private String question;
 
-  @Column(nullable = false)
+  @Column()
   private String answer;
 
   @Column(nullable = false, name = "application_status")
