@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.models;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import java.util.Collection;
 import lombok.Builder;
@@ -20,7 +21,7 @@ public record EditSite(
     String application_question,
     Boolean private_instance,
     String default_theme,
-    String default_post_listing_type,
+    ListingType default_post_listing_type,
     String legal_information,
     Boolean application_email_admins,
     Boolean hide_modlog_mod_names,

@@ -608,12 +608,27 @@ CREATE INDEX `IDX_PEOPLE_APPLICATIONS_PERSON_ID` ON `person_applications` (`pers
 
 CREATE TABLE `instance_configs`
 (
-  `id`                    BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `instance_id`           BIGINT                                        NOT NULL UNIQUE,
-  `registration_mode`     ENUM ('Closed', 'RequireApplication', 'Open') NOT NULL DEFAULT 'Closed',
-  `registration_question` TEXT                                          NULL,
-  `created_at`            timestamp(3)                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_at`            timestamp(3)                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+  `id`                            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `instance_id`                   BIGINT                                               NOT NULL UNIQUE,
+  `registration_mode`             ENUM ('Closed', 'RequireApplication', 'Open')        NOT NULL DEFAULT 'Closed',
+  `registration_question`         TEXT                                                 NULL,
+  `private_instance`              BOOLEAN                                              NULL,
+  `enable_downvotes`              BOOLEAN                                              NULL,
+  `enable_nsfw`                   BOOLEAN                                              NULL,
+  `community_creation_admin_only` BOOLEAN                                              NULL,
+  `application_email_admins`      BOOLEAN                                              NULL,
+  `hide_modlog_mod_names`         BOOLEAN                                              NULL,
+  `federation_enabled`            BOOLEAN                                              NULL,
+  `captcha_enabled`               BOOLEAN                                              NULL,
+  `captcha_difficulty`            TEXT                                                 NULL,
+  `require_email_verification`    BOOLEAN                                              NULL,
+  `slur_filter_regex`             TEXT                                                 NULL,
+  `actor_name_max_length`         BIGINT                                               NULL,
+  `default_theme`                 TEXT                                                 NULL,
+  `legal_information`             TEXT                                                 NULL,
+  `default_post_listing_type`     ENUM ('All', 'Local', 'Subscribed', 'ModeratorView') NULL,
+  `created_at`                    timestamp(3)                                         NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at`                    timestamp(3)                                         NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

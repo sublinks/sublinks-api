@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.instance.dto;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,12 +44,58 @@ public class InstanceConfig {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, name = "registration_mode")
+  @Column(name = "registration_mode")
   @Enumerated(EnumType.STRING)
   private RegistrationMode registrationMode;
 
   @Column(name = "registration_question")
   private String registrationQuestion;
+
+  @Column(name = "private_instance")
+  private boolean privateInstance;
+
+  @Column(name = "require_email_verification")
+  private boolean requireEmailVerification;
+
+  @Column(name = "enable_downvotes")
+  private boolean enableDownvotes;
+
+  @Column(name = "enable_nsfw")
+  private boolean enableNsfw;
+
+  @Column(name = "community_creation_admin_only")
+  private boolean communityCreationAdminOnly;
+
+  @Column(name = "application_email_admins")
+  private boolean applicationEmailAdmins;
+
+  @Column(name = "hide_modlog_mod_names")
+  private boolean hideModlogModNames;
+
+  @Column(name = "federation_enabled")
+  private boolean federationEnabled;
+
+  @Column(name = "captcha_enabled")
+  private boolean captchaEnabled;
+
+  @Column(name = "captcha_difficulty")
+  private String captchaDifficulty;
+
+  @Column(name = "slur_filter_regex")
+  private String slurFilterRegex;
+
+  @Column(name = "actor_name_max_length")
+  private int actorNameMaxLength;
+
+  @Column(name = "default_theme")
+  private String defaultTheme;
+
+  @Column(name = "default_post_listing_type")
+  @Enumerated(EnumType.STRING)
+  private ListingType defaultPostListingType;
+
+  @Column(name = "legal_information")
+  private String legalInformation;
 
   @CreationTimestamp
   @Column(nullable = false, name = "created_at")
