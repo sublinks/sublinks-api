@@ -2,7 +2,6 @@ package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstance;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstanceResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.CreateSite;
@@ -108,13 +107,29 @@ public class SiteController extends AbstractLemmyApiController {
     instance.setIconUrl(createSiteForm.icon());
     instanceService.createInstance(instance);
 
-    final InstanceConfig config = InstanceConfig.builder().instance(instance)
-        .registrationMode(createSiteForm.registration_mode())
-        .registrationQuestion(createSiteForm.application_question()).build();
+    final InstanceConfig.InstanceConfigBuilder config = InstanceConfig.builder().instance(instance);
+    config.registrationMode(createSiteForm.registration_mode());
+    config.registrationQuestion(createSiteForm.application_question());
 
-    instanceConfigService.createInstanceConfig(config);
+    config.actorNameMaxLength(createSiteForm.actor_name_max_length());
+    config.captchaDifficulty(createSiteForm.captcha_difficulty());
+    config.captchaEnabled(createSiteForm.captcha_enabled());
+    config.communityCreationAdminOnly(createSiteForm.community_creation_admin_only());
+    config.enableDownvotes(createSiteForm.enable_downvotes());
+    config.enableNsfw(createSiteForm.enable_nsfw());
+    config.federationEnabled(createSiteForm.federation_enabled());
+    config.hideModlogModNames(createSiteForm.hide_modlog_mod_names());
+    config.privateInstance(createSiteForm.private_instance());
+    config.requireEmailVerification(createSiteForm.require_email_verification());
+    config.slurFilterRegex(createSiteForm.slur_filter_regex());
+    config.applicationEmailAdmins(createSiteForm.application_email_admins());
+    config.defaultTheme(createSiteForm.default_theme());
+    config.defaultPostListingType(createSiteForm.default_post_listing_type());
+    config.legalInformation(createSiteForm.legal_information());
 
-    instance.setInstanceConfig(config);
+    final InstanceConfig instanceConfig = config.build();
+
+    instance.setInstanceConfig(instanceConfig);
     instanceService.updateInstance(instance);
 
     return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
@@ -147,6 +162,22 @@ public class SiteController extends AbstractLemmyApiController {
     if (config == null) {
       config = InstanceConfig.builder().build();
     }
+
+    config.setActorNameMaxLength(editSiteForm.actor_name_max_length());
+    config.setCaptchaDifficulty(editSiteForm.captcha_difficulty());
+    config.setCaptchaEnabled(editSiteForm.captcha_enabled());
+    config.setCommunityCreationAdminOnly(editSiteForm.community_creation_admin_only());
+    config.setEnableDownvotes(editSiteForm.enable_downvotes());
+    config.setEnableNsfw(editSiteForm.enable_nsfw());
+    config.setFederationEnabled(editSiteForm.federation_enabled());
+    config.setHideModlogModNames(editSiteForm.hide_modlog_mod_names());
+    config.setPrivateInstance(editSiteForm.private_instance());
+    config.setRequireEmailVerification(editSiteForm.require_email_verification());
+    config.setSlurFilterRegex(editSiteForm.slur_filter_regex());
+    config.setApplicationEmailAdmins(editSiteForm.application_email_admins());
+    config.setDefaultTheme(editSiteForm.default_theme());
+    config.setDefaultPostListingType(editSiteForm.default_post_listing_type());
+    config.setLegalInformation(editSiteForm.legal_information());
 
     config.setRegistrationMode(editSiteForm.registration_mode());
     config.setRegistrationQuestion(editSiteForm.application_question());
