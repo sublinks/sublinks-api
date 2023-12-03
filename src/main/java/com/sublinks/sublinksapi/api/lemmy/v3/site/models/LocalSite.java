@@ -4,7 +4,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 @SuppressWarnings("RecordComponentName")
 public record LocalSite(
     Long id,

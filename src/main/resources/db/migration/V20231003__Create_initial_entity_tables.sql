@@ -581,3 +581,39 @@ CREATE TABLE `post_reports`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE INDEX `IDX_POST_REPORTS_CREATOR_ID` ON `post_reports` (`creator_id`);
+
+
+/**
+    Person Registration Application
+    */
+CREATE TABLE `person_applications`
+(
+  `id`                 BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `admin_id`           BIGINT                                    NULL,
+  `person_id`          BIGINT                                    NOT NULL,
+  `question`           TEXT                                      NULL,
+  `answer`             TEXT                                      NULL,
+  `application_status` ENUM ('pending','approved','rejected')    NOT NULL,
+  `created_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_PEOPLE_APPLICATIONS_PERSON_ID` ON `person_applications` (`person_id`);
+
+/**
+    Instance Config
+    */
+
+CREATE TABLE `instance_configs`
+(
+  `id`                    BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `instance_id`           BIGINT                                        NOT NULL UNIQUE,
+  `registration_mode`     ENUM ('Closed', 'RequireApplication', 'Open') NOT NULL DEFAULT 'Closed',
+  `registration_question` TEXT                                          NULL,
+  `created_at`            timestamp(3)                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at`            timestamp(3)                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;

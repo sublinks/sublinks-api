@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiView;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Language;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.LocalSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.LocalSiteRateLimit;
@@ -33,11 +34,9 @@ public class LemmySiteService {
   // @todo finish admin list
   public Collection<PersonView> admins() {
 
-    Collection<LinkPersonInstance> admins
-        = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsIn(
+    Collection<LinkPersonInstance> admins = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsIn(
         localInstanceContext.instance(),
-        List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin)
-    );
+        List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin));
     final Collection<PersonView> adminViews = new LinkedHashSet<>();
     for (LinkPersonInstance linkPersonInstance : admins) {
       adminViews.add(lemmyPersonService.getPersonView(linkPersonInstance.getPerson()));
@@ -49,11 +48,8 @@ public class LemmySiteService {
 
     final Collection<Language> languages = new LinkedHashSet<>();
     for (com.sublinks.sublinksapi.language.dto.Language language : languageRepository.findAll()) {
-      Language l = Language.builder()
-          .id(language.getId())
-          .code(language.getCode())
-          .name(language.getName())
-          .build();
+      Language l = Language.builder().id(language.getId()).code(language.getCode())
+          .name(language.getName()).build();
       languages.add(l);
     }
     return languages;
@@ -68,12 +64,26 @@ public class LemmySiteService {
 
   public SiteView getSiteView() {
 
-    return SiteView.builder()
-        .site(conversionService.convert(localInstanceContext, Site.class))
-        .local_site(conversionService.convert(localInstanceContext, LocalSite.class))
+    final LocalSite localSite = conversionService.convert(localInstanceContext, LocalSite.class);
+
+    final LocalSite.LocalSiteBuilder builder = localSite.toBuilder();
+
+    if (localInstanceContext.instance().getInstanceConfig() != null) {
+      builder.application_question(
+          localInstanceContext.instance().getInstanceConfig().getRegistrationQuestion());
+      builder.registration_mode(
+          localInstanceContext.instance().getInstanceConfig().getRegistrationMode());
+
+      // @todo: Change it to use the instance config.
+      builder.private_instance(
+          localInstanceContext.instance().getInstanceConfig().getRegistrationMode()
+              == RegistrationMode.Closed);
+    }
+
+    return SiteView.builder().site(conversionService.convert(localInstanceContext, Site.class))
+        .local_site(builder.build())
         .counts(conversionService.convert(localInstanceContext, SiteAggregates.class))
         .local_site_rate_limit(
-            conversionService.convert(localInstanceContext, LocalSiteRateLimit.class))
-        .build();
+            conversionService.convert(localInstanceContext, LocalSiteRateLimit.class)).build();
   }
 }
