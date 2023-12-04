@@ -52,8 +52,8 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
-    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
+    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0'
+    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
