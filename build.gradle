@@ -34,7 +34,7 @@ dependencies {
     annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.0.Final"
 
     // Springdoc for Swagger API Docs
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
