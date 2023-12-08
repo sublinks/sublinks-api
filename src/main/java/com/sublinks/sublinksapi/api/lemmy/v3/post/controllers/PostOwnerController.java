@@ -19,8 +19,13 @@ import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.SlugUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
@@ -61,16 +66,14 @@ public class PostOwnerController extends AbstractLemmyApiController {
   private final PersonService personService;
   private final SiteMetadataUtil siteMetadataUtil;
   private final UrlUtil urlUtil;
+  private final SlurFilterService slurFilterService;
+  private final PostReportService postReportService;
 
   @Operation(summary = "Create a post.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping
   @Transactional
   public PostResponse create(@Valid @RequestBody final CreatePost createPostForm,
@@ -79,11 +82,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
     final Community community = communityRepository.findById((long) createPostForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     final Person person = getPersonOrThrowUnauthorized(principal);
-    authorizationService
-        .canPerson(person)
-        .performTheAction(AuthorizeAction.create)
-        .onEntity(AuthorizedEntityType.post)
-        .defaultResponse(
+    authorizationService.canPerson(person).performTheAction(AuthorizeAction.create)
+        .onEntity(AuthorizedEntityType.post).defaultResponse(
             community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline
                 : AuthorizationService.ResponseType.allow)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
@@ -108,22 +108,36 @@ public class PostOwnerController extends AbstractLemmyApiController {
       metadata = siteMetadataUtil.fetchSiteMetadata(url);
     }
 
-    final Post.PostBuilder postBuilder = Post.builder()
-        .instance(localInstanceContext.instance())
-        .community(community)
-        .language(language.get())
-        .title(createPostForm.name())
-        .titleSlug(slugUtil.uniqueSlug(createPostForm.name()))
-        .postBody(createPostForm.body())
+    final Post.PostBuilder postBuilder = Post.builder().instance(localInstanceContext.instance())
+        .community(community).language(language.get()).title(createPostForm.name())
+        .titleSlug(slugUtil.uniqueSlug(createPostForm.name())).postBody(createPostForm.body())
         .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()));
+
+    boolean shouldReport = false;
+
+    try {
+      postBuilder.postBody(slurFilterService.censorText(createPostForm.body()));
+    } catch (SlurFilterReportException e) {
+      shouldReport = true;
+      postBuilder.postBody(createPostForm.body());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_blocked_by_slur_filter");
+    }
+
+    try {
+      postBuilder.title(slurFilterService.censorText(createPostForm.name()));
+    } catch (SlurFilterReportException e) {
+      shouldReport = true;
+      postBuilder.title(createPostForm.name());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_blocked_by_slur_filter");
+    }
 
     if (url != null) {
       postBuilder.linkUrl(url);
       if (metadata != null) {
-        postBuilder.linkTitle(metadata.title())
-            .linkDescription(metadata.description())
-            .linkVideoUrl(metadata.videoUrl())
-            .linkThumbnailUrl(metadata.imageUrl());
+        postBuilder.linkTitle(metadata.title()).linkDescription(metadata.description())
+            .linkVideoUrl(metadata.videoUrl()).linkThumbnailUrl(metadata.imageUrl());
       }
     }
 
@@ -131,20 +145,23 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     postService.createPost(post, person);
 
-    return PostResponse.builder()
-        .post_view(lemmyPostService.postViewFromPost(post, person))
+    if (shouldReport) {
+      postReportService.createPostReport(PostReport.builder().post(post).creator(person)
+          .reason("AUTOMATED: Post creation triggered a slur filter")
+          .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
+          .originalTitle(post.getTitle() == null ? "" : post.getTitle())
+          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl()).build());
+    }
+
+    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 
   @Operation(summary = "Edit a post.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PutMapping
   PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
@@ -153,11 +170,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService
-        .canPerson(person)
-        .defaultingToDecline()
-        .performTheAction(AuthorizeAction.update)
-        .onEntity(post)
+    authorizationService.canPerson(person).defaultingToDecline()
+        .performTheAction(AuthorizeAction.update).onEntity(post)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     post.setTitle(editPostForm.name());
@@ -167,22 +181,45 @@ public class PostOwnerController extends AbstractLemmyApiController {
         .get()); // @todo catch errors here
     post.setLinkUrl(editPostForm.url());
 
+    boolean shouldReport = false;
+
+    try {
+      post.setPostBody(slurFilterService.censorText(editPostForm.body()));
+    } catch (SlurFilterReportException e) {
+      shouldReport = true;
+      post.setPostBody(editPostForm.body());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_blocked");
+    }
+
+    try {
+      post.setTitle(slurFilterService.censorText(editPostForm.name()));
+    } catch (SlurFilterReportException e) {
+      shouldReport = true;
+      post.setTitle(editPostForm.name());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_blocked");
+    }
+
     postService.updatePost(post);
 
-    return PostResponse.builder()
-        .post_view(lemmyPostService.postViewFromPost(post, person))
+    if (shouldReport) {
+      postReportService.createPostReport(PostReport.builder().post(post).creator(person)
+          .reason("AUTOMATED: Post update triggered a slur filter")
+          .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
+          .originalTitle(post.getTitle() == null ? "" : post.getTitle())
+          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl()).build());
+    }
+
+    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 
   @Operation(summary = "Delete a post.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("delete")
   PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
 
@@ -190,19 +227,15 @@ public class PostOwnerController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService
-        .canPerson(person)
-        .defaultingToDecline()
-        .performTheAction(AuthorizeAction.delete)
-        .onEntity(post)
+    authorizationService.canPerson(person).defaultingToDecline()
+        .performTheAction(AuthorizeAction.delete).onEntity(post)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     post.setDeleted(deletePostForm.deleted());
 
     postService.softDeletePost(post);
 
-    return PostResponse.builder()
-        .post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 }

@@ -622,13 +622,26 @@ CREATE TABLE `instance_configs`
   `captcha_enabled`               BOOLEAN                                              NULL,
   `captcha_difficulty`            TEXT                                                 NULL,
   `require_email_verification`    BOOLEAN                                              NULL,
-  `slur_filter_regex`             TEXT                                                 NULL,
   `actor_name_max_length`         BIGINT                                               NULL,
   `default_theme`                 TEXT                                                 NULL,
   `legal_information`             TEXT                                                 NULL,
   `default_post_listing_type`     ENUM ('All', 'Local', 'Subscribed', 'ModeratorView') NULL,
   `created_at`                    timestamp(3)                                         NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`                    timestamp(3)                                         NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+/**
+  Slur Filters
+ */
+CREATE TABLE `slur_filters`
+(
+  `id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `slur_action_type` ENUM ('BLOCK','REMOVE','REPLACE')         NOT NULL,
+  `slur_regex`       TEXT                                      NOT NULL,
+  `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
