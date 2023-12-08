@@ -83,8 +83,7 @@ public class UserAuthController {
       if (!Objects.equals(filteredUsername, registerForm.username())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
       }
-    } catch (
-        SlurFilterBlockedException | SlurFilterReportException e) {
+    } catch (SlurFilterBlockedException | SlurFilterReportException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
     }
 
