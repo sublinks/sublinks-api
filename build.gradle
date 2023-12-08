@@ -65,7 +65,7 @@ tasks.named('test') {
 }
 
 tasks.named("bootBuildImage") {
-    imageName.set("ghcr.io/participating-online/${project.name}:${project.version}")
+    imageName.set("ghcr.io/sublinks/${project.name}:${project.version}")
     publish = true
     docker {
         publishRegistry {
