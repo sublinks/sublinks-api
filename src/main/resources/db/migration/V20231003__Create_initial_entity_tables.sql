@@ -637,11 +637,11 @@ CREATE TABLE `instance_configs`
  */
 CREATE TABLE `slur_filters`
 (
-  `id`             BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `slurActionType` ENUM ('block','remove','replace')         NOT NULL,
-  `slurRegex`      TEXT                                      NOT NULL,
-  `created_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  `updated_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+  `id`               BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `slur_action_type` ENUM ('BLOCK','REMOVE','REPLACE')         NOT NULL,
+  `slur_regex`       TEXT                                      NOT NULL,
+  `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

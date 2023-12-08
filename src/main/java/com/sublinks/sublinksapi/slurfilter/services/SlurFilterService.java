@@ -34,7 +34,13 @@ public class SlurFilterService {
 
   public SlurFilter getLemmySlurFilter() {
 
-    return slurFilterRepository.findAll().stream().findFirst().orElse(null);
+    SlurFilter slurFilter = slurFilterRepository.findAll().stream().findFirst().orElse(null);
+    if (slurFilter == null) {
+      slurFilter = SlurFilter.builder().slurRegex("").slurActionType(SlurActionType.BLOCK)
+          .build();
+    }
+    slurFilterRepository.save(slurFilter);
+    return slurFilter;
   }
 
   public SlurFilter getHighestSlurFilterMatchingText(String text) {
