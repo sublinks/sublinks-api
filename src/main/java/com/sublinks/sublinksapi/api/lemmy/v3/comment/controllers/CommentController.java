@@ -38,6 +38,9 @@ import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -83,6 +86,7 @@ public class CommentController extends AbstractLemmyApiController {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommentReplyRepository commentReplyRepository;
   private final CommentReplyService commentReplyService;
+  private final SlurFilterService slurFilterService;
 
   @Operation(summary = "Create a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -117,9 +121,17 @@ public class CommentController extends AbstractLemmyApiController {
       throw new RuntimeException("No language selected");
     }
 
-    final Comment comment = Comment.builder().person(person).isLocal(true)
-        .commentBody(createCommentForm.content()).activityPubId("").post(post)
-        .community(post.getCommunity()).language(language.get()).build();
+    final Comment comment = Comment.builder().person(person).isLocal(true).activityPubId("")
+        .post(post).community(post.getCommunity()).language(language.get()).build();
+    boolean shouldReport = false;
+    try {
+      comment.setCommentBody(slurFilterService.censorText(createCommentForm.content()));
+    } catch (SlurFilterReportException e) {
+      shouldReport = true;
+      comment.setCommentBody(createCommentForm.content());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_blocked_by_slur_filter");
+    }
 
     if (createCommentForm.parent_id() != null) {
       Optional<Comment> parentComment = commentRepository.findById(
@@ -132,6 +144,13 @@ public class CommentController extends AbstractLemmyApiController {
       commentService.createComment(comment);
     }
     commentLikeService.updateOrCreateCommentLikeLike(comment, person);
+
+    if (shouldReport) {
+      commentReportService.createCommentReport(
+          CommentReport.builder().comment(comment).creator(person)
+              .originalContent(comment.getCommentBody())
+              .reason("AUTOMATED: Comment creation triggered slur filter").build());
+    }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
     return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
@@ -151,7 +170,6 @@ public class CommentController extends AbstractLemmyApiController {
     authorizationService.canPerson(person).performTheAction(AuthorizeAction.update)
         .onEntity(comment).orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-    comment.setCommentBody(editCommentForm.content());
     Optional<Language> language;
     if (editCommentForm.language_id() != null) {
       language = languageRepository.findById((long) editCommentForm.language_id());
@@ -164,7 +182,25 @@ public class CommentController extends AbstractLemmyApiController {
     }
     comment.setLanguage(language.get());
 
+    boolean shouldReport = false;
+
+    try {
+      comment.setCommentBody(slurFilterService.censorText(editCommentForm.content()));
+    } catch (SlurFilterReportException e) {
+      shouldReport = true;
+      comment.setCommentBody(editCommentForm.content());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_blocked_by_slur_filter");
+    }
+
     commentService.updateComment(comment);
+
+    if (shouldReport) {
+      commentReportService.createCommentReport(
+          CommentReport.builder().comment(comment).creator(person)
+              .originalContent(comment.getCommentBody())
+              .reason("AUTOMATED: Comment update triggered slur filter").build());
+    }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
     return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
