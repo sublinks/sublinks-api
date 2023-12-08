@@ -29,7 +29,7 @@ services:
       - lemmy-ui
 
   federation:
-    image: ghcr.io/participating-online/sublinks-federation:main
+    image: ghcr.io/sublinks/federation:main
     restart: always
     ports:
       - "8081:8080"
@@ -40,7 +40,7 @@ services:
       - sublinks
 
   sublinks:
-    image: ghcr.io/participating-online/sublinks-api:0.0.1-snapshot
+    image: ghcr.io/sublinks/sublinks:0.0.1-snapshot
     restart: always
     ports:
       - "8080"
