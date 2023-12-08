@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,6 +58,7 @@ public class SiteController extends AbstractLemmyApiController {
   private final MyUserInfoService myUserInfoService;
   private final AuthorizationService authorizationService;
   private final InstanceConfigService instanceConfigService;
+  private final SlurFilterService slurFilterService;
 
   @Operation(summary = "Gets the site, and your user data.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -121,13 +123,14 @@ public class SiteController extends AbstractLemmyApiController {
     config.hideModlogModNames(createSiteForm.hide_modlog_mod_names());
     config.privateInstance(createSiteForm.private_instance());
     config.requireEmailVerification(createSiteForm.require_email_verification());
-    config.slurFilterRegex(createSiteForm.slur_filter_regex());
     config.applicationEmailAdmins(createSiteForm.application_email_admins());
     config.defaultTheme(createSiteForm.default_theme());
     config.defaultPostListingType(createSiteForm.default_post_listing_type());
     config.legalInformation(createSiteForm.legal_information());
 
     final InstanceConfig instanceConfig = config.build();
+
+    slurFilterService.updateOrCreateLemmySlur(createSiteForm.slur_filter_regex());
 
     instance.setInstanceConfig(instanceConfig);
     instanceService.updateInstance(instance);
@@ -173,7 +176,6 @@ public class SiteController extends AbstractLemmyApiController {
     config.setHideModlogModNames(editSiteForm.hide_modlog_mod_names());
     config.setPrivateInstance(editSiteForm.private_instance());
     config.setRequireEmailVerification(editSiteForm.require_email_verification());
-    config.setSlurFilterRegex(editSiteForm.slur_filter_regex());
     config.setApplicationEmailAdmins(editSiteForm.application_email_admins());
     config.setDefaultTheme(editSiteForm.default_theme());
     config.setDefaultPostListingType(editSiteForm.default_post_listing_type());
@@ -183,6 +185,8 @@ public class SiteController extends AbstractLemmyApiController {
     config.setRegistrationQuestion(editSiteForm.application_question());
 
     instanceConfigService.updateInstanceConfig(config);
+
+    slurFilterService.updateOrCreateLemmySlur(editSiteForm.slur_filter_regex());
 
     return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
         .tag_lines(new ArrayList<>()).build();

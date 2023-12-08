@@ -19,6 +19,9 @@ import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import com.sublinks.sublinksapi.utils.SlugUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -30,6 +33,7 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
@@ -56,22 +60,18 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final LemmyCommunityService lemmyCommunityService;
   private final SlugUtil slugUtil;
   private final CommunityRepository communityRepository;
+  private final SlurFilterService slurFilterService;
 
   @Operation(summary = "Create a new community.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = CommunityResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))})})
   @PostMapping
   @Transactional
   public CommunityResponse create(@Valid @RequestBody final CreateCommunity createCommunityForm,
       JwtPerson principal) {
 
     Person person = getPersonOrThrowUnauthorized(principal);
-    authorizationService
-        .canPerson(person)
-        .performTheAction(AuthorizeAction.create)
+    authorizationService.canPerson(person).performTheAction(AuthorizeAction.create)
         .onEntity(AuthorizedEntityType.community)
         .defaultingToAllow() // @todo use site setting to allow community creation
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
@@ -83,46 +83,66 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
       language.ifPresent(languages::add);
     }
 
-    Community community = Community.builder()
-        .instance(localInstanceContext.instance())
-        .title(createCommunityForm.title())
+    Community.CommunityBuilder communityBuilder = Community.builder()
+        .instance(localInstanceContext.instance()).title(createCommunityForm.title())
         .titleSlug(slugUtil.stringToSlug(createCommunityForm.name()))
-        .description(createCommunityForm.description())
-        .isPostingRestrictedToMods(createCommunityForm.posting_restricted_to_mods() != null
-            && createCommunityForm.posting_restricted_to_mods())
+        .description(createCommunityForm.description()).isPostingRestrictedToMods(
+            createCommunityForm.posting_restricted_to_mods() != null
+                && createCommunityForm.posting_restricted_to_mods())
         .isNsfw(createCommunityForm.nsfw() != null && createCommunityForm.nsfw())
-        .iconImageUrl(createCommunityForm.icon())
-        .bannerImageUrl(createCommunityForm.banner())
-        .languages(languages)
-        .build();
+        .iconImageUrl(createCommunityForm.icon()).bannerImageUrl(createCommunityForm.banner())
+        .languages(languages);
+
+    try {
+      communityBuilder.title(slurFilterService.censorText(createCommunityForm.title()));
+    } catch (SlurFilterReportException e) {
+      // Do nothing as we cant report communities
+      communityBuilder.title(createCommunityForm.title());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_blocked_by_slur_filter");
+    }
+
+    try {
+      communityBuilder.description(slurFilterService.censorText(createCommunityForm.description()));
+    } catch (SlurFilterReportException e) {
+      // Do nothing as we cant report communities
+      communityBuilder.description(createCommunityForm.description());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_blocked_by_slur_filter");
+    }
+
+    try {
+      String censorText = slurFilterService.censorText(createCommunityForm.name());
+      // We dont want censored slugs.... like c/#####communitytest
+      if (!Objects.equals(censorText, createCommunityForm.name())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "community_blocked_by_slur_filter");
+      }
+      communityBuilder.titleSlug(slugUtil.stringToSlug(createCommunityForm.name()));
+    } catch (SlurFilterReportException | SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_blocked_by_slur_filter");
+    }
+
+    Community community = communityBuilder.build();
 
     final Set<LinkPersonCommunity> linkPersonCommunities = new LinkedHashSet<>();
-    linkPersonCommunities.add(LinkPersonCommunity.builder()
-        .community(community)
-        .person(person)
-        .linkType(LinkPersonCommunityType.owner)
-        .build());
-    linkPersonCommunities.add(LinkPersonCommunity.builder()
-        .community(community)
-        .person(person)
-        .linkType(LinkPersonCommunityType.follower)
-        .build());
+    linkPersonCommunities.add(LinkPersonCommunity.builder().community(community).person(person)
+        .linkType(LinkPersonCommunityType.owner).build());
+    linkPersonCommunities.add(LinkPersonCommunity.builder().community(community).person(person)
+        .linkType(LinkPersonCommunityType.follower).build());
 
     communityService.createCommunity(community);
+
     linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
     return lemmyCommunityService.createCommunityResponse(community, person);
   }
 
   @Operation(summary = "Edit a community.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = CommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PutMapping
   CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm,
       final JwtPerson principal) {
@@ -131,18 +151,32 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     Community community = communityRepository.findById(editCommunityForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    authorizationService
-        .canPerson(person)
-        .performTheAction(AuthorizeAction.update)
+    authorizationService.canPerson(person).performTheAction(AuthorizeAction.update)
         .onEntity(community)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-    community.setTitle(editCommunityForm.title());
-    community.setDescription(editCommunityForm.description());
     community.setIconImageUrl(editCommunityForm.icon());
     community.setBannerImageUrl(editCommunityForm.banner());
     community.setNsfw(editCommunityForm.nsfw());
     community.setPostingRestrictedToMods(editCommunityForm.posting_restricted_to_mods());
+
+    try {
+      community.setTitle(slurFilterService.censorText(editCommunityForm.title()));
+    } catch (SlurFilterReportException e) {
+      // Do nothing as we cant report communities
+      community.setTitle(editCommunityForm.title());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_blocked_by_slur_filter");
+    }
+
+    try {
+      community.setDescription(slurFilterService.censorText(editCommunityForm.description()));
+    } catch (SlurFilterReportException e) {
+      // Do nothing as we cant report communities
+      community.setDescription(editCommunityForm.description());
+    } catch (SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_blocked_by_slur_filter");
+    }
 
     final List<Language> languages = new ArrayList<>();
     for (String languageCode : editCommunityForm.discussion_languages()) {
