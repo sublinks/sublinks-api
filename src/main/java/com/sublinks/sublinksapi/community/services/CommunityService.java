@@ -27,7 +27,7 @@ public class CommunityService {
     community.setPrivateKey(keys.privateKey());
     community.setPublicKey(keys.publicKey());
     community.setActivityPubId(
-        "c/" +localInstanceContext.instance().getDomain() + "/" + community.getTitleSlug());
+         localInstanceContext.instance().getDomain()  + "/c/" + community.getTitleSlug());
     community.setLocal(true);
     // @todo set inbox & follower urls
     communityRepository.save(community);
