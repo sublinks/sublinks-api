@@ -1,5 +1,6 @@
-package com.sublinks.sublinksapi.announcment.dto;
+package com.sublinks.sublinksapi.announcement.dto;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,6 +12,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
@@ -22,12 +25,29 @@ import org.hibernate.proxy.HibernateProxy;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "announcement")
+@Table(name = "announcements")
 public class Announcement {
 
+  /**
+   * Attributes.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  @Column(name = "content")
+  private String content;
+
+  @Column(name = "local_site_id")
+  private Long localSiteId;
+
+  @CreationTimestamp
+  @Column(name = "created_at")
+  private String createdAt;
+
+  @UpdateTimestamp
+  @Column(name = "updated_at")
+  private String updatedAt;
 
   /**
    * @param o Object to compare to
