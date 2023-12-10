@@ -645,3 +645,17 @@ CREATE TABLE `slur_filters`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+/**
+  Announcements
+ */
+CREATE TABLE `announcements`
+(
+  `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `content`       TEXT                                      NOT NULL,
+  `local_site_id` BIGINT                                    NOT NULL,
+  `created_at`    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;

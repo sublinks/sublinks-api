@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
+import com.sublinks.sublinksapi.announcement.dto.Announcement;
+import com.sublinks.sublinksapi.announcement.repositories.AnnouncementRepository;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.BlockInstance;
@@ -8,6 +10,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.CreateSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.EditSite;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
@@ -32,6 +35,7 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +63,9 @@ public class SiteController extends AbstractLemmyApiController {
   private final AuthorizationService authorizationService;
   private final InstanceConfigService instanceConfigService;
   private final SlurFilterService slurFilterService;
+  private final AnnouncementRepository announcementRepository;
+  private final ConversionService conversionService;
+
 
   @Operation(summary = "Gets the site, and your user data.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -68,7 +75,8 @@ public class SiteController extends AbstractLemmyApiController {
 
     GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
         .version("0.19.0") // @todo grab this from config?
-        .taglines(new ArrayList<>()) // @todo taglines
+        .taglines(announcementRepository.findAll().stream()
+            .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
@@ -135,8 +143,9 @@ public class SiteController extends AbstractLemmyApiController {
     instance.setInstanceConfig(instanceConfig);
     instanceService.updateInstance(instance);
 
-    return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
-        .tag_lines(new ArrayList<>()).build();
+    return SiteResponse.builder().site_view(lemmySiteService.getSiteView()).tag_lines(
+        announcementRepository.findAll().stream()
+            .map((x) -> conversionService.convert(x, Tagline.class)).toList()).build();
   }
 
   @Operation(summary = "Edit your site.")
@@ -150,6 +159,15 @@ public class SiteController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    if (editSiteForm.taglines().isPresent()) {
+      announcementRepository.deleteAll();
+      editSiteForm.taglines().get().forEach(tagline -> announcementRepository.save(
+          Announcement.builder().content(tagline)
+              .localSiteId(localInstanceContext.instance().getId()).build()));
+      return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
+          .tag_lines(new ArrayList<>()).build();
+    }
 
     final Instance instance = localInstanceContext.instance();
     instance.setName(editSiteForm.name());
