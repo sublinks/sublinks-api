@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApi
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePostLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.CreatePostReport;
@@ -24,10 +25,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadataResponse
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
+import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostReport;
@@ -86,7 +88,7 @@ public class PostController extends AbstractLemmyApiController {
   private final SiteMetadataUtil siteMetadataUtil;
   private final PostReportService postReportService;
   private final LemmyPostReportService lemmyPostReportService;
-
+  private final LocalInstanceContext localInstanceContext;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -190,11 +192,13 @@ public class PostController extends AbstractLemmyApiController {
       }
     }
 
+    InstanceConfig config = localInstanceContext.instance().getInstanceConfig();
+
     SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
     }
-    ListingType listingType = null; // @todo set to site default
+    ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig().getDefaultPostListingType() : null; // @todo set to site default
     if (getPostsForm.type_() != null) {
       listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
