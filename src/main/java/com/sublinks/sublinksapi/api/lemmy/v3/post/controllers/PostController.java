@@ -198,7 +198,7 @@ public class PostController extends AbstractLemmyApiController {
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
     }
-    ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig().getDefaultPostListingType() : null; // @todo set to site default
+    ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig().getDefaultPostListingType() : null;
     if (getPostsForm.type_() != null) {
       listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
