@@ -2,12 +2,12 @@ package com.sublinks.sublinksapi.post.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
-import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
