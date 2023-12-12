@@ -13,9 +13,12 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetCommunityRespon
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunities;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.ListCommunitiesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -57,22 +60,18 @@ public class CommunityController extends AbstractLemmyApiController {
   private final ConversionService conversionService;
 
   @Operation(summary = "Get / fetch a community.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetCommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCommunityResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @GetMapping
   public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm,
       final JwtPerson principal) {
 
     final Community community = Optional.ofNullable(
-        communityRepository.findCommunityByIdOrTitleSlug(
-            getCommunityForm.id(), getCommunityForm.name()
-        )).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+            communityRepository.findCommunityByIdOrTitleSlug(getCommunityForm.id(),
+                getCommunityForm.name()))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     final Optional<Person> person = getOptionalPerson(principal);
     CommunityView communityView;
     if (person.isPresent()) {
@@ -80,22 +79,17 @@ public class CommunityController extends AbstractLemmyApiController {
     } else {
       communityView = lemmyCommunityService.communityViewFromCommunity(community);
     }
-    final List<CommunityModeratorView> moderatorViews
-        = lemmyCommunityService.communityModeratorViewList(community);
-    return GetCommunityResponse.builder()
-        .community_view(communityView)
+    final List<CommunityModeratorView> moderatorViews = lemmyCommunityService.communityModeratorViewList(
+        community);
+    return GetCommunityResponse.builder().community_view(communityView)
         .site(conversionService.convert(localInstanceContext, Site.class))
         .moderators(moderatorViews)
-        .discussion_languages(lemmyCommunityService.communityLanguageCodes(community))
-        .build();
+        .discussion_languages(lemmyCommunityService.communityLanguageCodes(community)).build();
   }
 
   @Operation(summary = "List communities, with various filters.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ListCommunitiesResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommunitiesResponse.class))})})
   @GetMapping("list")
   @Transactional
   public ListCommunitiesResponse list(@Valid final ListCommunities listCommunitiesForm,
@@ -104,7 +98,19 @@ public class CommunityController extends AbstractLemmyApiController {
     final Collection<CommunityView> communityViews = new LinkedHashSet<>();
     final Optional<Person> person = getOptionalPerson(principal);
 
-    final Collection<Community> communities = communityRepository.findAll(); // @todo apply filters
+    final Collection<Community> communities = communityRepository.allCommunitiesBySearchCriteria(
+        CommunitySearchCriteria.builder()
+            .page(listCommunitiesForm.page() != null ? listCommunitiesForm.page() : 1)
+            .perPage(listCommunitiesForm.limit() != null ? listCommunitiesForm.limit() : 25)
+            .person(person.orElse(null)).listingType(
+                listCommunitiesForm.type_() != null ? listCommunitiesForm.type_()
+                    : (localInstanceContext.instance().getInstanceConfig() != null
+                        ? localInstanceContext.instance().getInstanceConfig()
+                        .getDefaultPostListingType() : ListingType.Local)).sortType(
+                listCommunitiesForm.sort() != null ? listCommunitiesForm.sort() : SortType.New)
+            .showNsfw(
+                listCommunitiesForm.show_nsfw() != null ? listCommunitiesForm.show_nsfw() : false)
+            .build());
     for (Community community : communities) {
       CommunityView communityView;
       if (person.isPresent()) {
@@ -115,20 +121,14 @@ public class CommunityController extends AbstractLemmyApiController {
       communityViews.add(communityView);
     }
 
-    return ListCommunitiesResponse.builder()
-        .communities(communityViews)
-        .build();
+    return ListCommunitiesResponse.builder().communities(communityViews).build();
   }
 
   @Operation(summary = "Follow / subscribe to a community.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = CommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("follow")
   CommunityResponse follow(@Valid @RequestBody final FollowCommunity followCommunityForm,
       final JwtPerson principal) {
@@ -154,21 +154,14 @@ public class CommunityController extends AbstractLemmyApiController {
           LinkPersonCommunityType.follower);
     }
 
-    return lemmyCommunityService.createCommunityResponse(
-        community.get(),
-        person
-    );
+    return lemmyCommunityService.createCommunityResponse(community.get(), person);
   }
 
   @Operation(summary = "Block a community.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = BlockCommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockCommunityResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("block")
   BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm,
       final JwtPerson principal) {
@@ -188,7 +181,6 @@ public class CommunityController extends AbstractLemmyApiController {
 
     return BlockCommunityResponse.builder()
         .community_view(lemmyCommunityService.communityViewFromCommunity(community, person))
-        .blocked(blockCommunityForm.block())
-        .build();
+        .blocked(blockCommunityForm.block()).build();
   }
 }
