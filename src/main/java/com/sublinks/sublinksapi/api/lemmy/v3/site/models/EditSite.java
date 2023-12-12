@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.site.models;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import java.util.Collection;
+import java.util.Optional;
 import lombok.Builder;
 
 @Builder
@@ -46,7 +47,7 @@ public record EditSite(
     String captcha_difficulty,
     Collection<String> allowed_instances,
     Collection<String> blocked_instances,
-    Collection<String> taglines,
+    Optional<Collection<String>> taglines,
     RegistrationMode registration_mode
 ) {
 

@@ -22,6 +22,9 @@ import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -54,6 +57,7 @@ public class UserAuthController {
   private final InstanceConfigRepository instanceConfigRepository;
   private final InstanceConfigService instanceConfigService;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
+  private final SlurFilterService slurFilterService;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -73,6 +77,14 @@ public class UserAuthController {
 
     if (personRepository.findOneByName(registerForm.username()).isPresent()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username_taken");
+    }
+    try {
+      String filteredUsername = slurFilterService.censorText(registerForm.username());
+      if (!Objects.equals(filteredUsername, registerForm.username())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+      }
+    } catch (SlurFilterBlockedException | SlurFilterReportException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
     }
 
     final Person person = personService.getDefaultNewUser(registerForm.username());

@@ -81,9 +81,6 @@ public class InstanceConfig {
   @Column(name = "captcha_difficulty")
   private String captchaDifficulty;
 
-  @Column(name = "slur_filter_regex")
-  private String slurFilterRegex;
-
   @Column(name = "actor_name_max_length")
   private int actorNameMaxLength;
 
