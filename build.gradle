@@ -34,26 +34,26 @@ dependencies {
     annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.0.Final"
 
     // Springdoc for Swagger API Docs
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.3'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.3'
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation 'org.jsoup:jsoup:1.16.2'
+    implementation 'org.jsoup:jsoup:1.17.1'
 
     implementation "org.mapstruct:mapstruct:1.5.5.Final"
     compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
-    compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.0.1'
+    compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
-    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.0.1'
+    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0'
+    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
