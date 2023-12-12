@@ -204,7 +204,7 @@ public class PostController extends AbstractLemmyApiController {
     }
 
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder().page(1)
-        .listingType(listingType).perPage(20)
+        .listingType(conversionService.convert(listingType, com.sublinks.sublinksapi.person.enums.ListingType.class)).perPage(20)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType).person(person.orElse(null)).communityIds(communityIds).build();
