@@ -1,38 +1,56 @@
-package com.sublinks.sublinksapi.announcment.dto;
+package com.sublinks.sublinksapi.slurfilter.dto;
 
+import com.sublinks.sublinksapi.slurfilter.enums.SlurActionType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Date;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
-/**
- * Announcement entity.
- */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "announcement")
-public class Announcement {
+@Table(name = "slur_filters")
+public class SlurFilter {
 
+  /**
+   * Attributes.
+   */
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  /**
-   * @param o Object to compare to
-   * @return boolean
-   */
+  @Column(name = "slur_regex", nullable = false)
+  private String slurRegex;
+
+  @Column(name = "slur_action_type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private SlurActionType slurActionType;
+
+  @CreationTimestamp
+  @Column(updatable = false, nullable = false, name = "created_at")
+  private Date createdAt;
+
+  @UpdateTimestamp
+  @Column(updatable = false, nullable = false, name = "updated_at")
+  private Date updatedAt;
+
   @Override
   public final boolean equals(Object o) {
 
@@ -51,15 +69,10 @@ public class Announcement {
     if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
-    Announcement that = (Announcement) o;
+    SlurFilter that = (SlurFilter) o;
     return getId() != null && Objects.equals(getId(), that.getId());
   }
 
-  /**
-   * Object hashCode.
-   *
-   * @return int
-   */
   @Override
   public final int hashCode() {
 
