@@ -33,6 +33,9 @@ import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
+import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -44,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -74,6 +78,7 @@ public class UserController {
   private final CommentReplyRepository commentReplyRepository;
   private final LemmyCommentReplyService lemmyCommentReplyService;
   private final PrivateMessageRepository privateMessageRepository;
+  private final SlurFilterService slurFilterService;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -85,11 +90,11 @@ public class UserController {
     Person person = null;
     if (getPersonDetailsForm.person_id() != null) {
       userId = (long) getPersonDetailsForm.person_id();
-      person = personRepository.findById(userId)
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+      person = personRepository.findById(userId).orElseThrow(
+          () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
     } else if (getPersonDetailsForm.username() != null) {
-      person = personRepository.findOneByName(getPersonDetailsForm.username())
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+      person = personRepository.findOneByName(getPersonDetailsForm.username()).orElseThrow(
+          () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
@@ -214,10 +219,26 @@ public class UserController {
         ? saveUserSettingsForm.interface_language() : "");
     person.setAvatarImageUrl(saveUserSettingsForm.avatar());
     person.setBannerImageUrl(saveUserSettingsForm.banner());
-    person.setDisplayName(
-        saveUserSettingsForm.display_name() != null ? saveUserSettingsForm.display_name() : "");
+
     person.setEmail(saveUserSettingsForm.email()); // @todo verify email again?
-    person.setBiography(saveUserSettingsForm.bio() != null ? saveUserSettingsForm.bio() : "");
+    try {
+      String bioFiltered = saveUserSettingsForm.bio() != null ? slurFilterService.censorText(
+          saveUserSettingsForm.bio()) : "";
+      String displayNameFiltered =
+          saveUserSettingsForm.display_name() != null ? slurFilterService.censorText(
+              saveUserSettingsForm.display_name()) : "";
+      if (!Objects.equals(bioFiltered,
+          saveUserSettingsForm.bio() != null ? saveUserSettingsForm.bio() : "") || !Objects.equals(
+          displayNameFiltered,
+          saveUserSettingsForm.display_name() != null ? slurFilterService.censorText(
+              saveUserSettingsForm.display_name()) : "")) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+      }
+      person.setDisplayName(displayNameFiltered);
+      person.setBiography(bioFiltered);
+    } catch (SlurFilterReportException | SlurFilterBlockedException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+    }
     // @todo matrix user
     person.setShowAvatars(
         saveUserSettingsForm.show_avatars() != null && saveUserSettingsForm.show_avatars());

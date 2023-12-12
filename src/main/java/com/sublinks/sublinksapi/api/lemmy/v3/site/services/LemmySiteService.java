@@ -15,6 +15,7 @@ import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
+import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ public class LemmySiteService {
   private final LocalInstanceContext localInstanceContext;
   private final LemmyPersonService lemmyPersonService;
   private final LinkPersonInstanceRepository linkPersonInstanceRepository;
+  private final SlurFilterService slurFilterService;
 
   // @todo finish admin list
   public Collection<PersonView> admins() {
@@ -68,6 +70,8 @@ public class LemmySiteService {
 
     final LocalSite.LocalSiteBuilder builder = localSite.toBuilder();
 
+    builder.slur_filter_regex(slurFilterService.getLemmySlurFilter().getSlurRegex());
+
     if (localInstanceContext.instance().getInstanceConfig() != null) {
       InstanceConfig config = localInstanceContext.instance().getInstanceConfig();
       builder.application_question(config.getRegistrationQuestion());
@@ -86,7 +90,6 @@ public class LemmySiteService {
       builder.default_post_listing_type(config.getDefaultPostListingType());
       builder.actor_name_max_length(config.getActorNameMaxLength());
       builder.default_theme(config.getDefaultTheme());
-      builder.slur_filter_regex(config.getSlurFilterRegex());
     }
 
     return SiteView.builder().site(conversionService.convert(localInstanceContext, Site.class))
