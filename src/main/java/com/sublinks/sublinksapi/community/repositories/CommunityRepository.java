@@ -8,5 +8,7 @@ public interface CommunityRepository extends JpaRepository<Community, Long>,
 
   Community findCommunityByIdOrTitleSlug(Long id, String titleSlug);
 
+  Community findCommunityByIsLocalTrueAndTitleSlug(String titleSlug);
+
   Community findCommunityByTitleSlug(String titleSlug);
 }
