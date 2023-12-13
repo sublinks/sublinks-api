@@ -27,7 +27,6 @@ public class LemmyPostService {
   private final LinkPersonCommunityService linkPersonCommunityService;
 
   public PostView postViewFromPost(final Post post) {
-    // @todo: what the fuck is this
     return postViewBuilder(post).saved(false).read(false).creator_blocked(false).my_vote(0)
         .unread_comments(0).build();
   }
