@@ -111,6 +111,13 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_blocked_by_slur_filter");
     }
 
+    // Prevent users from creating duplicate communities
+    final Optional<Community> oldCommunity = Optional.ofNullable(
+        communityRepository.findCommunityByIsLocalTrueAndTitleSlug(slugUtil.stringToSlug(createCommunityForm.name())));
+    if (oldCommunity.isPresent()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_already_exists");
+    }
+
     try {
       String censorText = slurFilterService.censorText(createCommunityForm.name());
       // We dont want censored slugs.... like c/#####communitytest
