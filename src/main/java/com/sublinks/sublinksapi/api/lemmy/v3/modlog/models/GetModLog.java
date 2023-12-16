@@ -1,16 +1,17 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.modlog.models;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import lombok.Builder;
 
 @Builder
 @SuppressWarnings("RecordComponentName")
 public record GetModLog(
-    Integer mod_person_id,
-    Integer community_id,
-    Integer page,
-    Integer limit,
-    String type_,
-    Integer other_person_id
+    Long mod_person_id,
+    Long community_id,
+    int page,
+    int limit,
+    ModlogActionType type_,
+    Long other_person_id
 ) {
 
 }
