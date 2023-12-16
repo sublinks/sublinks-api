@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReplyView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetReplies;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReplyService;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetails;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
@@ -66,7 +67,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/user")
 @Tag(name = "User")
-public class UserController {
+public class UserController extends AbstractLemmyApiController {
 
   private final LemmyPersonService lemmyPersonService;
   private final PersonRepository personRepository;
@@ -154,8 +155,7 @@ public class UserController {
   @GetMapping("replies")
   GetRepliesResponse replies(@Valid final GetReplies getReplies, JwtPerson principal) {
 
-    final Person person = Optional.ofNullable((Person) principal.getPrincipal())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Person person = getPersonOrThrowUnauthorized(principal);
 
     final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
         com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
@@ -198,8 +198,7 @@ public class UserController {
   public LoginResponse saveUserSettings(@Valid @RequestBody SaveUserSettings saveUserSettingsForm,
       JwtPerson principal) {
 
-    Person person = Optional.ofNullable((Person) principal.getPrincipal())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Person person = getPersonOrThrowUnauthorized(principal);
 
     // @todo expand form validation to check for email formatting, etc.
     person.setShowNsfw(
@@ -275,8 +274,7 @@ public class UserController {
   GetUnreadCountResponse unreadCount(@Valid final GetUnreadCount getUnreadCountForm,
       JwtPerson principal) {
 
-    final Person person = Optional.ofNullable((Person) principal.getPrincipal())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    final Person person = getPersonOrThrowUnauthorized(principal);
 
     GetUnreadCountResponse.GetUnreadCountResponseBuilder builder = GetUnreadCountResponse.builder();
 

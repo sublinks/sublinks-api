@@ -1,8 +1,11 @@
 package com.sublinks.sublinksapi.moderation.dto;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -10,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
 import java.util.Objects;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -41,7 +45,8 @@ public class ModerationLog {
   private Long id;
 
   @Column(nullable = false, name = "action_type")
-  private String actionType;
+  @Enumerated(EnumType.STRING)
+  private ModlogActionType actionType;
 
   private String reason;
 
@@ -49,30 +54,42 @@ public class ModerationLog {
   private long entityId;
 
   @Column(name = "admin_person_id")
-  private long adminPersonId;
+  private Long adminPersonId;
 
   @Column(name = "post_id")
-  private long postId;
+  private Long postId;
+
+  @Column(name = "comment_id")
+  private Long commentId;
 
   @Column(name = "community_id")
-  private long communityId;
+  private Long communityId;
 
   @Column(name = "moderation_person_id")
-  private long moderationPersonId;
+  private Long moderationPersonId;
 
   @Column(name = "other_person_id")
-  private long otherPersonId;
+  private Long otherPersonId;
 
+  @Column(name = "removed")
   private boolean removed;
 
+  @Column(name = "hidden")
   private boolean hidden;
 
+  @Column(name = "locked")
   private boolean locked;
 
+  @Column(name = "banned")
   private boolean banned;
 
+  @Column(name = "featured")
   private boolean featured;
 
+  @Column(name = "featured_community")
+  private boolean featuredCommunity;
+
+  @Column(name = "expires")
   private Date expires;
 
   @CreationTimestamp

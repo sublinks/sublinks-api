@@ -2,9 +2,11 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModLockPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePost;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.FeaturePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ListPostReports;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ListPostReportsResponse;
@@ -17,6 +19,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
+import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -64,6 +67,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   private final PostRepository postRepository;
   private final LemmyPostService lemmyPostService;
   private final PostService postService;
+  private final ModerationLogService moderationLogService;
 
   @Operation(summary = "A moderator remove for a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -92,8 +96,22 @@ public class PostModActionsController extends AbstractLemmyApiController {
       }
     }
 
-    //@todo: Add it to the modlog
     post.setRemoved(modRemovePostForm.removed());
+    postService.updatePost(post);
+
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModRemovePost)
+        .removed(modRemovePostForm.removed())
+        .entityId(post.getId())
+        .postId(post.getId())
+        .communityId(post.getCommunity().getId())
+        .instance(post.getInstance())
+        .adminPersonId(isAdmin ? person.getId() : null)
+        .moderationPersonId(!isAdmin ? person.getId() : null)
+        .reason(modRemovePostForm.reason())
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
 
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post)).build();
   }
@@ -126,10 +144,20 @@ public class PostModActionsController extends AbstractLemmyApiController {
       }
     }
 
-    //@todo: Add it to the modlog
     post.setLocked(modLockPostForm.locked());
-    System.out.println("post: " + post.isLocked());
     postService.updatePost(post);
+
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModLockPost)
+        .locked(modLockPostForm.locked())
+        .entityId(post.getId())
+        .postId(post.getId())
+        .communityId(post.getCommunity().getId())
+        .instance(post.getInstance())
+        .moderationPersonId(person.getId())
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
 
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post)).build();
   }
@@ -173,7 +201,20 @@ public class PostModActionsController extends AbstractLemmyApiController {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_feature_type");
     }
 
-    //@todo: Add it to the modlog
+    postService.updatePost(post);
+
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModFeaturePost)
+        .featured(post.isFeatured())
+        .featuredCommunity(post.isFeaturedInCommunity())
+        .communityId(post.getCommunity().getId())
+        .entityId(post.getId())
+        .postId(post.getId())
+        .instance(post.getInstance())
+        .moderationPersonId(person.getId())
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
 
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post)).build();
   }
