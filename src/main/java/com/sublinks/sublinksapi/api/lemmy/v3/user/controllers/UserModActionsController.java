@@ -3,6 +3,8 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetReportCount;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
@@ -14,6 +16,7 @@ import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
+import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
@@ -29,6 +32,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -56,6 +60,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PostService postService;
   private final CommentService commentService;
   private final LemmyPersonService lemmyPersonService;
+  private final ModerationLogService moderationLogService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -80,7 +85,18 @@ public class UserModActionsController extends AbstractLemmyApiController {
       commentService.removeAllCommentsFromUser(personToBan, true);
     }
 
-    // @todo: Add to modlog
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModBan)
+        .banned(banPersonForm.ban())
+        .entityId(personToBan.getId())
+        .instance(personToBan.getInstance())
+        .adminPersonId(person.getId())
+        .otherPersonId(personToBan.getId())
+        .reason(banPersonForm.reason())
+        .expires(banPersonForm.expires() == null ? null : new Date(banPersonForm.expires() * 1000L))
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
 
     return BanPersonResponse.builder().banned(banPersonForm.ban())
         .person_view(lemmyPersonService.getPersonView(personToBan)).build();
