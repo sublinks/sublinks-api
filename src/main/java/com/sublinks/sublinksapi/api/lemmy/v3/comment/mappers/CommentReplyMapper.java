@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -12,7 +13,7 @@ public interface CommentReplyMapper extends
     Converter<com.sublinks.sublinksapi.comment.dto.CommentReply, CommentReply> {
 
   @Override
-  @Mapping(target = "published", source = "commentReply.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "commentReply.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "comment_id", source = "commentReply.comment.id")
   @Mapping(target = "recipient_id", source = "commentReply.recipient.id")
   @Mapping(target = "read", source = "commentReply.isRead")

@@ -81,18 +81,17 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     commentService.updateComment(comment);
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
-
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
         .actionType(ModlogActionType.ModRemoveComment)
         .removed(removeCommentForm.removed())
         .entityId(comment.getId())
         .commentId(comment.getId())
+        .postId(comment.getPost().getId())
         .communityId(comment.getCommunity().getId())
         .instance(comment.getPost().getInstance())
-        .adminPersonId(isAdmin ? person.getId() : null)
-        .moderationPersonId(!isAdmin ? person.getId() : null)
+        .otherPersonId(comment.getPerson().getId())
+        .moderationPersonId(person.getId())
         .build();
     moderationLogService.createModerationLog(moderationLog);
 

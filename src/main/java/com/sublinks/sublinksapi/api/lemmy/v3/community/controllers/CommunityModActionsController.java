@@ -339,7 +339,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModAdd)
+        .actionType(ModlogActionType.ModAddCommunity)
         .entityId(community.getId())
         .communityId(community.getId())
         .removed(!addModToCommunityForm.added())

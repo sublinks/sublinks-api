@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -16,7 +17,7 @@ public interface PersonMentionMapper extends
   @Mapping(target = "read", source = "personMention.read")
   @Mapping(target = "comment_id", source = "personMention.comment.id")
   @Mapping(target = "recipient_id", source = "personMention.recipient.id")
-  @Mapping(target = "published", source = "personMention.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "personMention.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMention convert(
       @Nullable PersonMention personMention);
 }

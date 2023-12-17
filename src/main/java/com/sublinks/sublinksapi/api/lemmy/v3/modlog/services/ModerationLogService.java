@@ -1,32 +1,57 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.modlog.services;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommentView;
+import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommunityView;
+import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePersonView;
+import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePostView;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment;
+import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModAdd;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModAddCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModAddCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModAddView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBan;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBanFromCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBanFromCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBanView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModFeaturePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModFeaturePostView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModHideCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModHideCommunityView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModLockPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModLockPostView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommentView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommunityView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePostView;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunityView;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.moderation.events.ModerationLogCreatedPublisher;
 import com.sublinks.sublinksapi.moderation.repositories.ModerationLogRepository;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.post.dto.PostRead;
+import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
+import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.utils.DateUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Moderation Log Service
@@ -36,6 +61,11 @@ import java.util.List;
 public class ModerationLogService {
   private final ModerationLogRepository moderationLogRepository;
   private final ModerationLogCreatedPublisher moderationLogCreatedPublisher;
+  private final CommunityRepository communityRepository;
+  private final CommentRepository commentRepository;
+  private final PostRepository postRepository;
+  private final PersonRepository personRepository;
+  private final ConversionService conversionService;
 
   /**
    * Search moderation logs and return a page of results
@@ -57,7 +87,10 @@ public class ModerationLogService {
       final int pageSize,
       final Sort sort) {
     return moderationLogRepository.searchAllByActionTypeAndPersonIds(actionType,
-        communityId, moderationPersonId, otherPersonId, PageRequest.of(page, pageSize, sort));
+        communityId,
+        moderationPersonId,
+        otherPersonId,
+        PageRequest.of(page - 1, pageSize, sort));
   }
 
   /**
@@ -79,7 +112,18 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModRemovePostView buildModRemovePostView(ModerationLog moderationLog) {
-    return ModRemovePostView.builder().build();
+    return ModRemovePostView.builder()
+        .mod_remove_post(conversionService.convert(moderationLog, ModRemovePost.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .post(conversionService.convert(
+            postRepository.findById(moderationLog.getPostId())
+                .orElse(null), Post.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -89,7 +133,18 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModLockPostView buildModLockPostView(ModerationLog moderationLog) {
-    return ModLockPostView.builder().build();
+    return ModLockPostView.builder()
+        .mod_lock_post(conversionService.convert(moderationLog, ModLockPost.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .post(conversionService.convert(
+                    postRepository.findById(moderationLog.getPostId())
+                .orElse(null), Post.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -99,7 +154,18 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModFeaturePostView buildModFeaturePostView(ModerationLog moderationLog) {
-    return ModFeaturePostView.builder().build();
+    return ModFeaturePostView.builder()
+        .mod_feature_post(conversionService.convert(moderationLog, ModFeaturePost.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .post(conversionService.convert(
+            postRepository.findById(moderationLog.getPostId())
+                .orElse(null), Post.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -109,7 +175,24 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModRemoveCommentView buildModRemoveCommentView(ModerationLog moderationLog) {
-    return ModRemoveCommentView.builder().build();
+    return ModRemoveCommentView.builder()
+        .mod_remove_comment(conversionService.convert(moderationLog, ModRemoveComment.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .post(conversionService.convert(
+            postRepository.findById(moderationLog.getPostId())
+                .orElse(null), Post.class))
+        .comment(conversionService.convert(
+            commentRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Comment.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .commenter(conversionService.convert(
+            personRepository.findById(moderationLog.getOtherPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -119,7 +202,15 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModRemoveCommunityView buildModRemoveCommunityView(ModerationLog moderationLog) {
-    return ModRemoveCommunityView.builder().build();
+    return ModRemoveCommunityView.builder()
+        .mod_remove_community(conversionService.convert(moderationLog, ModRemoveCommunity.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -129,7 +220,18 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModBanFromCommunityView buildModBanFromCommunityView(ModerationLog moderationLog) {
-    return ModBanFromCommunityView.builder().build();
+    return ModBanFromCommunityView.builder()
+        .mod_ban_from_community(conversionService.convert(moderationLog, ModBanFromCommunity.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .banned_person(conversionService.convert(
+            personRepository.findById(moderationLog.getOtherPersonId())
+                .orElse(null), Person.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -139,7 +241,15 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModBanView buildModBanView(ModerationLog moderationLog) {
-    return ModBanView.builder().build();
+    return ModBanView.builder()
+        .mod_ban(conversionService.convert(moderationLog, ModBan.class))
+        .banned_person(conversionService.convert(
+            personRepository.findById(moderationLog.getOtherPersonId())
+                .orElse(null), Person.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -149,7 +259,18 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModAddCommunityView buildModAddCommunityView(ModerationLog moderationLog) {
-    return ModAddCommunityView.builder().build();
+    return ModAddCommunityView.builder()
+        .mod_add_community(conversionService.convert(moderationLog, ModAddCommunity.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .modded_person(conversionService.convert(
+            personRepository.findById(moderationLog.getOtherPersonId())
+                .orElse(null), Person.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -159,7 +280,18 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModTransferCommunityView buildModTransferCommunityView(ModerationLog moderationLog) {
-    return ModTransferCommunityView.builder().build();
+    return ModTransferCommunityView.builder()
+        .mod_transfer_community(conversionService.convert(moderationLog, ModTransferCommunity.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .modded_person(conversionService.convert(
+            personRepository.findById(moderationLog.getOtherPersonId())
+                .orElse(null), Person.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -169,7 +301,15 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModAddView buildModAddView(ModerationLog moderationLog) {
-    return ModAddView.builder().build();
+    return ModAddView.builder()
+        .mod_add(conversionService.convert(moderationLog, ModAdd.class))
+        .modded_person(conversionService.convert(
+            personRepository.findById(moderationLog.getOtherPersonId())
+                .orElse(null), Person.class))
+        .moderator(conversionService.convert(
+            personRepository.findById(moderationLog.getModerationPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -179,7 +319,12 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgePersonView buildAdminPurgePersonView(ModerationLog moderationLog) {
-    return AdminPurgePersonView.builder().build();
+    return AdminPurgePersonView.builder()
+        .admin_purge_person(conversionService.convert(moderationLog, AdminPurgePerson.class))
+        .admin(conversionService.convert(
+            personRepository.findById(moderationLog.getAdminPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -189,7 +334,12 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgeCommunityView buildAdminPurgeCommunityView(ModerationLog moderationLog) {
-    return AdminPurgeCommunityView.builder().build();
+    return AdminPurgeCommunityView.builder()
+        .admin_purge_community(conversionService.convert(moderationLog, AdminPurgeCommunity.class))
+        .admin(conversionService.convert(
+            personRepository.findById(moderationLog.getAdminPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -199,7 +349,15 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgePostView buildAdminPurgePostView(ModerationLog moderationLog) {
-    return AdminPurgePostView.builder().build();
+    return AdminPurgePostView.builder()
+        .admin_purge_post(conversionService.convert(moderationLog, AdminPurgePost.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .admin(conversionService.convert(
+            personRepository.findById(moderationLog.getAdminPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -209,7 +367,15 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgeCommentView buildAdminPurgeCommentView(ModerationLog moderationLog) {
-    return AdminPurgeCommentView.builder().build();
+    return AdminPurgeCommentView.builder()
+        .admin_purge_comment(conversionService.convert(moderationLog, AdminPurgeComment.class))
+        .post(conversionService.convert(
+            postRepository.findById(moderationLog.getPostId())
+                .orElse(null), Post.class))
+        .admin(conversionService.convert(
+            personRepository.findById(moderationLog.getAdminPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 
   /**
@@ -219,6 +385,14 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModHideCommunityView buildModHideCommunityView(ModerationLog moderationLog) {
-    return ModHideCommunityView.builder().build();
+    return ModHideCommunityView.builder()
+        .mod_hide_community(conversionService.convert(moderationLog, ModHideCommunity.class))
+        .community(conversionService.convert(
+            communityRepository.findById(moderationLog.getCommunityId())
+                .orElse(null), Community.class))
+        .admin(conversionService.convert(
+            personRepository.findById(moderationLog.getAdminPersonId())
+                .orElse(null), Person.class))
+        .build();
   }
 }
