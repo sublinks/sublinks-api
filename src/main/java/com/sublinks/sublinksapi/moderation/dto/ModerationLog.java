@@ -9,6 +9,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.util.Date;
@@ -35,6 +36,7 @@ public class ModerationLog {
    * Relationships.
    */
   @ManyToOne
+  @JoinColumn(nullable = false, name = "instance_id")
   private Instance instance;
 
   /**
@@ -48,6 +50,7 @@ public class ModerationLog {
   @Enumerated(EnumType.STRING)
   private ModlogActionType actionType;
 
+  @Column(name = "reason")
   private String reason;
 
   @Column(name = "entity_id")
