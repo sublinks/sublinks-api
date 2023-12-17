@@ -100,7 +100,7 @@ public class AdminController extends AbstractLemmyApiController {
         .entityId(personToAdd.getId())
         .removed(!addAdminForm.added())
         .instance(localInstanceContext.instance())
-        .adminPersonId(person.getId())
+        .moderationPersonId(person.getId())
         .otherPersonId(personToAdd.getId())
         .build();
     moderationLogService.createModerationLog(moderationLog);

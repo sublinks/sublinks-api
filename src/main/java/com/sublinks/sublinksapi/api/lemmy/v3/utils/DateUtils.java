@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.utils;
+package com.sublinks.sublinksapi.api.lemmy.v3.utils;
 /**
  * Date Utils
  */
