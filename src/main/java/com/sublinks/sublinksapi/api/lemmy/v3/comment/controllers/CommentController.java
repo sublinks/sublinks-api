@@ -51,6 +51,7 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -281,8 +282,7 @@ public class CommentController extends AbstractLemmyApiController {
   @GetMapping("list")
   GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
-    final Post post = postRepository.findById((long) getCommentsForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
 
     Optional<Person> person = getOptionalPerson(principal);
 
@@ -291,8 +291,19 @@ public class CommentController extends AbstractLemmyApiController {
     final ListingType listingType = conversionService.convert(getCommentsForm.type_(),
         ListingType.class);
 
-    final CommentSearchCriteria commentRepositorySearch = CommentSearchCriteria.builder().page(1)
-        .listingType(listingType).perPage(20).commentSortType(sortType).post(post).build();
+    final CommentSearchCriteria.CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria
+        .builder().page(1).listingType(listingType).perPage(20)
+        .commentSortType(sortType);
+    if (post_id.isPresent()) {
+        final Optional<Post> post = postRepository.findById((long) post_id.get());
+        if (post.isPresent()) {
+            searchBuilder.post(post.get());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found");
+        }
+    }
+
+    final CommentSearchCriteria commentRepositorySearch = searchBuilder.build();
 
     final List<Comment> comments = commentRepository.allCommentsBySearchCriteria(
         commentRepositorySearch);
