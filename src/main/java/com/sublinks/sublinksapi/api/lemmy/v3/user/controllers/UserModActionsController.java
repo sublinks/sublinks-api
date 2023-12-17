@@ -91,7 +91,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .banned(banPersonForm.ban())
         .entityId(personToBan.getId())
         .instance(personToBan.getInstance())
-        .adminPersonId(person.getId())
+        .moderationPersonId(person.getId())
         .otherPersonId(personToBan.getId())
         .reason(banPersonForm.reason())
         .expires(banPersonForm.expires() == null ? null : new Date(banPersonForm.expires() * 1000L))
