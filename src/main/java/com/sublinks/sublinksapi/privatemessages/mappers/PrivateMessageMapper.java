@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.privatemessages.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.PrivateMessage;
-import com.sublinks.sublinksapi.utils.DateUtils;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
