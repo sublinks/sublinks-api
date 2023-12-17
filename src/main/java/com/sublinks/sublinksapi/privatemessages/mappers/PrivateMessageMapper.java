@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.privatemessages.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.PrivateMessage;
+import com.sublinks.sublinksapi.utils.DateUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -13,9 +14,9 @@ public interface PrivateMessageMapper extends
 
   @Override
   @Mapping(target = "updated", source = "privateMessage.updatedAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "published", source = "privateMessage.createdAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "creator_id", source = "privateMessage.sender.id")
   @Mapping(target = "recipient_id", source = "privateMessage.recipient.id")
   @Mapping(target = "local", source = "privateMessage.local")

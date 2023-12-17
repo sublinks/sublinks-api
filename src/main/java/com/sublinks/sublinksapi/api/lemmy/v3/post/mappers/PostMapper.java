@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -14,7 +15,7 @@ public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.dto.
   @Mapping(target = "creator_id", ignore = true)
   @Mapping(target = "url", source = "post.linkUrl")
   @Mapping(target = "thumbnail_url", source = "post.linkThumbnailUrl")
-  @Mapping(target = "published", source = "post.createdAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "published", source = "post.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "name", source = "post.title")
   @Mapping(target = "locked", source = "post.locked")
   @Mapping(target = "local", constant = "true")
@@ -26,7 +27,7 @@ public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.dto.
   @Mapping(target = "embed_description", source = "post.linkDescription")
   @Mapping(target = "community_id", source = "post.community.id")
   @Mapping(target = "body", source = "post.postBody")
-  @Mapping(target = "updated", source = "post.updatedAt", dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+  @Mapping(target = "updated", source = "post.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "ap_id", source = "post.activityPubId")
   Post convert(@Nullable com.sublinks.sublinksapi.post.dto.Post post);
 }

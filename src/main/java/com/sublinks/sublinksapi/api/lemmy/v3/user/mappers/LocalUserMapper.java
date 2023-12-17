@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {AdminBooleanMapper.class})
@@ -24,7 +25,7 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
   @Mapping(target = "email", source = "person.email")
   @Mapping(target = "theme", source = "person.defaultTheme")
   @Mapping(target = "validator_time", constant = "2023-06-09T02:35:26.397746Z",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "totp_2fa_url", constant = "")
   @Mapping(target = "interface_language", source = "person.interfaceLanguage")
   @Mapping(target = "default_sort_type", source = "person.defaultSortType")

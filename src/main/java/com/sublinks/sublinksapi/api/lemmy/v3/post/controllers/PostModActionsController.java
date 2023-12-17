@@ -107,8 +107,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
         .postId(post.getId())
         .communityId(post.getCommunity().getId())
         .instance(post.getInstance())
-        .adminPersonId(isAdmin ? person.getId() : null)
-        .moderationPersonId(!isAdmin ? person.getId() : null)
+        .moderationPersonId(person.getId())
         .reason(modRemovePostForm.reason())
         .build();
     moderationLogService.createModerationLog(moderationLog);
