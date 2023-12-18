@@ -77,10 +77,12 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     final List<Language> languages = new ArrayList<>();
-    for (String languageCode : createCommunityForm.discussion_languages()) {
-      final Optional<Language> language = localInstanceContext.languageRepository()
-          .findById(Long.valueOf(languageCode));
-      language.ifPresent(languages::add);
+    if(createCommunityForm.discussion_languages() != null) {
+      for (String languageCode : createCommunityForm.discussion_languages()) {
+        final Optional<Language> language = localInstanceContext.languageRepository()
+            .findById(Long.valueOf(languageCode));
+        language.ifPresent(languages::add);
+      }
     }
 
     Community.CommunityBuilder communityBuilder = Community.builder()

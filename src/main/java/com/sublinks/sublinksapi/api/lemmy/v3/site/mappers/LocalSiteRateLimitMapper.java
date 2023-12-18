@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -16,9 +17,9 @@ public interface LocalSiteRateLimitMapper extends
   @Mapping(target = "id", source = "context.instance.id")
   @Mapping(target = "local_site_id", source = "context.instance.id")
   @Mapping(target = "updated", source = "context.instance.updatedAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "published", source = "context.instance.createdAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "search_per_second", source = "context.rateLimits.searchPerSecond")
   @Mapping(target = "search", source = "context.rateLimits.search")
   @Mapping(target = "register_per_second", source = "context.rateLimits.registerPerSecond")

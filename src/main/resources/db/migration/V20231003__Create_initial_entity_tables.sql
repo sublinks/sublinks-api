@@ -421,6 +421,7 @@ CREATE TABLE `moderation_logs`
   `entity_id`            BIGINT                                    NOT NULL,
   `admin_person_id`      BIGINT                                    NULL,
   `post_id`              BIGINT                                    NULL,
+  `comment_id`           BIGINT                                    NULL,
   `community_id`         BIGINT                                    NULL,
   `moderation_person_id` BIGINT                                    NULL,
   `other_person_id`      BIGINT                                    NULL,
@@ -429,13 +430,14 @@ CREATE TABLE `moderation_logs`
   `locked`               TINYINT                                   NULL,
   `banned`               TINYINT                                   NULL,
   `featured`             TINYINT                                   NULL,
+  `featured_community`   TINYINT                                   NULL,
   `expires`              TIMESTAMP(3)                              NULL,
   `created_at`           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-CREATE UNIQUE INDEX `IDX_MODERATION_LOGS_INSTANCE_ID_ACTION_TYPE_ENTITY_ID` ON `moderation_logs` (`instance_id`, `action_type`, `entity_id`);
+CREATE INDEX `IDX_MODERATION_LOGS_ACTION_TYPE` ON `moderation_logs` (`action_type`);
 
 /**
  Post Post Cross Post table
