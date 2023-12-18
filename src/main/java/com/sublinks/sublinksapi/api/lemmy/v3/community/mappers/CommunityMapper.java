@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -17,9 +18,9 @@ public interface CommunityMapper extends
   @Mapping(target = "instance_id", source = "community.instance.id")
   @Mapping(target = "hidden", constant = "false")
   @Mapping(target = "updated", source = "community.updatedAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "published", source = "community.createdAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "actor_id", source = "activityPubId")
   @Mapping(target = "banner", source = "community.bannerImageUrl")
   @Mapping(target = "icon", source = "community.iconImageUrl")

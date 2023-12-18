@@ -6,6 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -18,9 +19,9 @@ public interface LocalSiteMapper extends Converter<LocalInstanceContext, LocalSi
   @Mapping(target = "enable_downvotes", source = "context.settings.enableDownVotes")
   @Mapping(target = "enable_nsfw", source = "context.settings.enableNsfw")
   @Mapping(target = "published", source = "context.instance.createdAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "updated", source = "context.instance.updatedAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "actor_name_max_length", source = "context.settings.actorNameMaxLength")
   @Mapping(target = "private_instance", source = "context.settings.isPrivateInstance")
   @Mapping(target = "community_creation_admin_only", constant = "false")

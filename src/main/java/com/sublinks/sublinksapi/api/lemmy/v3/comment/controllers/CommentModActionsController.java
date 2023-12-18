@@ -12,6 +12,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ResolveCommentReport
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
@@ -22,6 +24,7 @@ import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
+import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -60,6 +63,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   private final CommunityRepository communityRepository;
   private final CommentRepository commentRepository;
   private final CommentService commentService;
+  private final ModerationLogService moderationLogService;
 
   @Operation(summary = "A moderator remove for a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -77,7 +81,19 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     commentService.updateComment(comment);
 
-    //@todo: Add the reason to the modlogs
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModRemoveComment)
+        .removed(removeCommentForm.removed())
+        .entityId(comment.getId())
+        .commentId(comment.getId())
+        .postId(comment.getPost().getId())
+        .communityId(comment.getCommunity().getId())
+        .instance(comment.getPost().getInstance())
+        .otherPersonId(comment.getPerson().getId())
+        .moderationPersonId(person.getId())
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
 
     return CommentResponse.builder()
         .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();

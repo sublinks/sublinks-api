@@ -8,7 +8,7 @@ public record BanPerson(
     String reason,
     Boolean ban,
     Boolean remove_data,
-    Integer expires
+    Long expires
 
 ) {
 
