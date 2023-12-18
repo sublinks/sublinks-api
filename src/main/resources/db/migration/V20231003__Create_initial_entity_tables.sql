@@ -437,6 +437,8 @@ CREATE TABLE `moderation_logs`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
+CREATE INDEX `IDX_MODERATION_LOGS_ACTION_TYPE` ON `moderation_logs` (`action_type`);
+
 /**
  Post Post Cross Post table
  */

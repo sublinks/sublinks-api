@@ -165,3 +165,15 @@ ALTER TABLE `person_applications`
  */
 ALTER TABLE `instance_configs`
   ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE;
+
+/**
+  Moderation Logs table
+ */
+ALTER TABLE `moderation_logs`
+  ADD FOREIGN KEY (`instance_id`) REFERENCES `instances` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`admin_person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`moderation_person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`other_person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`community_id`) REFERENCES `communities` (`id`) ON DELETE CASCADE;
