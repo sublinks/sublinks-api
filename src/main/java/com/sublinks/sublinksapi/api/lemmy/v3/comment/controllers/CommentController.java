@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria.CommentSearchCriteriaBuilder;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
@@ -51,6 +52,7 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -281,8 +283,9 @@ public class CommentController extends AbstractLemmyApiController {
   @GetMapping("list")
   GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
-    final Post post = postRepository.findById((long) getCommentsForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
+    final Optional<Integer> page = Optional.ofNullable(getCommentsForm.page());
+    final Optional<Integer> perPage = Optional.ofNullable(getCommentsForm.limit());
 
     Optional<Person> person = getOptionalPerson(principal);
 
@@ -291,8 +294,29 @@ public class CommentController extends AbstractLemmyApiController {
     final ListingType listingType = conversionService.convert(getCommentsForm.type_(),
         ListingType.class);
 
-    final CommentSearchCriteria commentRepositorySearch = CommentSearchCriteria.builder().page(1)
-        .listingType(listingType).perPage(20).commentSortType(sortType).post(post).build();
+    final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria
+        .builder().listingType(listingType).commentSortType(sortType);
+
+    if (post_id.isPresent()) {
+        final Optional<Post> post = postRepository.findById((long) post_id.get());
+        if (post.isPresent()) {
+            searchBuilder.post(post.get());
+        } else {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found");
+        }
+    }
+
+    if (perPage.isPresent() && perPage.get() < 1 || perPage.get() > 50) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+    }
+    searchBuilder.perPage(perPage.orElse(10));
+
+    if (page.isPresent() && page.get() < 1) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+    }
+    searchBuilder.page(page.orElse(1));
+
+    final CommentSearchCriteria commentRepositorySearch = searchBuilder.build();
 
     final List<Comment> comments = commentRepository.allCommentsBySearchCriteria(
         commentRepositorySearch);

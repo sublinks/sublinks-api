@@ -68,7 +68,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
         break;
     }
 
-    final int perPage = Math.min(Math.abs(commentSearchCriteria.perPage()), 20);
+    final int perPage = Math.min(Math.abs(commentSearchCriteria.perPage()), 50);
     final int page = Math.max(commentSearchCriteria.page() - 1, 0);
 
     final TypedQuery<Comment> query = em.createQuery(cq);
