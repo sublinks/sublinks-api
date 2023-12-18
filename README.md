@@ -32,7 +32,11 @@
     ·
     <a href="https://github.com/sublinks/sublinks/blob/main/RELEASES.md">Releases</a>
     ·
-    <a href="https://sublinks.org/docs/code_of_conduct">Code of Conduct</a>
+    <a href="https://sublinks.org/docs/code_of_conduct.html">Code of Conduct</a>
+    ·
+    <a href="https://sublinks.org/docs/contributing.html">Contributing</a>
+    ·
+    <a href="https://sublinks.org/docs/style_guide.html">Style Guide</a>
   </p>
 
 </div>
