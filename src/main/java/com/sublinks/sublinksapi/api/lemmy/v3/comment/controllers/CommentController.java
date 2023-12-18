@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria.CommentSearchCriteriaBuilder;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
@@ -283,6 +284,8 @@ public class CommentController extends AbstractLemmyApiController {
   GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
     final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
+    final Optional<Integer> page = Optional.ofNullable(getCommentsForm.page());
+    final Optional<Integer> perPage = Optional.ofNullable(getCommentsForm.limit());
 
     Optional<Person> person = getOptionalPerson(principal);
 
@@ -291,9 +294,9 @@ public class CommentController extends AbstractLemmyApiController {
     final ListingType listingType = conversionService.convert(getCommentsForm.type_(),
         ListingType.class);
 
-    final CommentSearchCriteria.CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria
-        .builder().page(1).listingType(listingType).perPage(20)
-        .commentSortType(sortType);
+    final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria
+        .builder().listingType(listingType).commentSortType(sortType);
+
     if (post_id.isPresent()) {
         final Optional<Post> post = postRepository.findById((long) post_id.get());
         if (post.isPresent()) {
@@ -302,6 +305,16 @@ public class CommentController extends AbstractLemmyApiController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found");
         }
     }
+
+    if (perPage.isPresent() && perPage.get() < 1 || perPage.get() > 50) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+    }
+    searchBuilder.perPage(perPage.orElse(10));
+
+    if (page.isPresent() && page.get() < 1) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+    }
+    searchBuilder.page(page.orElse(1));
 
     final CommentSearchCriteria commentRepositorySearch = searchBuilder.build();
 
