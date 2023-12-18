@@ -13,11 +13,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.PurgeComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.PurgeCommunity;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
+import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PurgePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PurgePerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
@@ -59,6 +62,7 @@ public class AdminController extends AbstractLemmyApiController {
   private final PersonRegistrationApplicationRepository personRegistrationApplicationRepository;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
+  private final ModerationLogService moderationLogService;
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -89,6 +93,17 @@ public class AdminController extends AbstractLemmyApiController {
         linkPersonInstanceRepository.deleteAll(linkPersonInstances);
       }
     }
+
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModAdd)
+        .entityId(personToAdd.getId())
+        .removed(!addAdminForm.added())
+        .instance(localInstanceContext.instance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(personToAdd.getId())
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }

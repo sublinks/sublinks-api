@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -19,9 +20,9 @@ public interface PersonMapper extends
   @Mapping(target = "avatar", source = "person.avatarImageUrl")
   @Mapping(target = "banned", source = "person.banned")
   @Mapping(target = "published", source = "person.createdAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "updated", source = "person.updatedAt",
-      dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX")
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "actor_id", source = "person.activityPubId")
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "local", source = "person.local")
