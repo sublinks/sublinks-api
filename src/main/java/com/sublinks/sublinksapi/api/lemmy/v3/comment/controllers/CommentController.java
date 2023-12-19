@@ -52,7 +52,6 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -298,21 +297,21 @@ public class CommentController extends AbstractLemmyApiController {
         .builder().listingType(listingType).commentSortType(sortType);
 
     if (post_id.isPresent()) {
-        final Optional<Post> post = postRepository.findById((long) post_id.get());
-        if (post.isPresent()) {
-            searchBuilder.post(post.get());
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found");
-        }
+      final Optional<Post> post = postRepository.findById((long) post_id.get());
+      if (post.isPresent()) {
+        searchBuilder.post(post.get());
+      } else {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found");
+      }
     }
 
-    if (perPage.isPresent() && perPage.get() < 1 || perPage.get() > 50) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+    if (perPage.isPresent() && (perPage.get() < 1 || perPage.get() > 50)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
     }
     searchBuilder.perPage(perPage.orElse(10));
 
     if (page.isPresent() && page.get() < 1) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
     }
     searchBuilder.page(page.orElse(1));
 
