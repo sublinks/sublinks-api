@@ -18,6 +18,8 @@ public record PersonMentionView(
     Person recipient,
     CommentAggregates counts,
     boolean creator_banned_from_community,
+    boolean creator_is_moderator,
+    boolean creator_is_admin,
     SubscribedType subscribed,
     boolean saved,
     boolean creator_blocked,
