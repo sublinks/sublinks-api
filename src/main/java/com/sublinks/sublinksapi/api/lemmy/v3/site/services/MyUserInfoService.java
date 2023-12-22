@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.site.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityBlockView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityFollowerView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.models.InstanceBlockView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUserView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.MyUserInfo;
@@ -37,9 +38,18 @@ public class MyUserInfoService {
         .follows(getUserCommunityFollows(person))
         .moderates(getUserCommunityModerates(person))
         .community_blocks(getUserCommunitiesBlocked(person))
+        .instance_blocks(getInstanceBlocked(person))
         .person_blocks(getUserPeopleBlocked(person))
         .discussion_languages(getDiscussionLanguages(person))
         .build();
+  }
+
+  public Collection<InstanceBlockView> getInstanceBlocked(
+      com.sublinks.sublinksapi.person.dto.Person person) {
+
+    // @todo block instances
+    Collection<InstanceBlockView> blocked = new ArrayList<>();
+    return blocked;
   }
 
   public Collection<Long> getDiscussionLanguages(
