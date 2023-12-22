@@ -103,6 +103,8 @@ public class LemmyCommentService {
         .post(lemmyPost)
         .counts(lemmyCommentAggregates)
         .creator_banned_from_community(isBannedFromCommunity)
-        .creator_blocked(false);
+        .creator_blocked(false)
+        .creator_is_moderator(false) // @todo check if creator is moderator
+        .creator_is_admin(false); // @todo check if creator is admin
   }
 }
