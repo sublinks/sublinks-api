@@ -39,6 +39,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -81,20 +82,21 @@ public class AdminController extends AbstractLemmyApiController {
     final Person personToAdd = personRepository.findById((long) addAdminForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    final Collection<LinkPersonInstance> linkPersonInstances = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsInAndPerson(
-        localInstanceContext.instance(),
-        List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin), personToAdd);
+    final Optional<LinkPersonInstance> linkPersonInstance = linkPersonInstanceRepository.findLinkPersonInstanceByInstanceAndPerson(
+        localInstanceContext.instance(), personToAdd);
 
     if (addAdminForm.added()) {
-      if (linkPersonInstances.isEmpty()) {
+      if (linkPersonInstance.isEmpty()) {
         linkPersonInstanceRepository.save(
             LinkPersonInstance.builder().instance(localInstanceContext.instance())
                 .person(personToAdd).linkType(LinkPersonInstanceType.admin).build());
+      } else {
+        linkPersonInstance.get().setLinkType(LinkPersonInstanceType.admin);
+        linkPersonInstanceRepository.save(linkPersonInstance.get());
       }
-    } else {
-      if (!linkPersonInstances.isEmpty()) {
-        linkPersonInstanceRepository.deleteAll(linkPersonInstances);
-      }
+    } else if (linkPersonInstance.isPresent()) {
+        linkPersonInstance.get().setLinkType(LinkPersonInstanceType.user);
+        linkPersonInstanceRepository.save(linkPersonInstance.get());
     }
 
     // Create Moderation Log
