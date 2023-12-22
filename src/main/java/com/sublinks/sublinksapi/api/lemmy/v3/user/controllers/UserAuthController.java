@@ -4,6 +4,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.dto.Captcha;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.CaptchaMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
@@ -12,6 +14,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.CaptchaService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
@@ -58,6 +61,8 @@ public class UserAuthController {
   private final InstanceConfigService instanceConfigService;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
+  private final CaptchaService captchaService;
+  private final CaptchaMapper captchaMapper;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -115,7 +120,8 @@ public class UserAuthController {
   @GetMapping("get_captcha")
   GetCaptchaResponse captcha() {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    Captcha captcha = captchaService.getCaptcha();
+    return captchaMapper.map(captcha);
   }
 
   @Operation(summary = "Log into lemmy.")
