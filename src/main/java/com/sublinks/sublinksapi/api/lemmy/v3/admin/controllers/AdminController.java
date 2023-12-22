@@ -16,6 +16,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.PurgeCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PurgePost;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PurgePerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
@@ -45,6 +46,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -63,12 +65,13 @@ public class AdminController extends AbstractLemmyApiController {
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
+  private final LemmySiteService lemmySiteService;
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AddAdminResponse.class))})})
   @PostMapping("add")
-  AddAdminResponse create(@Valid final AddAdmin addAdminForm, JwtPerson principal) {
+  AddAdminResponse create(@Valid @RequestBody final AddAdmin addAdminForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -105,7 +108,7 @@ public class AdminController extends AbstractLemmyApiController {
         .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    return AddAdminResponse.builder().admins(lemmySiteService.admins()).build();
   }
 
   @Operation(summary = "Get the unread registration applications count.")
