@@ -12,6 +12,8 @@ public record PostView(
     Person creator,
     Community community,
     boolean creator_banned_from_community,
+    boolean creator_is_moderator,
+    boolean creator_is_admin,
     PostAggregates counts,
     SubscribedType subscribed,
     boolean saved,
