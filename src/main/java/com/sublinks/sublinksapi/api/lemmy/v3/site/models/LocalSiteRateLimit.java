@@ -19,6 +19,8 @@ public record LocalSiteRateLimit(
     int comment_per_second,
     int search,
     int search_per_second,
+    int import_user_settings,
+    int import_user_settings_per_second,
     String published,
     String updated
 ) {
