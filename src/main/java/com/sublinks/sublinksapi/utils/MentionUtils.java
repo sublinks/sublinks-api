@@ -13,6 +13,21 @@ public class MentionUtils {
   public final Pattern personMentionRegex = Pattern.compile(
       "@(?<name>[\\w.]+)@(?<domain>[a-zA-Z0-9._:-]+)", Pattern.CASE_INSENSITIVE);
 
+  /**
+   * Extracts person mentions from a given text string.
+   * This method utilizes defined in {@code personMentionRegex} to identify
+   * mentions in a specific format.
+   * A mention is recognized as a string that follows the pattern
+   * "@[name]@[domain]",
+   * where "name" and "domain" are captured groups in the regex.
+   *
+   * @param text The string from which person mentions are to be extracted.
+   * @return A list of {@link Mention} objects, each representing a found mention
+   *         in the text.
+   *         Each Mention object contains the extracted "name" and "domain" from
+   *         the mention.
+   *         Returns null if no mentions are found.
+   */
   public List<Mention> getPersonMentions(String text) {
 
     final Matcher matcher = personMentionRegex.matcher(text);
