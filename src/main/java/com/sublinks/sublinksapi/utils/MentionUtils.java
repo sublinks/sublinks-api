@@ -15,8 +15,8 @@ public class MentionUtils {
 
   /**
    * Extracts person mentions from a given text string.
-   * This method utilizes defined in {@code personMentionRegex} to identify
-   * mentions in a specific format.
+   * This method utilizes the regex defined in {@code personMentionRegex} to
+   * identify mentions in a specific format.
    * A mention is recognized as a string that follows the pattern
    * "@[name]@[domain]",
    * where "name" and "domain" are captured groups in the regex.
