@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 
+import com.sublinks.sublinksapi.announcement.repositories.AnnouncementRepository;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetReportCount;
@@ -10,15 +11,22 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
+import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
@@ -34,7 +42,9 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,7 +60,9 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "User")
 public class UserModActionsController extends AbstractLemmyApiController {
 
+  private final AnnouncementRepository announcementRepository;
   private final CommentReportRepository commentReportRepository;
+  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
   private final PostReportRepository postReportRepository;
   private final PrivateMessageReportRepository privateMessageReportRepository;
   private final CommunityRepository communityRepository;
@@ -61,6 +73,10 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final CommentService commentService;
   private final LemmyPersonService lemmyPersonService;
   private final ModerationLogService moderationLogService;
+  private final LocalInstanceContext localInstanceContext;
+  private final ConversionService conversionService;
+  private final LemmySiteService lemmySiteService;
+  private final LanguageService languageService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -180,8 +196,41 @@ public class UserModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetSiteResponse.class))})})
   @PostMapping("leave_admin")
-  GetSiteResponse leaveAdmin() {
+  GetSiteResponse leaveAdmin(JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final Optional<LinkPersonInstance> linkPersonInstance = linkPersonInstanceRepository.findLinkPersonInstanceByInstanceAndPerson(
+        localInstanceContext.instance(), person);
+
+    if (linkPersonInstance.isPresent()) {
+      linkPersonInstance.get().setLinkType(LinkPersonInstanceType.user);
+      linkPersonInstanceRepository.save(linkPersonInstance.get());
+    } else {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin");
+    }
+
+    // Create Moderation Log
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModAdd)
+        .entityId(person.getId())
+        .removed(true)
+        .instance(localInstanceContext.instance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(person.getId())
+        .build();
+    moderationLogService.createModerationLog(moderationLog);
+
+    return GetSiteResponse.builder()
+        .version("0.19.0") // @todo grab this from config?
+        .taglines(announcementRepository.findAll().stream()
+            .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
+        .site_view(lemmySiteService.getSiteView())
+        .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
+        .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
+        .custom_emojis(lemmySiteService.customEmojis()).admins(lemmySiteService.admins()).build();
   }
 }
