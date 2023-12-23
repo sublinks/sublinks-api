@@ -20,7 +20,6 @@ public record Person(
     String inbox_url,
     String shared_inbox_url,
     String matrix_user_id,
-    boolean admin,
     boolean bot_account,
     String ban_expires,
     Long instance_id
