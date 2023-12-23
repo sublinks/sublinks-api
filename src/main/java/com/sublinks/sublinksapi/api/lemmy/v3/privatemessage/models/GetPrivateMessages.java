@@ -7,7 +7,8 @@ import lombok.Builder;
 public record GetPrivateMessages(
     Boolean unread_only,
     Integer page,
-    Integer limit
+    Integer limit,
+    Long creator_id
 ) {
 
 }

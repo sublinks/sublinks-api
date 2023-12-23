@@ -5,12 +5,9 @@ import lombok.Builder;
 @Builder
 @SuppressWarnings("RecordComponentName")
 public record PersonAggregates(
-    Long id,
     Long person_id,
     int post_count,
-    int post_score,
-    int comment_count,
-    int comment_score
+    int comment_count
 ) {
 
 }

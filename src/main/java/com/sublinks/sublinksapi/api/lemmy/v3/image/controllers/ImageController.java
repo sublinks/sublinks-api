@@ -91,8 +91,7 @@ public class ImageController extends AbstractLemmyApiController {
         .bodyToMono(byte[].class)
         .map(bytes -> ResponseEntity.ok()
             .contentType(MediaType.IMAGE_JPEG)
-            .header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"image.jpeg\"")
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline;")
             .body(new ByteArrayResource(bytes)));
 
   }

@@ -7,8 +7,7 @@ import lombok.Builder;
 public record RemoveCommunity(
     Integer community_id,
     Boolean removed,
-    String reason,
-    Integer expires
+    String reason
 ) {
 
 }

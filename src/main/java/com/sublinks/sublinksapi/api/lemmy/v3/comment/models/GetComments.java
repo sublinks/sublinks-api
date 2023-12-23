@@ -16,7 +16,9 @@ public record GetComments(
     String community_name,
     Integer post_id,
     Integer parent_id,
-    Boolean saved_only
+    Boolean saved_only,
+    Boolean liked_only,
+    Boolean disliked_only
 ) {
 
 }
