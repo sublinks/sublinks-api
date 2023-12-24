@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CreateCustomEmoj
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiView;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.DeleteCustomEmoji;
+import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.DeleteCustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.EditCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
@@ -122,13 +123,27 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   @Operation(summary = "Delete a custom emoji.")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomEmojiResponse.class)) }),
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteCustomEmojiResponse.class)) }),
       @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class)) })
   })
   @PostMapping("delete")
-  CustomEmojiResponse delete(@Valid final DeleteCustomEmoji deleteCustomEmojiForm) {
+  DeleteCustomEmojiResponse delete(@Valid @RequestBody final DeleteCustomEmoji deleteCustomEmojiForm,
+      JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final var person = getPersonOrThrowUnauthorized(principal);
+
+    authorizationService.isAdminElseThrow(person,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    var emojiId = (long) deleteCustomEmojiForm.id();
+    var exists = customEmojiRepository.existsById(emojiId);
+    if (!exists) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "custom_emoji_not_found");
+    }
+
+    customEmojiRepository.deleteById(emojiId);
+
+    return DeleteCustomEmojiResponse.builder().success(true).build();
   }
 }
