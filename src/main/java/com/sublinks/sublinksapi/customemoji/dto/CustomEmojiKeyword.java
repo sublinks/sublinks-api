@@ -20,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "custom_emoji_keyword")
+@Table(name = "custom_emoji_keywords")
 public class CustomEmojiKeyword {
 
   /*

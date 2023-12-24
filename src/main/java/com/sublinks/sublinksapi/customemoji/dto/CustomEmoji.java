@@ -25,7 +25,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "custom_emoji")
+@Table(name = "custom_emojis")
 public class CustomEmoji {
 
   /*
@@ -44,7 +44,7 @@ public class CustomEmoji {
   @Column(nullable = false, name = "local_site_id")
   private Long localSiteId;
 
-  @Column(nullable = true, name = "alt_text")
+  @Column(nullable = false, name = "alt_text")
   private String altText;
 
   @Column(nullable = false, name = "image_url")
