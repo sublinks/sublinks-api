@@ -1,7 +1,7 @@
 /**
   Custom Emoji table
  */
-CREATE TABLE `custom_emoji` (
+CREATE TABLE `custom_emojis` (
     `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
     `local_site_id` BIGINT                                    NOT NULL,
     `alt_text`      TEXT                                      NOT NULL,
@@ -18,15 +18,15 @@ CREATE TABLE `custom_emoji` (
 /**
   Custom Emoji Keyword table
  */
-CREATE TABLE `custom_emoji_keyword` (
+CREATE TABLE `custom_emoji_keywords` (
     `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
     `custom_emoji_id` BIGINT       NOT NULL,
     `keyword`         VARCHAR(255) NOT NULL,
-    FOREIGN KEY (`custom_emoji_id`) REFERENCES `custom_emoji` (`id`) ON DELETE CASCADE
+    FOREIGN KEY (`custom_emoji_id`) REFERENCES `custom_emojis` (`id`) ON DELETE CASCADE
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-CREATE UNIQUE INDEX `IDX_CUSTOM_EMOJI_KEYWORD_CUSTOM_EMOJI_ID` ON `custom_emoji_keyword` (`custom_emoji_id`);
+CREATE INDEX `IDX_CUSTOM_EMOJI_KEYWORD_CUSTOM_EMOJI_ID` ON `custom_emoji_keywords` (`custom_emoji_id`);
 
 
