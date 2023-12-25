@@ -120,19 +120,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
     customEmoji.setCategory(editCustomEmojiForm.category());
     customEmoji.setImageUrl(editCustomEmojiForm.image_url());
 
-    var emojiEntity = customEmojiRepository.save(customEmoji);
-
-    customEmojiKeywordRepository.deleteAll(emojiEntity.getKeywords());
-
-    var keywords = new ArrayList<CustomEmojiKeyword>();
-    for (var keyword : editCustomEmojiForm.keywords()) {
-      keywords.add(
-          CustomEmojiKeyword.builder()
-              .keyword(keyword.toLowerCase().trim())
-              .emoji(emojiEntity)
-              .build());
-    }
-    customEmojiKeywordRepository.saveAll(keywords);
+    var emojiEntity = customEmojiService.updateCustomEmoji(customEmoji, editCustomEmojiForm.keywords());
 
     return CustomEmojiResponse.builder()
         .custom_emoji(CustomEmojiView
