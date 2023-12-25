@@ -1,5 +1,5 @@
 
-package com.sublinks.sublinksapi.customemoji.repository;
+package com.sublinks.sublinksapi.customemoji.repositories;
 
 import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
 

@@ -12,8 +12,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.customemoji.dto.CustomEmoji;
 import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
-import com.sublinks.sublinksapi.customemoji.repository.CustomEmojiKeywordRepository;
-import com.sublinks.sublinksapi.customemoji.repository.CustomEmojiRepository;
+import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiKeywordRepository;
+import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
+import com.sublinks.sublinksapi.customemoji.services.CustomEmojiService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,6 +48,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   private final LocalInstanceContext localInstanceContext;
   private final CustomEmojiRepository customEmojiRepository;
   private final CustomEmojiKeywordRepository customEmojiKeywordRepository;
+  public final CustomEmojiService customEmojiService;
 
   @Operation(summary = "Create a new custom emoji.")
   @ApiResponses(value = {
@@ -54,7 +56,6 @@ public class CustomEmojiController extends AbstractLemmyApiController {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomEmojiResponse.class)) })
   })
   @PostMapping
-  @Transactional
   CustomEmojiResponse create(@Valid @RequestBody final CreateCustomEmoji createCustomEmojiForm, JwtPerson principal) {
 
     final var person = getPersonOrThrowUnauthorized(principal);
@@ -69,17 +70,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
         .shortCode(createCustomEmojiForm.shortcode().toLowerCase().trim())
         .localSiteId(localInstanceContext.instance().getId())
         .build();
-    final var emojiEntity = customEmojiRepository.save(customEmoji);
 
-    var keywords = new ArrayList<CustomEmojiKeyword>();
-    for (var keyword : createCustomEmojiForm.keywords()) {
-      keywords.add(
-          CustomEmojiKeyword.builder()
-              .keyword(keyword.toLowerCase().trim())
-              .emoji(emojiEntity)
-              .build());
-    }
-    customEmojiKeywordRepository.saveAll(keywords);
+    var emojiEntity = customEmojiService.createCustomEmoji(customEmoji, createCustomEmojiForm.keywords());
 
     return CustomEmojiResponse.builder()
         .custom_emoji(CustomEmojiView
