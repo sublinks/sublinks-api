@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.customemoji.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.mappers.CustomEmojiMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CreateCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiView;
@@ -11,8 +12,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.EditCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
 import com.sublinks.sublinksapi.customemoji.dto.CustomEmoji;
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
-import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiKeywordRepository;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
 import com.sublinks.sublinksapi.customemoji.services.CustomEmojiService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -36,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import org.springframework.transaction.annotation.Transactional;
 
 @RestController
 @AllArgsConstructor
@@ -47,8 +45,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   private final AuthorizationService authorizationService;
   private final LocalInstanceContext localInstanceContext;
   private final CustomEmojiRepository customEmojiRepository;
-  private final CustomEmojiKeywordRepository customEmojiKeywordRepository;
   public final CustomEmojiService customEmojiService;
+  public final CustomEmojiMapper customEmojiMapper;
 
   @Operation(summary = "Create a new custom emoji.")
   @ApiResponses(value = {
@@ -77,17 +75,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
         .custom_emoji(CustomEmojiView
             .builder()
             .keywords(new ArrayList<String>(createCustomEmojiForm.keywords()))
-            .custom_emoji(
-                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.builder()
-                    .id(emojiEntity.getId())
-                    .local_site_id(emojiEntity.getLocalSiteId())
-                    .shortcode(emojiEntity.getShortCode())
-                    .image_url(emojiEntity.getImageUrl())
-                    .alt_text(emojiEntity.getAltText())
-                    .category(emojiEntity.getCategory())
-                    .published(emojiEntity.getCreatedAt().toString())
-                    .updated(emojiEntity.getUpdatedAt().toString())
-                    .build())
+            .custom_emoji(customEmojiMapper.convert(emojiEntity))
             .build())
         .build();
 
@@ -101,7 +89,6 @@ public class CustomEmojiController extends AbstractLemmyApiController {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class)) })
   })
   @PutMapping
-  @Transactional
   CustomEmojiResponse update(@Valid @RequestBody final EditCustomEmoji editCustomEmojiForm, JwtPerson principal) {
 
     final var person = getPersonOrThrowUnauthorized(principal);
@@ -126,17 +113,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
         .custom_emoji(CustomEmojiView
             .builder()
             .keywords(new ArrayList<String>(editCustomEmojiForm.keywords()))
-            .custom_emoji(
-                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.builder()
-                    .id(emojiEntity.getId())
-                    .local_site_id(emojiEntity.getLocalSiteId())
-                    .shortcode(emojiEntity.getShortCode())
-                    .image_url(emojiEntity.getImageUrl())
-                    .alt_text(emojiEntity.getAltText())
-                    .category(emojiEntity.getCategory())
-                    .published(emojiEntity.getCreatedAt().toString())
-                    .updated(emojiEntity.getUpdatedAt().toString())
-                    .build())
+            .custom_emoji(customEmojiMapper.convert(emojiEntity))
             .build())
         .build();
 
