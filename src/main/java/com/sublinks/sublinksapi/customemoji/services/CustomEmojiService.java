@@ -22,20 +22,29 @@ public class CustomEmojiService {
 
   @Transactional
   public CustomEmoji createCustomEmoji(final CustomEmoji customEmoji, final Iterable<String> keywords) {
-
     var emojiEntity = customEmojiRepository.save(customEmoji);
+    this.addKeywords(emojiEntity, keywords);
+    return emojiEntity;
+  }
 
+  @Transactional
+  public CustomEmoji updateCustomEmoji(final CustomEmoji customEmoji, final Iterable<String> keywords) {
+    var emojiEntity = customEmojiRepository.save(customEmoji);
+    customEmojiKeywordRepository.deleteAll(emojiEntity.getKeywords());
+    this.addKeywords(emojiEntity, keywords);
+    return emojiEntity;
+  }
+
+  private void addKeywords(final CustomEmoji customEmoji, final Iterable<String> keywords) {
     var customEmojiKeywords = new ArrayList<CustomEmojiKeyword>();
     for (var keyword : keywords) {
       customEmojiKeywords.add(
           CustomEmojiKeyword.builder()
               .keyword(keyword.toLowerCase().trim())
-              .emoji(emojiEntity)
+              .emoji(customEmoji)
               .build());
     }
     customEmojiKeywordRepository.saveAll(customEmojiKeywords);
-
-    return emojiEntity;
   }
 
 }
