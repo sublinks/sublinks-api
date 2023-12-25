@@ -8,6 +8,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class KeyGeneratorUtil {
 
+  /**
+   * Generates a new RSA key pair and wraps the keys in a KeyStore object.
+   * This method creates a new RSA key pair with a specified key size of 2048
+   * bits.
+   * The public and private keys are then base64 encoded and wrapped in a standard
+   * format.
+   *
+   * @return A <a href="#{@link}">{@link KeyStore}</a> object containing the
+   *         base64 encoded and wrapped public
+   *         and private keys.
+   *         If the key generation fails, returns a KeyStore object with null
+   *         values for both keys.
+   * 
+   */
   public KeyStore generate() {
 
     final KeyPair pair = generateKeyPair();
@@ -18,8 +32,7 @@ public class KeyGeneratorUtil {
     final String base64EncodedPrivate = base64Encode(pair.getPrivate().getEncoded());
     return new KeyStore(
         wrapPublic(base64EncodedPublic),
-        wrapPrivate(base64EncodedPrivate)
-    );
+        wrapPrivate(base64EncodedPrivate));
   }
 
   private KeyPair generateKeyPair() {
