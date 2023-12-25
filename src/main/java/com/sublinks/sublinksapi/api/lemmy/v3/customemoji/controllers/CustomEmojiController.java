@@ -109,14 +109,56 @@ public class CustomEmojiController extends AbstractLemmyApiController {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class)) })
   })
   @PutMapping
-  CustomEmojiResponse update(@Valid final EditCustomEmoji editCustomEmojiForm, JwtPerson principal) {
+  @Transactional
+  CustomEmojiResponse update(@Valid @RequestBody final EditCustomEmoji editCustomEmojiForm, JwtPerson principal) {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    var emojiId = (long) editCustomEmojiForm.id();
+    var customEmojiOptional = customEmojiRepository.findById(emojiId);
+    if (!customEmojiOptional.isPresent()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "custom_emoji_not_found");
+    }
+    var customEmoji = customEmojiOptional.get();
+
+    customEmoji.setAltText(editCustomEmojiForm.alt_text());
+    customEmoji.setCategory(editCustomEmojiForm.category());
+    customEmoji.setImageUrl(editCustomEmojiForm.image_url());
+
+    var emojiEntity = customEmojiRepository.save(customEmoji);
+
+    customEmojiKeywordRepository.deleteAll(emojiEntity.getKeywords());
+
+    var keywords = new ArrayList<CustomEmojiKeyword>();
+    for (var keyword : editCustomEmojiForm.keywords()) {
+      keywords.add(
+          CustomEmojiKeyword.builder()
+              .keyword(keyword.toLowerCase().trim())
+              .emoji(emojiEntity)
+              .build());
+    }
+    customEmojiKeywordRepository.saveAll(keywords);
+
+    return CustomEmojiResponse.builder()
+        .custom_emoji(CustomEmojiView
+            .builder()
+            .keywords(new ArrayList<String>(editCustomEmojiForm.keywords()))
+            .custom_emoji(
+                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.builder()
+                    .id(emojiEntity.getId())
+                    .local_site_id(emojiEntity.getLocalSiteId())
+                    .shortcode(emojiEntity.getShortCode())
+                    .image_url(emojiEntity.getImageUrl())
+                    .alt_text(emojiEntity.getAltText())
+                    .category(emojiEntity.getCategory())
+                    .published(emojiEntity.getCreatedAt().toString())
+                    .updated(emojiEntity.getUpdatedAt().toString())
+                    .build())
+            .build())
+        .build();
 
   }
 
