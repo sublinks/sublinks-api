@@ -2,7 +2,6 @@ package com.sublinks.sublinksapi.api.lemmy.v3.customemoji.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
-import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.mappers.CustomEmojiMapper;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CreateCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmojiView;
@@ -27,6 +26,7 @@ import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
 
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,7 +46,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   private final LocalInstanceContext localInstanceContext;
   private final CustomEmojiRepository customEmojiRepository;
   public final CustomEmojiService customEmojiService;
-  public final CustomEmojiMapper customEmojiMapper;
+  private final ConversionService conversionService;
 
   @Operation(summary = "Create a new custom emoji.")
   @ApiResponses(value = {
@@ -75,7 +75,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
         .custom_emoji(CustomEmojiView
             .builder()
             .keywords(new ArrayList<String>(createCustomEmojiForm.keywords()))
-            .custom_emoji(customEmojiMapper.convert(emojiEntity))
+            .custom_emoji(conversionService.convert(emojiEntity,
+                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.class))
             .build())
         .build();
 
@@ -113,7 +114,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
         .custom_emoji(CustomEmojiView
             .builder()
             .keywords(new ArrayList<String>(editCustomEmojiForm.keywords()))
-            .custom_emoji(customEmojiMapper.convert(emojiEntity))
+            .custom_emoji(conversionService.convert(emojiEntity,
+                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.class))
             .build())
         .build();
 
