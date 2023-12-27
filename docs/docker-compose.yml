@@ -36,8 +36,29 @@ services:
     environment:
       LEMMY_USER: federation
       LEMMY_PASSWORD: doesntmatter
+      DB_DSN: "federation:federation@tcp(federationdb:3306)/federation"
+      AMQP_SERVER_URL: "amqp://guest:guest@queue:5672"
     depends_on:
+      - federationdb
+      - queue
       - sublinks
+
+  federationdb:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=federation
+      - MYSQL_USER=federation
+      - MYSQL_PASSWORD=federation
+    restart: always
+    logging: *default-logging
+
+  queue:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "15672:15672"
+      - "5672:5672"
 
   sublinks:
     image: ghcr.io/sublinks/sublinks:0.0.1-snapshot
@@ -55,7 +76,7 @@ services:
     depends_on:
       - db
       - pictrs
-  
+
   db:
     image: mysql:latest
     environment:

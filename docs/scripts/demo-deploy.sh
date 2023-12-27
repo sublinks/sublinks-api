@@ -5,16 +5,17 @@ docker compose pull
 # Restart all containers by destroying them and recreating
 docker compose down
 docker compose up -d
+docker system prune -f --volumes -a
 
-SLEEP=65
+SLEEP=90
 echo "Sleeping for ${SLEEP} seconds to allow system to boot..."
 sleep ${SLEEP}
 
 echo "Create initial admin user..."
 read -r -d '' USERDATA <<EOF
 {
-  "username":"jgrim", 
-  "password": "changeme1234", 
+  "username":"jgrim",
+  "password": "changeme1234",
   "password_verify":"changeme1234"
 }
 EOF
@@ -91,4 +92,3 @@ read -r -d '' REPLY <<EOF
 }
 EOF
 REPLY_ID=$(curl -s -H "Authorization: Bearer ${TOKEN}" -H "content-type: application/json" -H "accept: application/json" --data "${REPLY}" "https://demo.sublinks.org/api/v3/comment" | jq -r '.comment_view.comment.id')
-
