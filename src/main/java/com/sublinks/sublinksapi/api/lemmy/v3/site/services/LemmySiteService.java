@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
@@ -32,6 +33,7 @@ public class LemmySiteService {
   private final LemmyPersonService lemmyPersonService;
   private final LinkPersonInstanceRepository linkPersonInstanceRepository;
   private final SlurFilterService slurFilterService;
+  private final CustomEmojiRepository customEmojiRepository;
 
   // @todo finish admin list
   public Collection<PersonView> admins() {
@@ -57,10 +59,12 @@ public class LemmySiteService {
     return languages;
   }
 
-  // @todo custom emojis
   public Collection<CustomEmojiView> customEmojis() {
-
     final Collection<CustomEmojiView> emojiViews = new LinkedHashSet<>();
+    for (var emoji : customEmojiRepository.findAll()) {
+      emojiViews.add(conversionService.convert(emoji,
+          CustomEmojiView.class));
+    }
     return emojiViews;
   }
 
