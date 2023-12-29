@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.customemoji.services;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,20 +21,16 @@ public class CustomEmojiService {
 
   @Transactional
   public CustomEmoji createCustomEmoji(final CustomEmoji customEmoji, final Iterable<String> keywords) {
-    var emojiEntity = customEmojiRepository.save(customEmoji);
-    this.addKeywords(emojiEntity, keywords);
-    return emojiEntity;
+    return this.addKeywords(customEmoji, keywords);
   }
 
   @Transactional
   public CustomEmoji updateCustomEmoji(final CustomEmoji customEmoji, final Iterable<String> keywords) {
-    var emojiEntity = customEmojiRepository.save(customEmoji);
-    customEmojiKeywordRepository.deleteAll(emojiEntity.getKeywords());
-    this.addKeywords(emojiEntity, keywords);
-    return emojiEntity;
+    customEmojiKeywordRepository.deleteAll(customEmoji.getKeywords());
+    return this.addKeywords(customEmoji, keywords);
   }
 
-  private void addKeywords(final CustomEmoji customEmoji, final Iterable<String> keywords) {
+  private CustomEmoji addKeywords(final CustomEmoji customEmoji, final Iterable<String> keywords) {
     var customEmojiKeywords = new ArrayList<CustomEmojiKeyword>();
     for (var keyword : keywords) {
       customEmojiKeywords.add(
@@ -44,7 +39,8 @@ public class CustomEmojiService {
               .emoji(customEmoji)
               .build());
     }
-    customEmojiKeywordRepository.saveAll(customEmojiKeywords);
+    customEmoji.setKeywords(customEmojiKeywords);
+    return customEmojiRepository.save(customEmoji);
   }
 
 }

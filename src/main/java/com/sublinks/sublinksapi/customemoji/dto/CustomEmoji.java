@@ -8,6 +8,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -33,8 +34,8 @@ public class CustomEmoji {
   /*
    * Relationships.
    */
-  @OneToMany(mappedBy = "emoji")
-  List<CustomEmojiKeyword> keywords;
+  @OneToMany(mappedBy = "emoji", cascade = CascadeType.ALL)
+  private List<CustomEmojiKeyword> keywords;
 
   /**
    * Attributes.
