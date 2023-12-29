@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -101,9 +100,15 @@ public class ImageController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "200", description = "OK")}
   )
   @GetMapping("delete/{token}/{filename}")
-  String delete(@PathVariable String token, @PathVariable String filename) {
+  Mono<ResponseEntity<String>> delete(@PathVariable String token, @PathVariable String filename) {
+    var webClient = WebClient.builder().baseUrl(pictrsUri).build();
+    String url = "/image/delete/" + token + "/" + filename;
 
-    // @todo delete images
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    return webClient.delete().uri(url)
+        .exchangeToMono(response -> {
+          var status = response.statusCode().isError() ? response.statusCode() : HttpStatus.OK;
+          return response.bodyToMono(String.class)
+              .flatMap(body -> Mono.just(new ResponseEntity<>(body, status)));
+        });
   }
 }
