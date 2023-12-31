@@ -18,6 +18,7 @@ import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
@@ -57,6 +58,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final LinkPersonCommunityRepository linkPersonCommunityRepository;
   private final CommunityService communityService;
   private final AuthorizationService authorizationService;
+  private final LinkPersonCommunityService linkPersonCommunityService;
   private final LemmyCommunityService lemmyCommunityService;
   private final SlugUtil slugUtil;
   private final CommunityRepository communityRepository;
@@ -163,6 +165,12 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     authorizationService.canPerson(person).performTheAction(AuthorizeAction.update)
         .onEntity(community)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    final boolean isModerator = linkPersonCommunityService.hasLink(person, community,
+        LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner);
+    if (!isModerator) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
 
     community.setIconImageUrl(editCommunityForm.icon());
     community.setBannerImageUrl(editCommunityForm.banner());

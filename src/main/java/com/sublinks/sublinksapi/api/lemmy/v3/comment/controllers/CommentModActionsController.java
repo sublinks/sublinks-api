@@ -77,6 +77,18 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
+    final boolean isAdmin = authorizationService.isAdmin(person);
+
+    if (!isAdmin) {
+      final boolean isModerator =
+          linkPersonCommunityService.hasLink(person, comment.getCommunity(),
+              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
+              comment.getCommunity(), LinkPersonCommunityType.owner);
+      if (!isModerator) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+      }
+    }
+
     comment.setRemoved(removeCommentForm.removed());
 
     commentService.updateComment(comment);
@@ -111,6 +123,23 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     final Comment comment = commentRepository.findById((long) distinguishCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+    // Ensure the comment owner is a moderator or admin.
+    final boolean isAdmin = authorizationService.isAdmin(person);
+    if (!isAdmin) {
+      final boolean isModerator =
+          linkPersonCommunityService.hasLink(person, comment.getCommunity(),
+              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
+              comment.getCommunity(), LinkPersonCommunityType.owner);
+      if (!isModerator) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+      }
+    }
+
+    // Ensure the person making the change is the comment owner.
+    if (comment.getPerson().getId() != person.getId()) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+    }
 
     comment.setFeatured(distinguishCommentForm.distinguished());
 

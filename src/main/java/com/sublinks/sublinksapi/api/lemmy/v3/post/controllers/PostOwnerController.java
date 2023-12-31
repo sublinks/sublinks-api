@@ -17,6 +17,8 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostReport;
@@ -61,6 +63,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
   private final LemmyPostService lemmyPostService;
   private final PostService postService;
   private final LanguageRepository languageRepository;
+  private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommunityRepository communityRepository;
   private final SlugUtil slugUtil;
   private final PersonService personService;
@@ -87,6 +90,18 @@ public class PostOwnerController extends AbstractLemmyApiController {
             community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline
                 : AuthorizationService.ResponseType.allow)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    final boolean isAdmin = authorizationService.isAdmin(person);
+
+    if (!isAdmin) {
+      final boolean isModerator =
+          linkPersonCommunityService.hasLink(person, community,
+              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
+              community, LinkPersonCommunityType.owner);
+      if (!isModerator) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+      }
+    }
 
     // Language
     Optional<Language> language;
