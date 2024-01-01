@@ -24,8 +24,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
-import java.util.ArrayList;
-
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -72,12 +70,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
     var emojiEntity = customEmojiService.createCustomEmoji(customEmoji, createCustomEmojiForm.keywords());
 
     return CustomEmojiResponse.builder()
-        .custom_emoji(CustomEmojiView
-            .builder()
-            .keywords(new ArrayList<String>(createCustomEmojiForm.keywords()))
-            .custom_emoji(conversionService.convert(emojiEntity,
-                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.class))
-            .build())
+        .custom_emoji(conversionService.convert(emojiEntity,
+            CustomEmojiView.class))
         .build();
 
   }
@@ -111,14 +105,9 @@ public class CustomEmojiController extends AbstractLemmyApiController {
     var emojiEntity = customEmojiService.updateCustomEmoji(customEmoji, editCustomEmojiForm.keywords());
 
     return CustomEmojiResponse.builder()
-        .custom_emoji(CustomEmojiView
-            .builder()
-            .keywords(new ArrayList<String>(editCustomEmojiForm.keywords()))
-            .custom_emoji(conversionService.convert(emojiEntity,
-                com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.CustomEmoji.class))
-            .build())
+        .custom_emoji(conversionService.convert(emojiEntity,
+            CustomEmojiView.class))
         .build();
-
   }
 
   @Operation(summary = "Delete a custom emoji.")
