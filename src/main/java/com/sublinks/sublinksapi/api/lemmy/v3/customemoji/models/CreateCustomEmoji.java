@@ -7,10 +7,9 @@ import lombok.Builder;
 @SuppressWarnings("RecordComponentName")
 public record CreateCustomEmoji(
     String category,
-    String shorcode,
+    String shortcode,
     String image_url,
     String alt_text,
-    Collection<String> keywords
-) {
+    Collection<String> keywords) {
 
 }
