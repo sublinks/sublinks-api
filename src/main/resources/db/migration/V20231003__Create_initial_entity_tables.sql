@@ -661,3 +661,18 @@ CREATE TABLE `announcements`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+/**
+  Captcha
+ */
+CREATE TABLE `captcha`
+(
+  `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `uuid`          VARCHAR(36)                               NOT NULL,
+  `word`          TEXT                                      NOT NULL,
+  `png`           TEXT                                      NOT NULL,
+  `wav`           TEXT                                      NULL,
+  `locked`        BOOLEAN DEFAULT false                     NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
