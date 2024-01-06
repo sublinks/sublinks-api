@@ -95,6 +95,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
     personToBan.setBanned(banPersonForm.ban());
+    personRepository.save(personToBan);
 
     if (banPersonForm.remove_data()) {
       postService.removeAllPostsFromUser(personToBan, true);
