@@ -48,14 +48,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -143,6 +141,7 @@ public class PostController extends AbstractLemmyApiController {
   PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
       final JwtPerson principal) {
 
+    // @todo support multiple posts
     final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     final Person person = getPersonOrThrowBadRequest(principal);
