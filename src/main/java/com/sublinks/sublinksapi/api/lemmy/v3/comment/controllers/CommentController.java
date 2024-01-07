@@ -98,7 +98,7 @@ public class CommentController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     // @todo auth service
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     final Post post = postRepository.findById((long) createCommentForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
@@ -165,7 +165,7 @@ public class CommentController extends AbstractLemmyApiController {
   CommentResponse update(@Valid @RequestBody final EditComment editCommentForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     authorizationService.canPerson(person).performTheAction(AuthorizeAction.update)
@@ -252,7 +252,7 @@ public class CommentController extends AbstractLemmyApiController {
   CommentResponse like(@Valid @RequestBody CreateCommentLike createCommentLikeForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     final Comment comment = commentRepository.findById(createCommentLikeForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     if (createCommentLikeForm.score() == 1) {
@@ -341,7 +341,7 @@ public class CommentController extends AbstractLemmyApiController {
       @Valid @RequestBody final CreateCommentReport createCommentReportForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     final Comment comment = commentRepository.findById((long) createCommentReportForm.comment_id())
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));

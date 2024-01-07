@@ -56,7 +56,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   @PostMapping
   CustomEmojiResponse create(@Valid @RequestBody final CreateCustomEmoji createCustomEmojiForm, JwtPerson principal) {
 
-    final var person = getPersonOrThrowUnauthorized(principal);
+    final var person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
@@ -92,7 +92,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   @PutMapping
   CustomEmojiResponse update(@Valid @RequestBody final EditCustomEmoji editCustomEmojiForm, JwtPerson principal) {
 
-    final var person = getPersonOrThrowUnauthorized(principal);
+    final var person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
@@ -132,7 +132,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   DeleteCustomEmojiResponse delete(@Valid @RequestBody final DeleteCustomEmoji deleteCustomEmojiForm,
       JwtPerson principal) {
 
-    final var person = getPersonOrThrowUnauthorized(principal);
+    final var person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));

@@ -74,7 +74,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
   PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm,
       final JwtPerson principal) {
 
-    final Person sender = getPersonOrThrowUnauthorized(principal);
+    final Person sender = getPersonNotBannedOrThrowUnauthorized(principal);
 
     // @todo: add support for other sort types
     final PrivateMessageSortType sortType = PrivateMessageSortType.New;
@@ -105,7 +105,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       @Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm,
       final JwtPerson principal) {
 
-    final Person sender = getPersonOrThrowUnauthorized(principal);
+    final Person sender = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Person recipient = personRepository.findById(
         (long) createPrivateMessageForm.recipient_id()).orElseThrow(
@@ -131,7 +131,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
   PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
         (long) editPrivateMessageForm.private_message_id()).orElseThrow(
@@ -160,7 +160,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       @Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
         (long) deletePrivateMessageForm.private_message_id()).orElseThrow(
@@ -213,7 +213,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       @Valid @RequestBody final CreatePrivateMessageReport privateMessageReportForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(
         (long) privateMessageReportForm.private_message_id()).orElseThrow(
@@ -243,7 +243,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       @Valid @RequestBody ResolvePrivateMessageReport privateMessageReportForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
@@ -271,7 +271,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       @Valid final ListPrivateMessageReports listPrivateMessageReportsForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));

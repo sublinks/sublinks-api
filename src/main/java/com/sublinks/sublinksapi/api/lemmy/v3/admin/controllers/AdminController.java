@@ -74,7 +74,7 @@ public class AdminController extends AbstractLemmyApiController {
   @PostMapping("add")
   AddAdminResponse create(@Valid @RequestBody final AddAdmin addAdminForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
@@ -121,7 +121,7 @@ public class AdminController extends AbstractLemmyApiController {
       @Valid GetUnreadRegistrationApplicationCount getUnreadRegistrationApplicationCountForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
@@ -139,7 +139,7 @@ public class AdminController extends AbstractLemmyApiController {
       @Valid final ListRegistrationApplications listRegistrationApplicationsForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
@@ -161,7 +161,7 @@ public class AdminController extends AbstractLemmyApiController {
       @Valid final ApproveRegistrationApplication approveRegistrationApplicationForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));

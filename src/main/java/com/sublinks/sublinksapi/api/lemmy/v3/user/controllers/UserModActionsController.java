@@ -86,7 +86,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   @PostMapping("ban")
   BanPersonResponse ban(@Valid @RequestBody final BanPerson banPersonForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_admin"));
@@ -136,7 +136,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   GetReportCountResponse reportCount(@Valid final GetReportCount getReportCount,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final GetReportCountResponse.GetReportCountResponseBuilder builder = GetReportCountResponse.builder();
 
@@ -199,7 +199,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   @PostMapping("leave_admin")
   GetSiteResponse leaveAdmin(JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));

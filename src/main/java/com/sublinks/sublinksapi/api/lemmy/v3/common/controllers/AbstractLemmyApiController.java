@@ -42,6 +42,23 @@ public abstract class AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
   }
 
+  /**
+   * Get the non-banned person object or throw a 401 Unauthorized exception.
+   *
+   * @param principal JwtPerson object that contains the person as it's principal
+   * @return Person
+   * @throws ResponseStatusException Exception thrown when Person not present, or banned
+   */
+  public Person getPersonNotBannedOrThrowUnauthorized(JwtPerson principal) throws ResponseStatusException {
+
+    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).filter(
+            p -> !p.isBanned() && !p.isDeleted()
+                && (p.getRegistrationApplication() == null
+                || p.getRegistrationApplication().getApplicationStatus()
+                == PersonRegistrationApplicationStatus.approved))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+  }
+
   public Person getPerson(JwtPerson principal) {
 
     return getOptionalPerson(principal).orElseGet(() -> null);

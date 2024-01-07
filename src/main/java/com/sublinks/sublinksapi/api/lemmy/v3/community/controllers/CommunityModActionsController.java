@@ -75,7 +75,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   CommunityResponse hide(@Valid @RequestBody final HideCommunity hideCommunityForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN));
@@ -109,7 +109,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   @PostMapping("delete")
   CommunityResponse delete(@Valid final DeleteCommunity deleteCommunityForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Community community = communityRepository.findById(
         (long) deleteCommunityForm.community_id()).orElseThrow(
@@ -143,7 +143,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   CommunityResponse remove(@Valid @RequestBody final RemoveCommunity removeCommunityForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Community community = communityRepository.findById(
         (long) removeCommunityForm.community_id()).orElseThrow(
@@ -178,7 +178,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   GetCommunityResponse transfer(@Valid @RequestBody final TransferCommunity transferCommunityForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Community community = communityRepository.findById(
         (long) transferCommunityForm.community_id()).orElseThrow(
@@ -231,7 +231,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   BanFromCommunityResponse banUser(@Valid @RequestBody final BanFromCommunity banPersonForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Community community = communityRepository.findById((long) banPersonForm.community_id())
         .orElseThrow(
@@ -291,7 +291,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   AddModToCommunityResponse addMod(@Valid @RequestBody AddModToCommunity addModToCommunityForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Community community = communityRepository.findById(
         (long) addModToCommunityForm.community_id()).orElseThrow(

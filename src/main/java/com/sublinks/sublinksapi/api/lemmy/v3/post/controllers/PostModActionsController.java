@@ -78,7 +78,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   PostResponse remove(@Valid @RequestBody final ModRemovePost modRemovePostForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Post post = postRepository.findById(modRemovePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -125,7 +125,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @PostMapping("lock")
   PostResponse lock(@Valid @RequestBody final ModLockPost modLockPostForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Post post = postRepository.findById(modLockPostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
@@ -169,7 +169,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @PostMapping("feature")
   PostResponse feature(@Valid @RequestBody FeaturePost featurePostForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Post post = postRepository.findById((long) featurePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -230,7 +230,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
       @Valid @RequestBody final ResolvePostReport resolvePostReportForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final boolean isAdmin = authorizationService.isAdmin(person);
 
@@ -269,7 +269,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   ListPostReportsResponse reportList(@Valid final ListPostReports listPostReportsForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final boolean isAdmin = authorizationService.isAdmin(person);
 

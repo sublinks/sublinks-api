@@ -72,7 +72,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   @PostMapping("remove")
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -119,7 +119,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentResponse distinguish(@Valid @RequestBody DistinguishComment distinguishCommentForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Comment comment = commentRepository.findById((long) distinguishCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -156,7 +156,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentReportResponse reportResolve(
       @Valid @RequestBody ResolveCommentReport resolveCommentReportForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final CommentReport commentReport = commentReportRepository.findById(
             (long) resolveCommentReportForm.report_id())
@@ -190,7 +190,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   ListCommentReportsResponse reportList(@Valid ListCommentReports listCommentReportsForm,
       JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final boolean isAdmin = authorizationService.isAdmin(person);
 

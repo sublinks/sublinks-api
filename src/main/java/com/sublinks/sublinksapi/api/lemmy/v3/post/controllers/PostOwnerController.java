@@ -84,7 +84,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Community community = communityRepository.findById((long) createPostForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     authorizationService.canPerson(person).performTheAction(AuthorizeAction.create)
         .onEntity(AuthorizedEntityType.post).defaultResponse(
             community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline
@@ -183,7 +183,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
     final Post post = postRepository.findById((long) editPostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.canPerson(person).defaultingToDecline()
         .performTheAction(AuthorizeAction.update).onEntity(post)
@@ -240,7 +240,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Post post = postRepository.findById((long) deletePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     authorizationService.canPerson(person).defaultingToDecline()
         .performTheAction(AuthorizeAction.delete).onEntity(post)

@@ -72,7 +72,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   public CommunityResponse create(@Valid @RequestBody final CreateCommunity createCommunityForm,
       JwtPerson principal) {
 
-    Person person = getPersonOrThrowUnauthorized(principal);
+    Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     authorizationService.canPerson(person).performTheAction(AuthorizeAction.create)
         .onEntity(AuthorizedEntityType.community)
         .defaultingToAllow() // @todo use site setting to allow community creation
@@ -158,7 +158,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm,
       final JwtPerson principal) {
 
-    Person person = getPersonOrThrowUnauthorized(principal);
+    Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     Community community = communityRepository.findById(editCommunityForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 

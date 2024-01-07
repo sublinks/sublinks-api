@@ -99,7 +99,7 @@ public class SiteController extends AbstractLemmyApiController {
     if (!localInstanceContext.instance().getDomain().isBlank()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -156,7 +156,7 @@ public class SiteController extends AbstractLemmyApiController {
   public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
@@ -218,7 +218,7 @@ public class SiteController extends AbstractLemmyApiController {
   public BlockInstanceResponse blockInstance(
       @Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     authorizationService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     final Optional<Instance> instance = instanceRepository.findById(

@@ -229,7 +229,7 @@ public class PostController extends AbstractLemmyApiController {
   @PostMapping("like")
   PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
     final Post post = postRepository.findById(createPostLikeForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     if (createPostLikeForm.score() == 1) {
@@ -273,7 +273,7 @@ public class PostController extends AbstractLemmyApiController {
   PostReportResponse report(@Valid @RequestBody final CreatePostReport createPostReportForm,
       final JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    final Person person = getPersonNotBannedOrThrowUnauthorized(principal);
 
     final Post post = postRepository.findById((long) createPostReportForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found"));
