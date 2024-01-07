@@ -214,7 +214,6 @@ CREATE TABLE `people`
   `is_show_scores`                 TINYINT                            NOT NULL DEFAULT 0,
   `is_show_read_posts`             TINYINT                            NOT NULL DEFAULT 0,
   `is_show_nsfw`                   TINYINT                            NOT NULL DEFAULT 0,
-  `is_show_new_post_notifications` TINYINT                            NOT NULL DEFAULT 0,
   `is_show_bot_accounts`           TINYINT                            NOT NULL DEFAULT 0,
   `is_show_avatars`                TINYINT                            NOT NULL DEFAULT 0,
   `is_send_notifications_to_email` TINYINT                            NOT NULL DEFAULT 0,
@@ -226,6 +225,7 @@ CREATE TABLE `people`
   `is_auto_expanding`              TINYINT                            NOT NULL DEFAULT 0,
   `is_blur_nsfw`                   TINYINT                            NOT NULL DEFAULT 0,
   `post_listing_type`              ENUM ('List', 'Card', 'SmallCard') NOT NULL DEFAULT 'List',
+  `matrix_user_id` TEXT NULL,
   `public_key`                     TEXT                               NOT NULL,
   `private_key`                    TEXT                               NULL,
   `created_at`                     TIMESTAMP(3)                                DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
@@ -479,7 +479,7 @@ CREATE TABLE `people_mentions`
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `recipient_id` BIGINT                                    NOT NULL,
   `comment_id`   BIGINT                                    NOT NULL,
-  `is_read`      TINYINT      DEFAULT 0                NOT NULL,
+  `is_read` TINYINT DEFAULT 0 NOT NULL,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
@@ -497,9 +497,9 @@ CREATE TABLE `private_messages`
   `recipient_id`    BIGINT                                    NOT NULL,
   `activity_pub_id` TEXT                                      NOT NULL,
   `content`         TEXT                                      NOT NULL,
-  `is_local`        TINYINT      DEFAULT 0                NOT NULL,
-  `is_deleted`      TINYINT      DEFAULT 0                NOT NULL,
-  `is_read`         TINYINT      DEFAULT 0                NOT NULL,
+  `is_local`   TINYINT DEFAULT 0 NOT NULL,
+  `is_deleted` TINYINT DEFAULT 0 NOT NULL,
+  `is_read`    TINYINT DEFAULT 0 NOT NULL,
   `created_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -520,7 +520,7 @@ CREATE TABLE `private_messages_reports`
   `private_message_id` BIGINT                                    NOT NULL,
   `original_content`   TEXT                                      NOT NULL,
   `reason`             TEXT                                      NOT NULL,
-  `resolved`           TINYINT      DEFAULT 0                NOT NULL,
+  `resolved` TINYINT DEFAULT 0 NOT NULL,
   `created_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -541,7 +541,7 @@ CREATE TABLE `comment_reports`
   `comment_id`       BIGINT                                    NOT NULL,
   `original_content` TEXT                                      NOT NULL,
   `reason`           TEXT                                      NOT NULL,
-  `resolved`         TINYINT      DEFAULT 0                NOT NULL,
+  `resolved` TINYINT DEFAULT 0 NOT NULL,
   `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -558,7 +558,7 @@ CREATE TABLE `comment_replies`
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `recipient_id` BIGINT                                    NOT NULL,
   `comment_id`   BIGINT                                    NOT NULL,
-  `is_read`      TINYINT      DEFAULT 0                NOT NULL,
+  `is_read` TINYINT DEFAULT 0 NOT NULL,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -581,7 +581,7 @@ CREATE TABLE `post_reports`
   `original_body`  TEXT                                      NOT NULL,
   `original_url`   TEXT                                      NOT NULL,
   `reason`         TEXT                                      NOT NULL,
-  `resolved`       TINYINT      DEFAULT 0                NOT NULL,
+  `resolved` TINYINT DEFAULT 0 NOT NULL,
   `created_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
