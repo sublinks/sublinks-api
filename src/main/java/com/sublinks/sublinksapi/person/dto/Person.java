@@ -195,9 +195,6 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "is_blur_nsfw")
   private boolean isBlurNsfw;
 
-  @Column(nullable = false, name = "is_show_new_post_notifications")
-  private boolean isShowNewPostNotifications;
-
   @Column(nullable = false, name = "is_show_bot_accounts")
   private boolean isShowBotAccounts;
 
@@ -209,6 +206,9 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = false, name = "is_open_links_in_new_tab")
   private boolean isOpenLinksInNewTab;
+
+  @Column(nullable = true, name = "matrix_user_id")
+  private String matrixUserId;
 
   @Column(nullable = false, name = "public_key")
   private String publicKey;
