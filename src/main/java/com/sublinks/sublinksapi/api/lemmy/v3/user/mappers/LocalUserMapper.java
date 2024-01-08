@@ -15,12 +15,12 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
   @Override
   @Mapping(target = "totp_2fa_enabled", constant = "true")
   @Mapping(target = "post_listing_mode", source = "person.postListingType")
-  @Mapping(target = "infinite_scroll_enabled", source = "person.isInfiniteScroll")
-  @Mapping(target = "enable_keyboard_navigation", source = "person.isKeyboardNavigation")
-  @Mapping(target = "enable_animated_images", source = "person.isAnimatedImages")
-  @Mapping(target = "blur_nsfw", source = "person.isBlurNsfw")
+  @Mapping(target = "infinite_scroll_enabled", source = "person.infiniteScroll")
+  @Mapping(target = "enable_keyboard_navigation", source = "person.keyboardNavigation")
+  @Mapping(target = "enable_animated_images", source = "person.animatedImages")
+  @Mapping(target = "blur_nsfw", source = "person.blurNsfw")
   @Mapping(target = "collapse_bot_comments", source = "person.collapseBotComments")
-  @Mapping(target = "auto_expand", source = "person.isAutoExpanding")
+  @Mapping(target = "auto_expand", source = "person.autoExpanding")
   @Mapping(target = "admin", source = "person")
   @Mapping(target = "person_id", source = "person.id")
   @Mapping(target = "email", source = "person.email")
@@ -40,6 +40,5 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
   @Mapping(target = "open_links_in_new_tab", source = "person.openLinksInNewTab")
   @Mapping(target = "email_verified", source = "person.emailVerified")
   @Mapping(target = "accepted_application", constant = "true")
-  @Mapping(target = "matrix_user_id", source = "person.matrixUserId")
   LocalUser convert(@Nullable Person person);
 }
