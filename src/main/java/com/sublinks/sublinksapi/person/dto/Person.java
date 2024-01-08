@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.comment.dto.CommentLike;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.enums.PostListingMode;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.dto.PostRead;
@@ -163,6 +164,25 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "default_sort_type")
   private SortType defaultSortType;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, name = "post_listing_type")
+  private PostListingMode postListingType;
+
+  @Column(nullable = false, name = "is_infinite_scroll")
+  private boolean isInfiniteScroll;
+
+  @Column(nullable = false, name = "is_keyboard_navigation")
+  private boolean isKeyboardNavigation;
+
+  @Column(nullable = false, name = "is_animated_images")
+  private boolean isAnimatedImages;
+
+  @Column(nullable = false, name = "is_collapse_bot_comments")
+  private boolean isCollapseBotComments;
+
+  @Column(nullable = false, name = "is_auto_expanding")
+  private boolean isAutoExpanding;
+
   @Column(nullable = false, name = "is_show_scores")
   private boolean isShowScores;
 
@@ -172,8 +192,8 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "is_show_nsfw")
   private boolean isShowNsfw;
 
-  @Column(nullable = false, name = "is_show_new_post_notifications")
-  private boolean isShowNewPostNotifications;
+  @Column(nullable = false, name = "is_blur_nsfw")
+  private boolean isBlurNsfw;
 
   @Column(nullable = false, name = "is_show_bot_accounts")
   private boolean isShowBotAccounts;
@@ -186,6 +206,9 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = false, name = "is_open_links_in_new_tab")
   private boolean isOpenLinksInNewTab;
+
+  @Column(nullable = true, name = "matrix_user_id")
+  private String matrixUserId;
 
   @Column(nullable = false, name = "public_key")
   private String publicKey;

@@ -203,9 +203,18 @@ public class UserController extends AbstractLemmyApiController {
     // @todo expand form validation to check for email formatting, etc.
     person.setShowNsfw(
         saveUserSettingsForm.show_nsfw() != null && saveUserSettingsForm.show_nsfw());
-    // @todo add blur nfsw content
-    // @todo add auto expand media
-    // @todo show bot accounts
+    person.setBlurNsfw(
+        saveUserSettingsForm.blur_nsfw() != null && saveUserSettingsForm.blur_nsfw());
+    person.setAutoExpanding(
+        saveUserSettingsForm.auto_expand() != null && saveUserSettingsForm.auto_expand());
+    person.setCollapseBotComments(saveUserSettingsForm.collapse_bot_comments() != null
+        && saveUserSettingsForm.collapse_bot_comments());
+    person.setKeyboardNavigation(saveUserSettingsForm.enable_keyboard_navigation() != null
+        && saveUserSettingsForm.enable_keyboard_navigation());
+    person.setAnimatedImages(saveUserSettingsForm.enable_animated_images() != null
+        && saveUserSettingsForm.enable_animated_images());
+    person.setShowBotAccounts(saveUserSettingsForm.show_bot_accounts() != null
+        && saveUserSettingsForm.show_bot_accounts());
     person.setShowScores(
         saveUserSettingsForm.show_scores() != null && saveUserSettingsForm.show_scores());
     person.setDefaultTheme(
@@ -247,8 +256,10 @@ public class UserController extends AbstractLemmyApiController {
         saveUserSettingsForm.bot_account() != null && saveUserSettingsForm.bot_account());
     person.setShowReadPosts(
         saveUserSettingsForm.show_read_posts() != null && saveUserSettingsForm.show_read_posts());
-    person.setShowNewPostNotifications(saveUserSettingsForm.show_new_post_notifs() != null
-        && saveUserSettingsForm.show_new_post_notifs());
+    person.setMatrixUserId(saveUserSettingsForm.matrix_user_id());
+    // Not used anymore??
+    //person.setShowNewPostNotifications(saveUserSettingsForm.show_new_post_notifs() != null
+    //    && saveUserSettingsForm.show_new_post_notifs());
     // @todo generate_totp_2fa
     person.setOpenLinksInNewTab(saveUserSettingsForm.open_links_in_new_tab() != null
         && saveUserSettingsForm.open_links_in_new_tab());
