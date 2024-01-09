@@ -46,7 +46,6 @@ public class LemmyPersonService {
   public Collection<PostView> getPersonPosts(Person person) {
 
     Collection<PostView> postViews = new ArrayList<>();
-    // @todo person posts
 
     postRepository.allPostsByPerson(person).forEach(post -> {
       postViews.add(lemmyPostService.postViewFromPost(post, person));
