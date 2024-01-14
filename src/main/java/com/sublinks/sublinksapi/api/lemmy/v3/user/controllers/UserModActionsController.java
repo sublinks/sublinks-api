@@ -7,14 +7,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.GetReportCount;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.dto.Community;
@@ -22,11 +22,8 @@ import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
@@ -42,7 +39,6 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -62,12 +58,11 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
   private final AnnouncementRepository announcementRepository;
   private final CommentReportRepository commentReportRepository;
-  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
   private final PostReportRepository postReportRepository;
   private final PrivateMessageReportRepository privateMessageReportRepository;
   private final CommunityRepository communityRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final PersonRepository personRepository;
   private final PostService postService;
   private final CommentService commentService;
@@ -88,13 +83,13 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.isAdminElseThrow(person,
+    RoleAuthorizingService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_admin"));
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    personToBan.setBanned(banPersonForm.ban());
+    personToBan.setRole(roleAuthorizingService.getBannedRole());
 
     if (banPersonForm.remove_data()) {
       postService.removeAllPostsFromUser(personToBan, true);
@@ -162,7 +157,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
       builder.private_message_reports(0);
     } else {
 
-      final boolean isAdmin = authorizationService.isAdmin(person);
+      final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
       if (isAdmin) {
         builder.comment_reports(
@@ -200,18 +195,14 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.isAdminElseThrow(person,
+    RoleAuthorizingService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
-    final Optional<LinkPersonInstance> linkPersonInstance = linkPersonInstanceRepository.findLinkPersonInstanceByInstanceAndPerson(
-        localInstanceContext.instance(), person);
-
-    if (linkPersonInstance.isPresent()) {
-      linkPersonInstance.get().setLinkType(LinkPersonInstanceType.user);
-      linkPersonInstanceRepository.save(linkPersonInstance.get());
-    } else {
-      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin");
+    if (roleAuthorizingService.getAdmins().size() == 1) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_leave_last_admin");
     }
+
+    person.setRole(roleAuthorizingService.getUserRole());
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
@@ -231,6 +222,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
-        .custom_emojis(lemmySiteService.customEmojis()).admins(lemmySiteService.admins()).build();
+        .custom_emojis(lemmySiteService.customEmojis()).admins(
+            roleAuthorizingService.getAdmins().stream().map(lemmyPersonService::getPersonView)
+                .toList()).build();
   }
 }

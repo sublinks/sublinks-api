@@ -49,10 +49,6 @@ public class LinkPersonInstance {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, name = "link_type")
-  @Enumerated(EnumType.STRING)
-  private LinkPersonInstanceType linkType;
-
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;

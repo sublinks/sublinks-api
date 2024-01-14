@@ -142,7 +142,6 @@ CREATE TABLE `link_person_instances`
   `id`          BIGINT AUTO_INCREMENT PRIMARY KEY,
   `person_id`   BIGINT                                    NOT NULL,
   `instance_id` BIGINT                                    NOT NULL,
-  `link_type`   ENUM ('super_admin','admin','user')       NOT NULL,
   `created_at`  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
@@ -194,9 +193,9 @@ CREATE TABLE `people`
   `id`                             BIGINT AUTO_INCREMENT PRIMARY KEY,
   `is_local`                       TINYINT                            NOT NULL DEFAULT 0,
   `is_bot_account`                 TINYINT                            NOT NULL DEFAULT 0,
-  `is_banned`                      TINYINT                            NOT NULL DEFAULT 0,
   `is_deleted`                     TINYINT                            NOT NULL DEFAULT 0,
   `activity_pub_id`                TEXT                               NOT NULL,
+  `role_id`                        BIGINT                             NOT NULL,
   `name`                           VARCHAR(255)                       NULL,
   `display_name`                   VARCHAR(255)                       NULL,
   `email`                          VARCHAR(255)                       NULL,
@@ -225,7 +224,7 @@ CREATE TABLE `people`
   `is_auto_expanding`              TINYINT                            NOT NULL DEFAULT 0,
   `is_blur_nsfw`                   TINYINT                            NOT NULL DEFAULT 0,
   `post_listing_type`              ENUM ('List', 'Card', 'SmallCard') NOT NULL DEFAULT 'List',
-  `matrix_user_id` TEXT NULL,
+  `matrix_user_id`                 TEXT                               NULL,
   `public_key`                     TEXT                               NOT NULL,
   `private_key`                    TEXT                               NULL,
   `created_at`                     TIMESTAMP(3)                                DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
@@ -238,6 +237,7 @@ CREATE INDEX `IDX_PEOPLE_NAME` ON `people` (`name`);
 CREATE INDEX `IDX_PEOPLE_EMAIL` ON `people` (`email`);
 CREATE INDEX `IDX_PEOPLE_IS_BANNED` ON `people` (`is_banned`);
 CREATE INDEX `IDX_PEOPLE_IS_LOCAL` ON `people` (`is_local`);
+CREATE INDEX `IDX_PEOPLE_ROLE_ID` ON `people` (`role_id`);
 
 CREATE TABLE `person_languages`
 (
@@ -479,7 +479,7 @@ CREATE TABLE `people_mentions`
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `recipient_id` BIGINT                                    NOT NULL,
   `comment_id`   BIGINT                                    NOT NULL,
-  `is_read` TINYINT DEFAULT 0 NOT NULL,
+  `is_read`      TINYINT      DEFAULT 0                    NOT NULL,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
@@ -497,9 +497,9 @@ CREATE TABLE `private_messages`
   `recipient_id`    BIGINT                                    NOT NULL,
   `activity_pub_id` TEXT                                      NOT NULL,
   `content`         TEXT                                      NOT NULL,
-  `is_local`   TINYINT DEFAULT 0 NOT NULL,
-  `is_deleted` TINYINT DEFAULT 0 NOT NULL,
-  `is_read`    TINYINT DEFAULT 0 NOT NULL,
+  `is_local`        TINYINT      DEFAULT 0                    NOT NULL,
+  `is_deleted`      TINYINT      DEFAULT 0                    NOT NULL,
+  `is_read`         TINYINT      DEFAULT 0                    NOT NULL,
   `created_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -520,7 +520,7 @@ CREATE TABLE `private_messages_reports`
   `private_message_id` BIGINT                                    NOT NULL,
   `original_content`   TEXT                                      NOT NULL,
   `reason`             TEXT                                      NOT NULL,
-  `resolved` TINYINT DEFAULT 0 NOT NULL,
+  `resolved`           TINYINT      DEFAULT 0                    NOT NULL,
   `created_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -541,7 +541,7 @@ CREATE TABLE `comment_reports`
   `comment_id`       BIGINT                                    NOT NULL,
   `original_content` TEXT                                      NOT NULL,
   `reason`           TEXT                                      NOT NULL,
-  `resolved` TINYINT DEFAULT 0 NOT NULL,
+  `resolved`         TINYINT      DEFAULT 0                    NOT NULL,
   `created_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -558,7 +558,7 @@ CREATE TABLE `comment_replies`
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `recipient_id` BIGINT                                    NOT NULL,
   `comment_id`   BIGINT                                    NOT NULL,
-  `is_read` TINYINT DEFAULT 0 NOT NULL,
+  `is_read`      TINYINT      DEFAULT 0                    NOT NULL,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -581,7 +581,7 @@ CREATE TABLE `post_reports`
   `original_body`  TEXT                                      NOT NULL,
   `original_url`   TEXT                                      NOT NULL,
   `reason`         TEXT                                      NOT NULL,
-  `resolved` TINYINT DEFAULT 0 NOT NULL,
+  `resolved`       TINYINT      DEFAULT 0                    NOT NULL,
   `created_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -692,10 +692,41 @@ CREATE TABLE `custom_emoji_keywords`
 (
   `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
   `custom_emoji_id` BIGINT       NOT NULL,
-  `keyword`         VARCHAR(255) NOT NULL,
-  FOREIGN KEY (`custom_emoji_id`) REFERENCES `custom_emojis` (`id`) ON DELETE CASCADE
+  `keyword`         VARCHAR(255) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
 CREATE INDEX `IDX_CUSTOM_EMOJI_KEYWORD_CUSTOM_EMOJI_ID` ON `custom_emoji_keywords` (`custom_emoji_id`);
+
+
+/**
+  Roles table
+ */
+CREATE TABLE `roles`
+(
+  `id`          BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `name`        VARCHAR(255)                              NOT NULL,
+  `description` TEXT                                      NOT NULL,
+  `is_active`   TINYINT                                   NOT NULL DEFAULT 1,
+  `expires_at`  TIMESTAMP(3)                              NULL,
+  `created_at`  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Rolepermissions table
+ */
+CREATE TABLE `role_permissions`
+(
+  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `role_id`    BIGINT NOT NULL,
+  `permission` TEXT   NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+CREATE INDEX `IDX_ROLE_PERMISSIONS_ROLE_ID` ON `role_permissions` (`role_id`);
+CREATE UNIQUE INDEX `IDX_ROLE_PERMISSIONS_ROLE_ID_PERMISSION` ON `role_permissions` (role_id, permission(255));
