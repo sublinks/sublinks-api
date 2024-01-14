@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.person.dto;
 
+import com.sublinks.sublinksapi.authorization.dto.Role;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentLike;
 import com.sublinks.sublinksapi.instance.dto.Instance;
@@ -66,6 +68,10 @@ public class Person implements UserDetails, Principal {
   @JoinTable(name = "link_person_instances", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "instance_id"))
   private Instance instance;
 
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "role_id", nullable = false)
+  private Role role;
+
   @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
   private LinkPersonInstance linkPersonInstance;
 
@@ -116,9 +122,6 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = false, name = "is_bot_account")
   private boolean isBotAccount;
-
-  @Column(nullable = false, name = "is_banned")
-  private boolean isBanned;
 
   @Column(nullable = false, name = "is_deleted")
   private boolean isDeleted;
@@ -224,6 +227,24 @@ public class Person implements UserDetails, Principal {
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
 
+  public boolean isBanned() {
+
+    if (getRole() == null) {
+      throw new RuntimeException("Role is null!");
+    }
+
+    return RoleAuthorizingService.isBanned(getRole());
+  }
+
+  public boolean isAdmin() {
+
+    if (getRole() == null) {
+      throw new RuntimeException("Role is null!");
+    }
+
+    return RoleAuthorizingService.isAdmin(getRole());
+  }
+
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
 
@@ -245,19 +266,19 @@ public class Person implements UserDetails, Principal {
   @Override
   public boolean isAccountNonExpired() {
 
-    return true;
+    return !isBanned();
   }
 
   @Override
   public boolean isAccountNonLocked() {
 
-    return isBanned();
+    return !isBanned();
   }
 
   @Override
   public boolean isCredentialsNonExpired() {
 
-    return true;
+    return !isBanned();
   }
 
   @Override

@@ -14,7 +14,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentServic
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
@@ -28,6 +29,7 @@ import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,6 +39,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -58,7 +61,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   private final LemmyCommentService lemmyCommentService;
   private final CommentReportRepository commentReportRepository;
   private final CommentReportService commentReportService;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommunityRepository communityRepository;
   private final CommentRepository commentRepository;
@@ -73,7 +76,9 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.REMOVE_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -108,7 +113,11 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Collections.setOf(RolePermission.ADMIN_SPEAK, RolePermission.MODERATOR_SPEAK),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
+    // @todo: check if he is mod if not ADMIN_SPEAK
     final Comment comment = commentRepository.findById((long) distinguishCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -128,12 +137,17 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       @Valid @RequestBody ResolveCommentReport resolveCommentReportForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Collections.setOf(RolePermission.REPORT_COMMUNITY_RESOLVE,
+            RolePermission.REPORT_INSTANCE_RESOLVE),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final CommentReport commentReport = commentReportRepository.findById(
             (long) resolveCommentReportForm.report_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
+        RolePermission.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
       final boolean isModerator =
@@ -162,8 +176,13 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.REPORT_COMMUNITY_READ,
+            RolePermission.REPORT_INSTANCE_READ),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
+        RolePermission.REPORT_INSTANCE_READ);
 
     final List<CommentReport> commentReports = new ArrayList<>();
 

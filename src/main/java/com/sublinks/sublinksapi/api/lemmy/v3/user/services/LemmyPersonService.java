@@ -1,16 +1,13 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.services;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
-import com.sublinks.sublinksapi.comment.services.CommentLikeService;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -26,7 +23,7 @@ import org.springframework.stereotype.Service;
 public class LemmyPersonService {
 
   private final ConversionService conversionService;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final LemmyPostService lemmyPostService;
   private final LemmyCommentService lemmyCommentService;
@@ -34,7 +31,7 @@ public class LemmyPersonService {
 
   public PersonView getPersonView(Person person) {
 
-    final boolean is_admin = authorizationService.isAdmin(person);
+    final boolean is_admin = roleAuthorizingService.isAdmin(person);
     return PersonView.builder()
         .person(conversionService.convert(person,
             com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))

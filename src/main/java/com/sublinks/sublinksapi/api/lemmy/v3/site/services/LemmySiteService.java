@@ -15,7 +15,6 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -31,22 +30,8 @@ public class LemmySiteService {
   private final ConversionService conversionService;
   private final LocalInstanceContext localInstanceContext;
   private final LemmyPersonService lemmyPersonService;
-  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
   private final SlurFilterService slurFilterService;
   private final CustomEmojiRepository customEmojiRepository;
-
-  // @todo finish admin list
-  public Collection<PersonView> admins() {
-
-    Collection<LinkPersonInstance> admins = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsIn(
-        localInstanceContext.instance(),
-        List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin));
-    final Collection<PersonView> adminViews = new LinkedHashSet<>();
-    for (LinkPersonInstance linkPersonInstance : admins) {
-      adminViews.add(lemmyPersonService.getPersonView(linkPersonInstance.getPerson()));
-    }
-    return adminViews;
-  }
 
   public Collection<Language> allLanguages(final LanguageRepository languageRepository) {
 
