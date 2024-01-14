@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.post.dto;
 
-import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.persistence.Column;
@@ -29,7 +28,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "post_reports")
-public class PostReport implements AuthorizationEntityInterface {
+public class PostReport {
 
   /**
    * Relationships.
@@ -75,12 +74,6 @@ public class PostReport implements AuthorizationEntityInterface {
   @UpdateTimestamp
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
-
-  @Override
-  public AuthorizedEntityType entityType() {
-
-    return AuthorizedEntityType.report;
-  }
 
   @Override
   public final boolean equals(Object o) {

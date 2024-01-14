@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.community.dto;
 
-import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.instance.dto.Instance;
@@ -42,7 +41,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "communities")
-public class Community implements Serializable, AuthorizationEntityInterface {
+public class Community implements Serializable {
 
   @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
   Set<LinkPersonCommunity> linkPersonCommunity;
@@ -119,12 +118,6 @@ public class Community implements Serializable, AuthorizationEntityInterface {
   @UpdateTimestamp
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
-
-  @Override
-  public AuthorizedEntityType entityType() {
-
-    return AuthorizedEntityType.community;
-  }
 
   @Override
   public final boolean equals(Object o) {

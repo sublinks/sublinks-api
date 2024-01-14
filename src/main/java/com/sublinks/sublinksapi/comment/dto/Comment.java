@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.comment.dto;
 
-import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.language.dto.Language;
@@ -39,7 +38,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "comments")
-public class Comment implements Serializable, AuthorizationEntityInterface {
+public class Comment implements Serializable {
 
   /**
    * Relationships.
@@ -102,12 +101,6 @@ public class Comment implements Serializable, AuthorizationEntityInterface {
   @UpdateTimestamp
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
-
-  @Override
-  public AuthorizedEntityType entityType() {
-
-    return AuthorizedEntityType.comment;
-  }
 
   @Override
   public final boolean equals(Object o) {
