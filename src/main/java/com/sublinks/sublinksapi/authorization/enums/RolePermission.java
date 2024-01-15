@@ -109,6 +109,7 @@ public enum RolePermission {
 
   // Instance permissions
   INSTANCE_UPDATE_SETTINGS("instance", AuthorizeAction.UPDATE),
+  INSTANCE_BAN_USER("user-admin", AuthorizeAction.BAN),
 
   /**
    * Unused
