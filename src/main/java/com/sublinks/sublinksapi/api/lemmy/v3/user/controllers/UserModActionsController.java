@@ -14,6 +14,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
@@ -39,6 +40,7 @@ import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -83,8 +85,9 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    RoleAuthorizingService.isAdminElseThrow(person,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_admin"));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.INSTANCE_BAN_USER, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "not_an_admin"));
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
@@ -117,7 +120,13 @@ public class UserModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockPersonResponse.class))})})
   @PostMapping("block")
-  BlockPersonResponse block() {
+  BlockPersonResponse block(final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.USER_BLOCK, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "not_an_admin"));
 
     return BlockPersonResponse.builder().build();
   }
@@ -131,6 +140,11 @@ public class UserModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.REPORT_INSTANCE_READ, RolePermission.REPORT_COMMUNITY_READ),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "not_an_admin"));
 
     final GetReportCountResponse.GetReportCountResponseBuilder builder = GetReportCountResponse.builder();
 
@@ -195,8 +209,10 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    RoleAuthorizingService.isAdminElseThrow(person,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.INSTANCE_REMOVE_ADMIN,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "not_an_admin"));
 
     if (roleAuthorizingService.getAdmins().size() == 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_leave_last_admin");
