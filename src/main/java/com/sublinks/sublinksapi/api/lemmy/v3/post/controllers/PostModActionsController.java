@@ -16,6 +16,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ResolvePostReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -39,6 +40,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -80,10 +82,14 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.MODERATOR_REMOVE_POST, RolePermission.REMOVE_POST),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Post post = postRepository.findById(modRemovePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person, RolePermission.REMOVE_POST);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =

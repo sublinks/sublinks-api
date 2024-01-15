@@ -76,9 +76,11 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.REMOVE_COMMENT,
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.MODERATOR_REMOVE_COMMENT, RolePermission.REMOVE_COMMENT),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    //@todo: check if he is mod if not REMOVE_COMMENT
+
     final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 

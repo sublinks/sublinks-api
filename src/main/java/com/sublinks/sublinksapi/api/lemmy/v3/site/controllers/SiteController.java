@@ -14,6 +14,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
@@ -35,6 +36,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -160,9 +162,14 @@ public class SiteController extends AbstractLemmyApiController {
   public SiteResponse updateSite(@Valid @RequestBody final EditSite editSiteForm,
       final JwtPerson principal) {
 
+    // @todo: Check permission on federation change
+
+
     final Person person = getPersonOrThrowUnauthorized(principal);
-    RoleAuthorizingService.isAdminElseThrow(person,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.INSTANCE_UPDATE_SETTINGS,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     if (editSiteForm.taglines().isPresent()) {
       announcementRepository.deleteAll();
@@ -223,8 +230,11 @@ public class SiteController extends AbstractLemmyApiController {
       @Valid @RequestBody final BlockInstance blockInstanceForm, final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    RoleAuthorizingService.isAdminElseThrow(person,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.INSTANCE_DEFEDERATE_INSTANCE,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Optional<Instance> instance = instanceRepository.findById(
         (long) blockInstanceForm.instance_id());
     if (instance.isEmpty()) {
