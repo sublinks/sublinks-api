@@ -5,6 +5,8 @@ public enum RolePermission {
   // User permissions
   // Post permissions
   READ_POST("post", AuthorizeAction.READ),
+  READ_POSTS("posts", AuthorizeAction.READ),
+  MARK_POST_AS_READ("post-read", AuthorizeAction.UPDATE),
   CREATE_POST("post", AuthorizeAction.CREATE),
   UPDATE_POST("post", AuthorizeAction.UPDATE),
   DELETE_POST("post", AuthorizeAction.DELETE),
@@ -24,6 +26,7 @@ public enum RolePermission {
 
   // Private message permissions
   READ_PRIVATE_MESSAGE("message", AuthorizeAction.READ),
+  MARK_PRIVATE_MESSAGE_AS_READ("comment-read", AuthorizeAction.UPDATE),
   CREATE_PRIVATE_MESSAGE("message", AuthorizeAction.CREATE),
   UPDATE_PRIVATE_MESSAGE("message", AuthorizeAction.UPDATE),
   DELETE_PRIVATE_MESSAGE("message", AuthorizeAction.DELETE),
@@ -42,6 +45,9 @@ public enum RolePermission {
   UPDATE_USER("user", AuthorizeAction.UPDATE),
   DELETE_USER("user", AuthorizeAction.DELETE),
   PURGE_USER("user", AuthorizeAction.PURGE),
+
+  // Modlog permissions
+  READ_MODLOG("modlog", AuthorizeAction.READ),
 
   // Follow permissions
   COMMUNITY_FOLLOW("community", AuthorizeAction.FOLLOW),
@@ -122,7 +128,7 @@ public enum RolePermission {
   INSTANCE_FEDERATE_INSTANCE("instance-federation", AuthorizeAction.FOLLOW),
   INSTANCE_ADD_ADMIN("instance-admin", AuthorizeAction.CREATE),
   INSTANCE_REMOVE_ADMIN("instance-admin", AuthorizeAction.DELETE),
-
+  INSTANCE_SEARCH("instance-search", AuthorizeAction.READ),
 
   // Report permissions
   REPORT_POST("post-report", AuthorizeAction.CREATE),
@@ -165,7 +171,8 @@ public enum RolePermission {
   IGNORE_BLOCK("admin-ignore", AuthorizeAction.READ),
 
   /**
-   * The role who has this permission is the default role unreigstered users and for users if there is no "registered" role.
+   * The role who has this permission is the default role unreigstered users and for users if there
+   * is no "registered" role.
    */
   DEFAULT("default", AuthorizeAction.READ),
 
