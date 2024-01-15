@@ -69,7 +69,7 @@ public class PersonService {
     rolePermissions.add(RolePermission.READ_COMMENT);
     rolePermissions.add(RolePermission.READ_COMMUNITY);
     rolePermissions.add(RolePermission.READ_USER);
-
+    rolePermissions.add(RolePermission.READ_MODLOG);
     Role bannedRole = roleRepository.save(Role.builder()
         .description("Banned role for banned users")
         .name("Banned")
@@ -85,6 +85,22 @@ public class PersonService {
 
     rolePermissions.remove(RolePermission.BANNED);
     rolePermissions.add(RolePermission.DEFAULT);
+
+    Role defaultUserRole = roleRepository.save(Role.builder()
+        .description("Default role for all users")
+        .name("User")
+        .isActive(true)
+        .build());
+
+    defaultUserRole.setRolePermissions(
+        rolePermissions.stream().map(rolePermission -> rolePermissionsRepository.save(
+            RolePermissions.builder()
+                .role(defaultUserRole)
+                .permission(rolePermission)
+                .build())).collect(Collectors.toSet()));
+
+    rolePermissions.remove(RolePermission.DEFAULT);
+    rolePermissions.add(RolePermission.REGISTERED);
 
     rolePermissions.add(RolePermission.POST_UPVOTE);
     rolePermissions.add(RolePermission.POST_DOWNVOTE);
@@ -133,24 +149,11 @@ public class PersonService {
     rolePermissions.add(RolePermission.REPORT_COMMUNITY_RESOLVE);
     rolePermissions.add(RolePermission.REPORT_COMMUNITY_READ);
 
-    Role defaultUserRole = roleRepository.save(Role.builder()
-        .description("Default role for all users")
-        .name("User")
-        .isActive(true)
-        .build());
-
     Role registeredUserRole = roleRepository.save(Role.builder()
-        .description("Default role for all users")
+        .description("Default Role for all registered users")
         .name("User")
         .isActive(true)
         .build());
-
-    defaultUserRole.setRolePermissions(
-        rolePermissions.stream().map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder()
-                .role(defaultUserRole)
-                .permission(rolePermission)
-                .build())).collect(Collectors.toSet()));
 
     registeredUserRole.setRolePermissions(
         rolePermissions.stream().map(rolePermission -> rolePermissionsRepository.save(

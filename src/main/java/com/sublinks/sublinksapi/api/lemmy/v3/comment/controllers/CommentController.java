@@ -377,6 +377,7 @@ public class CommentController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
         RolePermission.REPORT_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
