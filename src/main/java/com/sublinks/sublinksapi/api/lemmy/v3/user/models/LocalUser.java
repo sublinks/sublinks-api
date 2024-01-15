@@ -22,7 +22,6 @@ public record LocalUser(
     boolean show_scores,
     boolean show_bot_accounts,
     boolean show_read_posts,
-    boolean show_new_post_notifs,
     boolean email_verified,
     boolean accepted_application,
     String totp_2fa_url,
