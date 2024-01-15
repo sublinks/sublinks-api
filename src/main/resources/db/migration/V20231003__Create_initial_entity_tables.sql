@@ -235,7 +235,6 @@ CREATE TABLE `people`
 
 CREATE INDEX `IDX_PEOPLE_NAME` ON `people` (`name`);
 CREATE INDEX `IDX_PEOPLE_EMAIL` ON `people` (`email`);
-CREATE INDEX `IDX_PEOPLE_IS_BANNED` ON `people` (`is_banned`);
 CREATE INDEX `IDX_PEOPLE_IS_LOCAL` ON `people` (`is_local`);
 CREATE INDEX `IDX_PEOPLE_ROLE_ID` ON `people` (`role_id`);
 
