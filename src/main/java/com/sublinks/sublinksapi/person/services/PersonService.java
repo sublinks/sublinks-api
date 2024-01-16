@@ -64,7 +64,7 @@ public class PersonService {
 
     Set<RolePermission> rolePermissions = new HashSet<>();
     rolePermissions.add(RolePermission.BANNED);
-    rolePermissions.add(RolePermission.READ_PRIVATE_MESSAGE);
+    rolePermissions.add(RolePermission.READ_PRIVATE_MESSAGES);
     rolePermissions.add(RolePermission.READ_POST);
     rolePermissions.add(RolePermission.READ_COMMENT);
     rolePermissions.add(RolePermission.READ_COMMUNITY);
@@ -122,6 +122,8 @@ public class PersonService {
     rolePermissions.add(RolePermission.CREATE_COMMENT);
     rolePermissions.add(RolePermission.UPDATE_COMMENT);
     rolePermissions.add(RolePermission.DELETE_COMMENT);
+
+    rolePermissions.add(RolePermission.UPDATE_USER_SETTINGS);
 
     rolePermissions.add(RolePermission.MODERATOR_REMOVE_POST);
     rolePermissions.add(RolePermission.MODERATOR_REMOVE_COMMENT);

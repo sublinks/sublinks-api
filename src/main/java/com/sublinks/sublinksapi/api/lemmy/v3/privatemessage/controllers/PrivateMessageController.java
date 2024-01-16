@@ -19,7 +19,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.PrivateMessag
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.ResolvePrivateMessageReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivateMessageReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivateMessageService;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -42,7 +41,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -79,7 +77,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
     final Person sender = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermissionOrThrow(sender,
-        RolePermission.READ_PRIVATE_MESSAGE,
+        RolePermission.READ_PRIVATE_MESSAGES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo: add support for other sort types

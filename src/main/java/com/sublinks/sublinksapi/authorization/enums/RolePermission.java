@@ -25,7 +25,7 @@ public enum RolePermission {
   FAVORITE_COMMENT("comment", AuthorizeAction.FAVORITE),
 
   // Private message permissions
-  READ_PRIVATE_MESSAGE("message", AuthorizeAction.READ),
+  READ_PRIVATE_MESSAGES("message", AuthorizeAction.READ),
   MARK_PRIVATE_MESSAGE_AS_READ("comment-read", AuthorizeAction.UPDATE),
   CREATE_PRIVATE_MESSAGE("message", AuthorizeAction.CREATE),
   UPDATE_PRIVATE_MESSAGE("message", AuthorizeAction.UPDATE),
@@ -43,8 +43,14 @@ public enum RolePermission {
   // User permissions
   READ_USER("user", AuthorizeAction.READ),
   UPDATE_USER("user", AuthorizeAction.UPDATE),
+  UPDATE_USER_SETTINGS("user-settings", AuthorizeAction.UPDATE),
   DELETE_USER("user", AuthorizeAction.DELETE),
   PURGE_USER("user", AuthorizeAction.PURGE),
+  READ_MENTION_USER("user-mention", AuthorizeAction.READ),
+  MARK_MENTION_AS_READ("user-mention-read", AuthorizeAction.UPDATE),
+  READ_REPLIES("user-reply-read", AuthorizeAction.READ),
+  MARK_REPLIES_AS_READ("user-reply-read", AuthorizeAction.UPDATE),
+
 
   // Modlog permissions
   READ_MODLOG("modlog", AuthorizeAction.READ),
@@ -110,6 +116,7 @@ public enum RolePermission {
   // Instance permissions
   INSTANCE_UPDATE_SETTINGS("instance", AuthorizeAction.UPDATE),
   INSTANCE_BAN_USER("user-admin", AuthorizeAction.BAN),
+  INSTANCE_BAN_READ("user-admin-ban", AuthorizeAction.READ),
 
   /**
    * Unused
