@@ -154,7 +154,7 @@ public class PersonService {
 
     Role registeredUserRole = roleRepository.save(Role.builder()
         .description("Default Role for all registered users")
-        .name("User")
+        .name("Registered")
         .isActive(true)
         .build());
 
