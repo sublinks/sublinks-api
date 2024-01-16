@@ -50,6 +50,7 @@ public enum RolePermission {
   MARK_MENTION_AS_READ("user-mention-read", AuthorizeAction.UPDATE),
   READ_REPLIES("user-reply-read", AuthorizeAction.READ),
   MARK_REPLIES_AS_READ("user-reply-read", AuthorizeAction.UPDATE),
+  RESET_PASSWORD("user-reset-password", AuthorizeAction.DELETE),
 
 
   // Modlog permissions

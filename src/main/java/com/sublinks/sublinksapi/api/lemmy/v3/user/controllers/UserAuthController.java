@@ -1,7 +1,9 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtUtil;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
@@ -12,6 +14,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
@@ -48,7 +52,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/user")
 @Tag(name = "User")
-public class UserAuthController {
+public class UserAuthController extends AbstractLemmyApiController {
 
   private final JwtUtil jwtUtil;
   private final PersonService personService;
@@ -58,6 +62,8 @@ public class UserAuthController {
   private final InstanceConfigService instanceConfigService;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
+  private final RoleAuthorizingService roleAuthorizingService;
+
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -140,7 +146,13 @@ public class UserAuthController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteAccountResponse.class))})})
   @PostMapping("delete_account")
-  DeleteAccountResponse delete() {
+  DeleteAccountResponse delete(final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermission(person, RolePermission.DELETE_USER);
+
+    // @todo: delete account
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -151,6 +163,8 @@ public class UserAuthController {
   @PostMapping("password_reset")
   PasswordResetResponse passwordReset() {
 
+    // @todo: implement reset password
+
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
 
@@ -160,6 +174,7 @@ public class UserAuthController {
   @PostMapping("password_change")
   LoginResponse passwordChange() {
 
+    // @todo: implement reset password
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
 
@@ -169,6 +184,8 @@ public class UserAuthController {
   @PostMapping("verify_email")
   VerifyEmailResponse verifyEmail() {
 
+    // @todo: implement verifiy Email
+
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
 
@@ -176,7 +193,13 @@ public class UserAuthController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class))})})
   @PutMapping("change_password")
-  LoginResponse changePassword() {
+  LoginResponse changePassword(final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermission(person, RolePermission.RESET_PASSWORD);
+
+    // @todo: implement change password
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -186,6 +209,7 @@ public class UserAuthController {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GenerateTotpSecretResponse.class))})})
   @PostMapping("totp/generate")
   GenerateTotpSecretResponse totpGenerate() {
+    // @todo: implement TOTP
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -198,6 +222,7 @@ public class UserAuthController {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
   @PostMapping("totp/update")
   UpdateTotpResponse totpUpdate() {
+    // @todo: implement TOTP
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
