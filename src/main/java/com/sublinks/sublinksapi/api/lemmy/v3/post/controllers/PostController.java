@@ -174,7 +174,6 @@ public class PostController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
         RolePermission.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-
     final List<Long> communityIds = new ArrayList<>();
     Community community = null;
     if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
@@ -212,6 +211,9 @@ public class PostController extends AbstractLemmyApiController {
     SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
+    }
+    else{
+      sortType = SortType.New;
     }
     ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig()
         .getDefaultPostListingType() : null;
