@@ -29,6 +29,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunityV
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.FeaturePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
 import io.swagger.v3.oas.annotations.Operation;
@@ -57,6 +59,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "Miscellaneous")
 public class ModerationLogController extends AbstractLemmyApiController {
   private final ModerationLogService moderationLogService;
+  private final RoleAuthorizingService roleAuthorizingService;
 
   @Operation(summary = "Get the modlog.")
   @ApiResponses(value = {
@@ -65,7 +68,14 @@ public class ModerationLogController extends AbstractLemmyApiController {
               schema = @Schema(implementation = GetModlogResponse.class))})
   })
   @GetMapping
-  GetModlogResponse index(@Valid final GetModLog getModLogForm) {
+  GetModlogResponse index(@Valid final GetModLog getModLogForm, final JwtPerson principal) {
+
+    final Optional<Person> person = getOptionalPerson(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
+        RolePermission.READ_MODLOG,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     // Lemmy limit is 20 per ModLog table and there are 15 tables
     final int limit = 300;
 

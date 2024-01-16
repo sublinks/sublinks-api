@@ -16,18 +16,16 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.PurgeCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PurgePost;
-import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PurgePerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrationApplicationService;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
-import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
@@ -38,8 +36,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.Collection;
-import java.util.Optional;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -58,15 +54,16 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "Admin")
 public class AdminController extends AbstractLemmyApiController {
 
-  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
-  private final AuthorizationService authorizationService;
   private final LocalInstanceContext localInstanceContext;
   private final PersonRepository personRepository;
   private final PersonRegistrationApplicationRepository personRegistrationApplicationRepository;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
-  private final LemmySiteService lemmySiteService;
+  private final RoleAuthorizingService roleAuthorizingService;
+
+  private final LemmyPersonService lemmyPersonService;
+
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -76,41 +73,30 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.isAdminElseThrow(person,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_ADD_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToAdd = personRepository.findById((long) addAdminForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    final Optional<LinkPersonInstance> linkPersonInstance = linkPersonInstanceRepository.findLinkPersonInstanceByInstanceAndPerson(
-        localInstanceContext.instance(), personToAdd);
-
-    if (addAdminForm.added()) {
-      if (linkPersonInstance.isEmpty()) {
-        linkPersonInstanceRepository.save(
-            LinkPersonInstance.builder().instance(localInstanceContext.instance())
-                .person(personToAdd).linkType(LinkPersonInstanceType.admin).build());
-      } else {
-        linkPersonInstance.get().setLinkType(LinkPersonInstanceType.admin);
-        linkPersonInstanceRepository.save(linkPersonInstance.get());
-      }
-    } else if (linkPersonInstance.isPresent()) {
-        linkPersonInstance.get().setLinkType(LinkPersonInstanceType.user);
-        linkPersonInstanceRepository.save(linkPersonInstance.get());
+    if (RoleAuthorizingService.isAdmin(personToAdd)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "already_admin");
     }
 
+    // Add Admin
+    personToAdd.setRole(roleAuthorizingService.getAdminRole());
+    personRepository.save(personToAdd);
+
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModAdd)
-        .entityId(personToAdd.getId())
-        .removed(!addAdminForm.added())
-        .instance(localInstanceContext.instance())
-        .moderationPersonId(person.getId())
-        .otherPersonId(personToAdd.getId())
-        .build();
+    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModAdd)
+        .entityId(personToAdd.getId()).removed(!addAdminForm.added())
+        .instance(localInstanceContext.instance()).moderationPersonId(person.getId())
+        .otherPersonId(personToAdd.getId()).build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return AddAdminResponse.builder().admins(lemmySiteService.admins()).build();
+    return AddAdminResponse.builder().admins(
+            roleAuthorizingService.getAdmins().stream().map(lemmyPersonService::getPersonView).toList())
+        .build();
   }
 
   @Operation(summary = "Get the unread registration applications count.")
@@ -123,7 +109,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.isAdminElseThrow(person,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_REMOVE_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(
@@ -141,7 +127,8 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.isAdminElseThrow(person,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.REGISTRATION_APPLICATION_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final List<PersonRegistrationApplication> personRegistrationApplications = personRegistrationApplicationRepository.findAllByApplicationStatus(
@@ -159,11 +146,12 @@ public class AdminController extends AbstractLemmyApiController {
   @PutMapping("registration_application/approve")
   RegistrationApplicationResponse registrationApplicationApprove(
       @Valid final ApproveRegistrationApplication approveRegistrationApplicationForm,
-      JwtPerson principal) {
+      final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.isAdminElseThrow(person,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.REGISTRATION_APPLICATION_UPDATE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final PersonRegistrationApplication personRegistrationApplication = personRegistrationApplicationRepository.findById(
@@ -189,7 +177,14 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/person")
-  PurgeItemResponse purgePerson(@Valid final PurgePerson purgePersonForm) {
+  PurgeItemResponse purgePerson(@Valid final PurgePerson purgePersonForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.PURGE_USER,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -198,7 +193,14 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/community")
-  PurgeItemResponse purgeCommunity(@Valid final PurgeCommunity purgeCommunityForm) {
+  PurgeItemResponse purgeCommunity(@Valid final PurgeCommunity purgeCommunityForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.PURGE_COMMUNITY,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -207,7 +209,13 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/post")
-  PurgeItemResponse purgePost(@Valid final PurgePost purgePostForm) {
+  PurgeItemResponse purgePost(@Valid final PurgePost purgePostForm, final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.PURGE_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -216,7 +224,14 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/comment")
-  PurgeItemResponse purgeComment(@Valid final PurgeComment purgeCommentForm) {
+  PurgeItemResponse purgeComment(@Valid final PurgeComment purgeCommentForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.PURGE_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
