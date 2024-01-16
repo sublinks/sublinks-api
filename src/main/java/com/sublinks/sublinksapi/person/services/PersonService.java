@@ -66,6 +66,7 @@ public class PersonService {
     rolePermissions.add(RolePermission.BANNED);
     rolePermissions.add(RolePermission.READ_PRIVATE_MESSAGES);
     rolePermissions.add(RolePermission.READ_POST);
+    rolePermissions.add(RolePermission.READ_POSTS);
     rolePermissions.add(RolePermission.READ_COMMENT);
     rolePermissions.add(RolePermission.READ_COMMUNITY);
     rolePermissions.add(RolePermission.READ_USER);
