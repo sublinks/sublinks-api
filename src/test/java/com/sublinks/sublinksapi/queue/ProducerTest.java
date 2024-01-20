@@ -18,8 +18,7 @@ public class ProducerTest {
   private Producer producer;
 
   @BeforeEach
-  public void setUp() {
-
+  public void setup() {
     MockitoAnnotations.openMocks(this);
   }
 
