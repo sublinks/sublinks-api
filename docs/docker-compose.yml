@@ -51,6 +51,12 @@ services:
       SUBLINKS_JWT_SECRET: <JWT-SECRET>
       SUBLINKS_BASE_URL: https://demo.sublinks.org
       SUBLINKS_PICTRS_URL: http://pictrs:8080
+      FEDERATION_QUEUE_ENDPOINT: localhost
+      FEDERATION_QUEUE_PORT: 5672
+      FEDERATION_QUEUE_USER: sublinks
+      FEDERATION_QUEUE_PASS: sublinks
+      FEDERATION_QUEUE_NAME: backend # TODO: Need to get correct queue name
+      FEDERATION_TOPIC_NAME: backend # TODO: Need to get correct topic name
     logging: *default-logging
     depends_on:
       - db
@@ -87,3 +93,15 @@ services:
     user: 991:991
     restart: always
     logging: *default-logging
+
+  queue:
+    image: rabbitmq:3-management
+    restart: always
+    volumes:
+      - queue_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=sublinks
+      - RABBITMQ_DEFAULT_PASS=sublinks
+    ports:
+      - "15672:15672"
+      - "5672:5672"
