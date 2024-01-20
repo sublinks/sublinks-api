@@ -69,6 +69,7 @@ public class PersonService {
     rolePermissions.add(RolePermission.READ_POSTS);
     rolePermissions.add(RolePermission.READ_COMMENT);
     rolePermissions.add(RolePermission.READ_COMMUNITY);
+    rolePermissions.add(RolePermission.READ_COMMUNITIES);
     rolePermissions.add(RolePermission.READ_USER);
     rolePermissions.add(RolePermission.READ_MODLOG);
     Role bannedRole = roleRepository.save(Role.builder()
