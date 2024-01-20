@@ -14,8 +14,7 @@ public class ConsumerTest {
   private Consumer consumer;
 
   @BeforeEach
-  public void setUp() {
-
+  public void setup() {
     MockitoAnnotations.openMocks(this);
   }
 
