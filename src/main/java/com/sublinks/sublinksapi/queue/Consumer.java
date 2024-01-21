@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class Consumer {
 
   @RabbitListener(queues = "${FEDERATION_QUEUE_NAME}")
-  public void receive(String msg) {
+  public void receive(Object msg) {
     // TODO: add message processing
   }
 }
