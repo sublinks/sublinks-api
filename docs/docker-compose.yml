@@ -51,7 +51,7 @@ services:
       SUBLINKS_JWT_SECRET: <JWT-SECRET>
       SUBLINKS_BASE_URL: https://demo.sublinks.org
       SUBLINKS_PICTRS_URL: http://pictrs:8080
-      FEDERATION_QUEUE_ENDPOINT: localhost
+      FEDERATION_QUEUE_HOST: localhost
       FEDERATION_QUEUE_PORT: 5672
       FEDERATION_QUEUE_USER: sublinks
       FEDERATION_QUEUE_PASS: sublinks
