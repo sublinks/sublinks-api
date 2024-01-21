@@ -21,6 +21,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SaveUserSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonMentionService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -50,6 +52,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -80,6 +84,8 @@ public class UserController extends AbstractLemmyApiController {
   private final LemmyCommentReplyService lemmyCommentReplyService;
   private final PrivateMessageRepository privateMessageRepository;
   private final SlurFilterService slurFilterService;
+  private final RoleAuthorizingService roleAuthorizingService;
+
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -89,6 +95,7 @@ public class UserController extends AbstractLemmyApiController {
 
     Long userId = null;
     Person person = null;
+
     if (getPersonDetailsForm.person_id() != null) {
       userId = (long) getPersonDetailsForm.person_id();
       person = personRepository.findById(userId).orElseThrow(
@@ -100,6 +107,9 @@ public class UserController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
 
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_USER,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+
     return GetPersonDetailsResponse.builder().person_view(lemmyPersonService.getPersonView(person))
         .posts(lemmyPersonService.getPersonPosts(person))
         .moderates(lemmyPersonService.getPersonModerates(person))
@@ -110,7 +120,13 @@ public class UserController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetPersonMentionsResponse.class))})})
   @GetMapping("mention")
-  GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm) {
+  GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_MENTION_USER,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
         .sort(getPersonMentionsForm.sort())
@@ -133,7 +149,12 @@ public class UserController extends AbstractLemmyApiController {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PersonMentionResponse.class))})})
   @PostMapping("mention/mark_as_read")
   PersonMentionResponse mentionMarkAsRead(
-      @Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm) {
+      @Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm, final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.MARK_MENTION_AS_READ,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final PersonMention personMention = personMentionRepository.findById(
         (long) markPersonMentionAsReadForm.person_mention_id()).orElseThrow(
@@ -157,6 +178,9 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_REPLIES,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+
     final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
         com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
             .sortType(getReplies.sort())
@@ -175,9 +199,17 @@ public class UserController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BannedPersonsResponse.class))})})
   @GetMapping("banned")
-  BannedPersonsResponse bannedList() {
+  BannedPersonsResponse bannedList(final JwtPerson principal) {
 
-    final Collection<PersonView> bannedPersons = new LinkedHashSet<>();
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_BAN_READ,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+
+    final Collection<PersonView> bannedPersons = roleAuthorizingService.getBannedUsers().stream()
+        .map(lemmyPersonService::getPersonView)
+        .collect(Collectors.toCollection(LinkedHashSet::new));
+
     return BannedPersonsResponse.builder().banned(bannedPersons).build();
   }
 
@@ -186,7 +218,8 @@ public class UserController extends AbstractLemmyApiController {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetRepliesResponse.class))})})
   @PostMapping("mark_all_as_read")
   GetRepliesResponse markAllAsRead() {
-
+    // @todo: Check if he has permission to read/update replies ( if not ignore
+    //  )
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
 
@@ -200,12 +233,24 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.UPDATE_USER_SETTINGS,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+
     // @todo expand form validation to check for email formatting, etc.
     person.setShowNsfw(
         saveUserSettingsForm.show_nsfw() != null && saveUserSettingsForm.show_nsfw());
-    // @todo add blur nfsw content
-    // @todo add auto expand media
-    // @todo show bot accounts
+    person.setBlurNsfw(
+        saveUserSettingsForm.blur_nsfw() != null && saveUserSettingsForm.blur_nsfw());
+    person.setAutoExpanding(
+        saveUserSettingsForm.auto_expand() != null && saveUserSettingsForm.auto_expand());
+    person.setCollapseBotComments(saveUserSettingsForm.collapse_bot_comments() != null
+        && saveUserSettingsForm.collapse_bot_comments());
+    person.setKeyboardNavigation(saveUserSettingsForm.enable_keyboard_navigation() != null
+        && saveUserSettingsForm.enable_keyboard_navigation());
+    person.setAnimatedImages(saveUserSettingsForm.enable_animated_images() != null
+        && saveUserSettingsForm.enable_animated_images());
+    person.setShowBotAccounts(saveUserSettingsForm.show_bot_accounts() != null
+        && saveUserSettingsForm.show_bot_accounts());
     person.setShowScores(
         saveUserSettingsForm.show_scores() != null && saveUserSettingsForm.show_scores());
     person.setDefaultTheme(
@@ -247,8 +292,10 @@ public class UserController extends AbstractLemmyApiController {
         saveUserSettingsForm.bot_account() != null && saveUserSettingsForm.bot_account());
     person.setShowReadPosts(
         saveUserSettingsForm.show_read_posts() != null && saveUserSettingsForm.show_read_posts());
-    person.setShowNewPostNotifications(saveUserSettingsForm.show_new_post_notifs() != null
-        && saveUserSettingsForm.show_new_post_notifs());
+    person.setMatrixUserId(saveUserSettingsForm.matrix_user_id());
+    // Not used anymore??
+    //person.setShowNewPostNotifications(saveUserSettingsForm.show_new_post_notifs() != null
+    //    && saveUserSettingsForm.show_new_post_notifs());
     // @todo generate_totp_2fa
     person.setOpenLinksInNewTab(saveUserSettingsForm.open_links_in_new_tab() != null
         && saveUserSettingsForm.open_links_in_new_tab());
@@ -276,12 +323,23 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.READ_MENTION_USER, RolePermission.READ_REPLIES,
+            RolePermission.READ_PRIVATE_MESSAGES),
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+
     GetUnreadCountResponse.GetUnreadCountResponseBuilder builder = GetUnreadCountResponse.builder();
 
-    builder.mentions((int) personMentionRepository.countByRecipientAndIsReadFalse(person));
-    builder.replies((int) commentReplyRepository.countByRecipientAndIsReadFalse(person));
-    builder.private_messages((int) privateMessageRepository.countByRecipientAndIsReadFalse(person));
-
+    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_MENTION_USER)) {
+      builder.mentions((int) personMentionRepository.countByRecipientAndIsReadFalse(person));
+    }
+    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_REPLIES)) {
+      builder.replies((int) commentReplyRepository.countByRecipientAndIsReadFalse(person));
+    }
+    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_PRIVATE_MESSAGES)) {
+      builder.private_messages(
+          (int) privateMessageRepository.countByRecipientAndIsReadFalse(person));
+    }
     return builder.build();
   }
 }

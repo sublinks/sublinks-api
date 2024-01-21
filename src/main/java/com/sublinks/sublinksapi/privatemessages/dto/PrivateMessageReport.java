@@ -1,7 +1,5 @@
 package com.sublinks.sublinksapi.privatemessages.dto;
 
-import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +27,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "private_messages_reports")
-public class PrivateMessageReport implements AuthorizationEntityInterface {
+public class PrivateMessageReport {
 
   /**
    * Relationships.
@@ -70,12 +68,6 @@ public class PrivateMessageReport implements AuthorizationEntityInterface {
   @UpdateTimestamp
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
-
-  @Override
-  public AuthorizedEntityType entityType() {
-
-    return AuthorizedEntityType.report;
-  }
 
   @Override
   public final boolean equals(Object o) {
