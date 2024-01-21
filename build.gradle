@@ -63,8 +63,12 @@ dependencies {
     testImplementation 'org.mockito:mockito-core:3.+'
 }
 
-tasks.named('test') {
+tasks.named("test") {
     useJUnitPlatform()
+
+    testLogging {
+      events "PASSED", "SKIPPED", "FAILED"
+    }
 }
 
 tasks.named("bootBuildImage") {
