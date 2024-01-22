@@ -8,6 +8,6 @@ public class Consumer {
 
   @RabbitListener(queues = "${FEDERATION_QUEUE_NAME}")
   public void receive(Object msg) {
-    // TODO: add message processing
+    // @todo add message processing
   }
 }
