@@ -24,6 +24,6 @@ public class ConsumerTest {
 
     consumer.receive(msg);
 
-    // TODO: add test for message processing
+    // @todo: add tests for messaging processing
   }
 }

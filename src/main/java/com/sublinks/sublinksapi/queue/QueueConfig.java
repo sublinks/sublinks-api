@@ -19,6 +19,9 @@ public class QueueConfig {
   @Value("${FEDERATION_TOPIC_NAME}")
   private String federationTopicName;
 
+  @Value("${FEDERATION_ROUTING_KEY}")
+  private String federationRoutingKey;
+
   @Bean
   public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
@@ -43,6 +46,6 @@ public class QueueConfig {
 
   @Bean
   public Binding binding(Queue federationQueue, TopicExchange federationTopicExchange) {
-    return BindingBuilder.bind(federationQueue).to(federationTopicExchange).with("");
+    return BindingBuilder.bind(federationQueue).to(federationTopicExchange).with(federationRoutingKey);
   }
 }
