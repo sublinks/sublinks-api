@@ -60,10 +60,17 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testImplementation 'org.mockito:mockito-core:3.+'
 }
 
-tasks.named('test') {
+tasks.named("test") {
     useJUnitPlatform()
+
+    testLogging {
+      events "PASSED", "SKIPPED", "FAILED"
+    }
 }
 
 tasks.named("bootBuildImage") {
