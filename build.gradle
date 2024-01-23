@@ -31,7 +31,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
-    annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.1.Final"
+    annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.2.Final"
 
     // Springdoc for Swagger API Docs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
