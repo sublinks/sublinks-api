@@ -55,8 +55,9 @@ services:
       FEDERATION_QUEUE_PORT: 5672
       FEDERATION_QUEUE_USER: sublinks
       FEDERATION_QUEUE_PASS: sublinks
-      FEDERATION_QUEUE_NAME: backend # TODO: Need to get correct queue name
-      FEDERATION_TOPIC_NAME: backend # TODO: Need to get correct topic name
+      FEDERATION_QUEUE_NAME: federation # TODO: Need to get correct queue name
+      BACKEND_QUEUE_NAME: backend # TODO: Need to get correct queue name
+      BACKEND_TOPIC_NAME: backend # TODO: Need to get correct topic name
     logging: *default-logging
     depends_on:
       - db
