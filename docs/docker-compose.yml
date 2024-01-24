@@ -59,6 +59,7 @@ services:
       FEDERATION_QUEUE_NAME: federation
       BACKEND_QUEUE_NAME: backend
       BACKEND_TOPIC_NAME: backend
+      FEDERATION_ROUTING_KEY: ""
     logging: *default-logging
     depends_on:
       - db
