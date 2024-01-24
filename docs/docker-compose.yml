@@ -2,6 +2,7 @@ version: "3.7"
 
 volumes:
   letsencrypt:
+  redis_data:
 
 x-logging: &default-logging
   driver: "json-file"
@@ -111,3 +112,5 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
