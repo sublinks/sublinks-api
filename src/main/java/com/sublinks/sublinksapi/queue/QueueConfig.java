@@ -20,7 +20,7 @@ public class QueueConfig {
   @Value("${BACKEND_TOPIC_NAME}")
   private String backendTopicName;
 
-  @Value("${FEDERATION_ROUTING_KEY}")
+  @Value("${FEDERATION_ROUTING_KEY:}")
   private String federationRoutingKey;
 
   @Bean
