@@ -64,6 +64,7 @@ services:
     depends_on:
       - db
       - pictrs
+      - queue
   
   db:
     image: mysql:latest
