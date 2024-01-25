@@ -20,6 +20,7 @@ public class QueueConfig {
   @Value("${BACKEND_TOPIC_NAME}")
   private String backendTopicName;
 
+  // set default to an empty string
   @Value("${FEDERATION_ROUTING_KEY:}")
   private String federationRoutingKey;
 
