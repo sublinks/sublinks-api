@@ -7,6 +7,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetReplies;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReplyService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ExportSettingsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetails;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonDetailsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonMentions;
@@ -14,11 +15,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetPersonMentionsRespon
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetRepliesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetUnreadCount;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetUnreadCountResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ImportSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.MarkPersonMentionAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMentionView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SaveUserSettings;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UserExportSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonMentionService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
@@ -29,11 +33,13 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonMention;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
 import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
@@ -85,7 +91,7 @@ public class UserController extends AbstractLemmyApiController {
   private final PrivateMessageRepository privateMessageRepository;
   private final SlurFilterService slurFilterService;
   private final RoleAuthorizingService roleAuthorizingService;
-
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -342,4 +348,121 @@ public class UserController extends AbstractLemmyApiController {
     }
     return builder.build();
   }
+
+  @Operation(summary = "Import your User Settings.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SuccessResponse.class))})})
+  @PostMapping("import_settings")
+  SuccessResponse import_settings(@Valid final ImportSettings importSettingsForm,
+      JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    SuccessResponse.SuccessResponseBuilder builder = SuccessResponse.builder();
+
+    UserExportSettings settings = importSettingsForm.settings();
+    try {
+      person.setShowAvatars(settings.show_avatars() != null && settings.show_avatars());
+      person.setShowNsfw(settings.show_nsfw() != null && settings.show_nsfw());
+      person.setBlurNsfw(settings.blur_nsfw() != null && settings.blur_nsfw());
+      person.setAutoExpanding(settings.auto_expand() != null && settings.auto_expand());
+      person.setCollapseBotComments(
+          settings.collapse_bot_comments() != null && settings.collapse_bot_comments());
+      person.setKeyboardNavigation(
+          settings.enable_keyboard_navigation() != null && settings.enable_keyboard_navigation());
+      person.setAnimatedImages(
+          settings.enable_animated_images() != null && settings.enable_animated_images());
+      person.setShowBotAccounts(
+          settings.show_bot_accounts() != null && settings.show_bot_accounts());
+      person.setShowScores(settings.show_scores() != null && settings.show_scores());
+      person.setDefaultTheme(settings.theme() != null ? settings.theme() : "");
+      try {
+        person.setDefaultSortType(
+            conversionService.convert(settings.default_sort_type(), SortType.class));
+      } catch (Exception e) {
+        System.out.println("Error converting default_sort_type");
+      }
+      try {
+        person.setDefaultListingType(
+            conversionService.convert(settings.default_listing_type(), ListingType.class));
+      } catch (Exception e) {
+        System.out.println("Error converting default_listing_type");
+      }
+      person.setInterfaceLanguage(
+          settings.interface_language() != null ? settings.interface_language() : "");
+      person.setAvatarImageUrl(importSettingsForm.avatar());
+      person.setBannerImageUrl(importSettingsForm.banner());
+      person.setDisplayName(importSettingsForm.display_name());
+      person.setMatrixUserId(importSettingsForm.matrix_id());
+      person.setBiography(importSettingsForm.bio());
+
+      builder.success(true);
+
+      // @todo Add Blocklist for communities, User and Instnaces
+    } catch (Exception e) {
+      builder.success(false);
+    }
+
+    return builder.build();
+  }
+
+  @Operation(summary = "Get your user settings.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SaveUserSettings.class))})})
+  @GetMapping("export_settings")
+  ExportSettingsResponse export_settings(final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    ExportSettingsResponse.ExportSettingsResponseBuilder builder = ExportSettingsResponse.builder();
+
+    UserExportSettings.UserExportSettingsBuilder settings_builder = UserExportSettings.builder();
+
+    settings_builder.show_avatars(person.isShowAvatars());
+    settings_builder.show_nsfw(person.isShowNsfw());
+    settings_builder.blur_nsfw(person.isBlurNsfw());
+    settings_builder.auto_expand(person.isAutoExpanding());
+    settings_builder.collapse_bot_comments(person.isCollapseBotComments());
+    settings_builder.enable_keyboard_navigation(person.isKeyboardNavigation());
+    settings_builder.enable_animated_images(person.isAnimatedImages());
+    settings_builder.show_bot_accounts(person.isShowBotAccounts());
+    settings_builder.show_scores(person.isShowScores());
+    settings_builder.theme(person.getDefaultTheme());
+    settings_builder.default_sort_type(conversionService.convert(person.getDefaultSortType(),
+        com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType.class));
+    settings_builder.default_listing_type(conversionService.convert(person.getDefaultListingType(),
+        com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType.class));
+
+    settings_builder.interface_language(person.getInterfaceLanguage());
+    settings_builder.show_read_posts(person.isShowReadPosts());
+
+    // Ignore email to not "leak" it
+    settings_builder.email("");
+
+    // @todo Add Blocklist for communities, User and Instnaces
+
+    List<String> blocked_community = new ArrayList<>();
+    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked)
+        .forEach(
+            linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
+
+    builder.blocked_communities(blocked_community);
+    // @todo Add Blocklist for User and Instances
+    builder.blocked_users(new ArrayList<>());
+    builder.blocked_instances(new ArrayList<>());
+
+    builder.settings(settings_builder.build());
+    builder.banner(person.getBannerImageUrl());
+    builder.avatar(person.getAvatarImageUrl());
+    builder.bio(person.getBiography());
+    builder.bot_account(person.isBotAccount());
+    builder.display_name(person.getDisplayName());
+    builder.matrix_id(person.getMatrixUserId());
+    builder.saved_comments(new ArrayList<>());
+    builder.saved_posts(new ArrayList<>());
+    builder.followed_communities(new ArrayList<>());
+
+    return builder.build();
+  }
+
 }
