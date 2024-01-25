@@ -7,20 +7,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
+import reactor.core.scheduler.Schedulers;
+
+import java.io.IOException;
+import java.time.Duration;
 
 @Component
 public class RateLimiter implements HandlerInterceptor {
 
-  private final JwtUtil jwtUtil;
   private final ReactiveRedisTemplate<String, String> redis;
   private String userName;
+  private final int MAX_REQS = 5;
+  private final int TOO_MANY_REQUESTS = 429;
+
   @Autowired
-  public RateLimiter(
-          JwtUtil jwtUtil,
-          ReactiveRedisTemplate<String, String> redis
-  ) {
+  public RateLimiter(ReactiveRedisTemplate<String, String> redis) {
     this.redis = redis;
-    this.jwtUtil = jwtUtil;
   }
 
   @Override
@@ -28,21 +30,27 @@ public class RateLimiter implements HandlerInterceptor {
       HttpServletRequest request,
       HttpServletResponse response,
       Object handler
-  ) throws Exception {
-    String authHeader = request.getHeader("Authorization");
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
-      try {
-        String token = authHeader.substring(7);
-        userName = jwtUtil.extractUsername(token);
-      } catch (Exception e) {
-        this.redis.opsForValue().increment(request.getRemoteAddr()).subscribe();
-        return true;
+  ) {
+    try {
+      userName = request.getUserPrincipal().getName();
+    } catch (Exception e) {}
+
+    String key = userName != null ? userName : request.getRemoteAddr();
+
+    try {
+      Long result = this.redis.opsForValue().increment(key).block();
+
+      this.redis.expire(key, Duration.ofSeconds(10)).subscribe();
+
+      if (result != null && result > MAX_REQS) {
+        response.setStatus(TOO_MANY_REQUESTS);
+        return false;
       }
-    } else {
-      this.redis.opsForValue().increment(request.getRemoteAddr()).subscribe();
+
+      return true;
+    } catch (Exception e) {
+
       return true;
     }
-    this.redis.opsForValue().increment(userName).subscribe();
-    return true;
   }
 }
