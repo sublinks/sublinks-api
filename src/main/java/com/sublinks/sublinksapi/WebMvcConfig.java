@@ -17,6 +17,13 @@ public class WebMvcConfig implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry){
     registry.addInterceptor(rateLimiter)
-        .excludePathPatterns("/api/v3/site");
+        .addPathPatterns(
+            "/api/v3/post*",
+            "/api/v3/message*",
+            "/api/v3/register*",
+            "/api/v3/image*",
+            "/api/v3/comment*",
+            "/api/v3/search*"
+        );
   }
 }
