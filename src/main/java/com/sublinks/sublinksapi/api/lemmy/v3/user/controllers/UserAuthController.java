@@ -13,6 +13,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Login;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
@@ -39,6 +40,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -277,5 +279,18 @@ public class UserAuthController extends AbstractLemmyApiController {
     personService.updatePerson(person);
 
     return updateTotpResponseBuilder.enabled(true).build();
+  }
+
+  @Operation(summary =
+      "Validates your Token, throws an error if it is invalid.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
+  @PostMapping("validate_auth")
+  SuccessResponse validate_auth(final JwtPerson principal) {
+
+    Optional<Person> person = getOptionalPerson(principal);
+
+    return SuccessResponse.builder().success(person.isPresent())
+        .error(person.isPresent() ? null : "not_logged_in").build();
   }
 }
