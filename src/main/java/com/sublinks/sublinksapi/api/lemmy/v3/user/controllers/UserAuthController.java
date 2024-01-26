@@ -12,6 +12,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Login;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
@@ -29,6 +30,7 @@ import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
+import com.sublinks.sublinksapi.utils.TotpUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -63,7 +65,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
   private final RoleAuthorizingService roleAuthorizingService;
-
+  private final TotpUtil totpUtil;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -135,6 +137,16 @@ public class UserAuthController extends AbstractLemmyApiController {
     final Person person = personRepository.findOneByName(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
+
+    if (!person.getPassword().equals(loginForm.password())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
+
+    String totpSecret = person.getTotpVerifiedSecret();
+    if (totpSecret != null && !totpUtil.verify(totpSecret, loginForm.totp_2fa_token())) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
+
     final String token = jwtUtil.generateToken(person);
     return LoginResponse.builder().jwt(token)
         .registration_created(false) // @todo return true if application created
@@ -161,9 +173,11 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PasswordResetResponse.class))})})
   @PostMapping("password_reset")
-  PasswordResetResponse passwordReset() {
+  PasswordResetResponse passwordReset(final JwtPerson principal) {
 
-    // @todo: implement reset password
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    // @todo: implement reset password and check for 2fa
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -184,7 +198,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   @PostMapping("verify_email")
   VerifyEmailResponse verifyEmail() {
 
-    // @todo: implement verifiy Email
+    // @todo: implement verify Email
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -208,10 +222,28 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GenerateTotpSecretResponse.class))})})
   @PostMapping("totp/generate")
-  GenerateTotpSecretResponse totpGenerate() {
-    // @todo: implement TOTP
+  GenerateTotpSecretResponse totpGenerate(final JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    try {
+      String secret = totpUtil.createSecretString(160);
+      GenerateTotpSecretResponse generateTotpSecretResponse = GenerateTotpSecretResponse.builder()
+          .totp_secret_url(
+              totpUtil.createUri(localInstanceContext.instance().getDomain(), person.getName(),
+                  secret).toString()
+
+          ).build();
+
+      person.setTotpSecret(secret);
+      personService.updatePerson(person);
+
+      return generateTotpSecretResponse;
+
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "totp_secret_generation_failed");
+    }
   }
 
   @Operation(summary =
@@ -221,9 +253,29 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
   @PostMapping("totp/update")
-  UpdateTotpResponse totpUpdate() {
-    // @todo: implement TOTP
+  UpdateTotpResponse totpUpdate(final UpdateTotp updateTotpForm, final JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    UpdateTotpResponse.UpdateTotpResponseBuilder updateTotpResponseBuilder = UpdateTotpResponse
+        .builder();
+
+    if (updateTotpForm.enabled()) {
+      if (person.getTotpSecret() == null) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      if (!totpUtil.verify(person.getTotpSecret(), updateTotpForm.totp_token())) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      person.setTotpSecret(null);
+      person.setTotpVerifiedSecret(person.getTotpSecret());
+    } else {
+      person.setTotpSecret(null);
+    }
+    personService.updatePerson(person);
+
+    return updateTotpResponseBuilder.enabled(true).build();
   }
 }
