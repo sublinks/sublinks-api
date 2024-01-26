@@ -4,9 +4,9 @@ import lombok.Builder;
 
 @Builder
 @SuppressWarnings("RecordComponentName")
-public record SuccessResponse(
-    Boolean success,
+public record FailureResponse(
     String error
+
 ) {
 
 
