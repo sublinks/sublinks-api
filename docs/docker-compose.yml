@@ -60,11 +60,14 @@ services:
       BACKEND_QUEUE_NAME: backend
       BACKEND_TOPIC_NAME: backend
       FEDERATION_ROUTING_KEY: ""
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
     logging: *default-logging
     depends_on:
       - db
       - pictrs
       - queue
+      - redis
   
   db:
     image: mysql:latest
