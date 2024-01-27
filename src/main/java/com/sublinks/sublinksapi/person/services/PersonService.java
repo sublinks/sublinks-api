@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.utils.BaseUrlUtil;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonService {
 
   private final KeyGeneratorUtil keyGeneratorUtil;
+  private final BaseUrlUtil baseUrlUtil;
   private final PersonRepository personRepository;
   private final PersonAggregateRepository personAggregateRepository;
   private final LocalInstanceContext localInstanceContext;
@@ -189,6 +191,9 @@ public class PersonService {
 
     person.setPassword(passwordEncoder.encode(person.getPassword()));
 
+    final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
+    person.setActorId(userActorId);
+
     final KeyStore keys = keyGeneratorUtil.generate();
     person.setPublicKey(keys.publicKey());
     person.setPrivateKey(keys.privateKey());
@@ -200,6 +205,7 @@ public class PersonService {
       person.setRole(roles.stream().filter(x -> x.getRolePermissions().stream()
               .anyMatch(y -> y.getPermission().equals(RolePermission.ADMIN))).findFirst()
           .orElseThrow(() -> new RuntimeException("Admin role not found!")));
+
     } else {
       person.setRole(roleAuthorizingService.getUserRole());
     }
