@@ -2,9 +2,11 @@ package com.sublinks.sublinksapi.queue;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 
 @Service
+@ConditionalOnBean(RabbitTemplate.class)
 public class Producer {
   private final RabbitTemplate rabbitTemplate;
 
