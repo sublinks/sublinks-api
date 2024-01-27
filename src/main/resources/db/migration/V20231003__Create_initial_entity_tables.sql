@@ -227,6 +227,8 @@ CREATE TABLE `people`
   `matrix_user_id`                 TEXT                               NULL,
   `public_key`                     TEXT                               NOT NULL,
   `private_key`                    TEXT                               NULL,
+  `totp_secret`                    TEXT                               NULL,
+  `totp_verified_secret`           TEXT                               NULL,
   `created_at`                     TIMESTAMP(3)                                DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`                     TIMESTAMP(3)                                DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
