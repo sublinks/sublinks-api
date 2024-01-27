@@ -4,20 +4,21 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
+import com.sublinks.sublinksapi.utils.TotpUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    imports = {TotpUtil.class, DateUtils.class}
+)
 public interface LocalUserMapper extends Converter<Person, LocalUser> {
 
   @Override
-  @Mapping(target = "totp_2fa_enabled", constant = "true")
+  @Mapping(target = "totp_2fa_enabled", expression = "java(person.getTotpVerifiedSecret() != null)")
   @Mapping(target = "post_listing_mode", source = "person.postListingType")
   @Mapping(target = "infinite_scroll_enabled", source = "person.infiniteScroll")
   @Mapping(target = "enable_keyboard_navigation", source = "person.keyboardNavigation")
@@ -31,7 +32,7 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
   @Mapping(target = "theme", source = "person.defaultTheme")
   @Mapping(target = "validator_time", constant = "2023-06-09T02:35:26.397746Z",
       dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "totp_2fa_url", constant = "")
+  @Mapping(target = "totp_2fa_url", expression = "java(TotpUtil.createUriString(person))")
   @Mapping(target = "interface_language", source = "person.interfaceLanguage")
   @Mapping(target = "default_sort_type", source = "person.defaultSortType")
   @Mapping(target = "default_listing_type", source = "person.defaultListingType")
@@ -49,6 +50,7 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
 
   @Named("is_admin")
   default boolean isAdmin(Person person) {
+
     return RoleAuthorizingService.isAdmin(person);
   }
 }
