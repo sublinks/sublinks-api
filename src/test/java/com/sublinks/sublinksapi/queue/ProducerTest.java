@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.queue;
 
+import com.sublinks.sublinksapi.queue.services.Producer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
