@@ -129,6 +129,9 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "activity_pub_id")
   private String activityPubId;
 
+  @Column(nullable = false, name = "actor_id")
+  private String actorId;
+
   @Column(nullable = false)
   private String name;
 
