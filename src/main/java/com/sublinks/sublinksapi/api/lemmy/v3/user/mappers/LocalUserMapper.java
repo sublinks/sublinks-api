@@ -4,12 +4,10 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
@@ -49,6 +47,7 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
 
   @Named("is_admin")
   default boolean isAdmin(Person person) {
+
     return RoleAuthorizingService.isAdmin(person);
   }
 }
