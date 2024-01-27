@@ -205,7 +205,6 @@ public class PersonService {
       person.setRole(roles.stream().filter(x -> x.getRolePermissions().stream()
               .anyMatch(y -> y.getPermission().equals(RolePermission.ADMIN))).findFirst()
           .orElseThrow(() -> new RuntimeException("Admin role not found!")));
-
     } else {
       person.setRole(roleAuthorizingService.getUserRole());
     }
