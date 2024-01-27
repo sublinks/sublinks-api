@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.queue;
+package com.sublinks.sublinksapi.queue.services;
 
 import org.springframework.stereotype.Service;
 
