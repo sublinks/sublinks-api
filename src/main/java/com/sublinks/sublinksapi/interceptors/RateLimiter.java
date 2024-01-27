@@ -80,24 +80,19 @@ public class RateLimiter implements HandlerInterceptor {
     if (reqPath.startsWith("/api/v3/post")) {
       this.maxReqs = rateLimit.post_per_second();
       this.duration = rateLimit.post() * rateLimit.post_per_second();
-    }
-    if (reqPath.startsWith("/api/v3/message")) {
+    } else if (reqPath.startsWith("/api/v3/message")) {
       this.maxReqs = rateLimit.message_per_second();
       this.duration = rateLimit.message() * rateLimit.message_per_second();
-    }
-    if (reqPath.startsWith("/api/v3/register")) {
+    } else if (reqPath.startsWith("/api/v3/register")) {
       this.maxReqs = rateLimit.register_per_second();
       this.duration = rateLimit.register() * rateLimit.register_per_second();
-    }
-    if (reqPath.startsWith("/api/v3/image")) {
+    } else if (reqPath.startsWith("/api/v3/image")) {
       this.maxReqs = rateLimit.image_per_second();
       this.duration = rateLimit.image() * rateLimit.image_per_second();
-    }
-    if (reqPath.startsWith("/api/v3/comment")) {
+    } else if (reqPath.startsWith("/api/v3/comment")) {
       this.maxReqs = rateLimit.comment_per_second();
       this.duration = rateLimit.comment() * rateLimit.comment_per_second();
-    }
-    if (reqPath.startsWith("/api/v3/search")) {
+    } else if (reqPath.startsWith("/api/v3/search")) {
       this.maxReqs = rateLimit.search_per_second();
       this.duration = rateLimit.search() * rateLimit.search_per_second();
     }
@@ -120,7 +115,7 @@ public class RateLimiter implements HandlerInterceptor {
       return false;
     }
 
-    redis.expire(key, Duration.ofSeconds(duration)).subscribe();
+    redis.expire(key, Duration.ofSeconds(duration)).block();
     response.setHeader("X-RateLimit-Limit", maxReqs.toString());
     response.setHeader("X-RateLimit-Remaining", String.valueOf(maxReqs - (result == null ? 0 : result)));
     response.setHeader("X-RateLimit-Reset", String.valueOf((Instant.now().getEpochSecond() + duration)));
