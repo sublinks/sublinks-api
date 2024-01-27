@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.errorhandler;
 
+import com.sublinks.sublinksapi.utils.models.LemmyException;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -91,6 +92,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         ex.getStatusCode(), ex.getLocalizedMessage(), "error occurred");
     return new ResponseEntity<Object>(
         apiError, new HttpHeaders(), apiError.getStatus());
+  }
+
+  @ExceptionHandler({LemmyException.class})
+  public ResponseEntity<Object> handleLemmyException(LemmyException ex) {
+
+    return new ResponseEntity<Object>(
+        ex.getException(), new HttpHeaders(), ex.getStatus());
   }
 
   @ExceptionHandler({ExpiredJwtException.class})

@@ -219,6 +219,12 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = true, name = "private_key")
   private String privateKey;
 
+  @Column(nullable = true, name = "totp_secret")
+  private String totpSecret;
+
+  @Column(nullable = true, name = "totp_verified_secret")
+  private String totpVerifiedSecret;
+
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
