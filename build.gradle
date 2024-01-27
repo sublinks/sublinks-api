@@ -47,6 +47,8 @@ dependencies {
 
     implementation 'org.jsoup:jsoup:1.17.2'
 
+    implementation 'com.github.bastiaanjansen:otp-java:2.0.3'
+
     implementation "org.mapstruct:mapstruct:1.5.5.Final"
     compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
