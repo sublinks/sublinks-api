@@ -669,7 +669,25 @@ CREATE TABLE `announcements`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-/**
+/*
+  Captcha
+ */
+CREATE TABLE `captcha`
+(
+  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `uuid`       VARCHAR(36)  NOT NULL,
+  `word`       TEXT         NOT NULL,
+  `png`        TEXT         NOT NULL,
+  `wav`        TEXT         NULL,
+  `locked`     SMALLINT     NOT NULL DEFAULT 0,
+  `updated_at` TIMESTAMP(3) NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE UNIQUE INDEX `IDX_CAPTCHA_UUID` ON `captcha` (`uuid`);
+
+/*
   Custom Emoji table
  */
 CREATE TABLE `custom_emojis`

@@ -140,6 +140,7 @@ public class SiteController extends AbstractLemmyApiController {
     config.defaultTheme(createSiteForm.default_theme());
     config.defaultPostListingType(createSiteForm.default_post_listing_type());
     config.legalInformation(createSiteForm.legal_information());
+    config.captchaDifficulty(createSiteForm.captcha_difficulty());
 
     final InstanceConfig instanceConfig = config.build();
 

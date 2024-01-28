@@ -29,6 +29,5 @@ public class InstanceConfigService {
 
     instanceConfigRepository.save(instance);
     instanceConfigUpdatedPublisher.publish(instance);
-
   }
 }

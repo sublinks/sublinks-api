@@ -49,6 +49,9 @@ dependencies {
 
     implementation 'com.github.bastiaanjansen:otp-java:2.0.3'
 
+    implementation 'cn.apiclub.tool:simplecaptcha:1.2.2'
+    implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
+
     implementation "org.mapstruct:mapstruct:1.5.5.Final"
     compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
