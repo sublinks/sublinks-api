@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -191,9 +192,6 @@ public class PersonService {
 
     person.setPassword(passwordEncoder.encode(person.getPassword()));
 
-    final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
-    person.setActorId(userActorId);
-
     final KeyStore keys = keyGeneratorUtil.generate();
     person.setPublicKey(keys.publicKey());
     person.setPrivateKey(keys.privateKey());
@@ -207,6 +205,11 @@ public class PersonService {
           .orElseThrow(() -> new RuntimeException("Admin role not found!")));
     } else {
       person.setRole(roleAuthorizingService.getUserRole());
+    }
+
+    if (localInstanceContext.settings().getIsPrivateInstance()) {
+      final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
+      person.setActorId(userActorId);
     }
 
     person.setLinkPersonInstance(LinkPersonInstance.builder()
