@@ -5,9 +5,9 @@ import cn.apiclub.captcha.gimpy.GimpyRenderer;
 import cn.apiclub.captcha.gimpy.RippleGimpyRenderer;
 import cn.apiclub.captcha.noise.NoiseProducer;
 import cn.apiclub.captcha.noise.StraightLineNoiseProducer;
-import com.sublinks.sublinksapi.person.scheduling.CaptchaScheduler;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.Producers.LinesProducer;
+import com.sublinks.sublinksapi.person.config.CaptchaConfiguration;
 import com.sublinks.sublinksapi.person.dto.Captcha;
 import com.sublinks.sublinksapi.person.repositories.CaptchaRepository;
 import jakarta.transaction.Transactional;
@@ -30,9 +30,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class CaptchaService {
 
+  private final CaptchaConfiguration captchaConfiguration;
+
   private final CaptchaRepository captchaRepository;
   private final LocalInstanceContext localInstanceContext;
-  private final CaptchaScheduler captchaScheduler;
 
   private final Map<String, NoiseProducer> noiseProducers = Map.of(
       "Hard", new LinesProducer(3, List.of(Color.WHITE, Color.RED, Color.BLACK)),
@@ -45,6 +46,7 @@ public class CaptchaService {
       "Medium", new RippleGimpyRenderer(),
       "Easy", new BlockGimpyRenderer()
   );
+
   private static String encodeToString(BufferedImage image) {
 
     String imageString;
@@ -90,11 +92,13 @@ public class CaptchaService {
     // Not to disturb already locked Captchas
     captchaRepository.deleteAllByLockedFalse();
 
-    captchaScheduler.generateCachedCaptcha();
+    this.cacheCaptchas();
   }
 
   public Captcha createCaptcha() {
-    final String difficulty = localInstanceContext.instance().getInstanceConfig() != null ? localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty() : "Easy";
+
+    final String difficulty = localInstanceContext.instance().getInstanceConfig() != null
+        ? localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty() : "Easy";
 
     NoiseProducer noiseProducer = noiseProducers.get(difficulty);
 
@@ -112,5 +116,23 @@ public class CaptchaService {
     captchaEntity.setPng(encodeToString(captcha.getImage()));
 
     return captchaRepository.save(captchaEntity);
+  }
+
+  public void cacheCaptchas() {
+
+    if (localInstanceContext.instance().getInstanceConfig() == null
+        || !localInstanceContext.instance().getInstanceConfig().isCaptchaEnabled()) {
+      return;
+    }
+
+    long quantity = captchaRepository.countAllByLockedFalse();
+
+    if (quantity >= captchaConfiguration.getMaxCaptchas()) {
+      return;
+    }
+
+    for (long i = quantity; i < 100; i++) {
+      this.createCaptcha();
+    }
   }
 }
