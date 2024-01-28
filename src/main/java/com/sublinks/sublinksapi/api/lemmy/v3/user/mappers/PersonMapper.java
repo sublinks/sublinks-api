@@ -24,10 +24,10 @@ public abstract class PersonMapper implements
   @Mapping(target = "ban_expires", source = "person.role.expiresAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "published", source = "person.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "updated", source = "person.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "actor_id", source = "person.actorId")
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "local", source = "person.local")
   @Mapping(target = "deleted", source = "person.deleted")
-  @Mapping(target = "actor_id", constant = "") // @todo actor_id
   @Mapping(target = "inbox_url", constant = "") // @todo inbox_url
   @Mapping(target = "shared_inbox_url", constant = "") // @todo shared_inbox_url
   @Mapping(target = "matrix_user_id", source = "person.matrixUserId")
