@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.utils.BaseUrlUtil;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonService {
 
   private final KeyGeneratorUtil keyGeneratorUtil;
+  private final BaseUrlUtil baseUrlUtil;
   private final PersonRepository personRepository;
   private final PersonAggregateRepository personAggregateRepository;
   private final LocalInstanceContext localInstanceContext;
@@ -203,6 +206,9 @@ public class PersonService {
     } else {
       person.setRole(roleAuthorizingService.getUserRole());
     }
+
+    final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
+    person.setActorId(userActorId);
 
     person.setLinkPersonInstance(LinkPersonInstance.builder()
         .instance(localInstanceContext.instance())

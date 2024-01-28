@@ -20,7 +20,7 @@ public class SlugUtil {
     return title
         .toLowerCase()
         .replace("\n", " ")
-        .replace("[^a-z\\d\\s]", " ")
+        .replaceAll("[^a-z\\d\\s]", " ")
         .replaceAll("\\s+", "_");
   }
 
