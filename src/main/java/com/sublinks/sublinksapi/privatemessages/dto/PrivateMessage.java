@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.privatemessages.dto;
 
-import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.persistence.Column;
@@ -29,7 +28,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "private_messages")
-public class PrivateMessage implements AuthorizationEntityInterface {
+public class PrivateMessage {
 
   /**
    * Relationships.
@@ -71,12 +70,6 @@ public class PrivateMessage implements AuthorizationEntityInterface {
 
   @Column(nullable = false, name = "activity_pub_id")
   private String activityPubId;
-
-  @Override
-  public AuthorizedEntityType entityType() {
-
-    return AuthorizedEntityType.message;
-  }
 
   @Override
   public final boolean equals(Object o) {

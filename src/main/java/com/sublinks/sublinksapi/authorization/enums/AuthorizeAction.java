@@ -1,14 +1,14 @@
 package com.sublinks.sublinksapi.authorization.enums;
 
 public enum AuthorizeAction {
-  create,
-  read,
-  update,
-  delete,
-  post,
-  comment,
-  message,
-  ban,
-  purge,
-  follow,
+  CREATE,
+  READ,
+  UPDATE,
+  DELETE,
+  REMOVE,
+  BAN,
+  PURGE,
+  FOLLOW,
+  BLOCK,
+  FAVORITE
 }

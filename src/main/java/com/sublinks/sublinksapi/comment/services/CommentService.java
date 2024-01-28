@@ -24,12 +24,25 @@ public class CommentService {
   private final CommentUpdatedPublisher commentUpdatedPublisher;
   private final LocalInstanceContext localInstanceContext;
 
+  /**
+   * Generates an ActivityPub ID for a given comment.
+   *
+   * @param comment The comment for which the ActivityPub ID is being generated.
+   * @return A string representing the ActivityPub ID.
+   */
   public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
 
     String domain = localInstanceContext.instance().getDomain();
     return String.format("%s/comment/%d", domain, comment.getId());
   }
 
+  /**
+   * Retrieves the parent comment of a given comment, if it exists.
+   *
+   * @param comment The comment whose parent is to be retrieved.
+   * @return An Optional containing the parent Comment, or empty if no parent
+   *         exists.
+   */
   public Optional<Comment> getParentComment(final Comment comment) {
 
     if (comment.getPath() == null) {
@@ -45,7 +58,11 @@ public class CommentService {
 
   }
 
-
+  /**
+   * Creates a new comment without a parent and publishes an event upon creation.
+   *
+   * @param comment The Comment object to be created.
+   */
   @Transactional
   public void createComment(final Comment comment) {
 
@@ -64,6 +81,13 @@ public class CommentService {
     commentCreatedPublisher.publish(comment);
   }
 
+  /**
+   * Creates a new comment as a reply to a specified parent and publishes an event
+   * upon creation.
+   *
+   * @param comment The Comment object to be created, a reply to the parent.
+   * @param parent  The parent Comment of the new comment.
+   */
   @Transactional
   public void createComment(final Comment comment, final Comment parent) {
 
@@ -72,12 +96,22 @@ public class CommentService {
     createComment(comment);
   }
 
+  /**
+   * Updates a comment without publishing any event.
+   *
+   * @param comment The Comment object to be updated.
+   */
   @Transactional
   public void updateCommentQuietly(final Comment comment) {
 
     commentRepository.save(comment);
   }
 
+  /**
+   * Updates a comment and publishes an event upon update.
+   *
+   * @param comment The Comment object to be updated.
+   */
   @Transactional
   public void updateComment(final Comment comment) {
 
@@ -85,6 +119,14 @@ public class CommentService {
     commentUpdatedPublisher.publish(comment);
   }
 
+  /**
+   * Removes all comments made by a specific user in a specific community.
+   *
+   * @param community The community from which comments are to be removed.
+   * @param person    The user whose comments are to be removed.
+   * @param removed   Boolean flag indicating whether the comments should be
+   *                  marked as removed.
+   */
   @Transactional
   public void removeAllCommentsFromCommunityAndUser(final Community community, final Person person,
       final boolean removed) {
@@ -95,6 +137,13 @@ public class CommentService {
     });
   }
 
+  /**
+   * Removes all comments made by a specific user.
+   *
+   * @param person  The user whose comments are to be removed.
+   * @param removed Boolean flag indicating whether the comments should be marked
+   *                as removed.
+   */
   @Transactional
   public void removeAllCommentsFromUser(final Person person, final boolean removed) {
 

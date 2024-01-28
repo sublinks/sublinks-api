@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.search.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
@@ -12,6 +13,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.search.models.Search;
 import com.sublinks.sublinksapi.api.lemmy.v3.search.models.SearchResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -26,11 +29,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,6 +50,7 @@ public class SearchController extends AbstractLemmyApiController {
   private final LemmyCommentService lemmyCommentService;
   private final LemmyPostService lemmyPostService;
   private final LemmyPersonService lemmyPersonService;
+  private final RoleAuthorizingService roleAuthorizingService;
 
   @Operation(summary = "Search lemmy.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -56,7 +60,13 @@ public class SearchController extends AbstractLemmyApiController {
 
       )})
   @GetMapping
-  SearchResponse search(@Valid final Search searchForm) {
+  SearchResponse search(@Valid final Search searchForm, final JwtPerson jwtPerson) {
+
+    final Optional<Person> person = getOptionalPerson(jwtPerson);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
+        RolePermission.INSTANCE_SEARCH,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final SearchResponse.SearchResponseBuilder responseBuilder = SearchResponse.builder();
 

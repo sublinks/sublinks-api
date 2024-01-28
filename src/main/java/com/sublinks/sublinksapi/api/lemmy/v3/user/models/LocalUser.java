@@ -22,7 +22,6 @@ public record LocalUser(
     boolean show_scores,
     boolean show_bot_accounts,
     boolean show_read_posts,
-    boolean show_new_post_notifs,
     boolean email_verified,
     boolean accepted_application,
     String totp_2fa_url,
@@ -32,6 +31,7 @@ public record LocalUser(
     boolean infinite_scroll_enabled,
     boolean admin,
     PostListingMode post_listing_mode,
+    boolean collapse_bot_comments,
     boolean totp_2fa_enabled,
     boolean enable_keyboard_navigation,
     boolean enable_animated_images

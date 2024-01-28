@@ -1,10 +1,13 @@
 package com.sublinks.sublinksapi.person.dto;
 
+import com.sublinks.sublinksapi.authorization.dto.Role;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentLike;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.enums.PostListingMode;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.dto.PostRead;
@@ -65,6 +68,10 @@ public class Person implements UserDetails, Principal {
   @JoinTable(name = "link_person_instances", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "instance_id"))
   private Instance instance;
 
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "role_id", nullable = false)
+  private Role role;
+
   @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
   private LinkPersonInstance linkPersonInstance;
 
@@ -116,9 +123,6 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "is_bot_account")
   private boolean isBotAccount;
 
-  @Column(nullable = false, name = "is_banned")
-  private boolean isBanned;
-
   @Column(nullable = false, name = "is_deleted")
   private boolean isDeleted;
 
@@ -163,6 +167,25 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "default_sort_type")
   private SortType defaultSortType;
 
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, name = "post_listing_type")
+  private PostListingMode postListingType;
+
+  @Column(nullable = false, name = "is_infinite_scroll")
+  private boolean isInfiniteScroll;
+
+  @Column(nullable = false, name = "is_keyboard_navigation")
+  private boolean isKeyboardNavigation;
+
+  @Column(nullable = false, name = "is_animated_images")
+  private boolean isAnimatedImages;
+
+  @Column(nullable = false, name = "is_collapse_bot_comments")
+  private boolean isCollapseBotComments;
+
+  @Column(nullable = false, name = "is_auto_expanding")
+  private boolean isAutoExpanding;
+
   @Column(nullable = false, name = "is_show_scores")
   private boolean isShowScores;
 
@@ -172,8 +195,8 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "is_show_nsfw")
   private boolean isShowNsfw;
 
-  @Column(nullable = false, name = "is_show_new_post_notifications")
-  private boolean isShowNewPostNotifications;
+  @Column(nullable = false, name = "is_blur_nsfw")
+  private boolean isBlurNsfw;
 
   @Column(nullable = false, name = "is_show_bot_accounts")
   private boolean isShowBotAccounts;
@@ -187,11 +210,20 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "is_open_links_in_new_tab")
   private boolean isOpenLinksInNewTab;
 
+  @Column(nullable = true, name = "matrix_user_id")
+  private String matrixUserId;
+
   @Column(nullable = false, name = "public_key")
   private String publicKey;
 
   @Column(nullable = true, name = "private_key")
   private String privateKey;
+
+  @Column(nullable = true, name = "totp_secret")
+  private String totpSecret;
+
+  @Column(nullable = true, name = "totp_verified_secret")
+  private String totpVerifiedSecret;
 
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")
@@ -200,6 +232,24 @@ public class Person implements UserDetails, Principal {
   @UpdateTimestamp
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
+
+  public boolean isBanned() {
+
+    if (getRole() == null) {
+      throw new RuntimeException("Role is null!");
+    }
+
+    return RoleAuthorizingService.isBanned(getRole());
+  }
+
+  public boolean isAdmin() {
+
+    if (getRole() == null) {
+      throw new RuntimeException("Role is null!");
+    }
+
+    return RoleAuthorizingService.isAdmin(getRole());
+  }
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -222,19 +272,19 @@ public class Person implements UserDetails, Principal {
   @Override
   public boolean isAccountNonExpired() {
 
-    return true;
+    return !isBanned();
   }
 
   @Override
   public boolean isAccountNonLocked() {
 
-    return isBanned();
+    return !isBanned();
   }
 
   @Override
   public boolean isCredentialsNonExpired() {
 
-    return true;
+    return !isBanned();
   }
 
   @Override

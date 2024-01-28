@@ -1,7 +1,5 @@
 package com.sublinks.sublinksapi.post.dto;
 
-import com.sublinks.sublinksapi.authorization.AuthorizationEntityInterface;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.dto.Instance;
@@ -40,38 +38,30 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "posts")
-public class Post implements AuthorizationEntityInterface {
+public class Post {
 
   /**
    * Relationships.
    */
   @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
   Set<LinkPersonPost> linkPersonPost;
-
-  @ManyToOne
-  @JoinColumn(name = "community_id")
-  private Community community;
-
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
-  private List<Comment> comments;
-
-  @ManyToOne
-  private Instance instance;
-
-  @ManyToOne
-  @JoinColumn(name = "language_id")
-  private Language language;
-
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
-  private PostAggregate postAggregate;
-
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
-  private List<PostLike> postLikes;
-
   @ManyToOne
   @JoinTable(name = "post_post_cross_post", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "cross_post_id"))
   CrossPost crossPost;
-
+  @ManyToOne
+  @JoinColumn(name = "community_id")
+  private Community community;
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
+  private List<Comment> comments;
+  @ManyToOne
+  private Instance instance;
+  @ManyToOne
+  @JoinColumn(name = "language_id")
+  private Language language;
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
+  private PostAggregate postAggregate;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<PostLike> postLikes;
   /**
    * Attributes.
    */
@@ -139,12 +129,6 @@ public class Post implements AuthorizationEntityInterface {
   @UpdateTimestamp
   @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
-
-  @Override
-  public AuthorizedEntityType entityType() {
-
-    return AuthorizedEntityType.post;
-  }
 
   @Override
   public final boolean equals(Object o) {

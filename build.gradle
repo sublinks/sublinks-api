@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.1'
+    id 'org.springframework.boot' version '3.2.2'
     id 'io.spring.dependency-management' version '1.1.4'
 }
 
@@ -30,8 +30,10 @@ dependencies {
     implementation 'org.flywaydb:flyway-mysql'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    testImplementation 'org.springframework.amqp:spring-rabbit-test'
 
-    annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.1.Final"
+    annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.2.Final"
 
     // Springdoc for Swagger API Docs
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
@@ -42,7 +44,9 @@ dependencies {
 
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation 'org.jsoup:jsoup:1.17.1'
+    implementation 'org.jsoup:jsoup:1.17.2'
+
+    implementation 'com.github.bastiaanjansen:otp-java:2.0.3'
 
     implementation 'cn.apiclub.tool:simplecaptcha:1.2.2'
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
@@ -50,21 +54,28 @@ dependencies {
     implementation "org.mapstruct:mapstruct:1.5.5.Final"
     compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
-    compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.0'
+    compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.1'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
     annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0'
-    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.0'
+    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
+    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.1'
+    testImplementation 'org.mockito:mockito-core:3.+'
 }
 
-tasks.named('test') {
+tasks.named("test") {
     useJUnitPlatform()
+
+    testLogging {
+      events "PASSED", "SKIPPED", "FAILED"
+    }
 }
 
 tasks.named("bootBuildImage") {

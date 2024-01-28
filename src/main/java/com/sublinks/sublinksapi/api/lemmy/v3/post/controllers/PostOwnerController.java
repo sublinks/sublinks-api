@@ -8,9 +8,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.EditPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -56,7 +55,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostOwnerController extends AbstractLemmyApiController {
 
   private final LocalInstanceContext localInstanceContext;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final PostRepository postRepository;
   private final LemmyPostService lemmyPostService;
   private final PostService postService;
@@ -79,14 +78,14 @@ public class PostOwnerController extends AbstractLemmyApiController {
   public PostResponse create(@Valid @RequestBody final CreatePost createPostForm,
       JwtPerson principal) {
 
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.CREATE_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Community community = communityRepository.findById((long) createPostForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    final Person person = getPersonOrThrowUnauthorized(principal);
-    authorizationService.canPerson(person).performTheAction(AuthorizeAction.create)
-        .onEntity(AuthorizedEntityType.post).defaultResponse(
-            community.isPostingRestrictedToMods() ? AuthorizationService.ResponseType.decline
-                : AuthorizationService.ResponseType.allow)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     // Language
     Optional<Language> language;
@@ -170,9 +169,9 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.canPerson(person).defaultingToDecline()
-        .performTheAction(AuthorizeAction.update).onEntity(post)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.UPDATE_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     post.setTitle(editPostForm.name());
     post.setPostBody(editPostForm.body());
@@ -223,13 +222,14 @@ public class PostOwnerController extends AbstractLemmyApiController {
   @PostMapping("delete")
   PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
 
-    final Post post = postRepository.findById((long) deletePostForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    authorizationService.canPerson(person).defaultingToDecline()
-        .performTheAction(AuthorizeAction.delete).onEntity(post)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.DELETE_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
+    final Post post = postRepository.findById((long) deletePostForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     post.setDeleted(deletePostForm.deleted());
 

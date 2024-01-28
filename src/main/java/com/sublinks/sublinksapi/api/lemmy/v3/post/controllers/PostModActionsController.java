@@ -16,7 +16,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ResolvePostReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
@@ -39,6 +40,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,7 +63,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   private final PostReportService postReportService;
   private final LemmyPostReportService lemmyPostReportService;
   private final PostReportRepository postReportRepository;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommunityRepository communityRepository;
   private final PostRepository postRepository;
@@ -80,10 +82,14 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.MODERATOR_REMOVE_POST, RolePermission.REMOVE_POST),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Post post = postRepository.findById(modRemovePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person, RolePermission.REMOVE_POST);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -130,7 +136,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById(modLockPostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -174,7 +180,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById((long) featurePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -232,7 +238,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
 
     final PostReport postReport = postReportRepository.findById(
             (long) resolvePostReportForm.report_id())
@@ -271,7 +277,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
 
     final List<PostReport> postReports = new ArrayList<>();
 

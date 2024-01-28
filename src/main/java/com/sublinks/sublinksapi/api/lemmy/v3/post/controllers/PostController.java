@@ -23,6 +23,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadataResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
@@ -87,6 +89,7 @@ public class PostController extends AbstractLemmyApiController {
   private final PostReportService postReportService;
   private final LemmyPostReportService lemmyPostReportService;
   private final LocalInstanceContext localInstanceContext;
+  private final RoleAuthorizingService roleAuthorizingService;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -101,6 +104,10 @@ public class PostController extends AbstractLemmyApiController {
     final Community community = post.getCommunity();
 
     Optional<Person> person = getOptionalPerson(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
+        RolePermission.READ_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PostView postView;
     final CommunityView communityView;
@@ -141,10 +148,15 @@ public class PostController extends AbstractLemmyApiController {
   PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
       final JwtPerson principal) {
 
+    final Person person = getPersonOrThrowBadRequest(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.MARK_POST_AS_READ,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     // @todo support multiple posts
     final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    final Person person = getPersonOrThrowBadRequest(principal);
     postReadService.markPostReadByPerson(post, person);
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
@@ -159,6 +171,9 @@ public class PostController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
+        RolePermission.READ_POSTS,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     final List<Long> communityIds = new ArrayList<>();
     Community community = null;
     if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
@@ -197,13 +212,18 @@ public class PostController extends AbstractLemmyApiController {
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
     }
-    ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig().getDefaultPostListingType() : null;
+    else{
+      sortType = SortType.New;
+    }
+    ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig()
+        .getDefaultPostListingType() : null;
     if (getPostsForm.type_() != null) {
       listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
 
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder().page(1)
-        .listingType(conversionService.convert(listingType, com.sublinks.sublinksapi.person.enums.ListingType.class)).perPage(20)
+        .listingType(conversionService.convert(listingType,
+            com.sublinks.sublinksapi.person.enums.ListingType.class)).perPage(20)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType).person(person.orElse(null)).communityIds(communityIds).build();
@@ -230,6 +250,16 @@ public class PostController extends AbstractLemmyApiController {
   PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        switch (createPostLikeForm.score()) {
+          case 1 -> RolePermission.POST_UPVOTE;
+          case -1 -> RolePermission.POST_DOWNVOTE;
+          case 0 -> RolePermission.POST_NEUTRAL;
+          default -> RolePermission.POST_NEUTRAL;
+        },
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Post post = postRepository.findById(createPostLikeForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     if (createPostLikeForm.score() == 1) {
@@ -252,9 +282,14 @@ public class PostController extends AbstractLemmyApiController {
   @PutMapping("save")
   public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
+    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.FAVORITE_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Post post = postRepository.findById((long) savePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+
     if (savePostForm.save()) {
       postSaveService.createPostSave(post, person);
     } else {
@@ -274,6 +309,10 @@ public class PostController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.REPORT_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createPostReportForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found"));
