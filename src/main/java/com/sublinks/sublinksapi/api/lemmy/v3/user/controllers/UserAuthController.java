@@ -77,9 +77,16 @@ public class UserAuthController extends AbstractLemmyApiController {
           "JWT will be empty if registration "
               + "requires email verification or application approval."))}),
       @ApiResponse(responseCode = "400", description = "Passwords do not match.", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))}),
+      @ApiResponse(responseCode = "400", description = "Username is taken.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))}),
+      @ApiResponse(responseCode = "400", description = "Captcha is incorrect.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LemmyException.class))}),
+      @ApiResponse(responseCode = "400", description = "Person is blocked by slur filter.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})
+  })
   @PostMapping("register")
-  LoginResponse create(@Valid @RequestBody final Register registerForm) {
+  LoginResponse create(@Valid @RequestBody final Register registerForm) throws LemmyException {
 
     InstanceConfig instanceConfig = localInstanceContext.instance().getInstanceConfig();
 
@@ -89,7 +96,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
       if (instanceConfig.isCaptchaEnabled()) {
         if (!captchaService.validateCaptcha(registerForm.captcha_answer(), true)) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_captcha");
+          throw new LemmyException("captcha_incorrect", HttpStatus.BAD_REQUEST);
         }
       }
     }
@@ -134,6 +141,9 @@ public class UserAuthController extends AbstractLemmyApiController {
   @GetMapping("get_captcha")
   GetCaptchaResponse captcha() {
 
+    if (!localInstanceContext.instance().getInstanceConfig().isCaptchaEnabled()) {
+      return GetCaptchaResponse.builder().build();
+    }
     Captcha captcha = captchaService.getCaptcha();
     return GetCaptchaResponse.builder()
         .ok(conversionService.convert(captcha, CaptchaResponse.class)).build();
