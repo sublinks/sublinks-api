@@ -14,5 +14,7 @@ public interface CaptchaRepository extends JpaRepository<Captcha, Long> {
 
   Optional<Captcha> findByWordIs(String word);
 
+  void deleteAllByLockedFalse();
+
   long countAllByLockedFalse();
 }

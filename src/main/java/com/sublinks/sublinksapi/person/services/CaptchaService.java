@@ -1,14 +1,11 @@
-package com.sublinks.sublinksapi.api.lemmy.v3.user.services;
+package com.sublinks.sublinksapi.person.services;
 
 import cn.apiclub.captcha.gimpy.BlockGimpyRenderer;
-import cn.apiclub.captcha.gimpy.FishEyeGimpyRenderer;
 import cn.apiclub.captcha.gimpy.GimpyRenderer;
 import cn.apiclub.captcha.gimpy.RippleGimpyRenderer;
-import cn.apiclub.captcha.gimpy.ShearGimpyRenderer;
-import cn.apiclub.captcha.gimpy.StretchGimpyRenderer;
-import cn.apiclub.captcha.noise.CurvedLineNoiseProducer;
 import cn.apiclub.captcha.noise.NoiseProducer;
 import cn.apiclub.captcha.noise.StraightLineNoiseProducer;
+import com.sublinks.sublinksapi.person.scheduling.CaptchaScheduler;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.Producers.LinesProducer;
 import com.sublinks.sublinksapi.person.dto.Captcha;
@@ -35,6 +32,7 @@ public class CaptchaService {
 
   private final CaptchaRepository captchaRepository;
   private final LocalInstanceContext localInstanceContext;
+  private final CaptchaScheduler captchaScheduler;
 
   private final Map<String, NoiseProducer> noiseProducers = Map.of(
       "Hard", new LinesProducer(3, List.of(Color.WHITE, Color.RED, Color.BLACK)),
@@ -87,14 +85,20 @@ public class CaptchaService {
     return captcha.isPresent();
   }
 
+  public void recreateAllCaptchas() {
+
+    // Not to disturb already locked Captchas
+    captchaRepository.deleteAllByLockedFalse();
+
+    captchaScheduler.generateCachedCaptcha();
+  }
+
   public Captcha createCaptcha() {
+    final String difficulty = localInstanceContext.instance().getInstanceConfig() != null ? localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty() : "Easy";
 
+    NoiseProducer noiseProducer = noiseProducers.get(difficulty);
 
-    NoiseProducer noiseProducer = noiseProducers.get(
-        localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty());
-
-    GimpyRenderer gimpyRender = gimpyRenderer.get(
-        localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty());
+    GimpyRenderer gimpyRender = gimpyRenderer.get(difficulty);
     cn.apiclub.captcha.Captcha captcha = new cn.apiclub.captcha.Captcha.Builder(200, 50)
         .addText()
         .addBackground()

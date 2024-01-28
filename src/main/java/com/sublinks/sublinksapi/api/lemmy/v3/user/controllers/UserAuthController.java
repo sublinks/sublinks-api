@@ -17,7 +17,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.services.CaptchaService;
+import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
