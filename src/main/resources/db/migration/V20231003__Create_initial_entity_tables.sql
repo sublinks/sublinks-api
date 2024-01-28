@@ -195,6 +195,7 @@ CREATE TABLE `people`
   `is_bot_account`                 TINYINT                            NOT NULL DEFAULT 0,
   `is_deleted`                     TINYINT                            NOT NULL DEFAULT 0,
   `activity_pub_id`                TEXT                               NOT NULL,
+  `actor_id`                       TEXT                               NOT NULL,
   `role_id`                        BIGINT                             NOT NULL,
   `name`                           VARCHAR(255)                       NULL,
   `display_name`                   VARCHAR(255)                       NULL,
