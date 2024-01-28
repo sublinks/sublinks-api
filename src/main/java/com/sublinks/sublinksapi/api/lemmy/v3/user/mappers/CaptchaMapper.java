@@ -1,16 +1,15 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.user.dto.Captcha;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
+import com.sublinks.sublinksapi.person.dto.Captcha;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.CaptchaResponse;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface CaptchaMapper {
+public interface CaptchaMapper extends Converter<Captcha, CaptchaResponse> {
 
-  @Mapping(target = "ok.png", source = "png")
-  @Mapping(target = "ok.wav", source = "wav")
-  @Mapping(target = "ok.uuid", source = "uuid")
-  GetCaptchaResponse map(Captcha captcha);
+  @Override
+  CaptchaResponse convert(@Nullable Captcha captcha);
 }
