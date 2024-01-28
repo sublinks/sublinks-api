@@ -1,12 +1,9 @@
 package com.sublinks.sublinksapi.utils.models;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import org.springframework.http.HttpStatusCode;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
 public class LemmyException extends Exception{
