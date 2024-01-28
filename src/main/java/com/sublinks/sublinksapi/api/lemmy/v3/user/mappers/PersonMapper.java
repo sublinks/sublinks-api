@@ -11,16 +11,16 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface PersonMapper extends
+public abstract class PersonMapper implements
     Converter<Person, com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person> {
 
   @Override
   @Mapping(target = "id", source = "person.id")
   @Mapping(target = "name", source = "person.name")
-  @Mapping(target = "display_name", source = "person.displayName")
-  @Mapping(target = "avatar", source = "person.avatarImageUrl")
-  @Mapping(target = "banner", source = "person.bannerImageUrl")
-  @Mapping(target = "banned", constant = "false")
+  @Mapping(target = "avatar", source = "person", qualifiedByName="avatar")
+  @Mapping(target = "banner", source = "person", qualifiedByName="banner")
+  @Mapping(target = "banned", source = "person", qualifiedByName="is_banned")
+  @Mapping(target = "display_name", source = "person", qualifiedByName="display_name")
   @Mapping(target = "ban_expires", source = "person.role.expiresAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "published", source = "person.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "updated", source = "person.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
@@ -28,16 +28,36 @@ public interface PersonMapper extends
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "local", source = "person.local")
   @Mapping(target = "deleted", source = "person.deleted")
-  @Mapping(target = "inbox_url", constant = "")
-  @Mapping(target = "shared_inbox_url", constant = "")
+  @Mapping(target = "actor_id", constant = "") // @todo actor_id
+  @Mapping(target = "inbox_url", constant = "") // @todo inbox_url
+  @Mapping(target = "shared_inbox_url", constant = "") // @todo shared_inbox_url
   @Mapping(target = "matrix_user_id", source = "person.matrixUserId")
   @Mapping(target = "bot_account", source = "person.botAccount")
   @Mapping(target = "instance_id", source = "person.instance.id")
-  com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person convert(@Nullable Person person);
+  public abstract com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person convert(
+      @Nullable Person person);
 
   @Named("is_banned")
-  default boolean isBanned(Person person) {
+  boolean mapIsBanned(Person person) {
 
     return RoleAuthorizingService.isBanned(person);
+  }
+
+  @Named("display_name")
+  String mapDisplayName(Person person) {
+
+    return !person.getDisplayName().isBlank() ? person.getDisplayName() : null;
+  }
+
+  @Named("avatar")
+  String mapAvatar(Person person) {
+
+    return !person.getAvatarImageUrl().isBlank() ? person.getAvatarImageUrl() : null;
+  }
+
+  @Named("banner")
+  String mapBanner(Person person) {
+
+    return !person.getBannerImageUrl().isBlank() ? person.getBannerImageUrl() : null;
   }
 }

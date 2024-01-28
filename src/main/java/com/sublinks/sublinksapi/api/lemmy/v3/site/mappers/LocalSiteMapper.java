@@ -34,8 +34,8 @@ public interface LocalSiteMapper extends Converter<LocalInstanceContext, LocalSi
   @Mapping(target = "application_email_admins", constant = "false")
   @Mapping(target = "slur_filter_regex", constant = "")
   @Mapping(target = "federation_enabled", constant = "false")
-  @Mapping(target = "captcha_enabled", constant = "false")
-  @Mapping(target = "captcha_difficulty", constant = "")
+  @Mapping(target = "captcha_enabled", source = "context.instance.instanceConfig.captchaEnabled")
+  @Mapping(target = "captcha_difficulty", source = "context.instance.instanceConfig.captchaDifficulty")
   @Mapping(target = "registration_mode", constant = "Open")
   @Mapping(target = "reports_email_admins", constant = "false")
   LocalSite convert(@Nullable LocalInstanceContext context);
