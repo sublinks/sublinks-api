@@ -6,8 +6,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.dto.Captcha;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.mappers.CaptchaMapper;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.CaptchaResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
@@ -23,6 +22,7 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.person.dto.Captcha;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
@@ -44,6 +44,7 @@ import jakarta.validation.Valid;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,8 +68,8 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
   private final CaptchaService captchaService;
-  private final CaptchaMapper captchaMapper;
   private final RoleAuthorizingService roleAuthorizingService;
+  private final ConversionService conversionService;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -82,8 +83,15 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     InstanceConfig instanceConfig = localInstanceContext.instance().getInstanceConfig();
 
-    if (instanceConfig != null && instanceConfig.getRegistrationMode() == RegistrationMode.Closed) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "registration_disabled");
+    if (instanceConfig != null) {
+      if (instanceConfig.getRegistrationMode() == RegistrationMode.Closed) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "registration_closed");
+      }
+      if (instanceConfig.isCaptchaEnabled()) {
+        if (!captchaService.validateCaptcha(registerForm.captcha_answer(), true)) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_captcha");
+        }
+      }
     }
 
     if (personRepository.findOneByName(registerForm.username()).isPresent()) {
@@ -127,7 +135,8 @@ public class UserAuthController extends AbstractLemmyApiController {
   GetCaptchaResponse captcha() {
 
     Captcha captcha = captchaService.getCaptcha();
-    return captchaMapper.map(captcha);
+    return GetCaptchaResponse.builder()
+        .ok(conversionService.convert(captcha, CaptchaResponse.class)).build();
   }
 
   @Operation(summary = "Log into lemmy.")
