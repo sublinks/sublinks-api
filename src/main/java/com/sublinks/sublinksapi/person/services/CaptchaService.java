@@ -1,5 +1,8 @@
 package com.sublinks.sublinksapi.person.services;
 
+import cn.apiclub.captcha.backgrounds.BackgroundProducer;
+import cn.apiclub.captcha.backgrounds.GradiatedBackgroundProducer;
+import cn.apiclub.captcha.backgrounds.SquigglesBackgroundProducer;
 import cn.apiclub.captcha.gimpy.BlockGimpyRenderer;
 import cn.apiclub.captcha.gimpy.GimpyRenderer;
 import cn.apiclub.captcha.gimpy.RippleGimpyRenderer;
@@ -36,15 +39,15 @@ public class CaptchaService {
   private final LocalInstanceContext localInstanceContext;
 
   private final Map<String, NoiseProducer> noiseProducers = Map.of(
-      "Hard", new LinesProducer(3, List.of(Color.WHITE, Color.RED, Color.BLACK)),
-      "Medium", new LinesProducer(2, List.of(Color.WHITE, Color.BLACK)),
-      "Easy", new StraightLineNoiseProducer()
+      "hard", new LinesProducer(3, List.of(Color.WHITE, Color.RED, Color.BLACK)),
+      "medium", new LinesProducer(2, List.of(Color.WHITE, Color.BLACK)),
+      "easy", new StraightLineNoiseProducer()
   );
 
   private final Map<String, GimpyRenderer> gimpyRenderer = Map.of(
-      "Hard", new RippleGimpyRenderer(),
-      "Medium", new RippleGimpyRenderer(),
-      "Easy", new BlockGimpyRenderer()
+      "hard", new RippleGimpyRenderer(),
+      "medium", new RippleGimpyRenderer(),
+      "easy", new BlockGimpyRenderer()
   );
 
   private static String encodeToString(BufferedImage image) {
@@ -98,14 +101,17 @@ public class CaptchaService {
   public Captcha createCaptcha() {
 
     final String difficulty = localInstanceContext.instance().getInstanceConfig() != null
-        ? localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty() : "Easy";
+        ? localInstanceContext.instance().getInstanceConfig().getCaptchaDifficulty() : "easy";
 
     NoiseProducer noiseProducer = noiseProducers.get(difficulty);
 
     GimpyRenderer gimpyRender = gimpyRenderer.get(difficulty);
+
+    BackgroundProducer backgroundProducer = new GradiatedBackgroundProducer();
+
     cn.apiclub.captcha.Captcha captcha = new cn.apiclub.captcha.Captcha.Builder(200, 50)
         .addText()
-        .addBackground()
+        .addBackground(backgroundProducer)
         .addNoise(noiseProducer)
         .gimp(gimpyRender)
         .build();
