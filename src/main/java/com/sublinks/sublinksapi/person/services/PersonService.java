@@ -207,10 +207,8 @@ public class PersonService {
       person.setRole(roleAuthorizingService.getUserRole());
     }
 
-    if (localInstanceContext.settings().getIsPrivateInstance()) {
-      final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
-      person.setActorId(userActorId);
-    }
+    final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
+    person.setActorId(userActorId);
 
     person.setLinkPersonInstance(LinkPersonInstance.builder()
         .instance(localInstanceContext.instance())
