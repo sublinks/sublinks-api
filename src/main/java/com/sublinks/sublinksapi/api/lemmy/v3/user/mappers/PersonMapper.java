@@ -6,20 +6,21 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.Named;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface PersonMapper extends
+public abstract class PersonMapper implements
     Converter<Person, com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person> {
 
   @Override
   @Mapping(target = "id", source = "person.id")
   @Mapping(target = "name", source = "person.name")
-  @Mapping(target = "display_name", source = "person")
-  @Mapping(target = "avatar", source = "person.avatarImageUrl")
-  @Mapping(target = "banner", source = "person.bannerImageUrl")
-  @Mapping(target = "banned", source = "person")
+  @Mapping(target = "avatar", source = "person", qualifiedByName="avatar")
+  @Mapping(target = "banner", source = "person", qualifiedByName="banner")
+  @Mapping(target = "banned", source = "person", qualifiedByName="is_banned")
+  @Mapping(target = "display_name", source = "person", qualifiedByName="display_name")
   @Mapping(target = "ban_expires", source = "person.role.expiresAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "published", source = "person.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "updated", source = "person.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
@@ -32,18 +33,30 @@ public interface PersonMapper extends
   @Mapping(target = "matrix_user_id", source = "person.matrixUserId")
   @Mapping(target = "bot_account", source = "person.botAccount")
   @Mapping(target = "instance_id", source = "person.instance.id")
-  com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person convert(@Nullable Person person);
+  public abstract com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person convert(
+      @Nullable Person person);
 
-  default boolean mapIsBanned(Person person) {
+  @Named("is_banned")
+  boolean mapIsBanned(Person person) {
 
     return RoleAuthorizingService.isBanned(person);
   }
 
-  default String mapDisplayName(Person person) {
+  @Named("display_name")
+  String mapDisplayName(Person person) {
 
-    if (person.getDisplayName().isBlank()) {
-      return null;
-    }
-    return person.getDisplayName();
+    return !person.getDisplayName().isBlank() ? person.getDisplayName() : null;
+  }
+
+  @Named("avatar")
+  String mapAvatar(Person person) {
+
+    return !person.getAvatarImageUrl().isBlank() ? person.getAvatarImageUrl() : null;
+  }
+
+  @Named("banner")
+  String mapBanner(Person person) {
+
+    return !person.getBannerImageUrl().isBlank() ? person.getBannerImageUrl() : null;
   }
 }

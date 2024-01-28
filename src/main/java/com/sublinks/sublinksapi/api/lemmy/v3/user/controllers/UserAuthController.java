@@ -13,14 +13,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Login;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
-import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
@@ -30,6 +29,8 @@ import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
+import com.sublinks.sublinksapi.utils.TotpUtil;
+import com.sublinks.sublinksapi.utils.models.LemmyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -60,12 +61,9 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonService personService;
   private final PersonRepository personRepository;
   private final LocalInstanceContext localInstanceContext;
-  private final InstanceConfigRepository instanceConfigRepository;
-  private final InstanceConfigService instanceConfigService;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
   private final RoleAuthorizingService roleAuthorizingService;
-
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -132,11 +130,22 @@ public class UserAuthController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "A valid user is not found or password is incorrect.", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("login")
-  LoginResponse login(@Valid @RequestBody final Login loginForm) {
+  LoginResponse login(@Valid @RequestBody final Login loginForm) throws LemmyException {
 
     final Person person = personRepository.findOneByName(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
+
+    String totpSecret = person.getTotpVerifiedSecret();
+    if (totpSecret != null) {
+      if (loginForm.totp_2fa_token() == null) {
+        throw new LemmyException("missing_totp_token", HttpStatus.BAD_REQUEST);
+      }
+      if (!TotpUtil.verify(totpSecret, loginForm.totp_2fa_token())) {
+        throw new LemmyException("wrong_totp_token", HttpStatus.BAD_REQUEST);
+      }
+    }
+
     final String token = jwtUtil.generateToken(person);
     return LoginResponse.builder().jwt(token)
         .registration_created(false) // @todo return true if application created
@@ -163,9 +172,11 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PasswordResetResponse.class))})})
   @PostMapping("password_reset")
-  PasswordResetResponse passwordReset() {
+  PasswordResetResponse passwordReset(final JwtPerson principal) {
 
-    // @todo: implement reset password
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    // @todo: implement reset password and check for 2fa
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -186,7 +197,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   @PostMapping("verify_email")
   VerifyEmailResponse verifyEmail() {
 
-    // @todo: implement verifiy Email
+    // @todo: implement verify Email
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -210,10 +221,28 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GenerateTotpSecretResponse.class))})})
   @PostMapping("totp/generate")
-  GenerateTotpSecretResponse totpGenerate() {
-    // @todo: implement TOTP
+  GenerateTotpSecretResponse totpGenerate(final JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    try {
+      String secret = TotpUtil.createSecretString(160);
+      GenerateTotpSecretResponse generateTotpSecretResponse = GenerateTotpSecretResponse.builder()
+          .totp_secret_url(
+              TotpUtil.createUri(localInstanceContext.instance().getDomain(), person.getName(),
+                  secret).toString()
+
+          ).build();
+
+      person.setTotpSecret(secret);
+      personService.updatePerson(person);
+
+      return generateTotpSecretResponse;
+
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "totp_secret_generation_failed");
+    }
   }
 
   @Operation(summary =
@@ -223,10 +252,35 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
   @PostMapping("totp/update")
-  UpdateTotpResponse totpUpdate() {
-    // @todo: implement TOTP
+  UpdateTotpResponse totpUpdate(@Valid @RequestBody final UpdateTotp updateTotpForm,
+      final JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    UpdateTotpResponse.UpdateTotpResponseBuilder updateTotpResponseBuilder = UpdateTotpResponse
+        .builder();
+
+    if (updateTotpForm.enabled()) {
+      if (person.getTotpSecret() == null) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      if (!TotpUtil.verify(person.getTotpSecret(), updateTotpForm.totp_token())) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      person.setTotpVerifiedSecret(person.getTotpSecret());
+      person.setTotpSecret(null);
+    } else {
+      if (TotpUtil.verify(person.getTotpVerifiedSecret(), updateTotpForm.totp_token())) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      person.setTotpVerifiedSecret(null);
+    }
+    personService.updatePerson(person);
+
+    return updateTotpResponseBuilder.enabled(true).build();
   }
 
   @Operation(summary =
