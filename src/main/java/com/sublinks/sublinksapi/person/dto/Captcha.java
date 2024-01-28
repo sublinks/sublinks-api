@@ -40,7 +40,7 @@ public class Captcha {
   private String wav;
 
   @Column(nullable = false)
-  private boolean locked = false;
+  private boolean locked;
 
   @UpdateTimestamp
   @Column(updatable = false, nullable = true, name = "updated_at")
