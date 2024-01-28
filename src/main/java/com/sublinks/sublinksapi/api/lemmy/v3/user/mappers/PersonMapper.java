@@ -26,7 +26,6 @@ public interface PersonMapper extends
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "local", source = "person.local")
   @Mapping(target = "deleted", source = "person.deleted")
-  @Mapping(target = "actor_id", constant = "") // @todo actor_id
   @Mapping(target = "inbox_url", constant = "") // @todo inbox_url
   @Mapping(target = "shared_inbox_url", constant = "") // @todo shared_inbox_url
   @Mapping(target = "matrix_user_id", source = "person.matrixUserId")
