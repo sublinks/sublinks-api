@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.queue;
+package com.sublinks.sublinksapi.queue.config;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
