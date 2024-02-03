@@ -6,26 +6,20 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.HandlerInterceptor;
-import reactor.core.Disposable;
-import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
 
 @Component
 public class RateLimiter implements HandlerInterceptor {
-  private String userName;
   private final ReactiveRedisTemplate<String, String> redis;
   private final LocalSiteRateLimitMapper limits;
   private final LocalInstanceContext localInstanceContext;
-
   private int maxReqs = 0;
   private int duration = 0;
 
@@ -46,6 +40,7 @@ public class RateLimiter implements HandlerInterceptor {
       HttpServletResponse response,
       Object handler
   ) throws ResponseStatusException {
+    String userName = null;
     try {
       userName = request.getUserPrincipal().getName();
       // request.getUserPrincipal() will throw if user not authed. We will ignore and just
