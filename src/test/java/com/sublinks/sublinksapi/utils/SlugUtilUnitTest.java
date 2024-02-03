@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.utils;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import java.util.regex.Pattern;
 
@@ -25,7 +24,6 @@ public class SlugUtilUnitTest {
   }
 
   @Test
-  @Disabled // Issue #173
   void givenStringWithNonAlphaNumericCharacters_whenStringToSlug_thenReturnStringAsSlug() {
 
     String titleString = "[])this(\\is}{*a&-string#%^";
