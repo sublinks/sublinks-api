@@ -627,6 +627,7 @@ CREATE TABLE `instance_configs`
   `enable_nsfw`                   TINYINT                                              NULL,
   `community_creation_admin_only` TINYINT                                              NULL,
   `application_email_admins`      TINYINT                                              NULL,
+  `report_email_admins`           TINYINT                                              NULL,
   `hide_modlog_mod_names`         TINYINT                                              NULL,
   `federation_enabled`            TINYINT                                              NULL,
   `captcha_enabled`               TINYINT                                              NULL,
