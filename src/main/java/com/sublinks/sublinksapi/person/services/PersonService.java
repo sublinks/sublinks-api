@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -196,6 +195,10 @@ public class PersonService {
     person.setPublicKey(keys.publicKey());
     person.setPrivateKey(keys.privateKey());
     person.setLocal(true);
+    person.setEmail(person.getEmail());
+    // @todo: add email verification and send verification email on registration
+    person.setEmailVerified(localInstanceContext.instance().getInstanceConfig() == null
+        || !localInstanceContext.instance().getInstanceConfig().isRequireEmailVerification());
 
     boolean isInitialAdmin = localInstanceContext.instance().getDomain().isEmpty();
     if (isInitialAdmin) {
