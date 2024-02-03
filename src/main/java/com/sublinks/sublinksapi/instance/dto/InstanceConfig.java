@@ -69,6 +69,9 @@ public class InstanceConfig {
   @Column(name = "application_email_admins")
   private boolean applicationEmailAdmins;
 
+  @Column(name = "report_email_admins")
+  private boolean reportEmailAdmins;
+
   @Column(name = "hide_modlog_mod_names")
   private boolean hideModlogModNames;
 
