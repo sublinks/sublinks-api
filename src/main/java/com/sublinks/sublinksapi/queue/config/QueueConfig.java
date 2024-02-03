@@ -25,7 +25,9 @@ public class QueueConfig {
   private String federationRoutingKey;
 
   @Bean
-  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
+  @ConditionalOnProperty(name =
+      {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key", "sublinks.federation_queue.name"},
+      matchIfMissing = false)
   public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(jsonMessageConverter());
@@ -33,7 +35,9 @@ public class QueueConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
+  @ConditionalOnProperty(name =
+      {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key", "sublinks.federation_queue.name"},
+      matchIfMissing = false)
   public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
@@ -42,7 +46,9 @@ public class QueueConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
+  @ConditionalOnProperty(name =
+      {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key", "sublinks.federation_queue.name"},
+      matchIfMissing = false)
   public Jackson2JsonMessageConverter jsonMessageConverter() {
     return new Jackson2JsonMessageConverter();
   }
