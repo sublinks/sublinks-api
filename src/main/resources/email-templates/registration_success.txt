@@ -1,0 +1,3 @@
+Hi ${username},
+
+Your Registration on ${instanceName} was successful!
