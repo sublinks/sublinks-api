@@ -25,6 +25,7 @@ public record EditSite(
     ListingType default_post_listing_type,
     String legal_information,
     Boolean application_email_admins,
+    Boolean reports_email_admins,
     Boolean hide_modlog_mod_names,
     Collection<String> discussion_languages,
     String slur_filter_regex,

@@ -23,7 +23,10 @@ public class RegistrationCreatedListener implements
 
   @Override
   public void onApplicationEvent(PersonRegistrationApplicationCreatedEvent event) {
-
+    if(localInstanceContext.instance().getInstanceConfig() != null
+        && !localInstanceContext.instance().getInstanceConfig().isApplicationEmailAdmins()) {
+      return;
+    }
     final Person person = event.getPersonRegistrationApplication().getPerson();
 
     Map<String, Object> properties = emailService.getDefaultEmailParameters();
