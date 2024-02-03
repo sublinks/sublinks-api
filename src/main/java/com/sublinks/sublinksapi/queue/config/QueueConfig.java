@@ -15,18 +15,17 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class QueueConfig {
-  @Value("${BACKEND_QUEUE_NAME:}")
+  @Value("${sublinks.backend_queue.name}")
   private String backendQueueName;
 
-  @Value("${BACKEND_TOPIC_NAME:}")
+  @Value("${sublinks.backend_topic.name}")
   private String backendTopicName;
 
-  // set default to an empty string
-  @Value("${FEDERATION_ROUTING_KEY:}")
+  @Value("${sublinks.federation.key}")
   private String federationRoutingKey;
 
   @Bean
-  @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
+  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(jsonMessageConverter());
@@ -34,7 +33,7 @@ public class QueueConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
+  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
     SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
     factory.setConnectionFactory(connectionFactory);
@@ -43,25 +42,25 @@ public class QueueConfig {
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
+  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public Jackson2JsonMessageConverter jsonMessageConverter() {
     return new Jackson2JsonMessageConverter();
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
+  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public Queue federationQueue() {
     return new Queue(this.backendQueueName, true);
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
+  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public TopicExchange federationTopicExchange() {
     return new TopicExchange(this.backendTopicName);
   }
 
   @Bean
-  @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
+  @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public Binding binding(Queue federationQueue, TopicExchange federationTopicExchange) {
     return BindingBuilder.bind(federationQueue).to(federationTopicExchange).with(federationRoutingKey);
   }

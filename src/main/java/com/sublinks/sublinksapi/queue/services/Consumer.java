@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @ConditionalOnBean(RabbitTemplate.class)
 public class Consumer {
 
-  /*@RabbitListener(queues = "${FEDERATION_QUEUE_NAME}")
+  /*@RabbitListener(queues = "${sublinks.federation_queue.name}")
   public void receive(Object msg) {
     // @todo add message processing
   }*/
