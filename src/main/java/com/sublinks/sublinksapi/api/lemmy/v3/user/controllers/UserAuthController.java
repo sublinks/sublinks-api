@@ -142,6 +142,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
 
       if (instanceConfig.isRequireEmailVerification()) {
+        // @todo: Implement email verification
         if (person.getEmail() == null) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
         }
