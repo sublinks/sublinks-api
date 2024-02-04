@@ -153,7 +153,11 @@ public class UserAuthController extends AbstractLemmyApiController {
                 + "TODO");
         try {
           emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
-              .subject("Verify your email").templateData(new Context(Locale.getDefault(), params))
+              .subject(emailService.getSubjects().get("verify_email").getAsString())
+              .body(emailService.formatTextEmailTemplate("verify_email",
+                  new Context(Locale.getDefault(), params)))
+              .htmlBody(emailService.formatEmailTemplate("verify_email",
+                  new Context(Locale.getDefault(), params)))
               .build());
           send_verification_email = true;
         } catch (Exception e) {
