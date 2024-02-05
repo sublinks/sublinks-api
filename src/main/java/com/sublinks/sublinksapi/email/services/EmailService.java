@@ -3,6 +3,9 @@ package com.sublinks.sublinksapi.email.services;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sublinks.sublinksapi.email.config.EmailConfig;
+import com.sublinks.sublinksapi.email.events.EmailCreatedEvent;
+import com.sublinks.sublinksapi.email.events.EmailCreatedPublisher;
+import com.sublinks.sublinksapi.email.models.CreateEmailEvent;
 import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -34,6 +37,7 @@ public class EmailService {
   private final LocalInstanceContext localInstanceContext;
   private final SpringTemplateEngine templateEngine;
   private final SpringTemplateEngine textTemplateEngine;
+  private final EmailCreatedPublisher emailCreatedPublisher;
 
   private JavaMailSender getMailSender() {
 
@@ -67,6 +71,9 @@ public class EmailService {
     }
 
     getMailSender().send(msg);
+
+    emailCreatedPublisher.publish(CreateEmailEvent.builder().createEmailRequest(request).build());
+
   }
 
   public Map<String, Object> getDefaultEmailParameters() {

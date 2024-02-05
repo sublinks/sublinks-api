@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.email.listeners;
 
+import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -23,7 +24,8 @@ public class RegistrationCreatedListener implements
 
   @Override
   public void onApplicationEvent(PersonRegistrationApplicationCreatedEvent event) {
-    if(localInstanceContext.instance().getInstanceConfig() != null
+
+    if (localInstanceContext.instance().getInstanceConfig() != null
         && !localInstanceContext.instance().getInstanceConfig().isApplicationEmailAdmins()) {
       return;
     }
@@ -36,10 +38,11 @@ public class RegistrationCreatedListener implements
     Context context = new Context(Locale.getDefault(), properties);
 
     try {
+      final String template_name = EmailTemplatesEnum.NEW_REGISTRATION_APPLICATION.toString();
       emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
-          .subject(emailService.getSubjects().get("new_registration_application").getAsString())
-          .body(emailService.formatTextEmailTemplate("new_registration_application", context))
-          .htmlBody(emailService.formatEmailTemplate("new_registration_application", context))
+          .subject(emailService.getSubjects().get(template_name).getAsString())
+          .body(emailService.formatTextEmailTemplate(template_name, context))
+          .htmlBody(emailService.formatEmailTemplate(template_name, context))
           .build());
     } catch (Exception e) {
       // @todo: log error

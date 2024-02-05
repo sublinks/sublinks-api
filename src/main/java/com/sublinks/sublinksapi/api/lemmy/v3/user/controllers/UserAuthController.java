@@ -19,6 +19,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
@@ -153,11 +154,12 @@ public class UserAuthController extends AbstractLemmyApiController {
             localInstanceContext.instance().getDomain() + "/api/v3/user/verify_email?token="
                 + "TODO");
         try {
+          final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
           emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
-              .subject(emailService.getSubjects().get("verify_email").getAsString())
-              .body(emailService.formatTextEmailTemplate("verify_email",
+              .subject(emailService.getSubjects().get(template_name).getAsString())
+              .body(emailService.formatTextEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
-              .htmlBody(emailService.formatEmailTemplate("verify_email",
+              .htmlBody(emailService.formatEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
               .build());
           send_verification_email = true;
@@ -173,10 +175,11 @@ public class UserAuthController extends AbstractLemmyApiController {
       try {
         final Context context = new Context(Locale.getDefault(), properties);
 
+        final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
         emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
-            .subject(emailService.getSubjects().get("registration_success").getAsString())
-            .body(emailService.formatTextEmailTemplate("registration_success", context))
-            .htmlBody(emailService.formatEmailTemplate("registration_success", context))
+            .subject(emailService.getSubjects().get(template_name).getAsString())
+            .body(emailService.formatTextEmailTemplate(template_name, context))
+            .htmlBody(emailService.formatEmailTemplate(template_name, context))
             .build());
       } catch (Exception e) {
         // @todo log error?
