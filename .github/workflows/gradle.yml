@@ -36,11 +36,11 @@ jobs:
         java-version: '17'
         distribution: 'corretto'
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/gradle-build-action@v3
       with:
         arguments: build
     - name: Build Docker Image
       if: github.event_name != 'pull_request'
-      uses: gradle/gradle-build-action@v2
+      uses: gradle/gradle-build-action@v3
       with:
         arguments: bootBuildImage

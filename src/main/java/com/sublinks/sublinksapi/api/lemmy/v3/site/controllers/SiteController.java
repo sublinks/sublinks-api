@@ -36,7 +36,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -141,6 +140,7 @@ public class SiteController extends AbstractLemmyApiController {
     config.defaultTheme(createSiteForm.default_theme());
     config.defaultPostListingType(createSiteForm.default_post_listing_type());
     config.legalInformation(createSiteForm.legal_information());
+    config.captchaDifficulty(createSiteForm.captcha_difficulty());
 
     final InstanceConfig instanceConfig = config.build();
 
@@ -163,7 +163,6 @@ public class SiteController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     // @todo: Check permission on federation change
-
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

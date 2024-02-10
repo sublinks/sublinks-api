@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -29,15 +30,29 @@ public class JwtFilter extends OncePerRequestFilter {
       final HttpServletResponse response,
       final FilterChain filterChain) throws ServletException, IOException {
 
-    final String authorizationHeader = request.getHeader("Authorization");
+    String authorizingToken = request.getHeader("Authorization");
+
+    if (authorizingToken == null && request.getCookies() != null) {
+      for (Cookie cookie : request.getCookies()) {
+        if (cookie.getName().equals("jwt")) {
+          authorizingToken = cookie.getValue();
+          break;
+        }
+      }
+
+    }
 
     String token = null;
     String userName = null;
 
     try {
-      if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-        token = authorizationHeader.substring(7);
-        userName = jwtUtil.extractUsername(token);
+      if (authorizingToken != null) {
+        if (authorizingToken.startsWith("Bearer ")) {
+          token = authorizingToken.substring(7);
+        } else {
+          token = authorizingToken;
+        }
+          userName = jwtUtil.extractUsername(token);
       }
     } catch (ExpiredJwtException ex) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -50,7 +65,8 @@ public class JwtFilter extends OncePerRequestFilter {
       }
 
       if (jwtUtil.validateToken(token, person.get())) {
-        final JwtPerson authenticationToken = new JwtPerson(person.get(), person.get().getAuthorities());
+        final JwtPerson authenticationToken = new JwtPerson(person.get(),
+            person.get().getAuthorities());
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
       }
