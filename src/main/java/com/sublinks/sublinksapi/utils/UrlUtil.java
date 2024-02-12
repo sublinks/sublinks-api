@@ -45,7 +45,7 @@ public class UrlUtil {
   private String removeTrackingParameters(final String queryString) {
 
     if (queryString == null || queryString.isEmpty()) {
-      return "";
+      return null;
     }
     Pattern pattern = Pattern.compile("(\\w+)=?([^&]+)?");
     Matcher matcher = pattern.matcher(queryString);
@@ -58,7 +58,7 @@ public class UrlUtil {
       }
     }
     if (parameters.isEmpty()) {
-      return "";
+      return null;
     }
     return parameters.entrySet().stream()
         .map(e -> e.getKey() + "=" + e.getValue())
