@@ -40,7 +40,6 @@ public class UrlUtilUnitTests {
   }
 
   @Test
-  @Disabled // ? is added to the end of urls with no parameters
   void givenHttpUrlWithNoParameters_whenNormalizeUrl_thenReturnUnmodifiedUrl() {
 
     String normalizedUrl = urlUtil.normalizeUrl(httpUrl);
@@ -49,7 +48,6 @@ public class UrlUtilUnitTests {
   }
 
   @Test
-  @Disabled // ? is added to the end of urls with no parameters
   void givenHttpsUrlWithNoParameters_whenNormalizeUrl_thenReturnUnmodifiedUrl() {
 
     String normalizedUrl = urlUtil.normalizeUrl(httpsUrl);
@@ -58,7 +56,6 @@ public class UrlUtilUnitTests {
   }
 
   @Test
-  @Disabled // ? is added to the end of urls that have all their parameters removed
   void givenHttpUrlWithOnlyTrackingParameters_whenNormalizeUrl_thenReturnUrlWithNoParameters() {
 
     String urlWithOnlyTrackingParameters = httpUrl + trackingParameters;
@@ -70,7 +67,6 @@ public class UrlUtilUnitTests {
   }
 
   @Test
-  @Disabled // ? is added to the end of urls that have all their parameters removed
   void givenHttpsUrlWithOnlyTrackingParameters_whenNormalizeUrl_thenReturnUrlWithNoParameters() {
 
     String urlWithOnlyTrackingParameters = httpsUrl + trackingParameters;
