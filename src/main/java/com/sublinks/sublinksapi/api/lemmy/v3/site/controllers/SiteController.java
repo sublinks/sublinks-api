@@ -141,6 +141,7 @@ public class SiteController extends AbstractLemmyApiController {
     config.defaultPostListingType(createSiteForm.default_post_listing_type());
     config.legalInformation(createSiteForm.legal_information());
     config.captchaDifficulty(createSiteForm.captcha_difficulty());
+    config.reportEmailAdmins(false);
 
     final InstanceConfig instanceConfig = config.build();
 
@@ -208,6 +209,7 @@ public class SiteController extends AbstractLemmyApiController {
     config.setDefaultTheme(editSiteForm.default_theme());
     config.setDefaultPostListingType(editSiteForm.default_post_listing_type());
     config.setLegalInformation(editSiteForm.legal_information());
+    config.setReportEmailAdmins(editSiteForm.application_email_admins());
 
     config.setRegistrationMode(editSiteForm.registration_mode());
     config.setRegistrationQuestion(editSiteForm.application_question());

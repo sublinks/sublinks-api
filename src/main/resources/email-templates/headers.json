@@ -1,0 +1,9 @@
+{
+  "dm_message": "You received a new message!",
+  "password_reset": "Your password reset url!",
+  "registration_approved": "Your registration has been approved!",
+  "verification_email": "Your verification email!",
+  "registration_success": "Your registration was successful!",
+  "new_registation_application": "There is a new registration application!",
+  "new_report": "There is a new report!"
+}

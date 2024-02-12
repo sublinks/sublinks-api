@@ -17,9 +17,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
-import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
+import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
+import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Captcha;
@@ -27,6 +29,7 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
@@ -41,6 +44,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.thymeleaf.context.Context;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,6 +77,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final CaptchaService captchaService;
   private final RoleAuthorizingService roleAuthorizingService;
   private final ConversionService conversionService;
+  private final EmailService emailService;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -83,8 +91,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "Captcha is incorrect.", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LemmyException.class))}),
       @ApiResponse(responseCode = "400", description = "Person is blocked by slur filter.", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})
-  })
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("register")
   LoginResponse create(@Valid @RequestBody final Register registerForm) throws LemmyException {
 
@@ -114,6 +121,7 @@ public class UserAuthController extends AbstractLemmyApiController {
     }
 
     final Person person = personService.getDefaultNewUser(registerForm.username());
+    person.setEmail(registerForm.email());
     if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
       throw new RuntimeException("Passwords do not match");
       // @todo throw lemmy error code
@@ -121,18 +129,65 @@ public class UserAuthController extends AbstractLemmyApiController {
     personService.createPerson(person);
     String token = jwtUtil.generateToken(person);
 
-    if (instanceConfig != null
-        && instanceConfig.getRegistrationMode() == RegistrationMode.RequireApplication) {
-      personRegistrationApplicationService.createPersonRegistrationApplication(
-          PersonRegistrationApplication.builder()
-              .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
-              .question(instanceConfig.getRegistrationQuestion()).answer(registerForm.answer())
+    boolean send_verification_email = false;
+
+    if (instanceConfig != null) {
+      if (instanceConfig.getRegistrationMode() == RegistrationMode.RequireApplication) {
+
+        personRegistrationApplicationService.createPersonRegistrationApplication(
+            PersonRegistrationApplication.builder()
+                .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
+                .question(instanceConfig.getRegistrationQuestion()).answer(registerForm.answer())
+                .build());
+        token = "";
+      }
+
+      if (instanceConfig.isRequireEmailVerification()) {
+        // @todo: Implement email verification
+        if (person.getEmail() == null) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
+        }
+        Map<String, Object> params = emailService.getDefaultEmailParameters();
+
+        params.put("person", person);
+        params.put("verificationUrl",
+            localInstanceContext.instance().getDomain() + "/api/v3/user/verify_email?token="
+                + "TODO");
+        try {
+          final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
+          emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
+              .subject(emailService.getSubjects().get(template_name).getAsString())
+              .body(emailService.formatTextEmailTemplate(template_name,
+                  new Context(Locale.getDefault(), params)))
+              .htmlBody(emailService.formatEmailTemplate(template_name,
+                  new Context(Locale.getDefault(), params)))
               .build());
-      token = "";
+          send_verification_email = true;
+        } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "email_sending_failed");
+        }
+      }
+    } else {
+      Map<String, Object> properties = emailService.getDefaultEmailParameters();
+      properties.put("person", person);
+
+      try {
+        final Context context = new Context(Locale.getDefault(), properties);
+
+        final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
+        emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
+            .subject(emailService.getSubjects().get(template_name).getAsString())
+            .body(emailService.formatTextEmailTemplate(template_name, context))
+            .htmlBody(emailService.formatEmailTemplate(template_name, context))
+            .build());
+      } catch (Exception e) {
+        // @todo log error?
+      }
     }
 
-    return LoginResponse.builder().jwt(token).registration_created(true).verify_email_sent(false)
-        .build();
+    return LoginResponse.builder().jwt(token).registration_created(true)
+        .verify_email_sent(send_verification_email).build();
   }
 
   @Operation(summary = "Fetch a Captcha.")
@@ -282,8 +337,7 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    UpdateTotpResponse.UpdateTotpResponseBuilder updateTotpResponseBuilder = UpdateTotpResponse
-        .builder();
+    UpdateTotpResponse.UpdateTotpResponseBuilder updateTotpResponseBuilder = UpdateTotpResponse.builder();
 
     if (updateTotpForm.enabled()) {
       if (person.getTotpSecret() == null) {
@@ -308,8 +362,7 @@ public class UserAuthController extends AbstractLemmyApiController {
     return updateTotpResponseBuilder.enabled(true).build();
   }
 
-  @Operation(summary =
-      "Validates your Token, throws an error if it is invalid.")
+  @Operation(summary = "Validates your Token, throws an error if it is invalid.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
   @PostMapping("validate_auth")
