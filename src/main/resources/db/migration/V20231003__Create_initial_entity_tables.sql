@@ -757,10 +757,12 @@ CREATE UNIQUE INDEX `IDX_ROLE_PERMISSIONS_ROLE_ID_PERMISSION` ON `role_permissio
  */
 CREATE TABLE `user_data`
 (
-  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `person_id`  BIGINT                                    NOT NULL,
-  `ip_address` VARCHAR(255)                              NOT NULL,
-  `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `person_id`    BIGINT                                    NOT NULL,
+  `ip_address`   VARCHAR(255)                              NOT NULL,
+  `user_agent`   TEXT                                      NULL,
+  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `last_used_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
