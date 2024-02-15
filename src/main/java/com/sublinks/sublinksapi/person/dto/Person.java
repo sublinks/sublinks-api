@@ -75,6 +75,9 @@ public class Person implements UserDetails, Principal {
   @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
   private LinkPersonInstance linkPersonInstance;
 
+  @OneToMany(mappedBy = "person")
+  private List<UserData> userData;
+
   @OneToMany
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
