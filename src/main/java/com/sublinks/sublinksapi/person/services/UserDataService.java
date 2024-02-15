@@ -4,8 +4,11 @@ import com.sublinks.sublinksapi.person.config.UserDataConfig;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.UserData;
 import com.sublinks.sublinksapi.person.repositories.UserDataRepository;
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import java.util.Date;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -24,16 +27,21 @@ public class UserDataService {
     userDataRepository.delete(userData);
   }
 
-  public void checkAndAddIpRelation(Person person, String ipAddress) {
+  public void checkAndAddIpRelation(Person person, String ipAddress, @Nullable String userAgent) {
 
     boolean saveUserIps = userDataConfig.isSaveUserIps();
-    boolean existsUserDataByPersonAndIpAddress = userDataRepository.existsUserDataByPersonAndIpAddress(
-        person, ipAddress);
-    if (saveUserIps && !existsUserDataByPersonAndIpAddress) {
-      UserData userData = new UserData();
-      userData.setPerson(person);
-      userData.setIpAddress(ipAddress);
-      save(userData);
+    Optional<UserData> foundData = userDataRepository.findFirstByPersonAndIpAddressAndUserAgent(
+        person, ipAddress, userAgent);
+    if (saveUserIps) {
+      foundData.ifPresent(userData -> {
+        userData.setLastUsedAt(new Date());
+        save(userData);
+      });
+      if (foundData.isEmpty()) {
+        UserData userData = UserData.builder().person(person).ipAddress(ipAddress)
+            .userAgent(userAgent).build();
+        save(userData);
+      }
     }
   }
 }
