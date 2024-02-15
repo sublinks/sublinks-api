@@ -8,5 +8,8 @@ import java.util.Optional;
 
 public interface UserDataRepository extends JpaRepository<UserData, Long> {
 
-  boolean existsUserDataByPersonAndIpAddress(Person person, String ipAddress);
+  List<UserData> findFirstByPersonAndIpAddress(Person person, String ipAddress);
+
+  Optional<UserData> findFirstByPersonAndIpAddressAndUserAgent(Person person, String ipAddress,
+      String userAgent);
 }

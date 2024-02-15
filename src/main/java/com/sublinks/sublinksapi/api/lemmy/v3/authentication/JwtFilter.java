@@ -56,7 +56,7 @@ public class JwtFilter extends OncePerRequestFilter {
         } else {
           token = authorizingToken;
         }
-          userName = jwtUtil.extractUsername(token);
+        userName = jwtUtil.extractUsername(token);
       }
     } catch (ExpiredJwtException ex) {
       response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -69,7 +69,8 @@ public class JwtFilter extends OncePerRequestFilter {
       }
 
       if (jwtUtil.validateToken(token, person.get())) {
-        userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr());
+        userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(),
+            request.getHeader("User-Agent"));
         final JwtPerson authenticationToken = new JwtPerson(person.get(),
             person.get().getAuthorities());
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
