@@ -9,14 +9,14 @@ import org.springframework.context.annotation.Configuration;
 public class CaptchaConfiguration {
 
   @Value("${sublinks.settings.captcha.max_captchas}")
-  private final long maxCaptchas = 100;
+  private long maxCaptchas;
 
   @Value("${sublinks.settings.captcha.rate}")
-  private final long rate = 15 * 60;
+  private long rate;
 
   @Value("${sublinks.settings.captcha.clearing_rate}")
-  private final long clearingRate = 15 * 60;
+  private long clearingRate;
 
   @Value("${sublinks.settings.captcha.clearing_older_than}")
-  private final long clearingCaptchaOlderThan = 15 * 60;
+  private long clearingCaptchaOlderThan;
 }
