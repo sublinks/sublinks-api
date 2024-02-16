@@ -11,4 +11,10 @@ public class UserDataConfig {
 
   @Value("${sublinks.save_user_ips}")
   private boolean saveUserIps;
+
+  @Value("${sublinks.settings.userdata.clear_rate}")
+  private long clearRate;
+
+  @Value("${sublinks.settings.userdata.clear_older_than}")
+  private long clearOlderThan;
 }
