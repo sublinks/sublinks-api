@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
@@ -109,6 +110,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Post.PostBuilder postBuilder = Post.builder().instance(localInstanceContext.instance())
         .community(community).language(language.get()).title(createPostForm.name())
+        .removedState(RemovedState.NOT_REMOVED)
         .titleSlug(slugUtil.uniqueSlug(createPostForm.name())).postBody(createPostForm.body())
         .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()));
 
