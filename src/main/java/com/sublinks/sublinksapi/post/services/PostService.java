@@ -110,7 +110,7 @@ public class PostService {
       final boolean removed) {
 
     postRepository.allPostsByCommunityAndPersonAndRemoved(community, person,
-            List.of(removed ? RemovedState.REMOVED_BY_COMMUNITY : RemovedState.NOT_REMOVED))
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_COMMUNITY))
         .forEach(post -> {
           post.setRemovedState(
               removed ? RemovedState.REMOVED_BY_COMMUNITY : RemovedState.NOT_REMOVED);
@@ -122,7 +122,7 @@ public class PostService {
   public void removeAllPostsFromUser(final Person person, final boolean removed) {
 
     postRepository.allPostsByPersonAndRemoved(person,
-            List.of(removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED))
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_INSTANCE))
         .forEach(post -> {
           post.setRemovedState(
               removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED);
