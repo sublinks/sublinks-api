@@ -11,12 +11,14 @@ import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
 import com.sublinks.sublinksapi.post.events.PostUpdatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,18 +109,24 @@ public class PostService {
   public void removeAllPostsFromCommunityAndUser(final Community community, final Person person,
       final boolean removed) {
 
-    postRepository.allPostsByCommunityAndPerson(community, person).forEach(post -> {
-      post.setRemoved(removed);
-      postRepository.save(post);
-    });
+    postRepository.allPostsByCommunityAndPersonAndRemoved(community, person,
+            List.of(removed ? RemovedState.REMOVED_BY_COMMUNITY : RemovedState.NOT_REMOVED))
+        .forEach(post -> {
+          post.setRemovedState(
+              removed ? RemovedState.REMOVED_BY_COMMUNITY : RemovedState.NOT_REMOVED);
+          postRepository.save(post);
+        });
   }
 
   @Transactional
   public void removeAllPostsFromUser(final Person person, final boolean removed) {
 
-    postRepository.allPostsByPerson(person).forEach(post -> {
-      post.setRemoved(removed);
-      postRepository.save(post);
-    });
+    postRepository.allPostsByPersonAndRemoved(person,
+            List.of(removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED))
+        .forEach(post -> {
+          post.setRemovedState(
+              removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED);
+          postRepository.save(post);
+        });
   }
 }
