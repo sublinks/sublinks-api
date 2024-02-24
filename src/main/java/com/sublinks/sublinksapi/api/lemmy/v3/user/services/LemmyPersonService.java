@@ -44,7 +44,7 @@ public class LemmyPersonService {
 
     Collection<PostView> postViews = new ArrayList<>();
 
-    postRepository.allPostsByPerson(person).forEach(post -> {
+    postRepository.allPostsByPersonAndRemoved(person, null).forEach(post -> {
       postViews.add(lemmyPostService.postViewFromPost(post, person));
     });
 
@@ -70,6 +70,7 @@ public class LemmyPersonService {
 
     Collection<CommentView> commentViews = new ArrayList<>();
 
+    // @TODO: Fix this?!???
 //    person.getComments().forEach(
 //            comment -> commentViews.add(lemmyCommentService.createCommentView(comment, person)));
 

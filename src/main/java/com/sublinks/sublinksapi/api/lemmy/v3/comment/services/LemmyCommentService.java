@@ -36,18 +36,14 @@ public class LemmyCommentService {
 
 
   @NonNull
-  public CommentView createCommentView(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment,
-      final com.sublinks.sublinksapi.person.dto.Person person
-  ) {
+  public CommentView createCommentView(final com.sublinks.sublinksapi.comment.dto.Comment comment,
+      final com.sublinks.sublinksapi.person.dto.Person person) {
 
     return commentViewBuilder(comment, person).build();
   }
 
   @NonNull
-  public CommentView createCommentView(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment
-  ) {
+  public CommentView createCommentView(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
 
     return commentViewBuilder(comment).build();
   }
@@ -55,18 +51,15 @@ public class LemmyCommentService {
   @NonNull
   private CommentView.CommentViewBuilder commentViewBuilder(
       final com.sublinks.sublinksapi.comment.dto.Comment comment,
-      final com.sublinks.sublinksapi.person.dto.Person person
-  ) {
+      final com.sublinks.sublinksapi.person.dto.Person person) {
 
     CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
 
     final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
-        person, comment.getCommunity()
-    );
+        person, comment.getCommunity());
     final int personVote = commentLikeService.getPersonCommentVote(person, comment);
 
-    commentView.subscribed(subscribedType)
-        .saved(false)// @todo check if saved
+    commentView.subscribed(subscribedType).saved(false)// @todo check if saved
         .my_vote(personVote);
 
     return commentView;
@@ -96,14 +89,9 @@ public class LemmyCommentService {
     final boolean isBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         comment.getCommunity(), LinkPersonCommunityType.banned);
 
-    return CommentView.builder()
-        .comment(lemmyComment)
-        .creator(lemmyCreator)
-        .community(lemmyCommunity)
-        .post(lemmyPost)
-        .counts(lemmyCommentAggregates)
-        .creator_banned_from_community(isBannedFromCommunity)
-        .creator_blocked(false)
+    return CommentView.builder().comment(lemmyComment).creator(lemmyCreator)
+        .community(lemmyCommunity).post(lemmyPost).counts(lemmyCommentAggregates)
+        .creator_banned_from_community(isBannedFromCommunity).creator_blocked(false)
         .creator_is_moderator(false) // @todo check if creator is moderator
         .creator_is_admin(false); // @todo check if creator is admin
   }

@@ -85,29 +85,29 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.INSTANCE_BAN_USER, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-            "not_an_admin"));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_BAN_USER,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    personToBan.setRole(roleAuthorizingService.getBannedRole());
-
-    if (banPersonForm.remove_data()) {
-      postService.removeAllPostsFromUser(personToBan, true);
-      commentService.removeAllCommentsFromUser(personToBan, true);
+    if (banPersonForm.ban()) {
+      personToBan.setRole(roleAuthorizingService.getBannedRole());
+      if (banPersonForm.remove_data()) {
+        postService.removeAllPostsFromUser(personToBan, true);
+        commentService.removeAllCommentsFromUser(personToBan, true);
+      }
+    } else {
+      postService.removeAllPostsFromUser(personToBan, false);
+      commentService.removeAllCommentsFromUser(personToBan, false);
+      personToBan.setRole(roleAuthorizingService.getUserRole());
     }
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModBan)
-        .banned(banPersonForm.ban())
-        .entityId(personToBan.getId())
-        .instance(personToBan.getInstance())
-        .moderationPersonId(person.getId())
-        .otherPersonId(personToBan.getId())
-        .reason(banPersonForm.reason())
+    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModBan)
+        .banned(banPersonForm.ban()).entityId(personToBan.getId())
+        .instance(personToBan.getInstance()).moderationPersonId(person.getId())
+        .otherPersonId(personToBan.getId()).reason(banPersonForm.reason())
         .expires(banPersonForm.expires() == null ? null : new Date(banPersonForm.expires() * 1000L))
         .build();
     moderationLogService.createModerationLog(moderationLog);
@@ -124,9 +124,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.USER_BLOCK, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-            "not_an_admin"));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.USER_BLOCK,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     return BlockPersonResponse.builder().build();
   }
@@ -143,8 +142,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
         Set.of(RolePermission.REPORT_INSTANCE_READ, RolePermission.REPORT_COMMUNITY_READ),
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-            "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final GetReportCountResponse.GetReportCountResponseBuilder builder = GetReportCountResponse.builder();
 
@@ -209,10 +207,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.INSTANCE_REMOVE_ADMIN,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-            "not_an_admin"));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_REMOVE_ADMIN,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     if (roleAuthorizingService.getAdmins().size() == 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_leave_last_admin");
@@ -221,18 +217,12 @@ public class UserModActionsController extends AbstractLemmyApiController {
     person.setRole(roleAuthorizingService.getUserRole());
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModAdd)
-        .entityId(person.getId())
-        .removed(true)
-        .instance(localInstanceContext.instance())
-        .moderationPersonId(person.getId())
-        .otherPersonId(person.getId())
-        .build();
+    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModAdd)
+        .entityId(person.getId()).removed(true).instance(localInstanceContext.instance())
+        .moderationPersonId(person.getId()).otherPersonId(person.getId()).build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return GetSiteResponse.builder()
-        .version("0.19.0") // @todo grab this from config?
+    return GetSiteResponse.builder().version("0.19.0") // @todo grab this from config?
         .taglines(announcementRepository.findAll().stream()
             .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
         .site_view(lemmySiteService.getSiteView())
