@@ -149,12 +149,8 @@ public class CommentService {
   public void removeAllCommentsFromUser(final Person person, final boolean removed) {
 
     commentRepository.allCommentsByPersonAndRemoved(person,
-            List.of(removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED))
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_INSTANCE))
         .forEach(comment -> {
-          if (comment.getRemovedState() == RemovedState.REMOVED_BY_COMMUNITY
-              || comment.getRemovedState() == RemovedState.REMOVED) {
-            return;
-          }
           comment.setRemovedState(
               removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED);
           commentRepository.save(comment);
