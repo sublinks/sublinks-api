@@ -5,9 +5,11 @@ import com.sublinks.sublinksapi.comment.dto.CommentLike;
 import com.sublinks.sublinksapi.comment.events.CommentLikeCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentLikeUpdatedEvent;
 import com.sublinks.sublinksapi.comment.events.CommentLikeUpdatedPublisher;
+import com.sublinks.sublinksapi.comment.models.CommentLikeSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentLikeRepository;
 import com.sublinks.sublinksapi.person.dto.Person;
 
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -26,8 +28,7 @@ public class CommentLikeService {
    *
    * @param person  The person whose vote is being queried.
    * @param comment The comment for which the vote is being queried.
-   * @return An integer representing the vote: 1 for an like, -1 for a dislike,
-   *         and 0 if neutral.
+   * @return An integer representing the vote: 1 for an like, -1 for a dislike, and 0 if neutral.
    */
   @NonNull
   public int getPersonCommentVote(final Person person, final Comment comment) {
@@ -51,7 +52,7 @@ public class CommentLikeService {
 
   /**
    * Creates or updates a dislike for a given comment by a specific person.
-   * 
+   *
    * @param comment The comment to be disliked.
    * @param person  The person who is disliking the comment.
    */
@@ -74,19 +75,26 @@ public class CommentLikeService {
   }
 
   /**
-   * Retrieves a {@link CommentLike} instance for a specific comment and person,
-   * if it
-   * exists.
+   * Retrieves a {@link CommentLike} instance for a specific comment and person, if it exists.
    *
    * @param comment The comment in question.
    * @param person  The person in question.
-   * @return An Optional containing the CommentLike if it exists, or empty
-   *         otherwise.
+   * @return An Optional containing the CommentLike if it exists, or empty otherwise.
    */
   @NonNull
   public Optional<CommentLike> getCommentLike(final Comment comment, final Person person) {
 
     return commentLikeRepository.getCommentLikeByPersonAndComment(person, comment);
+  }
+
+  @NonNull
+  public List<CommentLike> getCommentLikes(final Comment comment, final int page,
+      final int perPage) {
+
+    return commentLikeRepository.allCommentLikesBySearchCriteria(
+        CommentLikeSearchCriteria.builder().commentId(comment.getId()).perPage(perPage).page(page)
+            .build());
+
   }
 
   @NonNull
@@ -103,14 +111,8 @@ public class CommentLikeService {
 
   private void createCommentLike(final Comment comment, final Person person, final int score) {
 
-    final CommentLike commentLike = CommentLike.builder()
-        .comment(comment)
-        .post(comment.getPost())
-        .person(person)
-        .isUpVote(score == 1)
-        .isDownVote(score == -1)
-        .score(score)
-        .build();
+    final CommentLike commentLike = CommentLike.builder().comment(comment).post(comment.getPost())
+        .person(person).isUpVote(score == 1).isDownVote(score == -1).score(score).build();
     commentLikeRepository.save(commentLike);
     commentLikeCreatedPublisher.publish(commentLike);
   }

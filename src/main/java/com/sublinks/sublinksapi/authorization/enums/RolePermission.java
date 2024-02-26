@@ -63,10 +63,12 @@ public enum RolePermission {
   USER_BLOCK("user", AuthorizeAction.BLOCK),
 
   // Vote permissions
+  POST_LIST_VOTES("post-upvote", AuthorizeAction.READ),
   POST_UPVOTE("post-upvote", AuthorizeAction.CREATE),
   POST_DOWNVOTE("post-downvote", AuthorizeAction.CREATE),
   POST_NEUTRAL("post-neutral", AuthorizeAction.CREATE),
 
+  COMMENT_LIST_VOTES("comment-upvote", AuthorizeAction.READ),
   COMMENT_UPVOTE("comment-upvote", AuthorizeAction.CREATE),
   COMMENT_DOWNVOTE("comment-downvote", AuthorizeAction.CREATE),
   COMMENT_NEUTRAL("comment-neutral", AuthorizeAction.CREATE),
