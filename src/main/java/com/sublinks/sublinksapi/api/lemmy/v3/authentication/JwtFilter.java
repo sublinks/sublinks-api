@@ -34,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
       final HttpServletResponse response,
       final FilterChain filterChain) throws ServletException, IOException {
 
-    String authorizingToken = request.getHeader("Authorization");
+    String authorizingToken = request.getHeader("authorization");
 
     if (authorizingToken == null && request.getCookies() != null) {
       for (Cookie cookie : request.getCookies()) {
