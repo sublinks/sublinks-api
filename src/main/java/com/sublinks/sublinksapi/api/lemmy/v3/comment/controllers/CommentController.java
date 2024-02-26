@@ -299,8 +299,8 @@ public class CommentController extends AbstractLemmyApiController {
   @Operation(summary = "Get Votes on a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommentLikesResponse.class))})})
-  @GetMapping("like")
-  ListCommentLikesResponse getLikes(@Valid final ListCommentLikes listCommentLikesForm,
+  @GetMapping("like/list")
+  ListCommentLikesResponse listLikes(@Valid final ListCommentLikes listCommentLikesForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);

@@ -280,7 +280,7 @@ public class PostController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @GetMapping("like/list")
-  ListPostLikesResponse getLikes(@Valid ListPostLikes listPostLikesForm,
+  ListPostLikesResponse listLikes(@Valid ListPostLikes listPostLikesForm,
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
