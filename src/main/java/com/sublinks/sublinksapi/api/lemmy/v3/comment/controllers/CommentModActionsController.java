@@ -29,6 +29,7 @@ import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import io.jsonwebtoken.lang.Collections;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -84,22 +85,17 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    comment.setRemoved(removeCommentForm.removed());
+    comment.setRemovedState(
+        removeCommentForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
 
     commentService.updateComment(comment);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModRemoveComment)
-        .removed(removeCommentForm.removed())
-        .entityId(comment.getId())
-        .commentId(comment.getId())
-        .postId(comment.getPost().getId())
-        .communityId(comment.getCommunity().getId())
-        .instance(comment.getPost().getInstance())
-        .otherPersonId(comment.getPerson().getId())
-        .moderationPersonId(person.getId())
-        .build();
+        .actionType(ModlogActionType.ModRemoveComment).removed(removeCommentForm.removed())
+        .entityId(comment.getId()).commentId(comment.getId()).postId(comment.getPost().getId())
+        .communityId(comment.getCommunity().getId()).instance(comment.getPost().getInstance())
+        .otherPersonId(comment.getPerson().getId()).moderationPersonId(person.getId()).build();
     moderationLogService.createModerationLog(moderationLog);
 
     return CommentResponse.builder()
@@ -179,8 +175,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
     roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Set.of(RolePermission.REPORT_COMMUNITY_READ,
-            RolePermission.REPORT_INSTANCE_READ),
+        Set.of(RolePermission.REPORT_COMMUNITY_READ, RolePermission.REPORT_INSTANCE_READ),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
