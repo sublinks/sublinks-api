@@ -5,9 +5,12 @@ import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -79,8 +82,9 @@ public class Comment implements Serializable {
   @Column(nullable = false, name = "is_deleted")
   private boolean isDeleted;
 
-  @Column(nullable = false, name = "is_removed")
-  private boolean isRemoved;
+  @Column(nullable = false, name = "removed_state")
+  @Enumerated(EnumType.STRING)
+  private RemovedState removedState;
 
   @Column(nullable = false, name = "is_local")
   private boolean isLocal;
@@ -129,5 +133,10 @@ public class Comment implements Serializable {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
         .getPersistentClass().hashCode() : getClass().hashCode();
+  }
+
+  public boolean isRemoved() {
+
+    return this.removedState != RemovedState.NOT_REMOVED;
   }
 }
