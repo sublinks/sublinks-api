@@ -280,15 +280,14 @@ public class PostController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @GetMapping("like/list")
-  ListPostLikesResponse listLikes(@Valid ListPostLikes listPostLikesForm,
-      JwtPerson principal) {
+  ListPostLikesResponse listLikes(@Valid ListPostLikes listPostLikesForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.POST_LIST_VOTES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final Post post = postRepository.findById(listPostLikesForm.post_id())
+    final Post post = postRepository.findById((long) listPostLikesForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     List<PostLike> likes = postLikeService.getPostLikes(post, 1, 20);

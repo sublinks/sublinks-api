@@ -4,7 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record ListCommentLikes(
-    Long comment_id,
+    Integer comment_id,
     Integer limit,
     Integer page
 ) {

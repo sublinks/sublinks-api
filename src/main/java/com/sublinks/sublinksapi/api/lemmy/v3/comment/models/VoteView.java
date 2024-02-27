@@ -7,7 +7,7 @@ import java.util.List;
 @Builder
 public record VoteView(
     Person creator,
-    int score
+    Integer score
 ) {
 
 }
