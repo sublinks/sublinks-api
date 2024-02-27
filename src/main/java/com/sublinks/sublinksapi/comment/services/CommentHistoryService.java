@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.post.dto.PostHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -22,15 +23,21 @@ public class CommentHistoryService {
 
   public CommentHistory getCommentHistory(final Comment comment) {
 
-    return CommentHistory.builder().comment(comment).content(comment.getCommentBody())
-        .removedState(comment.getRemovedState()).isDeleted(comment.isDeleted()).build();
+    return CommentHistory.builder()
+        .comment(comment)
+        .content(comment.getCommentBody())
+        .removedState(comment.getRemovedState())
+        .isDeleted(comment.isDeleted())
+        .build();
   }
 
   public boolean isDifferent(CommentHistory commentHistory, Comment comment) {
 
-    return !commentHistory.getContent().equals(comment.getCommentBody())
-        && !commentHistory.getIsDeleted().equals(comment.isDeleted())
-        && commentHistory.getRemovedState().equals(comment.getRemovedState());
+    final CommentHistory commentHistoryNew = getCommentHistory(comment);
+
+    return commentHistory.getIsDeleted() != commentHistoryNew.getIsDeleted()
+        || commentHistory.getRemovedState() != commentHistoryNew.getRemovedState()
+        || !Objects.equals(commentHistory.getContent(), commentHistoryNew.getContent());
   }
 
 
@@ -50,6 +57,13 @@ public class CommentHistoryService {
       commentHistoryRepository.save(newPostHistory);
       commentHistoryCreatedPublisher.publish(newPostHistory);
     }
-
   }
+
+  @Transactional
+  public int deleteAllByComment(Comment comment) {
+
+    return commentHistoryRepository.deleteAllByComment(comment);
+  }
+
+
 }
