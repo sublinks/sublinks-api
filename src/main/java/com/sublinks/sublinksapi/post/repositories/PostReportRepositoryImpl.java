@@ -15,12 +15,13 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@AllArgsConstructor
 public class PostReportRepositoryImpl implements PostReportRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public List<PostReport> allPostReportsBySearchCriteria(

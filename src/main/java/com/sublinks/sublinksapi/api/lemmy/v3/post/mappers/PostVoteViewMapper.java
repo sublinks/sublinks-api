@@ -11,14 +11,12 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = PersonMapper.class)
 public interface PostVoteViewMapper extends
     Converter<com.sublinks.sublinksapi.post.dto.PostLike, VoteView> {
 
-  PersonMapper personMapper = Mappers.getMapper(PersonMapper.class);
-
   @Override
-  @Mapping(target = "creator", expression = "java(personMapper.convert(postLike.getPerson()))")
+  @Mapping(target = "creator", source = "postLike.person")
   @Mapping(target = "score", expression = "java(postLike.isUpVote() ? 1 : -1)")
   VoteView convert(@Nullable com.sublinks.sublinksapi.post.dto.PostLike postLike);
 }

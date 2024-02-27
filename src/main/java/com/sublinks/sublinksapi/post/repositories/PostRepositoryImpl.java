@@ -25,12 +25,13 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.validation.constraints.Null;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@AllArgsConstructor
 public class PostRepositoryImpl implements PostRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public List<Post> allPostsBySearchCriteria(final PostSearchCriteria postSearchCriteria) {
