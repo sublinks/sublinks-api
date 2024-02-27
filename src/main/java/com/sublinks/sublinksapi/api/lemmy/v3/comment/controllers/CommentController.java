@@ -308,7 +308,7 @@ public class CommentController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.COMMENT_LIST_VOTES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final Comment comment = commentRepository.findById(listCommentLikesForm.comment_id())
+    final Comment comment = commentRepository.findById((long) listCommentLikesForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     List<CommentLike> likes = commentLikeService.getCommentLikes(comment,
         listCommentLikesForm.page(), listCommentLikesForm.limit());
