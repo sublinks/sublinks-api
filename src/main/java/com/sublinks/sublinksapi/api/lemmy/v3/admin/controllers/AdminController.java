@@ -21,6 +21,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrati
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
+import com.sublinks.sublinksapi.comment.services.CommentHistoryService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -29,6 +31,11 @@ import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus
 import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
+import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
+import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.post.services.PostHistoryService;
+import com.sublinks.sublinksapi.post.services.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -61,9 +68,10 @@ public class AdminController extends AbstractLemmyApiController {
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
   private final RoleAuthorizingService roleAuthorizingService;
-
+  private final PostHistoryRepository postHistoryRepository;
+  private final CommentHistoryRepository commentHistoryRepository;
   private final LemmyPersonService lemmyPersonService;
-
+  private final PostRepository postRepository;
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -186,6 +194,14 @@ public class AdminController extends AbstractLemmyApiController {
         RolePermission.PURGE_USER,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
+    final Person personToPurge = personRepository.findById((long) purgePersonForm.person_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    final int removedPostHistory = postHistoryRepository.deleteAllByCreator(personToPurge);
+    final int removedCommentHistory = commentHistoryRepository.deleteAllByCreator(personToPurge);
+    // @todo: Log purged history amount?
+    // @todo: Implement purging
+
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
 
@@ -216,6 +232,10 @@ public class AdminController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
         RolePermission.PURGE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final Post postToPurge = postRepository.getReferenceById((long) purgePostForm.post_id());
+
+    final int removedPostHistory = postHistoryRepository.deleteAllByPost();
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
