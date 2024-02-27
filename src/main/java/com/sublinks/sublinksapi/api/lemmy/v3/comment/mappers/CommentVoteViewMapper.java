@@ -9,14 +9,12 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = PersonMapper.class)
 public interface CommentVoteViewMapper extends
     Converter<com.sublinks.sublinksapi.comment.dto.CommentLike, VoteView> {
 
-  PersonMapper personMapper = Mappers.getMapper(PersonMapper.class);
-
   @Override
-  @Mapping(target = "creator", expression = "java(personMapper.convert(commentLike.getPerson()))")
+  @Mapping(target = "creator", source = "commentLike.person")
   @Mapping(target = "score", expression = "java(commentLike.isUpVote() ? 1 : -1)")
   VoteView convert(@Nullable com.sublinks.sublinksapi.comment.dto.CommentLike commentLike);
 }

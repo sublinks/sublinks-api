@@ -131,9 +131,15 @@ public class CommentController extends AbstractLemmyApiController {
       throw new RuntimeException("No language selected");
     }
 
-    final Comment comment = Comment.builder().person(person).isLocal(true).activityPubId("")
-        .removedState(RemovedState.NOT_REMOVED).post(post).community(post.getCommunity())
-        .language(language.get()).build();
+    final Comment comment = Comment.builder()
+        .person(person)
+        .isLocal(true)
+        .activityPubId("")
+        .removedState(RemovedState.NOT_REMOVED)
+        .post(post)
+        .community(post.getCommunity())
+        .language(language.get())
+        .build();
     boolean shouldReport = false;
     try {
       comment.setCommentBody(slurFilterService.censorText(createCommentForm.content()));
@@ -157,14 +163,18 @@ public class CommentController extends AbstractLemmyApiController {
     commentLikeService.updateOrCreateCommentLikeLike(comment, person);
 
     if (shouldReport) {
-      commentReportService.createCommentReport(
-          CommentReport.builder().comment(comment).creator(person)
-              .originalContent(comment.getCommentBody())
-              .reason("AUTOMATED: Comment creation triggered slur filter").build());
+      commentReportService.createCommentReport(CommentReport.builder()
+          .comment(comment)
+          .creator(person)
+          .originalContent(comment.getCommentBody())
+          .reason("AUTOMATED: Comment creation triggered slur filter")
+          .build());
     }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -207,14 +217,18 @@ public class CommentController extends AbstractLemmyApiController {
     commentService.updateComment(comment);
 
     if (shouldReport) {
-      commentReportService.createCommentReport(
-          CommentReport.builder().comment(comment).creator(person)
-              .originalContent(comment.getCommentBody())
-              .reason("AUTOMATED: Comment update triggered slur filter").build());
+      commentReportService.createCommentReport(CommentReport.builder()
+          .comment(comment)
+          .creator(person)
+          .originalContent(comment.getCommentBody())
+          .reason("AUTOMATED: Comment update triggered slur filter")
+          .build());
     }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -259,7 +273,9 @@ public class CommentController extends AbstractLemmyApiController {
     }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -292,7 +308,9 @@ public class CommentController extends AbstractLemmyApiController {
       commentLikeService.updateOrCreateCommentLikeNeutral(comment, person);
     }
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -354,7 +372,8 @@ public class CommentController extends AbstractLemmyApiController {
         ListingType.class);
 
     final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria.builder()
-        .listingType(listingType).commentSortType(sortType);
+        .listingType(listingType)
+        .commentSortType(sortType);
 
     if (post_id.isPresent()) {
       final Optional<Post> post = postRepository.findById((long) post_id.get());
@@ -410,8 +429,12 @@ public class CommentController extends AbstractLemmyApiController {
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
 
-    final CommentReport commentReport = CommentReport.builder().comment(comment).creator(person)
-        .originalContent(comment.getCommentBody()).reason(createCommentReportForm.reason()).build();
+    final CommentReport commentReport = CommentReport.builder()
+        .comment(comment)
+        .creator(person)
+        .originalContent(comment.getCommentBody())
+        .reason(createCommentReportForm.reason())
+        .build();
 
     commentReportService.createCommentReport(commentReport);
 
