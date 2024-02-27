@@ -9,15 +9,16 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.CriteriaUpdate;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+@AllArgsConstructor
 public class CommentHistoryRepositoryImpl implements CommentHistoryRepositoryExtended {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   public int deleteAllByCreator(@NonNull Person Creator) {
 
