@@ -777,9 +777,9 @@ CREATE TABLE `post_history`
   `title`         TEXT                                                                          NOT NULL,
   `body`          TEXT                                                                          NOT NULL,
   `url`           TEXT                                                                          NULL,
-  'is_nsfw'       TINYINT                                                                       NOT NULL,
-  'is_locked'     TINYINT                                                                       NOT NULL,
-  'is_deleted'    TINYINT                                                                       NOT NULL,
+  `is_nsfw`       TINYINT                                                                       NOT NULL,
+  `is_locked`     TINYINT                                                                       NOT NULL,
+  `is_deleted`    TINYINT                                                                       NOT NULL,
   `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
   `created_at`    TIMESTAMP(3)                                                                           DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
@@ -793,8 +793,8 @@ CREATE TABLE `comment_history`
 (
   `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
   `comment_id`    BIGINT                                                                        NOT NULL,
-  `content`          TEXT                                                                          NOT NULL,
-  'is_deleted'    TINYINT                                                                       NOT NULL,
+  `content`       TEXT                                                                          NOT NULL,
+  `is_deleted`    TINYINT                                                                       NOT NULL,
   `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
   `created_at`    TIMESTAMP(3)                                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB

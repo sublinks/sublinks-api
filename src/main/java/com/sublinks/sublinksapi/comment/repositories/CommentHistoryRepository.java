@@ -16,5 +16,5 @@ public interface CommentHistoryRepository extends JpaRepository<CommentHistory, 
 
   Optional<CommentHistory> findFirstByCommentOrderByCreatedAtDesc(Comment post);
 
-  void deleteAllByComment(Comment comment);
+  int deleteAllByComment(Comment comment);
 }

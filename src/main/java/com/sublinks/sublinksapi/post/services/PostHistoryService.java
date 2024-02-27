@@ -8,6 +8,8 @@ import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -20,18 +22,29 @@ public class PostHistoryService {
 
   public PostHistory getPostHistory(final Post post) {
 
-    return PostHistory.builder().post(post).title(post.getTitle()).body(post.getPostBody())
-        .url(post.getLinkUrl()).removedState(post.getRemovedState()).isDeleted(post.isDeleted())
-        .isLocked(post.isLocked()).isNsfw(post.isNsfw()).build();
+    return PostHistory.builder()
+        .post(post)
+        .title(post.getTitle())
+        .body(post.getPostBody())
+        .url(post.getLinkUrl())
+        .removedState(post.getRemovedState())
+        .isDeleted(post.isDeleted())
+        .isLocked(post.isLocked())
+        .isNsfw(post.isNsfw())
+        .build();
   }
 
   public boolean isDifferent(PostHistory postHistory, Post post) {
 
-    return !postHistory.getTitle().equals(post.getTitle()) && !postHistory.getBody()
-        .equals(post.getPostBody()) && !postHistory.getUrl().equals(post.getLinkUrl())
-        && !postHistory.getRemovedState().equals(post.getRemovedState())
-        && postHistory.getIsDeleted() != post.isDeleted()
-        && postHistory.getIsNsfw() != post.isNsfw();
+    final PostHistory postHistoryNew = getPostHistory(post);
+
+    return postHistory.getIsNsfw() != postHistoryNew.getIsNsfw()
+        || postHistory.getIsLocked() != postHistoryNew.getIsLocked()
+        || postHistory.getIsDeleted() != postHistoryNew.getIsDeleted()
+        || postHistory.getRemovedState() != postHistoryNew.getRemovedState() || !Objects.equals(
+        postHistory.getUrl(), postHistoryNew.getUrl()) || !Objects.equals(postHistory.getTitle(),
+        postHistoryNew.getTitle()) || !Objects.equals(postHistory.getBody(),
+        postHistoryNew.getBody());
   }
 
 
@@ -51,5 +64,11 @@ public class PostHistoryService {
       postHistoryCreatedPublisher.publish(newPostHistory);
     }
 
+  }
+
+  @Transactional
+  public int deleteAllByPost(Post post) {
+
+    return postHistoryRepository.deleteAllByPost(post);
   }
 }
