@@ -22,14 +22,15 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
+@AllArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public List<Comment> allCommentsBySearchCriteria(CommentSearchCriteria commentSearchCriteria) {

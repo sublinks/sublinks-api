@@ -14,12 +14,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@AllArgsConstructor
 public class RoleSearchRepositoryImpl implements RoleSearchRepository {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public boolean existsByPersonIdAndRolePermissionWithin(Long id,

@@ -10,16 +10,17 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
+@AllArgsConstructor
 public class CommentLikeRepositoryImpl implements CommentLikeRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   public List<CommentLike> allCommentLikesBySearchCriteria(
       CommentLikeSearchCriteria commentLikeSearchCriteria) {
