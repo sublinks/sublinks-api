@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.post.services;
 
+import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.config.PostHistoryConfig;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostHistory;
@@ -70,5 +71,10 @@ public class PostHistoryService {
   public int deleteAllByPost(Post post) {
 
     return postHistoryRepository.deleteAllByPost(post);
+  }
+
+  @Transactional
+  public int deleteAllByCreator(Person person) {
+    return postHistoryRepository.deleteAllByCreator(person);
   }
 }
