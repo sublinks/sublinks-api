@@ -37,7 +37,6 @@ import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostHistoryService;
-import com.sublinks.sublinksapi.post.services.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -202,7 +201,7 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/person")
-  PurgeItemResponse purgePerson(@Valid final PurgePerson purgePersonForm,
+  PurgeItemResponse purgePerson(@Valid @RequestBody final PurgePerson purgePersonForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
@@ -213,8 +212,8 @@ public class AdminController extends AbstractLemmyApiController {
     final Person personToPurge = personRepository.findById((long) purgePersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    final int removedPostHistory = postHistoryRepository.deleteAllByCreator(personToPurge);
-    final int removedCommentHistory = commentHistoryRepository.deleteAllByCreator(personToPurge);
+    final int removedPostHistory = postHistoryService.deleteAllByCreator(personToPurge);
+    final int removedCommentHistory = commentHistoryService.deleteAllByCreator(personToPurge);
     // @todo: Log purged history amount?
     // @todo: Implement purging
 

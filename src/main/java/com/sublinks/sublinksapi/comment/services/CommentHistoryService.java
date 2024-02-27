@@ -5,8 +5,7 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentHistory;
 import com.sublinks.sublinksapi.comment.events.CommentHistoryCreatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostHistory;
+import com.sublinks.sublinksapi.person.dto.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -65,5 +64,9 @@ public class CommentHistoryService {
     return commentHistoryRepository.deleteAllByComment(comment);
   }
 
+  @Transactional
+  public int deleteAllByCreator(Person creator) {
 
+    return commentHistoryRepository.deleteAllByCreator(creator);
+  }
 }
