@@ -50,7 +50,7 @@ public class SlurFilterService {
       return null;
     }
 
-    return slurFilters.stream().filter((slur) -> text.matches(slur.getSlurRegex()))
+    return slurFilters.stream().filter((slur) -> Pattern.compile(slur.getSlurRegex()).matcher(text).find())
         .max(Comparator.comparing(SlurFilter::getSlurActionType)).orElse(null);
   }
 
