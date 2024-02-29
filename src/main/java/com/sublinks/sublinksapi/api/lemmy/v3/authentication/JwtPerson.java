@@ -13,7 +13,7 @@ public class JwtPerson extends AbstractAuthenticationToken {
 
     super(authorities);
     this.person = person;
-    setAuthenticated(false);
+    setAuthenticated(true);
   }
 
   @Override

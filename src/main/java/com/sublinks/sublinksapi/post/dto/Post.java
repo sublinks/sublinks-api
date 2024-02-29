@@ -65,6 +65,8 @@ public class Post {
   private PostAggregate postAggregate;
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
   private List<PostLike> postLikes;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<PostHistory> postHistory;
   /**
    * Attributes.
    */
