@@ -21,6 +21,10 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrati
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.comment.services.CommentHistoryService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -29,6 +33,10 @@ import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus
 import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
+import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
+import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.post.services.PostHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -61,9 +69,13 @@ public class AdminController extends AbstractLemmyApiController {
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
   private final RoleAuthorizingService roleAuthorizingService;
-
+  private final PostHistoryRepository postHistoryRepository;
+  private final PostHistoryService postHistoryService;
+  private final CommentHistoryRepository commentHistoryRepository;
+  private final CommentHistoryService commentHistoryService;
   private final LemmyPersonService lemmyPersonService;
-
+  private final PostRepository postRepository;
+  private final CommentRepository commentRepository;
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -88,14 +100,21 @@ public class AdminController extends AbstractLemmyApiController {
     personRepository.save(personToAdd);
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModAdd)
-        .entityId(personToAdd.getId()).removed(!addAdminForm.added())
-        .instance(localInstanceContext.instance()).moderationPersonId(person.getId())
-        .otherPersonId(personToAdd.getId()).build();
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModAdd)
+        .entityId(personToAdd.getId())
+        .removed(!addAdminForm.added())
+        .instance(localInstanceContext.instance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(personToAdd.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return AddAdminResponse.builder().admins(
-            roleAuthorizingService.getAdmins().stream().map(lemmyPersonService::getPersonView).toList())
+    return AddAdminResponse.builder()
+        .admins(roleAuthorizingService.getAdmins()
+            .stream()
+            .map(lemmyPersonService::getPersonView)
+            .toList())
         .build();
   }
 
@@ -112,9 +131,11 @@ public class AdminController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_REMOVE_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
-    return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(
-        (int) personRegistrationApplicationRepository.countByApplicationStatus(
-            PersonRegistrationApplicationStatus.pending)).build();
+    return GetUnreadRegistrationApplicationCountResponse.builder()
+        .registration_applications(
+            (int) personRegistrationApplicationRepository.countByApplicationStatus(
+                PersonRegistrationApplicationStatus.pending))
+        .build();
   }
 
   @Operation(summary = "List the registration applications.")
@@ -134,10 +155,11 @@ public class AdminController extends AbstractLemmyApiController {
     final List<PersonRegistrationApplication> personRegistrationApplications = personRegistrationApplicationRepository.findAllByApplicationStatus(
         PersonRegistrationApplicationStatus.pending);
 
-    return ListRegistrationApplicationsResponse.builder().registration_applications(
-        personRegistrationApplications.stream()
+    return ListRegistrationApplicationsResponse.builder()
+        .registration_applications(personRegistrationApplications.stream()
             .map(lemmyPersonRegistrationApplicationService::getPersonRegistrationApplicationView)
-            .toList()).build();
+            .toList())
+        .build();
   }
 
   @Operation(summary = "Approve a registration application.")
@@ -155,8 +177,8 @@ public class AdminController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final PersonRegistrationApplication personRegistrationApplication = personRegistrationApplicationRepository.findById(
-        (long) approveRegistrationApplicationForm.id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            (long) approveRegistrationApplicationForm.id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
             "registration_application_not_found"));
 
     personRegistrationApplication.setApplicationStatus(
@@ -168,23 +190,32 @@ public class AdminController extends AbstractLemmyApiController {
     personRegistrationApplicationService.updatePersonRegistrationApplication(
         personRegistrationApplication);
 
-    return RegistrationApplicationResponse.builder().registration_application(
-        lemmyPersonRegistrationApplicationService.getPersonRegistrationApplicationView(
-            personRegistrationApplication)).build();
+    return RegistrationApplicationResponse.builder()
+        .registration_application(
+            lemmyPersonRegistrationApplicationService.getPersonRegistrationApplicationView(
+                personRegistrationApplication))
+        .build();
   }
 
   @Operation(summary = "Purge / Delete a person from the database.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/person")
-  PurgeItemResponse purgePerson(@Valid final PurgePerson purgePersonForm,
+  PurgeItemResponse purgePerson(@Valid @RequestBody final PurgePerson purgePersonForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.PURGE_USER,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.PURGE_USER,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final Person personToPurge = personRepository.findById((long) purgePersonForm.person_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    final int removedPostHistory = postHistoryService.deleteAllByCreator(personToPurge);
+    final int removedCommentHistory = commentHistoryService.deleteAllByCreator(personToPurge);
+    // @todo: Log purged history amount?
+    // @todo: Implement purging
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -193,13 +224,12 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/community")
-  PurgeItemResponse purgeCommunity(@Valid final PurgeCommunity purgeCommunityForm,
+  PurgeItemResponse purgeCommunity(@Valid @RequestBody final PurgeCommunity purgeCommunityForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.PURGE_COMMUNITY,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.PURGE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
@@ -209,13 +239,22 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/post")
-  PurgeItemResponse purgePost(@Valid final PurgePost purgePostForm, final JwtPerson principal) {
+  PurgeItemResponse purgePost(@Valid @RequestBody final PurgePost purgePostForm,
+      final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.PURGE_POST,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.PURGE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final Post postToPurge = postRepository.getReferenceById((long) purgePostForm.post_id());
+    try {
+      final int removedPostHistory = postHistoryService.deleteAllByPost(postToPurge);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    // @todo: Log purged history amount?
+    // @todo: Implement purging
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -224,14 +263,23 @@ public class AdminController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/comment")
-  PurgeItemResponse purgeComment(@Valid final PurgeComment purgeCommentForm,
+  PurgeItemResponse purgeComment(@Valid @RequestBody final PurgeComment purgeCommentForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.PURGE_COMMENT,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.PURGE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+
+    final Comment commentToPurge = commentRepository.getReferenceById(
+        (long) purgeCommentForm.comment_id());
+    try {
+      final int removedCommentHistory = commentHistoryService.deleteAllByComment(commentToPurge);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    // @todo: Log purged history amount?
+    // @todo: Implement purging
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }

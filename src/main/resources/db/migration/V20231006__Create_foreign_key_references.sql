@@ -196,3 +196,15 @@ ALTER TABLE `role_permissions`
  */
 ALTER TABLE `people`
   ADD FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+/**
+  Post History table
+ */
+ALTER TABLE `post_history`
+  ADD FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+/**
+  Comment History table
+ */
+ALTER TABLE `comment_history`
+  ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
