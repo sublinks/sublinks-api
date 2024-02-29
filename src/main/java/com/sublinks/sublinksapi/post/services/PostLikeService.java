@@ -6,7 +6,9 @@ import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.events.PostLikeCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostLikeUpdatedEvent;
 import com.sublinks.sublinksapi.post.events.PostLikeUpdatedPublisher;
+import com.sublinks.sublinksapi.post.models.PostLikeSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostLikeRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -55,13 +57,8 @@ public class PostLikeService {
 
   private void createPostLike(final Post post, final Person person, final int score) {
 
-    final PostLike postLike = PostLike.builder()
-        .post(post)
-        .person(person)
-        .isUpVote(score == 1)
-        .isDownVote(score == -1)
-        .score(score)
-        .build();
+    final PostLike postLike = PostLike.builder().post(post).person(person).isUpVote(score == 1)
+        .isDownVote(score == -1).score(score).build();
     postLikeRepository.save(postLike);
     postLikeCreatedPublisher.publish(postLike);
   }
@@ -94,5 +91,11 @@ public class PostLikeService {
     postLike.setScore(score);
     postLikeRepository.save(postLike);
     postLikeUpdatedPublisher.publish(postLike, action);
+  }
+
+  public List<PostLike> getPostLikes(final Post post, final int page, final int perPage) {
+
+    return postLikeRepository.allPostLikesBySearchCriteria(
+        PostLikeSearchCriteria.builder().postId(post.getId()).perPage(perPage).page(page).build());
   }
 }

@@ -108,10 +108,16 @@ public class PostModActionsController extends AbstractLemmyApiController {
     postService.updatePost(post);
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModRemovePost)
-        .removed(modRemovePostForm.removed()).entityId(post.getId()).postId(post.getId())
-        .communityId(post.getCommunity().getId()).instance(post.getInstance())
-        .moderationPersonId(person.getId()).reason(modRemovePostForm.reason()).build();
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModRemovePost)
+        .removed(modRemovePostForm.removed())
+        .entityId(post.getId())
+        .postId(post.getId())
+        .communityId(post.getCommunity().getId())
+        .instance(post.getInstance())
+        .moderationPersonId(person.getId())
+        .reason(modRemovePostForm.reason())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post)).build();
@@ -149,10 +155,15 @@ public class PostModActionsController extends AbstractLemmyApiController {
     postService.updatePost(post);
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModLockPost)
-        .locked(modLockPostForm.locked()).entityId(post.getId()).postId(post.getId())
-        .communityId(post.getCommunity().getId()).instance(post.getInstance())
-        .moderationPersonId(person.getId()).build();
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModLockPost)
+        .locked(modLockPostForm.locked())
+        .entityId(post.getId())
+        .postId(post.getId())
+        .communityId(post.getCommunity().getId())
+        .instance(post.getInstance())
+        .moderationPersonId(person.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post)).build();
@@ -201,10 +212,15 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModFeaturePost).featured(post.isFeatured())
-        .featuredCommunity(post.isFeaturedInCommunity()).communityId(post.getCommunity().getId())
-        .entityId(post.getId()).postId(post.getId()).instance(post.getInstance())
-        .moderationPersonId(person.getId()).build();
+        .actionType(ModlogActionType.ModFeaturePost)
+        .featured(post.isFeatured())
+        .featuredCommunity(post.isFeaturedInCommunity())
+        .communityId(post.getCommunity().getId())
+        .entityId(post.getId())
+        .postId(post.getId())
+        .instance(post.getInstance())
+        .moderationPersonId(person.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post)).build();
@@ -246,8 +262,10 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     postReportService.updatePostReport(postReport);
 
-    return PostReportResponse.builder().post_report_view(
-        lemmyPostReportService.postReportViewFromPost(postReport, postReport.getCreator())).build();
+    return PostReportResponse.builder()
+        .post_report_view(
+            lemmyPostReportService.postReportViewFromPost(postReport, postReport.getCreator()))
+        .build();
   }
 
   @Operation(summary = "List post reports.")
@@ -276,16 +294,21 @@ public class PostModActionsController extends AbstractLemmyApiController {
           LinkPersonCommunityType.moderator));
 
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
-          PostReportSearchCriteria.builder().unresolvedOnly(
-                  listPostReportsForm.unresolved_only() == null
-                      || listPostReportsForm.unresolved_only()).perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page()).community(moderatingCommunities).build()));
+          PostReportSearchCriteria.builder()
+              .unresolvedOnly(listPostReportsForm.unresolved_only() == null
+                  || listPostReportsForm.unresolved_only())
+              .perPage(listPostReportsForm.limit())
+              .page(listPostReportsForm.page())
+              .community(moderatingCommunities)
+              .build()));
     } else {
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
-          PostReportSearchCriteria.builder().unresolvedOnly(
-                  listPostReportsForm.unresolved_only() != null
-                      && listPostReportsForm.unresolved_only()).perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page()).build()));
+          PostReportSearchCriteria.builder()
+              .unresolvedOnly(listPostReportsForm.unresolved_only() != null
+                  && listPostReportsForm.unresolved_only())
+              .perPage(listPostReportsForm.limit())
+              .page(listPostReportsForm.page())
+              .build()));
     }
 
     List<PostReportView> postReportView = new ArrayList<>();
