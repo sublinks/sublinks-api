@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.utils.BaseUrlUtil;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import java.util.ArrayList;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonService {
 
   private final KeyGeneratorUtil keyGeneratorUtil;
+  private final BaseUrlUtil baseUrlUtil;
   private final PersonRepository personRepository;
   private final PersonAggregateRepository personAggregateRepository;
   private final LocalInstanceContext localInstanceContext;
@@ -193,6 +195,10 @@ public class PersonService {
     person.setPublicKey(keys.publicKey());
     person.setPrivateKey(keys.privateKey());
     person.setLocal(true);
+    person.setEmail(person.getEmail());
+    // @todo: add email verification and send verification email on registration
+    person.setEmailVerified(localInstanceContext.instance().getInstanceConfig() == null
+        || !localInstanceContext.instance().getInstanceConfig().isRequireEmailVerification());
 
     boolean isInitialAdmin = localInstanceContext.instance().getDomain().isEmpty();
     if (isInitialAdmin) {
@@ -203,6 +209,9 @@ public class PersonService {
     } else {
       person.setRole(roleAuthorizingService.getUserRole());
     }
+
+    final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
+    person.setActorId(userActorId);
 
     person.setLinkPersonInstance(LinkPersonInstance.builder()
         .instance(localInstanceContext.instance())

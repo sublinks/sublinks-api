@@ -6,29 +6,37 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.models.LoginResponse
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.CaptchaResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Login;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordResetResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
+import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
+import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
-import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
+import com.sublinks.sublinksapi.person.dto.Captcha;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
+import com.sublinks.sublinksapi.utils.TotpUtil;
+import com.sublinks.sublinksapi.utils.models.LemmyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,8 +44,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +60,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.thymeleaf.context.Context;
 
 @RestController
 @RequiredArgsConstructor
@@ -58,12 +72,12 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonService personService;
   private final PersonRepository personRepository;
   private final LocalInstanceContext localInstanceContext;
-  private final InstanceConfigRepository instanceConfigRepository;
-  private final InstanceConfigService instanceConfigService;
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
+  private final CaptchaService captchaService;
   private final RoleAuthorizingService roleAuthorizingService;
-
+  private final ConversionService conversionService;
+  private final EmailService emailService;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -71,14 +85,27 @@ public class UserAuthController extends AbstractLemmyApiController {
           "JWT will be empty if registration "
               + "requires email verification or application approval."))}),
       @ApiResponse(responseCode = "400", description = "Passwords do not match.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))}),
+      @ApiResponse(responseCode = "400", description = "Username is taken.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))}),
+      @ApiResponse(responseCode = "400", description = "Captcha is incorrect.", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LemmyException.class))}),
+      @ApiResponse(responseCode = "400", description = "Person is blocked by slur filter.", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("register")
-  LoginResponse create(@Valid @RequestBody final Register registerForm) {
+  LoginResponse create(@Valid @RequestBody final Register registerForm) throws LemmyException {
 
     InstanceConfig instanceConfig = localInstanceContext.instance().getInstanceConfig();
 
-    if (instanceConfig != null && instanceConfig.getRegistrationMode() == RegistrationMode.Closed) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "registration_disabled");
+    if (instanceConfig != null) {
+      if (instanceConfig.getRegistrationMode() == RegistrationMode.Closed) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "registration_closed");
+      }
+      if (instanceConfig.isCaptchaEnabled()) {
+        if (!captchaService.validateCaptcha(registerForm.captcha_answer(), true)) {
+          throw new LemmyException("captcha_incorrect", HttpStatus.BAD_REQUEST);
+        }
+      }
     }
 
     if (personRepository.findOneByName(registerForm.username()).isPresent()) {
@@ -94,6 +121,7 @@ public class UserAuthController extends AbstractLemmyApiController {
     }
 
     final Person person = personService.getDefaultNewUser(registerForm.username());
+    person.setEmail(registerForm.email());
     if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
       throw new RuntimeException("Passwords do not match");
       // @todo throw lemmy error code
@@ -101,18 +129,65 @@ public class UserAuthController extends AbstractLemmyApiController {
     personService.createPerson(person);
     String token = jwtUtil.generateToken(person);
 
-    if (instanceConfig != null
-        && instanceConfig.getRegistrationMode() == RegistrationMode.RequireApplication) {
-      personRegistrationApplicationService.createPersonRegistrationApplication(
-          PersonRegistrationApplication.builder()
-              .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
-              .question(instanceConfig.getRegistrationQuestion()).answer(registerForm.answer())
+    boolean send_verification_email = false;
+
+    if (instanceConfig != null) {
+      if (instanceConfig.getRegistrationMode() == RegistrationMode.RequireApplication) {
+
+        personRegistrationApplicationService.createPersonRegistrationApplication(
+            PersonRegistrationApplication.builder()
+                .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
+                .question(instanceConfig.getRegistrationQuestion()).answer(registerForm.answer())
+                .build());
+        token = "";
+      }
+
+      if (instanceConfig.isRequireEmailVerification()) {
+        // @todo: Implement email verification
+        if (person.getEmail() == null) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
+        }
+        Map<String, Object> params = emailService.getDefaultEmailParameters();
+
+        params.put("person", person);
+        params.put("verificationUrl",
+            localInstanceContext.instance().getDomain() + "/api/v3/user/verify_email?token="
+                + "TODO");
+        try {
+          final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
+          emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
+              .subject(emailService.getSubjects().get(template_name).getAsString())
+              .body(emailService.formatTextEmailTemplate(template_name,
+                  new Context(Locale.getDefault(), params)))
+              .htmlBody(emailService.formatEmailTemplate(template_name,
+                  new Context(Locale.getDefault(), params)))
               .build());
-      token = "";
+          send_verification_email = true;
+        } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "email_sending_failed");
+        }
+      }
+    } else {
+      Map<String, Object> properties = emailService.getDefaultEmailParameters();
+      properties.put("person", person);
+
+      try {
+        final Context context = new Context(Locale.getDefault(), properties);
+
+        final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
+        emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
+            .subject(emailService.getSubjects().get(template_name).getAsString())
+            .body(emailService.formatTextEmailTemplate(template_name, context))
+            .htmlBody(emailService.formatEmailTemplate(template_name, context))
+            .build());
+      } catch (Exception e) {
+        // @todo log error?
+      }
     }
 
-    return LoginResponse.builder().jwt(token).registration_created(true).verify_email_sent(false)
-        .build();
+    return LoginResponse.builder().jwt(token).registration_created(true)
+        .verify_email_sent(send_verification_email).build();
   }
 
   @Operation(summary = "Fetch a Captcha.")
@@ -121,7 +196,12 @@ public class UserAuthController extends AbstractLemmyApiController {
   @GetMapping("get_captcha")
   GetCaptchaResponse captcha() {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    if (!localInstanceContext.instance().getInstanceConfig().isCaptchaEnabled()) {
+      return GetCaptchaResponse.builder().build();
+    }
+    Captcha captcha = captchaService.getCaptcha();
+    return GetCaptchaResponse.builder()
+        .ok(conversionService.convert(captcha, CaptchaResponse.class)).build();
   }
 
   @Operation(summary = "Log into lemmy.")
@@ -130,11 +210,22 @@ public class UserAuthController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "A valid user is not found or password is incorrect.", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("login")
-  LoginResponse login(@Valid @RequestBody final Login loginForm) {
+  LoginResponse login(@Valid @RequestBody final Login loginForm) throws LemmyException {
 
     final Person person = personRepository.findOneByName(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
+
+    String totpSecret = person.getTotpVerifiedSecret();
+    if (totpSecret != null) {
+      if (loginForm.totp_2fa_token() == null) {
+        throw new LemmyException("missing_totp_token", HttpStatus.BAD_REQUEST);
+      }
+      if (!TotpUtil.verify(totpSecret, loginForm.totp_2fa_token())) {
+        throw new LemmyException("wrong_totp_token", HttpStatus.BAD_REQUEST);
+      }
+    }
+
     final String token = jwtUtil.generateToken(person);
     return LoginResponse.builder().jwt(token)
         .registration_created(false) // @todo return true if application created
@@ -161,9 +252,11 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PasswordResetResponse.class))})})
   @PostMapping("password_reset")
-  PasswordResetResponse passwordReset() {
+  PasswordResetResponse passwordReset(final JwtPerson principal) {
 
-    // @todo: implement reset password
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    // @todo: implement reset password and check for 2fa
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -184,7 +277,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   @PostMapping("verify_email")
   VerifyEmailResponse verifyEmail() {
 
-    // @todo: implement verifiy Email
+    // @todo: implement verify Email
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -208,10 +301,28 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GenerateTotpSecretResponse.class))})})
   @PostMapping("totp/generate")
-  GenerateTotpSecretResponse totpGenerate() {
-    // @todo: implement TOTP
+  GenerateTotpSecretResponse totpGenerate(final JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    try {
+      String secret = TotpUtil.createSecretString(160);
+      GenerateTotpSecretResponse generateTotpSecretResponse = GenerateTotpSecretResponse.builder()
+          .totp_secret_url(
+              TotpUtil.createUri(localInstanceContext.instance().getDomain(), person.getName(),
+                  secret).toString()
+
+          ).build();
+
+      person.setTotpSecret(secret);
+      personService.updatePerson(person);
+
+      return generateTotpSecretResponse;
+
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+          "totp_secret_generation_failed");
+    }
   }
 
   @Operation(summary =
@@ -221,9 +332,45 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
   @PostMapping("totp/update")
-  UpdateTotpResponse totpUpdate() {
-    // @todo: implement TOTP
+  UpdateTotpResponse totpUpdate(@Valid @RequestBody final UpdateTotp updateTotpForm,
+      final JwtPerson principal) {
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    UpdateTotpResponse.UpdateTotpResponseBuilder updateTotpResponseBuilder = UpdateTotpResponse.builder();
+
+    if (updateTotpForm.enabled()) {
+      if (person.getTotpSecret() == null) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      if (!TotpUtil.verify(person.getTotpSecret(), updateTotpForm.totp_token())) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      person.setTotpVerifiedSecret(person.getTotpSecret());
+      person.setTotpSecret(null);
+    } else {
+      if (TotpUtil.verify(person.getTotpVerifiedSecret(), updateTotpForm.totp_token())) {
+        updateTotpResponseBuilder.enabled(false);
+        return updateTotpResponseBuilder.build();
+      }
+      person.setTotpVerifiedSecret(null);
+    }
+    personService.updatePerson(person);
+
+    return updateTotpResponseBuilder.enabled(true).build();
+  }
+
+  @Operation(summary = "Validates your Token, throws an error if it is invalid.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
+  @PostMapping("validate_auth")
+  SuccessResponse validate_auth(final JwtPerson principal) {
+
+    Optional<Person> person = getOptionalPerson(principal);
+
+    return SuccessResponse.builder().success(person.isPresent())
+        .error(person.isPresent() ? null : "not_logged_in").build();
   }
 }

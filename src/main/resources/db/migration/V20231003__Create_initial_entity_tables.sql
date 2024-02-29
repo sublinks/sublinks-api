@@ -4,19 +4,19 @@
 CREATE TABLE `comments`
 (
   `id`              BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `activity_pub_id` TEXT    NOT NULL,
-  `language_id`     BIGINT  NOT NULL,
-  `is_deleted`      TINYINT NOT NULL DEFAULT 0,
-  `is_removed`      TINYINT NOT NULL DEFAULT 0,
-  `is_local`        TINYINT NOT NULL DEFAULT 0,
-  `person_id`       BIGINT  NOT NULL,
-  `community_id`    BIGINT  NOT NULL,
-  `post_id`         BIGINT  NOT NULL,
-  `is_featured`     TINYINT NOT NULL DEFAULT 0,
-  `comment_body`    TEXT    NULL,
+  `activity_pub_id` TEXT                                                                           NOT NULL,
+  `language_id`     BIGINT                                                                         NOT NULL,
+  `is_deleted`      TINYINT                                                                        NOT NULL DEFAULT 0,
+  `removed_state`   ENUM ('NOT_REMOVED', 'REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `is_local`        TINYINT                                                                        NOT NULL DEFAULT 0,
+  `person_id`       BIGINT                                                                         NOT NULL,
+  `community_id`    BIGINT                                                                         NOT NULL,
+  `post_id`         BIGINT                                                                         NOT NULL,
+  `is_featured`     TINYINT                                                                        NOT NULL DEFAULT 0,
+  `comment_body`    TEXT                                                                           NULL,
   `path`            VARCHAR(512),
-  `created_at`      TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  `updated_at`      TIMESTAMP(3)     DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+  `created_at`      TIMESTAMP(3)                                                                            DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`      TIMESTAMP(3)                                                                            DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
@@ -195,6 +195,7 @@ CREATE TABLE `people`
   `is_bot_account`                 TINYINT                            NOT NULL DEFAULT 0,
   `is_deleted`                     TINYINT                            NOT NULL DEFAULT 0,
   `activity_pub_id`                TEXT                               NOT NULL,
+  `actor_id`                       TEXT                               NOT NULL,
   `role_id`                        BIGINT                             NOT NULL,
   `name`                           VARCHAR(255)                       NULL,
   `display_name`                   VARCHAR(255)                       NULL,
@@ -227,6 +228,8 @@ CREATE TABLE `people`
   `matrix_user_id`                 TEXT                               NULL,
   `public_key`                     TEXT                               NOT NULL,
   `private_key`                    TEXT                               NULL,
+  `totp_secret`                    TEXT                               NULL,
+  `totp_verified_secret`           TEXT                               NULL,
   `created_at`                     TIMESTAMP(3)                                DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `updated_at`                     TIMESTAMP(3)                                DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -270,29 +273,29 @@ CREATE UNIQUE INDEX `IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID_LINK_TYP
 CREATE TABLE `posts`
 (
   `id`                       BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `instance_id`              BIGINT       NOT NULL,
-  `activity_pub_id`          TEXT         NOT NULL,
-  `language_id`              BIGINT       NOT NULL,
-  `is_deleted`               TINYINT      NOT NULL DEFAULT 0,
-  `is_removed`               TINYINT      NOT NULL DEFAULT 0,
-  `is_local`                 TINYINT      NOT NULL DEFAULT 0,
-  `is_locked`                TINYINT      NOT NULL DEFAULT 0,
-  `community_id`             BIGINT       NOT NULL,
-  `is_featured`              TINYINT      NOT NULL DEFAULT 0,
-  `is_featured_in_community` TINYINT      NOT NULL DEFAULT 0,
-  `link_url`                 TEXT         NULL,
-  `link_title`               VARCHAR(255) NULL,
-  `link_description`         TEXT         NULL,
-  `link_thumbnail_url`       TEXT         NULL,
-  `link_video_url`           TEXT         NULL,
-  `is_nsfw`                  TINYINT      NOT NULL DEFAULT 0,
-  `title`                    VARCHAR(255) NOT NULL,
-  `title_slug`               VARCHAR(255) NOT NULL,
-  `post_body`                TEXT         NULL,
-  `public_key`               TEXT         NOT NULL,
-  `private_key`              TEXT         NULL,
-  `created_at`               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  `updated_at`               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3),
+  `instance_id`              BIGINT                                                                         NOT NULL,
+  `activity_pub_id`          TEXT                                                                           NOT NULL,
+  `language_id`              BIGINT                                                                         NOT NULL,
+  `is_deleted`               TINYINT                                                                        NOT NULL DEFAULT 0,
+  `removed_state`            ENUM ('NOT_REMOVED', 'REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `is_local`                 TINYINT                                                                        NOT NULL DEFAULT 0,
+  `is_locked`                TINYINT                                                                        NOT NULL DEFAULT 0,
+  `community_id`             BIGINT                                                                         NOT NULL,
+  `is_featured`              TINYINT                                                                        NOT NULL DEFAULT 0,
+  `is_featured_in_community` TINYINT                                                                        NOT NULL DEFAULT 0,
+  `link_url`                 TEXT                                                                           NULL,
+  `link_title`               VARCHAR(255)                                                                   NULL,
+  `link_description`         TEXT                                                                           NULL,
+  `link_thumbnail_url`       TEXT                                                                           NULL,
+  `link_video_url`           TEXT                                                                           NULL,
+  `is_nsfw`                  TINYINT                                                                        NOT NULL DEFAULT 0,
+  `title`                    VARCHAR(255)                                                                   NOT NULL,
+  `title_slug`               VARCHAR(255)                                                                   NOT NULL,
+  `post_body`                TEXT                                                                           NULL,
+  `public_key`               TEXT                                                                           NOT NULL,
+  `private_key`              TEXT                                                                           NULL,
+  `created_at`               TIMESTAMP(3)                                                                            DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `updated_at`               TIMESTAMP(3)                                                                            DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3),
 
   CONSTRAINT `UC_TITLE_SLUG` UNIQUE (`title_slug`)
 ) ENGINE = InnoDB
@@ -624,6 +627,7 @@ CREATE TABLE `instance_configs`
   `enable_nsfw`                   TINYINT                                              NULL,
   `community_creation_admin_only` TINYINT                                              NULL,
   `application_email_admins`      TINYINT                                              NULL,
+  `report_email_admins`           TINYINT                                              NULL,
   `hide_modlog_mod_names`         TINYINT                                              NULL,
   `federation_enabled`            TINYINT                                              NULL,
   `captcha_enabled`               TINYINT                                              NULL,
@@ -667,7 +671,25 @@ CREATE TABLE `announcements`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-/**
+/*
+  Captcha
+ */
+CREATE TABLE `captcha`
+(
+  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `uuid`       VARCHAR(36)  NOT NULL,
+  `word`       TEXT         NOT NULL,
+  `png`        TEXT         NOT NULL,
+  `wav`        TEXT         NULL,
+  `locked`     SMALLINT     NOT NULL DEFAULT 0,
+  `updated_at` TIMESTAMP(3) NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE UNIQUE INDEX `IDX_CAPTCHA_UUID` ON `captcha` (`uuid`);
+
+/*
   Custom Emoji table
  */
 CREATE TABLE `custom_emojis`
@@ -729,3 +751,52 @@ CREATE TABLE `role_permissions`
 
 CREATE INDEX `IDX_ROLE_PERMISSIONS_ROLE_ID` ON `role_permissions` (`role_id`);
 CREATE UNIQUE INDEX `IDX_ROLE_PERMISSIONS_ROLE_ID_PERMISSION` ON `role_permissions` (role_id, permission(255));
+
+/**
+  User Data table
+ */
+CREATE TABLE `user_data`
+(
+  `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `person_id`    BIGINT                                    NOT NULL,
+  `ip_address`   VARCHAR(255)                              NOT NULL,
+  `user_agent`   TEXT                                      NULL,
+  `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  `last_used_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Post History table
+ */
+CREATE TABLE `post_history`
+(
+  `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `post_id`       BIGINT                                                                        NOT NULL,
+  `title`         TEXT                                                                          NOT NULL,
+  `body`          TEXT                                                                          NOT NULL,
+  `url`           TEXT                                                                          NULL,
+  `is_nsfw`       TINYINT                                                                       NOT NULL,
+  `is_locked`     TINYINT                                                                       NOT NULL,
+  `is_deleted`    TINYINT                                                                       NOT NULL,
+  `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `created_at`    TIMESTAMP(3)                                                                           DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Comment History table
+ */
+CREATE TABLE `comment_history`
+(
+  `id`            BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `comment_id`    BIGINT                                                                        NOT NULL,
+  `content`       TEXT                                                                          NOT NULL,
+  `is_deleted`    TINYINT                                                                       NOT NULL,
+  `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `created_at`    TIMESTAMP(3)                                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';

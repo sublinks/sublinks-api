@@ -31,6 +31,7 @@ import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -65,7 +66,6 @@ public class PostModActionsController extends AbstractLemmyApiController {
   private final PostReportRepository postReportRepository;
   private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final CommunityRepository communityRepository;
   private final PostRepository postRepository;
   private final LemmyPostService lemmyPostService;
   private final PostService postService;
@@ -89,7 +89,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById(modRemovePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person, RolePermission.REMOVE_POST);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
+        RolePermission.REMOVE_POST);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -102,7 +103,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
       }
     }
 
-    post.setRemoved(modRemovePostForm.removed());
+    post.setRemovedState(
+        modRemovePostForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
     postService.updatePost(post);
 
     // Create Moderation Log
@@ -136,7 +138,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById(modLockPostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
 
-    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -180,7 +182,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById((long) featurePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -238,7 +240,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     final PostReport postReport = postReportRepository.findById(
             (long) resolvePostReportForm.report_id())
@@ -260,8 +262,10 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     postReportService.updatePostReport(postReport);
 
-    return PostReportResponse.builder().post_report_view(
-        lemmyPostReportService.postReportViewFromPost(postReport, postReport.getCreator())).build();
+    return PostReportResponse.builder()
+        .post_report_view(
+            lemmyPostReportService.postReportViewFromPost(postReport, postReport.getCreator()))
+        .build();
   }
 
   @Operation(summary = "List post reports.")
@@ -277,7 +281,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    final boolean isAdmin = roleAuthorizingService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     final List<PostReport> postReports = new ArrayList<>();
 
@@ -290,16 +294,21 @@ public class PostModActionsController extends AbstractLemmyApiController {
           LinkPersonCommunityType.moderator));
 
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
-          PostReportSearchCriteria.builder().unresolvedOnly(
-                  listPostReportsForm.unresolved_only() == null
-                      || listPostReportsForm.unresolved_only()).perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page()).community(moderatingCommunities).build()));
+          PostReportSearchCriteria.builder()
+              .unresolvedOnly(listPostReportsForm.unresolved_only() == null
+                  || listPostReportsForm.unresolved_only())
+              .perPage(listPostReportsForm.limit())
+              .page(listPostReportsForm.page())
+              .community(moderatingCommunities)
+              .build()));
     } else {
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
-          PostReportSearchCriteria.builder().unresolvedOnly(
-                  listPostReportsForm.unresolved_only() != null
-                      && listPostReportsForm.unresolved_only()).perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page()).build()));
+          PostReportSearchCriteria.builder()
+              .unresolvedOnly(listPostReportsForm.unresolved_only() != null
+                  && listPostReportsForm.unresolved_only())
+              .perPage(listPostReportsForm.limit())
+              .page(listPostReportsForm.page())
+              .build()));
     }
 
     List<PostReportView> postReportView = new ArrayList<>();

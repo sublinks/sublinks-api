@@ -75,6 +75,9 @@ public class Person implements UserDetails, Principal {
   @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
   private LinkPersonInstance linkPersonInstance;
 
+  @OneToMany(mappedBy = "person")
+  private List<UserData> userData;
+
   @OneToMany
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
@@ -128,6 +131,9 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = false, name = "activity_pub_id")
   private String activityPubId;
+
+  @Column(nullable = false, name = "actor_id")
+  private String actorId;
 
   @Column(nullable = false)
   private String name;
@@ -218,6 +224,12 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = true, name = "private_key")
   private String privateKey;
+
+  @Column(nullable = true, name = "totp_secret")
+  private String totpSecret;
+
+  @Column(nullable = true, name = "totp_verified_secret")
+  private String totpVerifiedSecret;
 
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")

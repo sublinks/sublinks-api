@@ -9,15 +9,19 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.EditComment;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentLikes;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentLikesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.MarkCommentReplyAsRead;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.VoteView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.dto.CommentLike;
 import com.sublinks.sublinksapi.comment.dto.CommentReply;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
@@ -39,6 +43,7 @@ import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
@@ -100,19 +105,18 @@ public class CommentController extends AbstractLemmyApiController {
     // @todo auth service
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_COMMENT,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createCommentForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    if (post.isLocked()) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_locked");
-    }
-
     if (post.isDeleted() || post.isRemoved()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found");
+    }
+
+    if (post.isLocked()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_locked");
     }
 
     // Language
@@ -127,8 +131,15 @@ public class CommentController extends AbstractLemmyApiController {
       throw new RuntimeException("No language selected");
     }
 
-    final Comment comment = Comment.builder().person(person).isLocal(true).activityPubId("")
-        .post(post).community(post.getCommunity()).language(language.get()).build();
+    final Comment comment = Comment.builder()
+        .person(person)
+        .isLocal(true)
+        .activityPubId("")
+        .removedState(RemovedState.NOT_REMOVED)
+        .post(post)
+        .community(post.getCommunity())
+        .language(language.get())
+        .build();
     boolean shouldReport = false;
     try {
       comment.setCommentBody(slurFilterService.censorText(createCommentForm.content()));
@@ -152,14 +163,18 @@ public class CommentController extends AbstractLemmyApiController {
     commentLikeService.updateOrCreateCommentLikeLike(comment, person);
 
     if (shouldReport) {
-      commentReportService.createCommentReport(
-          CommentReport.builder().comment(comment).creator(person)
-              .originalContent(comment.getCommentBody())
-              .reason("AUTOMATED: Comment creation triggered slur filter").build());
+      commentReportService.createCommentReport(CommentReport.builder()
+          .comment(comment)
+          .creator(person)
+          .originalContent(comment.getCommentBody())
+          .reason("AUTOMATED: Comment creation triggered slur filter")
+          .build());
     }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -171,8 +186,7 @@ public class CommentController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_COMMENT,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -203,14 +217,18 @@ public class CommentController extends AbstractLemmyApiController {
     commentService.updateComment(comment);
 
     if (shouldReport) {
-      commentReportService.createCommentReport(
-          CommentReport.builder().comment(comment).creator(person)
-              .originalContent(comment.getCommentBody())
-              .reason("AUTOMATED: Comment update triggered slur filter").build());
+      commentReportService.createCommentReport(CommentReport.builder()
+          .comment(comment)
+          .creator(person)
+          .originalContent(comment.getCommentBody())
+          .reason("AUTOMATED: Comment update triggered slur filter")
+          .build());
     }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -222,8 +240,7 @@ public class CommentController extends AbstractLemmyApiController {
     // @todo Implement delete comment
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_COMMENT,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -238,8 +255,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.MARK_COMMENT_AS_READ,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.MARK_COMMENT_AS_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById(
@@ -257,7 +273,9 @@ public class CommentController extends AbstractLemmyApiController {
     }
 
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
   }
 
@@ -290,8 +308,34 @@ public class CommentController extends AbstractLemmyApiController {
       commentLikeService.updateOrCreateCommentLikeNeutral(comment, person);
     }
     final CommentView commentView = lemmyCommentService.createCommentView(comment, person);
-    return CommentResponse.builder().comment_view(commentView).recipient_ids(new ArrayList<>())
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
         .build();
+  }
+
+  @Operation(summary = "Get Votes on a comment.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommentLikesResponse.class))})})
+  @GetMapping("like/list")
+  ListCommentLikesResponse listLikes(@Valid final ListCommentLikes listCommentLikesForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.COMMENT_LIST_VOTES,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
+    final Comment comment = commentRepository.findById((long) listCommentLikesForm.comment_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    List<CommentLike> likes = commentLikeService.getCommentLikes(comment,
+        listCommentLikesForm.page(), listCommentLikesForm.limit());
+
+    final List<VoteView> voteViews = new ArrayList<>();
+    for (CommentLike like : likes) {
+      voteViews.add(conversionService.convert(like, VoteView.class));
+    }
+    return ListCommentLikesResponse.builder().comment_likes(voteViews).build();
   }
 
   @Operation(summary = "Save a comment for later.")
@@ -302,8 +346,7 @@ public class CommentController extends AbstractLemmyApiController {
     // @todo Implement save comment
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.FAVORITE_COMMENT,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
   }
@@ -328,8 +371,9 @@ public class CommentController extends AbstractLemmyApiController {
     final ListingType listingType = conversionService.convert(getCommentsForm.type_(),
         ListingType.class);
 
-    final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria
-        .builder().listingType(listingType).commentSortType(sortType);
+    final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria.builder()
+        .listingType(listingType)
+        .commentSortType(sortType);
 
     if (post_id.isPresent()) {
       final Optional<Post> post = postRepository.findById((long) post_id.get());
@@ -378,16 +422,19 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.REPORT_COMMENT,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.REPORT_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById((long) createCommentReportForm.comment_id())
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
 
-    final CommentReport commentReport = CommentReport.builder().comment(comment).creator(person)
-        .originalContent(comment.getCommentBody()).reason(createCommentReportForm.reason()).build();
+    final CommentReport commentReport = CommentReport.builder()
+        .comment(comment)
+        .creator(person)
+        .originalContent(comment.getCommentBody())
+        .reason(createCommentReportForm.reason())
+        .build();
 
     commentReportService.createCommentReport(commentReport);
 

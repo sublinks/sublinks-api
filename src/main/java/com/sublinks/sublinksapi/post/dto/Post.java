@@ -5,9 +5,12 @@ import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -62,6 +65,8 @@ public class Post {
   private PostAggregate postAggregate;
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
   private List<PostLike> postLikes;
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  private List<PostHistory> postHistory;
   /**
    * Attributes.
    */
@@ -75,8 +80,9 @@ public class Post {
   @Column(nullable = false, name = "is_deleted")
   private boolean isDeleted;
 
-  @Column(nullable = false, name = "is_removed")
-  private boolean isRemoved;
+  @Column(nullable = false, name = "removed_state")
+  @Enumerated(EnumType.STRING)
+  private RemovedState removedState;
 
   @Column(nullable = false, name = "is_local")
   private boolean isLocal;
@@ -157,5 +163,10 @@ public class Post {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
         .getPersistentClass().hashCode() : getClass().hashCode();
+  }
+
+  public boolean isRemoved() {
+
+    return this.removedState != RemovedState.NOT_REMOVED;
   }
 }

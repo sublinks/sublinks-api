@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.VoteView;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
@@ -13,6 +14,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPosts;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.GetPostsResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ListPostLikes;
+import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ListPostLikesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.MarkPostAsRead;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
@@ -34,6 +37,7 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
@@ -135,8 +139,12 @@ public class PostController extends AbstractLemmyApiController {
       }
     }
 
-    return GetPostResponse.builder().post_view(postView).community_view(communityView)
-        .moderators(moderators).cross_posts(crossPosts).build();
+    return GetPostResponse.builder()
+        .post_view(postView)
+        .community_view(communityView)
+        .moderators(moderators)
+        .cross_posts(crossPosts)
+        .build();
   }
 
   @Operation(summary = "Mark a post as read.")
@@ -150,15 +158,15 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.MARK_POST_AS_READ,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.MARK_POST_AS_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo support multiple posts
     final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     postReadService.markPostReadByPerson(post, person);
-    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 
@@ -211,22 +219,27 @@ public class PostController extends AbstractLemmyApiController {
     SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
-    }
-    else{
+    } else {
       sortType = SortType.New;
     }
-    ListingType listingType = config != null ? localInstanceContext.instance().getInstanceConfig()
+    ListingType listingType = config != null ? localInstanceContext.instance()
+        .getInstanceConfig()
         .getDefaultPostListingType() : null;
     if (getPostsForm.type_() != null) {
       listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
 
-    final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder().page(1)
+    final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
+        .page(1)
         .listingType(conversionService.convert(listingType,
-            com.sublinks.sublinksapi.person.enums.ListingType.class)).perPage(20)
+            com.sublinks.sublinksapi.person.enums.ListingType.class))
+        .perPage(20)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
-        .sortType(sortType).person(person.orElse(null)).communityIds(communityIds).build();
+        .sortType(sortType)
+        .person(person.orElse(null))
+        .communityIds(communityIds)
+        .build();
 
     final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
     final Collection<PostView> postViewCollection = new LinkedHashSet<>();
@@ -251,14 +264,12 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        switch (createPostLikeForm.score()) {
-          case 1 -> RolePermission.POST_UPVOTE;
-          case -1 -> RolePermission.POST_DOWNVOTE;
-          case 0 -> RolePermission.POST_NEUTRAL;
-          default -> RolePermission.POST_NEUTRAL;
-        },
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, switch (createPostLikeForm.score()) {
+      case 1 -> RolePermission.POST_UPVOTE;
+      case -1 -> RolePermission.POST_DOWNVOTE;
+      case 0 -> RolePermission.POST_NEUTRAL;
+      default -> RolePermission.POST_NEUTRAL;
+    }, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById(createPostLikeForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -270,8 +281,35 @@ public class PostController extends AbstractLemmyApiController {
       postLikeService.updateOrCreatePostLikeNeutral(post, person);
     }
 
-    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
+  }
+
+  @Operation(summary = "Like / vote on a post.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @GetMapping("like/list")
+  ListPostLikesResponse listLikes(@Valid ListPostLikes listPostLikesForm, JwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.POST_LIST_VOTES,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
+    final Post post = postRepository.findById((long) listPostLikesForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+    List<PostLike> likes = postLikeService.getPostLikes(post, 1, 20);
+
+    List<VoteView> voteViews = new ArrayList<>();
+    for (PostLike like : likes) {
+      voteViews.add(conversionService.convert(like, VoteView.class));
+    }
+
+    return ListPostLikesResponse.builder().post_likes(voteViews).build();
   }
 
   @Operation(summary = "Save a post.")
@@ -283,8 +321,7 @@ public class PostController extends AbstractLemmyApiController {
   public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
     final Person person = getPersonOrThrowUnauthorized(jwtPerson);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.FAVORITE_POST,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) savePostForm.post_id())
@@ -295,7 +332,8 @@ public class PostController extends AbstractLemmyApiController {
     } else {
       postSaveService.deletePostSave(post, person);
     }
-    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 
@@ -310,18 +348,20 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.REPORT_POST,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.REPORT_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createPostReportForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found"));
 
-    final PostReport postReport = PostReport.builder().post(post).creator(person)
+    final PostReport postReport = PostReport.builder()
+        .post(post)
+        .creator(person)
         .reason(createPostReportForm.reason())
         .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
         .originalTitle(post.getTitle() == null ? "" : post.getTitle())
-        .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl()).build();
+        .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl())
+        .build();
 
     postReportService.createPostReport(postReport);
 
@@ -340,9 +380,13 @@ public class PostController extends AbstractLemmyApiController {
     String normalizedUrl = urlUtil.normalizeUrl(getSiteMetadataForm.url());
     SiteMetadataUtil.SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
 
-    return GetSiteMetadataResponse.builder().metadata(
-            SiteMetadata.builder().title(siteMetadata.title()).description(siteMetadata.description())
-                .image(siteMetadata.imageUrl()).embed_video_url(siteMetadata.videoUrl()).build())
+    return GetSiteMetadataResponse.builder()
+        .metadata(SiteMetadata.builder()
+            .title(siteMetadata.title())
+            .description(siteMetadata.description())
+            .image(siteMetadata.imageUrl())
+            .embed_video_url(siteMetadata.videoUrl())
+            .build())
         .build();
   }
 }
