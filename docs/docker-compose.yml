@@ -35,10 +35,21 @@ services:
     ports:
       - "8081:8080"
     environment:
-      LEMMY_USER: federation
-      LEMMY_PASSWORD: doesntmatter
+      DB_DSN: "federation:federation@tcp(federationdb:3306)/federation?charset=utf8mb4&parseTime=True&loc=Local"
+      AMQP_SERVER_URL: "amqp://sublinks:sublinks@queue:5672"
+      HOSTNAME: sublinks.org"
     depends_on:
       - sublinks
+
+  federationdb:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=federation
+      - MYSQL_USER=federation
+      - MYSQL_PASSWORD=federation
+    restart: always
+    logging: *default-logging
 
   sublinks:
     image: ghcr.io/sublinks/sublinks-api:0.0.1-snapshot
@@ -65,7 +76,7 @@ services:
       - db
       - pictrs
       - queue
-  
+
   db:
     image: mysql:latest
     environment:
