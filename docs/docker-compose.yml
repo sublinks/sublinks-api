@@ -41,7 +41,7 @@ services:
       - sublinks
 
   sublinks:
-    image: ghcr.io/sublinks/sublinks:0.0.1-snapshot
+    image: ghcr.io/sublinks/sublinks-api:0.0.1-snapshot
     restart: always
     ports:
       - "8080"
