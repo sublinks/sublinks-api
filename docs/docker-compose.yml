@@ -2,6 +2,7 @@ version: "3.7"
 
 volumes:
   letsencrypt:
+  queue_data:
 
 x-logging: &default-logging
   driver: "json-file"
