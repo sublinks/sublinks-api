@@ -50,8 +50,11 @@ public class SlurFilterService {
       return null;
     }
 
-    return slurFilters.stream().filter((slur) -> Pattern.compile(slur.getSlurRegex()).matcher(text).find())
-        .max(Comparator.comparing(SlurFilter::getSlurActionType)).orElse(null);
+    return slurFilters.stream()
+        .filter((slurFilter -> !slurFilter.getSlurRegex().isBlank()))
+        .filter((slur) -> Pattern.compile(slur.getSlurRegex()).matcher(text).find())
+        .max(Comparator.comparing(SlurFilter::getSlurActionType))
+        .orElse(null);
   }
 
   public String censorText(final String text)
