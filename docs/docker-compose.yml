@@ -56,6 +56,7 @@ services:
       FEDERATION_QUEUE_USER: sublinks
       FEDERATION_QUEUE_PASS: sublinks
       FEDERATION_QUEUE_NAME: federation
+      FEDERATION_ROUTING_KEY: federation
       BACKEND_QUEUE_NAME: backend
       BACKEND_TOPIC_NAME: backend
     logging: *default-logging

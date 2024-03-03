@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.email.services.EmailService;
+import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Captcha;
@@ -32,6 +33,7 @@ import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import com.sublinks.sublinksapi.queue.services.Producer;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
@@ -50,6 +52,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -78,6 +81,10 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final RoleAuthorizingService roleAuthorizingService;
   private final ConversionService conversionService;
   private final EmailService emailService;
+  private final Optional<Producer> federationProducer;
+
+  @Value("${sublinks.federation.key}")
+  private String federationRoutingKey;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -111,14 +118,14 @@ public class UserAuthController extends AbstractLemmyApiController {
     if (personRepository.findOneByName(registerForm.username()).isPresent()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username_taken");
     }
-    try {
-      String filteredUsername = slurFilterService.censorText(registerForm.username());
-      if (!Objects.equals(filteredUsername, registerForm.username())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
-      }
-    } catch (SlurFilterBlockedException | SlurFilterReportException e) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
-    }
+//    try {
+//      String filteredUsername = slurFilterService.censorText(registerForm.username());
+//      if (!Objects.equals(filteredUsername, registerForm.username())) {
+//        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+//      }
+//    } catch (SlurFilterBlockedException | SlurFilterReportException e) {
+//      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+//    }
 
     final Person person = personService.getDefaultNewUser(registerForm.username());
     person.setEmail(registerForm.email());
@@ -185,6 +192,21 @@ public class UserAuthController extends AbstractLemmyApiController {
         // @todo log error?
       }
     }
+
+    federationProducer.ifPresent(service -> {
+      final Actor actorMessage =
+          Actor.builder()
+              .actor_id(person.getActorId())
+              .actor_type("user")
+              .bio(person.getBiography())
+              .display_name(person.getDisplayName())
+              .matrix_user_id(person.getMatrixUserId())
+              .private_key(person.getPrivateKey())
+              .public_key(person.getPublicKey())
+              .build();
+
+      service.sendMessage(federationRoutingKey, "actor.create", actorMessage);
+    });
 
     return LoginResponse.builder().jwt(token).registration_created(true)
         .verify_email_sent(send_verification_email).build();
