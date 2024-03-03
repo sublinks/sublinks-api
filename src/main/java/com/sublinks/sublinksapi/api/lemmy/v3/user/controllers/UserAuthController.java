@@ -22,6 +22,8 @@ import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.email.services.EmailService;
+import com.sublinks.sublinksapi.federation.enums.ActorType;
+import com.sublinks.sublinksapi.federation.enums.RoutingKey;
 import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -197,7 +199,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       final Actor actorMessage =
           Actor.builder()
               .actor_id(person.getActorId())
-              .actor_type("user")
+              .actor_type(ActorType.USER.getValue())
               .bio(person.getBiography())
               .display_name(person.getDisplayName())
               .matrix_user_id(person.getMatrixUserId())
@@ -205,7 +207,7 @@ public class UserAuthController extends AbstractLemmyApiController {
               .public_key(person.getPublicKey())
               .build();
 
-      service.sendMessage(federationRoutingKey, "actor.create", actorMessage);
+      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
     });
 
     return LoginResponse.builder().jwt(token).registration_created(true)
