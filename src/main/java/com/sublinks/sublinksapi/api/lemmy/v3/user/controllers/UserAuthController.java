@@ -120,14 +120,14 @@ public class UserAuthController extends AbstractLemmyApiController {
     if (personRepository.findOneByName(registerForm.username()).isPresent()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username_taken");
     }
-//    try {
-//      String filteredUsername = slurFilterService.censorText(registerForm.username());
-//      if (!Objects.equals(filteredUsername, registerForm.username())) {
-//        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
-//      }
-//    } catch (SlurFilterBlockedException | SlurFilterReportException e) {
-//      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
-//    }
+    try {
+      String filteredUsername = slurFilterService.censorText(registerForm.username());
+      if (!Objects.equals(filteredUsername, registerForm.username())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+      }
+    } catch (SlurFilterBlockedException | SlurFilterReportException e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
+    }
 
     final Person person = personService.getDefaultNewUser(registerForm.username());
     person.setEmail(registerForm.email());
