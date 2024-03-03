@@ -12,12 +12,16 @@ import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
+import com.sublinks.sublinksapi.federation.enums.ActorType;
+import com.sublinks.sublinksapi.federation.enums.RoutingKey;
+import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
+import com.sublinks.sublinksapi.queue.services.Producer;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
@@ -36,6 +40,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +65,10 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final SlugUtil slugUtil;
   private final CommunityRepository communityRepository;
   private final SlurFilterService slurFilterService;
+  private final Optional<Producer> federationProducer;
+
+  @Value("${sublinks.federation.key}")
+  private String federationRoutingKey;
 
   @Operation(summary = "Create a new community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -142,6 +151,20 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     communityService.createCommunity(community);
 
+    federationProducer.ifPresent(service -> {
+      final Actor actorMessage =
+          Actor.builder()
+              .actor_id(community.getActivityPubId())
+              .actor_type(ActorType.COMMUNITY.getValue())
+              .bio(community.getDescription())
+              .display_name(community.getTitle())
+              .private_key(community.getPrivateKey())
+              .public_key(community.getPublicKey())
+              .build();
+
+      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+    });
+
     linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
 
     return lemmyCommunityService.createCommunityResponse(community, person);
@@ -197,6 +220,20 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     community.setLanguages(languages);
 
     communityService.updateCommunity(community);
+
+    federationProducer.ifPresent(service -> {
+      final Actor actorMessage =
+          Actor.builder()
+              .actor_id(community.getActivityPubId())
+              .actor_type(ActorType.COMMUNITY.getValue())
+              .bio(community.getDescription())
+              .display_name(community.getTitle())
+              .private_key(community.getPrivateKey())
+              .public_key(community.getPublicKey())
+              .build();
+
+      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+    });
 
     return lemmyCommunityService.createCommunityResponse(community, person);
   }
