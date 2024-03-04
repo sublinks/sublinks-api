@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.federation.enums;
 
 public enum ActorType {
-  USER("user"),
-  COMMUNITY("community");
+  USER("Person"),
+  COMMUNITY("Group");
 
   private final String value;
 
