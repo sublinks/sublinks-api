@@ -65,6 +65,8 @@ public class QueueConfig {
     return new TopicExchange(this.backendTopicName);
   }
 
+  // @TODO: We will need to create multiple bindings if we have different routing keys for the backend.
+  // This is assuming there is only one binding for our backend RabbitMQ exchange
   @Bean
   @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public Binding binding(Queue federationQueue, TopicExchange federationTopicExchange) {
