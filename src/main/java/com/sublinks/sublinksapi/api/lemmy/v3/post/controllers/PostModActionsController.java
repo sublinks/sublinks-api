@@ -16,6 +16,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ResolvePostReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
@@ -284,6 +285,9 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     final List<PostReport> postReports = new ArrayList<>();
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(listPostReportsForm.page(), 1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(listPostReportsForm.limit(),
+        20);
 
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
@@ -297,8 +301,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
           PostReportSearchCriteria.builder()
               .unresolvedOnly(listPostReportsForm.unresolved_only() == null
                   || listPostReportsForm.unresolved_only())
-              .perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page())
+              .perPage(perPage)
+              .page(page)
               .community(moderatingCommunities)
               .build()));
     } else {
@@ -306,8 +310,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
           PostReportSearchCriteria.builder()
               .unresolvedOnly(listPostReportsForm.unresolved_only() != null
                   && listPostReportsForm.unresolved_only())
-              .perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page())
+              .perPage(perPage)
+              .page(page)
               .build()));
     }
 
