@@ -21,8 +21,8 @@ public class QueueConfig {
   @Value("${sublinks.backend_topic.name}")
   private String backendTopicName;
 
-  @Value("${sublinks.federation.key}")
-  private String federationRoutingKey;
+  @Value("${sublinks.backend_routing_key}")
+  private String backendRoutingKey;
 
   @Bean
   @ConditionalOnProperty(name =
@@ -68,6 +68,6 @@ public class QueueConfig {
   @Bean
   @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.key"}, matchIfMissing = false)
   public Binding binding(Queue federationQueue, TopicExchange federationTopicExchange) {
-    return BindingBuilder.bind(federationQueue).to(federationTopicExchange).with(federationRoutingKey);
+    return BindingBuilder.bind(federationQueue).to(federationTopicExchange).with(backendRoutingKey);
   }
 }
