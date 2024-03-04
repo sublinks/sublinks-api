@@ -67,8 +67,8 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final SlurFilterService slurFilterService;
   private final Optional<Producer> federationProducer;
 
-  @Value("${sublinks.federation.key}")
-  private String federationRoutingKey;
+  @Value("${sublinks.federation.exchange}")
+  private String federationExchange;
 
   @Operation(summary = "Create a new community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -162,7 +162,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
               .public_key(community.getPublicKey())
               .build();
 
-      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
     });
 
     linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
@@ -232,7 +232,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
               .public_key(community.getPublicKey())
               .build();
 
-      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
     });
 
     return lemmyCommunityService.createCommunityResponse(community, person);

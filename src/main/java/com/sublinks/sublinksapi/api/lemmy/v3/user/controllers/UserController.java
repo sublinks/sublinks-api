@@ -99,8 +99,8 @@ public class UserController extends AbstractLemmyApiController {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final Optional<Producer> federationProducer;
 
-  @Value("${sublinks.federation.key}")
-  private String federationRoutingKey;
+  @Value("${sublinks.federation.exchange}")
+  private String federationExchange;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -337,7 +337,7 @@ public class UserController extends AbstractLemmyApiController {
               .public_key(person.getPublicKey())
               .build();
 
-      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
     });
 
     return LoginResponse.builder().jwt(null).registration_created(false).verify_email_sent(false)

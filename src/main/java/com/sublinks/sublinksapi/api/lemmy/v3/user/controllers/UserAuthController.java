@@ -85,8 +85,8 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final EmailService emailService;
   private final Optional<Producer> federationProducer;
 
-  @Value("${sublinks.federation.key}")
-  private String federationRoutingKey;
+  @Value("${sublinks.federation.exchange}")
+  private String federationExchange;
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -207,7 +207,7 @@ public class UserAuthController extends AbstractLemmyApiController {
               .public_key(person.getPublicKey())
               .build();
 
-      service.sendMessage(federationRoutingKey, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
     });
 
     return LoginResponse.builder().jwt(token).registration_created(true)
