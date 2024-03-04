@@ -25,6 +25,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UserExportSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonMentionService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.CommentReply;
@@ -104,11 +105,13 @@ public class UserController extends AbstractLemmyApiController {
 
     if (getPersonDetailsForm.person_id() != null) {
       userId = (long) getPersonDetailsForm.person_id();
-      person = personRepository.findById(userId).orElseThrow(
-          () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+      person = personRepository.findById(userId)
+          .orElseThrow(
+              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
     } else if (getPersonDetailsForm.username() != null) {
-      person = personRepository.findOneByName(getPersonDetailsForm.username()).orElseThrow(
-          () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+      person = personRepository.findOneByName(getPersonDetailsForm.username())
+          .orElseThrow(
+              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
@@ -116,10 +119,12 @@ public class UserController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_USER,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
-    return GetPersonDetailsResponse.builder().person_view(lemmyPersonService.getPersonView(person))
+    return GetPersonDetailsResponse.builder()
+        .person_view(lemmyPersonService.getPersonView(person))
         .posts(lemmyPersonService.getPersonPosts(person))
         .moderates(lemmyPersonService.getPersonModerates(person))
-        .comments(lemmyPersonService.getPersonComments(person)).build();
+        .comments(lemmyPersonService.getPersonComments(person))
+        .build();
   }
 
   @Operation(summary = "Get mentions for your user.")
@@ -134,10 +139,17 @@ public class UserController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_MENTION_USER,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(getPersonMentionsForm.page(),
+        1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(
+        getPersonMentionsForm.limit(), 20);
+
     final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
         .sort(getPersonMentionsForm.sort())
         .unreadOnly(getPersonMentionsForm.unread_only().orElse(false))
-        .page(getPersonMentionsForm.page()).perPage(getPersonMentionsForm.limit()).build();
+        .page(page)
+        .perPage(perPage)
+        .build();
 
     final List<PersonMention> personMentions = personMentionRepository.allPersonMentionBySearchCriteria(
         criteria);
@@ -163,8 +175,9 @@ public class UserController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final PersonMention personMention = personMentionRepository.findById(
-        (long) markPersonMentionAsReadForm.person_mention_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
+            (long) markPersonMentionAsReadForm.person_mention_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
 
     personMention.setRead(markPersonMentionAsReadForm.read());
 
@@ -187,11 +200,16 @@ public class UserController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_REPLIES,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(getReplies.page(), 1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(getReplies.limit(), 20);
+
     final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
         com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
             .sortType(getReplies.sort())
             .unreadOnly(getReplies.unread_only() != null && getReplies.unread_only())
-            .page(getReplies.page()).perPage(getReplies.limit()).build());
+            .page(page)
+            .perPage(perPage)
+            .build());
 
     final List<CommentReplyView> commentReplyViews = new ArrayList<>();
 
@@ -212,7 +230,8 @@ public class UserController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_BAN_READ,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
-    final Collection<PersonView> bannedPersons = roleAuthorizingService.getBannedUsers().stream()
+    final Collection<PersonView> bannedPersons = roleAuthorizingService.getBannedUsers()
+        .stream()
         .map(lemmyPersonService::getPersonView)
         .collect(Collectors.toCollection(LinkedHashSet::new));
 
@@ -316,7 +335,10 @@ public class UserController extends AbstractLemmyApiController {
 
     personService.updatePerson(person);
 
-    return LoginResponse.builder().jwt(null).registration_created(false).verify_email_sent(false)
+    return LoginResponse.builder()
+        .jwt(null)
+        .registration_created(false)
+        .verify_email_sent(false)
         .build();
   }
 

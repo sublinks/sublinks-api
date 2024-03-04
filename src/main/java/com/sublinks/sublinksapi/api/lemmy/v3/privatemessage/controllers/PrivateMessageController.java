@@ -19,6 +19,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.PrivateMessag
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.ResolvePrivateMessageReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivateMessageReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivateMessageService;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -76,16 +77,20 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person sender = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(sender,
-        RolePermission.READ_PRIVATE_MESSAGES,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(sender, RolePermission.READ_PRIVATE_MESSAGES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo: add support for other sort types
     final PrivateMessageSortType sortType = PrivateMessageSortType.New;
 
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(getPrivateMessagesForm.page(),
+        1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(
+        getPrivateMessagesForm.limit(), 20);
+
     final PrivateMessageSearchCriteria privateMessageSearchCriteria = PrivateMessageSearchCriteria.builder()
-        .page(getPrivateMessagesForm.page() == null ? 1 : getPrivateMessagesForm.page())
-        .perPage(getPrivateMessagesForm.limit() == null ? 20 : getPrivateMessagesForm.limit())
+        .page(page)
+        .perPage(perPage)
         .privateMessageSortType(sortType)
         .person(sender)
         .build();
@@ -116,12 +121,16 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Person recipient = personRepository.findById(
-        (long) createPrivateMessageForm.recipient_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "recipient_not_found"));
+            (long) createPrivateMessageForm.recipient_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "recipient_not_found"));
 
     final PrivateMessage privateMessage = PrivateMessage.builder()
-        .content(createPrivateMessageForm.content()).sender(sender).recipient(recipient)
-        .isLocal(recipient.isLocal()).build();
+        .content(createPrivateMessageForm.content())
+        .sender(sender)
+        .recipient(recipient)
+        .isLocal(recipient.isLocal())
+        .build();
     privateMessageService.createPrivateMessage(privateMessage);
 
     final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
@@ -146,8 +155,9 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
-        (long) editPrivateMessageForm.private_message_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+            (long) editPrivateMessageForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
     privateMessage.setContent(editPrivateMessageForm.content());
 
@@ -175,8 +185,9 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
-        (long) deletePrivateMessageForm.private_message_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+            (long) deletePrivateMessageForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
     privateMessageService.deletePrivateMessage(privateMessage);
 
@@ -202,8 +213,9 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
-        (long) markPrivateMessageAsReadForm.private_message_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+            (long) markPrivateMessageAsReadForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
     privateMessage.setRead(markPrivateMessageAsReadForm.read());
 
@@ -229,19 +241,24 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(
-        (long) privateMessageReportForm.private_message_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
+            (long) privateMessageReportForm.private_message_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "private_message_not_found"));
 
     final PrivateMessageReport privateMessageReport = PrivateMessageReport.builder()
-        .originalContent(privateMessage.getContent()).reason(privateMessageReportForm.reason())
-        .privateMessage(privateMessage).creator(person).build();
+        .originalContent(privateMessage.getContent())
+        .reason(privateMessageReportForm.reason())
+        .privateMessage(privateMessage)
+        .creator(person)
+        .build();
 
     privateMessageReportService.createPrivateMessageReport(privateMessageReport);
 
     final PrivateMessageReportView privateMessageReportView = lemmyPrivateMessageReportService.createPrivateMessageReportView(
         privateMessageReport);
     return PrivateMessageReportResponse.builder()
-        .private_message_report_view(privateMessageReportView).build();
+        .private_message_report_view(privateMessageReportView)
+        .build();
   }
 
   @Operation(summary = "Resolve a report for a private message.")
@@ -255,12 +272,12 @@ public class PrivateMessageController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-       RolePermission.REPORT_INSTANCE_RESOLVE,
+        RolePermission.REPORT_INSTANCE_RESOLVE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final PrivateMessageReport privateMessageReport = privateMessageReportRepository.findById(
-        (long) privateMessageReportForm.report_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            (long) privateMessageReportForm.report_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "private_message_report_not_found"));
 
     privateMessageReport.setResolved(privateMessageReportForm.resolved());
@@ -270,7 +287,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
     final PrivateMessageReportView privateMessageReportView = lemmyPrivateMessageReportService.createPrivateMessageReportView(
         privateMessageReport);
     return PrivateMessageReportResponse.builder()
-        .private_message_report_view(privateMessageReportView).build();
+        .private_message_report_view(privateMessageReportView)
+        .build();
   }
 
   @Operation(summary = "List private message reports.")
@@ -283,24 +301,27 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.REPORT_INSTANCE_READ,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.REPORT_INSTANCE_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final List<PrivateMessageReport> privateMessageReports = privateMessageReportRepository.allPrivateMessageReportsBySearchCriteria(
-        PrivateMessageReportSearchCriteria.builder().page(
-                listPrivateMessageReportsForm.page() == null ? 1 : listPrivateMessageReportsForm.page())
-            .perPage(listPrivateMessageReportsForm.limit() == null ? 20
-                : listPrivateMessageReportsForm.limit()).unresolvedOnly(
-                listPrivateMessageReportsForm.unresolved_only() == null ? false
-                    : listPrivateMessageReportsForm.unresolved_only()).build());
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(
+        listPrivateMessageReportsForm.page(), 1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(
+        listPrivateMessageReportsForm.limit(), 20);
 
+    final List<PrivateMessageReport> privateMessageReports = privateMessageReportRepository.allPrivateMessageReportsBySearchCriteria(
+        PrivateMessageReportSearchCriteria.builder()
+            .page(page)
+            .perPage(perPage)
+            .unresolvedOnly(listPrivateMessageReportsForm.unresolved_only() != null && listPrivateMessageReportsForm.unresolved_only())
+            .build());
 
     final List<PrivateMessageReportView> privateMessageReportViews = new ArrayList<>();
     privateMessageReports.forEach(privateMessageReport -> privateMessageReportViews.add(
         lemmyPrivateMessageReportService.createPrivateMessageReportView(privateMessageReport)));
 
     return ListPrivateMessageReportsResponse.builder()
-        .private_message_reports(privateMessageReportViews).build();
+        .private_message_reports(privateMessageReportViews)
+        .build();
   }
 }

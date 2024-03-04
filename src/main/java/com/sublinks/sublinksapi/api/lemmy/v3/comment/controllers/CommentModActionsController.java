@@ -14,6 +14,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentServic
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
@@ -92,14 +93,21 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModRemoveComment).removed(removeCommentForm.removed())
-        .entityId(comment.getId()).commentId(comment.getId()).postId(comment.getPost().getId())
-        .communityId(comment.getCommunity().getId()).instance(comment.getPost().getInstance())
-        .otherPersonId(comment.getPerson().getId()).moderationPersonId(person.getId()).build();
+        .actionType(ModlogActionType.ModRemoveComment)
+        .removed(removeCommentForm.removed())
+        .entityId(comment.getId())
+        .commentId(comment.getId())
+        .postId(comment.getPost().getId())
+        .communityId(comment.getCommunity().getId())
+        .instance(comment.getPost().getInstance())
+        .otherPersonId(comment.getPerson().getId())
+        .moderationPersonId(person.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return CommentResponse.builder()
-        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();
+        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson()))
+        .build();
   }
 
   @Operation(summary = "Distinguishes a comment (speak as moderator).")
@@ -124,7 +132,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     commentService.updateComment(comment);
 
     return CommentResponse.builder()
-        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();
+        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson()))
+        .build();
   }
 
   @Operation(summary = "Resolve a comment report. Only a mod can do this.")
@@ -161,9 +170,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     commentReport.setResolver(person);
     commentReportService.updateCommentReport(commentReport);
 
-    return CommentReportResponse.builder().comment_report_view(
-        lemmyCommentReportService.createCommentReportView(commentReport,
-            commentReport.getCreator())).build();
+    return CommentReportResponse.builder()
+        .comment_report_view(lemmyCommentReportService.createCommentReportView(commentReport,
+            commentReport.getCreator()))
+        .build();
   }
 
   @Operation(summary = "List comment reports.")
@@ -183,6 +193,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     final List<CommentReport> commentReports = new ArrayList<>();
 
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(listCommentReportsForm.page(),
+        1);
+    final int limit = PaginationControllerUtils.getAbsoluteMinNumber(listCommentReportsForm.limit(),
+        20);
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
 
@@ -194,8 +208,9 @@ public class CommentModActionsController extends AbstractLemmyApiController {
             LinkPersonCommunityType.moderator));
       } else {
         Community community = communityRepository.findById(
-            (long) listCommentReportsForm.community_id()).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+                (long) listCommentReportsForm.community_id())
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
         if (!linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner)
             && !linkPersonCommunityService.hasLink(person, community,
             LinkPersonCommunityType.moderator)) {
@@ -204,28 +219,34 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         moderatingCommunities.add(community);
       }
       commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-          CommentReportSearchCriteria.builder().unresolvedOnly(
-                  listCommentReportsForm.unresolved_only() == null
-                      || listCommentReportsForm.unresolved_only())
-              .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
-              .community(moderatingCommunities).build()));
+          CommentReportSearchCriteria.builder()
+              .unresolvedOnly(listCommentReportsForm.unresolved_only() == null
+                  || listCommentReportsForm.unresolved_only())
+              .perPage(limit)
+              .page(page)
+              .community(moderatingCommunities)
+              .build()));
     } else {
       if (listCommentReportsForm.community_id() != null) {
         Community community = communityRepository.findById(
-            (long) listCommentReportsForm.community_id()).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+                (long) listCommentReportsForm.community_id())
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
         commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-            CommentReportSearchCriteria.builder().unresolvedOnly(
-                    listCommentReportsForm.unresolved_only() != null
-                        && listCommentReportsForm.unresolved_only())
-                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
-                .community(List.of(community)).build()));
+            CommentReportSearchCriteria.builder()
+                .unresolvedOnly(listCommentReportsForm.unresolved_only() != null
+                    && listCommentReportsForm.unresolved_only())
+                .perPage(limit)
+                .page(page)
+                .community(List.of(community))
+                .build()));
       } else {
         commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-            CommentReportSearchCriteria.builder().unresolvedOnly(
-                    listCommentReportsForm.unresolved_only() != null
-                        && listCommentReportsForm.unresolved_only())
-                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
+            CommentReportSearchCriteria.builder()
+                .unresolvedOnly(listCommentReportsForm.unresolved_only() != null
+                    && listCommentReportsForm.unresolved_only())
+                .perPage(limit)
+                .page(page)
                 .build()));
       }
     }

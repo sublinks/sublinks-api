@@ -26,6 +26,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadataResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.dto.Community;
@@ -229,11 +230,14 @@ public class PostController extends AbstractLemmyApiController {
       listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
 
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(getPostsForm.page(), 1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(getPostsForm.limit(), 20);
+
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
-        .page(1)
+        .page(page)
         .listingType(conversionService.convert(listingType,
             com.sublinks.sublinksapi.person.enums.ListingType.class))
-        .perPage(20)
+        .perPage(perPage)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType)
@@ -286,7 +290,7 @@ public class PostController extends AbstractLemmyApiController {
         .build();
   }
 
-  @Operation(summary = "Like / vote on a post.")
+  @Operation(summary = "Get Votes on a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
@@ -302,7 +306,9 @@ public class PostController extends AbstractLemmyApiController {
     final Post post = postRepository.findById((long) listPostLikesForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    List<PostLike> likes = postLikeService.getPostLikes(post, 1, 20);
+    List<PostLike> likes = postLikeService.getPostLikes(post,
+        PaginationControllerUtils.getAbsoluteMinNumber(listPostLikesForm.page(), 1),
+        PaginationControllerUtils.getAbsoluteMinNumber(listPostLikesForm.limit(), 20));
 
     List<VoteView> voteViews = new ArrayList<>();
     for (PostLike like : likes) {
