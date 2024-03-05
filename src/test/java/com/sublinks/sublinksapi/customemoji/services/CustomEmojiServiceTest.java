@@ -18,7 +18,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomEmojiServiceTest {
@@ -50,6 +50,7 @@ public class CustomEmojiServiceTest {
     keywords.add("word");
     CustomEmoji customEmoji = customEmojiService.createCustomEmoji(emoji, keywords);
 
+    verify(emojiRepository, times(1)).save(any());
     assertNotNull(customEmoji.getKeywords());
   }
 
@@ -69,6 +70,8 @@ public class CustomEmojiServiceTest {
 
     customEmojiService.updateCustomEmoji(customEmoji, words);
 
+    verify(emojiKeywordRepository, times(1)).deleteAll(any());
+    verify(emojiRepository, times(2)).save(any());
     assertEquals(3, customEmoji.getKeywords().size());
   }
 
@@ -85,6 +88,8 @@ public class CustomEmojiServiceTest {
 
     customEmojiService.updateCustomEmoji(customEmoji, words);
 
+    verify(emojiKeywordRepository, times(1)).deleteAll(any());
+    verify(emojiRepository, times(2)).save(any());
     assertEquals(0, customEmoji.getKeywords().size());
   }
 }
