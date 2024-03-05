@@ -233,7 +233,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       "Validates your Token, throws an error if it is invalid.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = UpdateTotpResponse.class))})})
-  @PostMapping("validate_auth")
+  @GetMapping("validate_auth")
   SuccessResponse validate_auth(final JwtPerson principal) {
 
     Optional<Person> person = getOptionalPerson(principal);
