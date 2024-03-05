@@ -257,7 +257,7 @@ public class CustomEmojiTest {
         .updatedAt(Date.valueOf("2024-03-05"))
         .build();
 
-    assertEquals(emoji, emoji);
+    assertTrue(emoji.equals(emoji));
   }
 
   @Test
