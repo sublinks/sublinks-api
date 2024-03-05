@@ -12,6 +12,7 @@ import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.shared.RemovedState;
+import com.sublinks.sublinksapi.utils.CursorBasedPageable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -59,6 +60,13 @@ public class PostRepositoryImpl implements PostRepositorySearch {
       postPostLikeJoin.on(cb.equal(postPostLikeJoin.get("person"), postSearchCriteria.person()));
     }
 
+    if (postSearchCriteria.cursorBasedPageable() != null) {
+      CursorBasedPageable cursorBasedPageable = postSearchCriteria.cursorBasedPageable();
+
+      Integer postId = Integer.parseInt(cursorBasedPageable.getNextPageDecodedCursor());
+      predicates.add(cb.lessThan(postTable.get("id"), postId));
+    }
+
     cq.where(predicates.toArray(new Predicate[0]));
 
     switch (postSearchCriteria.sortType()) {
@@ -72,12 +80,14 @@ public class PostRepositoryImpl implements PostRepositorySearch {
         cq.orderBy(cb.desc(postTable.get("createdAt")));
         break;
     }
-
     int perPage = Math.min(Math.abs(postSearchCriteria.perPage()), 20);
 
     TypedQuery<Post> query = em.createQuery(cq);
-
-    applyPagination(query, postSearchCriteria.page(), perPage);
+    if (postSearchCriteria.cursorBasedPageable() == null) {
+      applyPagination(query, postSearchCriteria.page(), perPage);
+    } else {
+      applyPagination(query, null, perPage);
+    }
 
     return query.getResultList();
   }
