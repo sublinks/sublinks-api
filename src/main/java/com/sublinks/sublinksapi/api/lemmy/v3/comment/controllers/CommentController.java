@@ -329,7 +329,8 @@ public class CommentController extends AbstractLemmyApiController {
     final Comment comment = commentRepository.findById((long) listCommentLikesForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     List<CommentLike> likes = commentLikeService.getCommentLikes(comment,
-        listCommentLikesForm.page(), listCommentLikesForm.limit());
+        Math.abs(listCommentLikesForm.page() != null ? listCommentLikesForm.page() : 1),
+        Math.abs(listCommentLikesForm.limit() != null ? listCommentLikesForm.limit() : 20));
 
     final List<VoteView> voteViews = new ArrayList<>();
     for (CommentLike like : likes) {
@@ -384,6 +385,7 @@ public class CommentController extends AbstractLemmyApiController {
       }
     }
 
+    // @todo Should this really throw a error? Why not just clamp the values?
     if (perPage.isPresent() && (perPage.get() < 1 || perPage.get() > 50)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
     }
