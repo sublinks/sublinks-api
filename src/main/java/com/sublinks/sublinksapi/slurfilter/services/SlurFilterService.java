@@ -5,9 +5,11 @@ import com.sublinks.sublinksapi.slurfilter.enums.SlurActionType;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.repositories.SlurFilterRepository;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -85,7 +87,9 @@ public class SlurFilterService {
 
     for (Pattern pattern : patterns) {
       censoredText = pattern.matcher(censoredText)
-          .replaceAll(pattern.pattern().replaceAll(".", "*"));
+          .replaceAll(result -> Arrays.stream(result.group().split("\\s+"))
+              .map(word -> "*****")
+              .collect(Collectors.joining(" ")));
     }
     return censoredText;
   }
