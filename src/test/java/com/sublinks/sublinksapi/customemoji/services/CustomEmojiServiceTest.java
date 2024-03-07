@@ -39,6 +39,7 @@ public class CustomEmojiServiceTest {
 
   @BeforeEach
   public void setup() {
+
     emoji = CustomEmoji.builder().id(12345L).build();
     when(emojiRepository.save(any())).thenReturn(emoji);
     emojiKeyword = CustomEmojiKeyword.builder().id(123L).emoji(emoji).build();
@@ -46,6 +47,7 @@ public class CustomEmojiServiceTest {
 
   @Test
   public void createCustomEmojiTest() {
+
     List<String> keywords = new ArrayList<>();
     keywords.add("key");
     keywords.add("word");
@@ -57,6 +59,7 @@ public class CustomEmojiServiceTest {
 
   @Test
   public void updateCustomEmojiTest() {
+
     List<String> keywords = new ArrayList<>();
     keywords.add("key");
     keywords.add("word");
@@ -78,6 +81,7 @@ public class CustomEmojiServiceTest {
 
   @Test
   public void updateCustomEmojiNullListTest() {
+
     List<String> keywords = new ArrayList<>();
     keywords.add("key");
     keywords.add("word");
