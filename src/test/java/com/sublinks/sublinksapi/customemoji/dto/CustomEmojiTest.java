@@ -13,6 +13,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testEquals() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -41,6 +42,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testNotEquals() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -69,6 +71,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testEqualsSameIdDifferentText() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -97,6 +100,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testEqualsDifferentIdSameText() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -125,6 +129,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testNotEqualsToWrongClass() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -144,6 +149,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testHashCode() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -172,6 +178,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testHashCodeEqualsSameIdDifferentText() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -200,6 +207,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testHashCodeEqualsDifferentIdSameText() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -228,6 +236,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testHashCodeNotEqualsToWrongClass() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -247,6 +256,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testEqualsToSelf() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
@@ -264,6 +274,7 @@ public class CustomEmojiTest {
 
   @Test
   public void testEqualsToNull() {
+
     List<CustomEmojiKeyword> keywords = new ArrayList<>();
     CustomEmoji emoji = CustomEmoji.builder()
         .id(12345L)
