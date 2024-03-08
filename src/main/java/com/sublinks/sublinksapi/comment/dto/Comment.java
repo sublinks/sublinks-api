@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.comment.dto;
 
-import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -58,14 +57,29 @@ public class Comment implements Serializable {
   @JoinColumn(name = "community_id")
   private Community community;
 
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<CommentLike> likes;
+
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CommentReply> commentReply;
+
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CommentHistory> commentHistory;
+
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CommentRead> commentRead;
+
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CommentReport> commentReport;
+
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<CommentSave> commentSave;
 
   @ManyToOne
   @JoinColumn(name = "language_id")
   private Language language;
 
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
   @PrimaryKeyJoinColumn
   private CommentAggregate commentAggregate;
 

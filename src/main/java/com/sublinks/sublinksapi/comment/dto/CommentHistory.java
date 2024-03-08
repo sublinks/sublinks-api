@@ -46,7 +46,7 @@ public class CommentHistory implements Serializable {
    * Relationships.
    */
   @ManyToOne
-  @JoinColumn(name = "comment_id")
+  @JoinColumn(name = "comment_id", nullable = false)
   private Comment comment;
 
   /**
