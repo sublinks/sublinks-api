@@ -97,6 +97,15 @@ public class CommentService {
   }
 
   /**
+   * Deletes a comment and publishes an event.
+   *
+   * @param comment The Comment object to be deleted.
+   */
+  public void deleteComment(final Comment comment) {
+    commentRepository.deleteById(comment.getId());
+  }
+
+  /**
    * Updates a comment without publishing any event.
    *
    * @param comment The Comment object to be updated.

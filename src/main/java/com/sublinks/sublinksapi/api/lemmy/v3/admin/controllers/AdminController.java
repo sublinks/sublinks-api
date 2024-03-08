@@ -25,6 +25,7 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentHistoryService;
+import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -53,6 +54,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -76,6 +78,7 @@ public class AdminController extends AbstractLemmyApiController {
   private final LemmyPersonService lemmyPersonService;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
+  private final CommentService commentService;
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -273,14 +276,17 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Comment commentToPurge = commentRepository.getReferenceById(
         (long) purgeCommentForm.comment_id());
+
     try {
-      final int removedCommentHistory = commentHistoryService.deleteAllByComment(commentToPurge);
+      commentService.deleteComment(commentToPurge);
     } catch (Exception e) {
       e.printStackTrace();
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
+
     // @todo: Log purged history amount?
     // @todo: Implement purging
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    return PurgeItemResponse.builder().build();
   }
 }
