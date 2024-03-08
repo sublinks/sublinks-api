@@ -44,7 +44,7 @@ public class CommentLike implements Serializable {
   private Person person;
 
   @ManyToOne
-  @JoinColumn(name = "comment_id")
+  @JoinColumn(name = "comment_id", nullable = false)
   private Comment comment;
 
   /**
