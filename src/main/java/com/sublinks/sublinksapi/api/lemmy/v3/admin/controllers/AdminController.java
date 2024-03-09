@@ -283,10 +283,8 @@ public class AdminController extends AbstractLemmyApiController {
     logger.info("Purge reason: {}", purgeCommentForm.reason());
 
     try {
-      if (commentHistoryConfig.isKeepCommentHistory()) {
-        final int commentHistoryDeleted = commentHistoryService.deleteAllByComment(commentToPurge);
-        logger.info("Successfully deleted {} comments from commentHistory", commentHistoryDeleted);
-      }
+      final int commentHistoryDeleted = commentHistoryService.deleteAllByComment(commentToPurge);
+      logger.info("Successfully deleted {} comments from commentHistory", commentHistoryDeleted);
 
       final Comment deletedComment = commentService.deleteComment(commentToPurge);
       logger.info("Successfully deleted comment: {}", deletedComment.getId());
