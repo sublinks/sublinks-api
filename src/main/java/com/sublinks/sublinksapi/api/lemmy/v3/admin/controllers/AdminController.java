@@ -21,10 +21,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrati
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.config.CommentHistoryConfig;
 import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentHistoryService;
+import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
 import com.sublinks.sublinksapi.person.dto.Person;
@@ -34,7 +35,6 @@ import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicatio
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,6 +46,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,13 +71,16 @@ public class AdminController extends AbstractLemmyApiController {
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
   private final RoleAuthorizingService roleAuthorizingService;
-  private final PostHistoryRepository postHistoryRepository;
   private final PostHistoryService postHistoryService;
-  private final CommentHistoryRepository commentHistoryRepository;
   private final CommentHistoryService commentHistoryService;
   private final LemmyPersonService lemmyPersonService;
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
+  private final CommentService commentService;
+  private final CommentHistoryConfig commentHistoryConfig;
+
+  private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -273,14 +278,21 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Comment commentToPurge = commentRepository.getReferenceById(
         (long) purgeCommentForm.comment_id());
-    try {
-      final int removedCommentHistory = commentHistoryService.deleteAllByComment(commentToPurge);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    // @todo: Log purged history amount?
-    // @todo: Implement purging
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    logger.info("Purging comment: {}", commentToPurge.getId());
+    logger.info("Purge reason: {}", purgeCommentForm.reason());
+
+    try {
+      final int commentHistoryDeleted = commentHistoryService.deleteAllByComment(commentToPurge);
+      logger.info("Successfully deleted {} comments from commentHistory", commentHistoryDeleted);
+
+      final Comment deletedComment = commentService.deleteComment(commentToPurge);
+      logger.info("Successfully deleted comment: {}", deletedComment.getId());
+    } catch (Exception e) {
+      logger.error("Error occurred while purging comments: {}", e.getMessage(), e);
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+    }
+
+    return PurgeItemResponse.builder().build();
   }
 }

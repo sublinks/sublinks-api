@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Optional;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.shared.RemovedState;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +22,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
 
-  private final CommentRepository commentRepository;
   private final CommentAggregateRepository commentAggregateRepository;
+  private final CommentRepository commentRepository;
   private final CommentCreatedPublisher commentCreatedPublisher;
   private final CommentUpdatedPublisher commentUpdatedPublisher;
   private final LocalInstanceContext localInstanceContext;
+
+  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommentService.class);
 
   /**
    * Generates an ActivityPub ID for a given comment.
@@ -94,6 +98,25 @@ public class CommentService {
     commentRepository.saveAndFlush(comment);
     comment.setPath(String.format("%s.%d", parent.getPath(), comment.getId()));
     createComment(comment);
+  }
+
+  /**
+   * Deletes a comment and publishes an event.
+   *
+   * @param comment The Comment object to be deleted.
+   */
+  public Comment deleteComment(final Comment comment) {
+    String DELETED_REPLACEMENT_TEXT = "*Permanently Deleted*";
+
+    Comment foundComment = commentRepository.findById(comment.getId())
+        .orElseThrow(() -> {
+          logger.error("no comment found by id: {}", comment.getId());
+          return new EntityNotFoundException("could not find comment by Id");
+        });
+    foundComment.setCommentBody(DELETED_REPLACEMENT_TEXT);
+    foundComment.setRemovedState(RemovedState.PURGED);
+
+    return commentRepository.save(foundComment);
   }
 
   /**
