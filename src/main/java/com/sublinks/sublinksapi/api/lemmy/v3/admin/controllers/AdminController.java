@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonRegistrati
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.config.CommentHistoryConfig;
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentHistoryService;
@@ -76,6 +77,7 @@ public class AdminController extends AbstractLemmyApiController {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final CommentService commentService;
+  private final CommentHistoryConfig commentHistoryConfig;
 
   private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
@@ -281,8 +283,10 @@ public class AdminController extends AbstractLemmyApiController {
     logger.info("Purge reason: {}", purgeCommentForm.reason());
 
     try {
-      final int commentHistoryDeleted = commentHistoryService.deleteAllByComment(commentToPurge);
-      logger.info("Successfully deleted {} comments from commentHistory", commentHistoryDeleted);
+      if (commentHistoryConfig.isKeepCommentHistory()) {
+        final int commentHistoryDeleted = commentHistoryService.deleteAllByComment(commentToPurge);
+        logger.info("Successfully deleted {} comments from commentHistory", commentHistoryDeleted);
+      }
 
       final Comment deletedComment = commentService.deleteComment(commentToPurge);
       logger.info("Successfully deleted comment: {}", deletedComment.getId());
