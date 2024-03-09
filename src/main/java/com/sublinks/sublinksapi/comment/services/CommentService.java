@@ -114,7 +114,7 @@ public class CommentService {
           return new EntityNotFoundException("could not find comment by Id");
         });
     foundComment.setCommentBody(DELETED_REPLACEMENT_TEXT);
-    foundComment.setRemovedState(RemovedState.REMOVED);
+    foundComment.setRemovedState(RemovedState.PURGED);
 
     return commentRepository.save(foundComment);
   }
