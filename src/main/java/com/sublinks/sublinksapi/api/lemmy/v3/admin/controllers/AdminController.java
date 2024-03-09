@@ -47,6 +47,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -79,6 +81,9 @@ public class AdminController extends AbstractLemmyApiController {
   private final PostRepository postRepository;
   private final CommentRepository commentRepository;
   private final CommentService commentService;
+
+  private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
+
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -277,15 +282,16 @@ public class AdminController extends AbstractLemmyApiController {
     final Comment commentToPurge = commentRepository.getReferenceById(
         (long) purgeCommentForm.comment_id());
 
+    logger.info("Purging comment: {}", commentToPurge.getCommentBody());
+    logger.info("Purge reason: {}", purgeCommentForm.reason());
+
     try {
-      commentService.deleteComment(commentToPurge);
+      final int deletedCount = commentService.deleteComment(commentToPurge);
+      logger.info("Comments purged: {}", deletedCount);
     } catch (Exception e) {
-      e.printStackTrace();
+      logger.error("Error occurred while purging comments: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
-
-    // @todo: Log purged history amount?
-    // @todo: Implement purging
 
     return PurgeItemResponse.builder().build();
   }

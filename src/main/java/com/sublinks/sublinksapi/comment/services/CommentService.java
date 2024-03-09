@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepositoryImpl;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import java.util.List;
@@ -20,11 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CommentService {
 
-  private final CommentRepository commentRepository;
   private final CommentAggregateRepository commentAggregateRepository;
+  private final CommentRepository commentRepository;
   private final CommentCreatedPublisher commentCreatedPublisher;
   private final CommentUpdatedPublisher commentUpdatedPublisher;
   private final LocalInstanceContext localInstanceContext;
+  private final CommentRepositoryImpl commentRepositoryImpl;
 
   /**
    * Generates an ActivityPub ID for a given comment.
@@ -101,8 +103,8 @@ public class CommentService {
    *
    * @param comment The Comment object to be deleted.
    */
-  public void deleteComment(final Comment comment) {
-    commentRepository.deleteById(comment.getId());
+  public int deleteComment(final Comment comment) {
+    return commentRepositoryImpl.deleteByIdAndReturnDeletedCount(comment.getId());
   }
 
   /**
