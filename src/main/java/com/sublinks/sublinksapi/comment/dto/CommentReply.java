@@ -35,7 +35,7 @@ public class CommentReply implements Serializable {
    * Relationships.
    */
   @ManyToOne
-  @JoinColumn(name = "comment_id", nullable = false)
+  @JoinColumn(name = "comment_id")
   private Comment comment;
 
   @ManyToOne

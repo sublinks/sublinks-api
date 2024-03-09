@@ -57,29 +57,14 @@ public class Comment implements Serializable {
   @JoinColumn(name = "community_id")
   private Community community;
 
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
   private List<CommentLike> likes;
-
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CommentReply> commentReply;
-
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CommentHistory> commentHistory;
-
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CommentRead> commentRead;
-
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CommentReport> commentReport;
-
-  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-  private List<CommentSave> commentSave;
 
   @ManyToOne
   @JoinColumn(name = "language_id")
   private Language language;
 
-  @OneToOne(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @PrimaryKeyJoinColumn
   private CommentAggregate commentAggregate;
 
