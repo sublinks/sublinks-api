@@ -27,15 +27,6 @@ public class CommentReplyService {
   }
 
   /**
-   * Deletes a comment from comment_replies
-   *
-   * @param commentId The ID for the comment to be deleted.
-   */
-  public void deleteOneByCommentId(Long commentId) {
-    commentReplyRepository.deleteByCommentId(commentId);
-  }
-
-  /**
    * Updates an existing comment reply and publishes an event indicating its
    * update.
    *
