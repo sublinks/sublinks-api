@@ -73,9 +73,7 @@ public class AdminController extends AbstractLemmyApiController {
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
   private final RoleAuthorizingService roleAuthorizingService;
-  private final PostHistoryRepository postHistoryRepository;
   private final PostHistoryService postHistoryService;
-  private final CommentHistoryRepository commentHistoryRepository;
   private final CommentHistoryService commentHistoryService;
   private final LemmyPersonService lemmyPersonService;
   private final PostRepository postRepository;
@@ -282,12 +280,15 @@ public class AdminController extends AbstractLemmyApiController {
     final Comment commentToPurge = commentRepository.getReferenceById(
         (long) purgeCommentForm.comment_id());
 
-    logger.info("Purging comment: {}", commentToPurge.getCommentBody());
+    logger.info("Purging comment: {}", commentToPurge.getId());
     logger.info("Purge reason: {}", purgeCommentForm.reason());
 
     try {
-      final int deletedCount = commentService.deleteComment(commentToPurge);
-      logger.info("Comments purged: {}", deletedCount);
+      final int commentHistoryDeleted = commentHistoryService.deleteAllByComment(commentToPurge);
+      logger.info("Successfully deleted {} comments from commentHistory", commentHistoryDeleted);
+
+      final Comment deletedComment = commentService.deleteComment(commentToPurge);
+      logger.info("Successfully deleted comment: {}", deletedComment.getId());
     } catch (Exception e) {
       logger.error("Error occurred while purging comments: {}", e.getMessage(), e);
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);

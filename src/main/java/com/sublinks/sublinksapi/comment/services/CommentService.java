@@ -6,14 +6,15 @@ import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
-import com.sublinks.sublinksapi.comment.repositories.CommentRepositoryImpl;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import java.util.List;
 import java.util.Optional;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.shared.RemovedState;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,8 @@ public class CommentService {
   private final CommentCreatedPublisher commentCreatedPublisher;
   private final CommentUpdatedPublisher commentUpdatedPublisher;
   private final LocalInstanceContext localInstanceContext;
-  private final CommentRepositoryImpl commentRepositoryImpl;
+
+  private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommentService.class);
 
   /**
    * Generates an ActivityPub ID for a given comment.
@@ -103,8 +105,18 @@ public class CommentService {
    *
    * @param comment The Comment object to be deleted.
    */
-  public int deleteComment(final Comment comment) {
-    return commentRepositoryImpl.deleteByIdAndReturnDeletedCount(comment.getId());
+  public Comment deleteComment(final Comment comment) {
+    String DELETED_REPLACEMENT_TEXT = "*Permanently Deleted*";
+
+    Comment foundComment = commentRepository.findById(comment.getId())
+        .orElseThrow(() -> {
+          logger.error("no comment found by id: {}", comment.getId());
+          return new EntityNotFoundException("could not find comment by Id");
+        });
+    foundComment.setCommentBody(DELETED_REPLACEMENT_TEXT);
+    foundComment.setRemovedState(RemovedState.REMOVED);
+
+    return commentRepository.save(foundComment);
   }
 
   /**

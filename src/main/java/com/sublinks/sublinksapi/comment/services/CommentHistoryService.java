@@ -60,6 +60,9 @@ public class CommentHistoryService {
 
   @Transactional
   public int deleteAllByComment(Comment comment) {
+    if (!commentHistoryConfig.isKeepCommentHistory()) {
+      return 0;
+    }
 
     return commentHistoryRepository.deleteAllByComment(comment);
   }

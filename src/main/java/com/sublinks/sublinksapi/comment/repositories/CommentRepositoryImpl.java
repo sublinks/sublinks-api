@@ -136,12 +136,4 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     return em.createQuery(cq).getResultList();
 
   }
-
-  @Transactional
-  @Modifying
-  public int deleteByIdAndReturnDeletedCount(Long id) {
-    Query deleteQuery = em.createQuery("DELETE FROM Comment c WHERE c.id = :id");
-    deleteQuery.setParameter("id", id);
-    return deleteQuery.executeUpdate();
-  }
 }
