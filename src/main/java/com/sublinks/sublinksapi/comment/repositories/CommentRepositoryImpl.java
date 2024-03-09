@@ -8,7 +8,6 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -20,8 +19,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.transaction.annotation.Transactional;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
@@ -134,6 +131,5 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
-
   }
 }
