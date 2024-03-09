@@ -22,7 +22,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentHistoryService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
@@ -35,7 +34,6 @@ import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicatio
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +54,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 

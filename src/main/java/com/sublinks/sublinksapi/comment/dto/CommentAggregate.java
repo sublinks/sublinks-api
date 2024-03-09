@@ -31,7 +31,7 @@ public class CommentAggregate {
    * Relationships.
    */
   @OneToOne
-  @JoinColumn(name = "comment_id", referencedColumnName = "id")
+  @JoinColumn(name = "comment_id")
   private Comment comment;
 
   /**
