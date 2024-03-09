@@ -34,7 +34,7 @@ public class CommentSave {
    * Relationships.
    */
   @ManyToOne
-  @JoinColumn(name = "comment_id", nullable = false)
+  @JoinColumn(name = "comment_id")
   private Comment comment;
 
   @OneToOne
