@@ -2,14 +2,15 @@ package com.sublinks.sublinksapi.post.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.community.entities.Community;
-import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
-import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
+import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
+import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
-import com.sublinks.sublinksapi.post.entities.Post;
-import com.sublinks.sublinksapi.post.entities.PostLike;
+import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.dto.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.CursorBasedPageable;
@@ -23,9 +24,21 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.datetime.DateFormatter;
 
 @AllArgsConstructor
 public class PostRepositoryImpl implements PostRepositorySearch {
@@ -60,11 +73,31 @@ public class PostRepositoryImpl implements PostRepositorySearch {
       postPostLikeJoin.on(cb.equal(postPostLikeJoin.get("person"), postSearchCriteria.person()));
     }
 
-    if (postSearchCriteria.cursorBasedPageable() != null) {
-      CursorBasedPageable cursorBasedPageable = postSearchCriteria.cursorBasedPageable();
+    CursorBasedPageable<Post> cursorBasedPageable = postSearchCriteria.cursorBasedPageable();
 
-      Integer postId = Integer.parseInt(cursorBasedPageable.getNextPageDecodedCursor());
-      predicates.add(cb.lessThan(postTable.get("id"), postId));
+    if (cursorBasedPageable != null) {
+      try {
+        final Map<String, String> values = cursorBasedPageable.getNextPageDecodedCursor();
+        final String primary = values.get("primary");
+        // 2024-03-17T11:07:39.000057+01 format
+
+        final Date secondary = new SimpleDateFormat(DateUtils.FRONT_END_DATE_FORMAT).parse(
+            values.get("secondary"));
+
+        final Predicate primaryPredicate = cb.lessThan(postTable.get("id"),
+            Integer.parseInt(primary));
+        final Predicate secondaryPredicate = switch (postSearchCriteria.sortType()) {
+          case New -> cb.lessThan(postTable.<Date>get("createdAt"), secondary);
+          case Old -> cb.greaterThan(postTable.<Date>get("createdAt"), secondary);
+          default -> cb.lessThan(postTable.<Date>get("createdAt"), secondary);
+        };
+        final Predicate secondaryPrimaryPredicate = cb.equal(postTable.get("createdAt"), primary);
+        predicates.add(
+            cb.or(cb.and(primaryPredicate, secondaryPrimaryPredicate), secondaryPredicate));
+      } catch (Exception e) {
+        System.out.println("Error in parsing date");
+        throw new IllegalArgumentException("Error in parsing Cursor");
+      }
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
@@ -83,7 +116,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     int perPage = Math.min(Math.abs(postSearchCriteria.perPage()), 20);
 
     TypedQuery<Post> query = em.createQuery(cq);
-    if (postSearchCriteria.cursorBasedPageable() == null) {
+    if (cursorBasedPageable == null) {
       applyPagination(query, postSearchCriteria.page(), perPage);
     } else {
       applyPagination(query, null, perPage);

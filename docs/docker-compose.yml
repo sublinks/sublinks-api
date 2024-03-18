@@ -38,9 +38,6 @@ services:
       DB_DSN: "federation:federation@tcp(federationdb:3306)/federation?charset=utf8mb4&parseTime=True&loc=Local"
       AMQP_SERVER_URL: "amqp://sublinks:sublinks@queue:5672"
       HOSTNAME: sublinks.org"
-    depends_on:
-      - sublinks
-
   federationdb:
     image: mysql:latest
     environment:
@@ -51,31 +48,6 @@ services:
     restart: always
     logging: *default-logging
 
-  sublinks:
-    image: ghcr.io/sublinks/sublinks-api:0.0.1-snapshot
-    restart: always
-    ports:
-      - "8080"
-    environment:
-      SUBLINKS_DB_URL: jdbc:mysql://db:3306/sublinks
-      SUBLINKS_DB_USERNAME: sublinks
-      SUBLINKS_DB_PASSWORD: sublinks
-      SUBLINKS_JWT_SECRET: <JWT-SECRET>
-      SUBLINKS_BASE_URL: https://demo.sublinks.org
-      SUBLINKS_PICTRS_URL: http://pictrs:8080
-      FEDERATION_QUEUE_HOST: localhost
-      FEDERATION_QUEUE_PORT: 5672
-      FEDERATION_QUEUE_USER: sublinks
-      FEDERATION_QUEUE_PASS: sublinks
-      FEDERATION_QUEUE_NAME: federation
-      FEDERATION_EXCHANGE_NAME: federation
-      BACKEND_QUEUE_NAME: backend
-      BACKEND_TOPIC_NAME: backend
-    logging: *default-logging
-    depends_on:
-      - db
-      - pictrs
-      - queue
 
   db:
     image: mysql:latest
@@ -86,6 +58,8 @@ services:
       - MYSQL_PASSWORD=sublinks
     restart: always
     logging: *default-logging
+    ports:
+      - "3306:3306"
 
   lemmy-ui:
     image: dessalines/lemmy-ui:0.19.3
@@ -97,7 +71,6 @@ services:
     restart: always
     logging: *default-logging
     depends_on:
-      - sublinks
       - federation
 
   pictrs:
