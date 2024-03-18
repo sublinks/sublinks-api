@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import java.util.List;
+import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.utils.CursorBasedPageable;
 import lombok.Builder;
 
@@ -13,7 +14,7 @@ public record PostSearchCriteria(
     ListingType listingType,
     int perPage,
     int page,
-    CursorBasedPageable cursorBasedPageable,
+    CursorBasedPageable<Post> cursorBasedPageable,
     List<Long> communityIds,
     Person person,
     boolean isSavedOnly,

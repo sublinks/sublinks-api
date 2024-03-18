@@ -1,7 +1,10 @@
 package com.sublinks.sublinksapi.utils;
 
+import com.sublinks.sublinksapi.utils.models.CursorPageable;
 import jakarta.persistence.TypedQuery;
 import org.springframework.lang.Nullable;
+
+import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
 
@@ -34,13 +37,5 @@ public class PaginationUtils {
       query.setFirstResult(getOffset(page, size));
     }
     query.setMaxResults(Math.abs(size));
-  }
-
-  public static CursorBasedPageable getCursor(String prefix, Integer id) {
-
-    requireNonNull(prefix);
-    requireNonNull(id);
-
-    return new CursorBasedPageable(prefix, id.toString());
   }
 }
