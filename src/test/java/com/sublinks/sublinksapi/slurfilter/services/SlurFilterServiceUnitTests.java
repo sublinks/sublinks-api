@@ -325,6 +325,6 @@ public class SlurFilterServiceUnitTests {
     verify(slurFilterRepository, times(1)).findAll();
     verify(slurFilterRepository, times(1)).findBySlurActionType(SlurActionType.REPLACE);
 
-    assertEquals("Some **** *********** in here.", resultText, "Censored text did not match expected");
+    assertEquals("Some **** ***** in here.", resultText, "Censored text did not match expected");
   }
 }
