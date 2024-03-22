@@ -24,7 +24,9 @@ public class SlurFilterService {
 
     SlurFilter slurFilter = slurFilterRepository.findAll().stream().findFirst().orElse(null);
     if (slurFilter == null) {
-      slurFilter = SlurFilter.builder().slurRegex(regex).slurActionType(SlurActionType.BLOCK)
+      slurFilter = SlurFilter.builder()
+          .slurRegex(regex)
+          .slurActionType(SlurActionType.BLOCK)
           .build();
     } else {
       slurFilter.setSlurRegex(regex);
@@ -36,8 +38,7 @@ public class SlurFilterService {
 
     SlurFilter slurFilter = slurFilterRepository.findAll().stream().findFirst().orElse(null);
     if (slurFilter == null) {
-      slurFilter = SlurFilter.builder().slurRegex("").slurActionType(SlurActionType.BLOCK)
-          .build();
+      slurFilter = SlurFilter.builder().slurRegex("").slurActionType(SlurActionType.BLOCK).build();
     }
     slurFilterRepository.save(slurFilter);
     return slurFilter;
@@ -51,8 +52,8 @@ public class SlurFilterService {
     }
 
     return slurFilters.stream()
-        .filter((slurFilter -> !slurFilter.getSlurRegex().isBlank()))
-        .filter((slur) -> Pattern.compile(slur.getSlurRegex()).matcher(text).find())
+        .filter(slurFilter -> !slurFilter.getSlurRegex().isBlank() && Pattern.compile(
+            slurFilter.getSlurRegex()).matcher(text).find())
         .max(Comparator.comparing(SlurFilter::getSlurActionType))
         .orElse(null);
   }
@@ -84,8 +85,9 @@ public class SlurFilterService {
         .toList();
 
     for (Pattern pattern : patterns) {
+      // Censor all found text with the same word count of the found word with *
       censoredText = pattern.matcher(censoredText)
-          .replaceAll(pattern.pattern().replaceAll(".", "*"));
+          .replaceAll(match -> "*".repeat(match.group().length()));
     }
     return censoredText;
   }
