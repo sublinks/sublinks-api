@@ -95,3 +95,9 @@ tasks.named("bootBuildImage") {
         }
     }
 }
+
+tasks.named("jar") {
+    // Disable generation of the "plain" jar file and just generate the fat jar file
+    // See https://docs.spring.io/spring-boot/docs/3.2.3/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
+    enabled = false
+}
