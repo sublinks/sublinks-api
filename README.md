@@ -95,7 +95,23 @@ experience, content authenticity, and networked social interaction
 ## Contributing
 
 - [Contributing instructions](https://sublinks.org/docs/contributors/01-overview)
-- [Local Development](https://sublinks.org/docs/contributors/local-development)
+
+### Docker Setup (for dependencies)
+
+To use this Docker setup you first need to complete a few steps:
+
+- Run `git submodule update --init --recursive` to pull down all submodules
+- `docker-compose -f docker/docker-compose.backend.yaml up [-d]`
+  - `-d` to run in detached mode (don't include the [] brackets, they indicate
+  being optional)
+  - NOTE: The UI service will fail unless the API is already running. However,
+  the API will also fail if the database is not running. So, it is recommended
+  to run the backend first and ignore the errors until the database is running
+
+### Run
+
+- Run `./gradlew bootRun`
+- Open [localhost:8080](http://localhost:8080/)
 
 ## Support / Donate
 
