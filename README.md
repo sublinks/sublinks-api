@@ -92,7 +92,21 @@ social interaction.
 ## Contributing
 
 - [Contributing instructions](https://sublinks.org/docs/contributors/01-overview)
-- [Local Development](https://sublinks.org/docs/contributors/local-development)
+
+### Docker Setup (for dependencies)
+
+To use this Docker setup you first need to complete a few steps:
+
+- Authenticate towards GitHub's container registry(GHCR)
+  - Please follow [this guide](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-with-a-personal-access-token-classic) to create an access token and authenticate before running the below command.
+- Run `git submodule update --init --recursive` to pull down all submodules
+- docker-compose -f docker/docker-compose.backend.yaml up [-d]
+  - -d to run in detached mode (don't include the [] brackets, they indicate being optional)
+
+### Run
+
+- Run `./gradlew bootRun`
+- Open [localhost:8080](http://localhost:8080/)
 
 ## Support / Donate
 
