@@ -292,8 +292,8 @@ public class CommentController extends AbstractLemmyApiController {
         switch (createCommentLikeForm.score()) {
           case 1 -> RolePermission.COMMENT_UPVOTE;
           case -1 -> RolePermission.COMMENT_DOWNVOTE;
-          case 0 -> RolePermission.COMMENT_NEUTRAL;
-          default -> RolePermission.COMMENT_NEUTRAL;
+          case 0 -> RolePermission.COMMENT_NEUTRALVOTE;
+          default -> RolePermission.COMMENT_NEUTRALVOTE;
         },
 
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));

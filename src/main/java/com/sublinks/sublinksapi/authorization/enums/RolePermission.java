@@ -66,12 +66,12 @@ public enum RolePermission {
   POST_LIST_VOTES("post-upvote", AuthorizeAction.READ),
   POST_UPVOTE("post-upvote", AuthorizeAction.CREATE),
   POST_DOWNVOTE("post-downvote", AuthorizeAction.CREATE),
-  POST_NEUTRAL("post-neutral", AuthorizeAction.CREATE),
+  POST_NEUTRALVOTE("post-neutralvote", AuthorizeAction.CREATE),
 
   COMMENT_LIST_VOTES("comment-upvote", AuthorizeAction.READ),
   COMMENT_UPVOTE("comment-upvote", AuthorizeAction.CREATE),
   COMMENT_DOWNVOTE("comment-downvote", AuthorizeAction.CREATE),
-  COMMENT_NEUTRAL("comment-neutral", AuthorizeAction.CREATE),
+  COMMENT_NEUTRALVOTE("comment-neutralvote", AuthorizeAction.CREATE),
 
   // Emoji permissions
 
