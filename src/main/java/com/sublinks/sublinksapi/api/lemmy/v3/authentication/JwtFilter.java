@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.UserDataService;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -29,10 +30,9 @@ public class JwtFilter extends OncePerRequestFilter {
   private final UserDataService userDataService;
 
   @Override
-  protected void doFilterInternal(
-      final HttpServletRequest request,
-      final HttpServletResponse response,
-      final FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(final HttpServletRequest request,
+      final HttpServletResponse response, final FilterChain filterChain)
+      throws ServletException, IOException {
 
     String authorizingToken = request.getHeader("authorization");
 
@@ -58,8 +58,8 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         userName = jwtUtil.extractUsername(token);
       }
-    } catch (ExpiredJwtException ex) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    } catch (ExpiredJwtException | SignatureException ex) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid_token");
     }
 
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
