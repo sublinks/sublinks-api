@@ -78,7 +78,7 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person")
   private List<UserData> userData;
 
-  @OneToMany
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
 
@@ -325,6 +325,7 @@ public class Person implements UserDetails, Principal {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }
