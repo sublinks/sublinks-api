@@ -53,7 +53,7 @@ dependencies {
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
 
 
-    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.3'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.4'
     implementation 'org.apache.commons:commons-text:1.11.0'
     implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
     implementation 'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE'
