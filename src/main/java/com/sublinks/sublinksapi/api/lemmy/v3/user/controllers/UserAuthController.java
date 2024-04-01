@@ -7,6 +7,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApi
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.CaptchaResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ChangePassword;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ChangePasswordEmail;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
@@ -28,13 +30,16 @@ import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Captcha;
+import com.sublinks.sublinksapi.person.dto.PasswordReset;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.CaptchaService;
+import com.sublinks.sublinksapi.person.services.PasswordResetService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import com.sublinks.sublinksapi.person.services.UserDataService;
 import com.sublinks.sublinksapi.queue.services.Producer;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
@@ -47,6 +52,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +90,8 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final ConversionService conversionService;
   private final EmailService emailService;
   private final Optional<Producer> federationProducer;
+  private final UserDataService userDataService;
+  private final PasswordResetService passwordResetService;
 
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
@@ -102,7 +110,8 @@ public class UserAuthController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "Person is blocked by slur filter.", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("register")
-  LoginResponse create(@Valid @RequestBody final Register registerForm) throws LemmyException {
+  LoginResponse create(final HttpServletRequest request,
+      @Valid @RequestBody final Register registerForm) throws LemmyException {
 
     InstanceConfig instanceConfig = localInstanceContext.instance().getInstanceConfig();
 
@@ -131,6 +140,7 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     final Person person = personService.getDefaultNewUser(registerForm.username());
     person.setEmail(registerForm.email());
+    person.setPassword(registerForm.password());
     if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
       throw new RuntimeException("Passwords do not match");
       // @todo throw lemmy error code
@@ -145,8 +155,10 @@ public class UserAuthController extends AbstractLemmyApiController {
 
         personRegistrationApplicationService.createPersonRegistrationApplication(
             PersonRegistrationApplication.builder()
-                .applicationStatus(PersonRegistrationApplicationStatus.pending).person(person)
-                .question(instanceConfig.getRegistrationQuestion()).answer(registerForm.answer())
+                .applicationStatus(PersonRegistrationApplicationStatus.pending)
+                .person(person)
+                .question(instanceConfig.getRegistrationQuestion())
+                .answer(registerForm.answer())
                 .build());
         token = "";
       }
@@ -164,7 +176,8 @@ public class UserAuthController extends AbstractLemmyApiController {
                 + "TODO");
         try {
           final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
-          emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
+          emailService.sendEmail(CreateEmailRequest.builder()
+              .to(List.of(person.getEmail()))
               .subject(emailService.getSubjects().get(template_name).getAsString())
               .body(emailService.formatTextEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
@@ -185,7 +198,8 @@ public class UserAuthController extends AbstractLemmyApiController {
         final Context context = new Context(Locale.getDefault(), properties);
 
         final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
-        emailService.sendEmail(CreateEmailRequest.builder().to(List.of(person.getEmail()))
+        emailService.sendEmail(CreateEmailRequest.builder()
+            .to(List.of(person.getEmail()))
             .subject(emailService.getSubjects().get(template_name).getAsString())
             .body(emailService.formatTextEmailTemplate(template_name, context))
             .htmlBody(emailService.formatEmailTemplate(template_name, context))
@@ -196,22 +210,29 @@ public class UserAuthController extends AbstractLemmyApiController {
     }
 
     federationProducer.ifPresent(service -> {
-      final Actor actorMessage =
-          Actor.builder()
-              .actor_id(person.getActorId())
-              .actor_type(ActorType.USER.getValue())
-              .bio(person.getBiography())
-              .display_name(person.getDisplayName())
-              .matrix_user_id(person.getMatrixUserId())
-              .private_key(person.getPrivateKey())
-              .public_key(person.getPublicKey())
-              .build();
+      final Actor actorMessage = Actor.builder()
+          .actor_id(person.getActorId())
+          .actor_type(ActorType.USER.getValue())
+          .bio(person.getBiography())
+          .display_name(person.getDisplayName())
+          .matrix_user_id(person.getMatrixUserId())
+          .private_key(person.getPrivateKey())
+          .public_key(person.getPublicKey())
+          .build();
 
       service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
     });
 
-    return LoginResponse.builder().jwt(token).registration_created(true)
-        .verify_email_sent(send_verification_email).build();
+    if (token != null && !token.isEmpty()) {
+      userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
+          request.getHeader("User-Agent"));
+    }
+
+    return LoginResponse.builder()
+        .jwt(token)
+        .registration_created(true)
+        .verify_email_sent(send_verification_email)
+        .build();
   }
 
   @Operation(summary = "Fetch a Captcha.")
@@ -225,7 +246,8 @@ public class UserAuthController extends AbstractLemmyApiController {
     }
     Captcha captcha = captchaService.getCaptcha();
     return GetCaptchaResponse.builder()
-        .ok(conversionService.convert(captcha, CaptchaResponse.class)).build();
+        .ok(conversionService.convert(captcha, CaptchaResponse.class))
+        .build();
   }
 
   @Operation(summary = "Log into lemmy.")
@@ -234,7 +256,8 @@ public class UserAuthController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "A valid user is not found or password is incorrect.", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("login")
-  LoginResponse login(@Valid @RequestBody final Login loginForm) throws LemmyException {
+  LoginResponse login(final HttpServletRequest request, @Valid @RequestBody final Login loginForm)
+      throws LemmyException {
 
     final Person person = personRepository.findOneByName(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
@@ -250,8 +273,17 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
     }
 
+    if (!personService.isPasswordEqual(person, loginForm.password())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
+    }
+
     final String token = jwtUtil.generateToken(person);
-    return LoginResponse.builder().jwt(token)
+
+    userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
+        request.getHeader("User-Agent"));
+
+    return LoginResponse.builder()
+        .jwt(token)
         .registration_created(false) // @todo return true if application created
         .verify_email_sent(false) // @todo return true if welcome email sent for verification
         .build();
@@ -276,23 +308,94 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PasswordResetResponse.class))})})
   @PostMapping("password_reset")
-  PasswordResetResponse passwordReset(final JwtPerson principal) {
+  PasswordResetResponse passwordReset(
+      @RequestBody final com.sublinks.sublinksapi.api.lemmy.v3.user.models.PasswordReset passwordResetForm) {
 
-    final Person person = getPersonOrThrowUnauthorized(principal);
+    Optional<Person> person = personRepository.findOneByEmail(passwordResetForm.email());
 
     // @todo: implement reset password and check for 2fa
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    if (person.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_not_found");
+    }
+    final String template_name = EmailTemplatesEnum.PASSWORD_RESET.toString();
+
+    Person foundPerson = person.get();
+
+    if (foundPerson.getEmail() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
+    }
+
+    if (passwordResetService.isRateLimited(foundPerson)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "rate_limited");
+    }
+
+    PasswordReset passwordReset = passwordResetService.createPasswordReset(foundPerson);
+
+    try {
+      Map<String, Object> params = emailService.getDefaultEmailParameters();
+
+      params.put("person", foundPerson);
+
+      String url = localInstanceContext.instance()
+          .getDomain()
+          .substring(0, localInstanceContext.instance().getDomain().length() - 4)
+          + "/password_change/" + passwordReset.getToken();
+
+      // #todo: implement the password reset in the frontend
+      params.put("resetUrl", url);
+
+      emailService.sendEmail(CreateEmailRequest.builder()
+          .to(List.of(foundPerson.getEmail()))
+          .subject(emailService.getSubjects().get(template_name).getAsString())
+          .body(emailService.formatTextEmailTemplate(template_name,
+              new Context(Locale.getDefault(), params)))
+          .htmlBody(emailService.formatEmailTemplate(template_name,
+              new Context(Locale.getDefault(), params)))
+          .build());
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "email_sending_failed");
+    }
+
+    return PasswordResetResponse.builder().build();
   }
 
   @Operation(summary = "Change your password from an email / token based reset.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class))})})
   @PostMapping("password_change")
-  LoginResponse passwordChange() {
+  LoginResponse passwordChange(final HttpServletRequest request,
+      @RequestBody final ChangePasswordEmail changePasswordForm) {
 
-    // @todo: implement reset password
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    Optional<PasswordReset> passwordReset = passwordResetService.findFirstByToken(
+        changePasswordForm.token());
+
+    if (passwordReset.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "token_invalid");
+    }
+    PasswordReset passwordResetEntity = passwordReset.get();
+
+    if (passwordResetEntity.isUsed()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "token_used");
+    }
+
+    if (passwordResetEntity.getPerson() == null) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "token_invalid");
+    }
+
+    Person person = passwordResetEntity.getPerson();
+
+    if (!Objects.equals(changePasswordForm.password(), changePasswordForm.password_verify())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "passwords_do_not_match");
+    }
+
+    passwordResetEntity.setUsed(true);
+    person.setPassword(personService.encodePassword(changePasswordForm.password()));
+
+    passwordResetService.updatePasswordReset(passwordResetEntity);
+    personService.updatePerson(person);
+
+    return LoginResponse.builder().jwt(jwtUtil.generateToken(person)).build();
   }
 
   @Operation(summary = "Verify your email.")
@@ -310,15 +413,33 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = LoginResponse.class))})})
   @PutMapping("change_password")
-  LoginResponse changePassword(final JwtPerson principal) {
+  LoginResponse changePassword(final HttpServletRequest request,
+      @RequestBody final ChangePassword changePasswordForm, final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermission(person, RolePermission.RESET_PASSWORD);
 
-    // @todo: implement change password
+    if (!personService.isPasswordEqual(person, changePasswordForm.old_password())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
+    }
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    if (!Objects.equals(changePasswordForm.new_password(),
+        changePasswordForm.new_password_verify())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "passwords_do_not_match");
+    }
+
+    person.setPassword(personService.encodePassword(changePasswordForm.new_password()));
+
+    personService.updatePerson(person);
+    userDataService.invalidateAllUserData(person);
+
+    String token = jwtUtil.generateToken(person);
+
+    userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
+        request.getHeader("User-Agent"));
+
+    return LoginResponse.builder().jwt(token).build();
   }
 
   @Operation(summary = "Generate a TOTP / two-factor secret.\r\r Afterwards you need to call `/user/totp/update` with a valid token to enable it.")
@@ -336,7 +457,8 @@ public class UserAuthController extends AbstractLemmyApiController {
               TotpUtil.createUri(localInstanceContext.instance().getDomain(), person.getName(),
                   secret).toString()
 
-          ).build();
+          )
+          .build();
 
       person.setTotpSecret(secret);
       personService.updatePerson(person);
@@ -394,7 +516,9 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     Optional<Person> person = getOptionalPerson(principal);
 
-    return SuccessResponse.builder().success(person.isPresent())
-        .error(person.isPresent() ? null : "not_logged_in").build();
+    return SuccessResponse.builder()
+        .success(person.isPresent())
+        .error(person.isPresent() ? null : "not_logged_in")
+        .build();
   }
 }
