@@ -58,18 +58,16 @@ public class UserDataService {
         userDataUpdatedPublisher.publish(userData);
         return;
       }
-      if (foundData.isEmpty()) {
         UserData userData = UserData.builder()
-            .person(person)
-            .ipAddress(ipAddress)
-            .userAgent(userAgent)
-            .token(token)
-            .active(true)
-            .lastUsedAt(new Date())
-            .build();
+                .person(person)
+                .ipAddress(ipAddress)
+                .userAgent(userAgent)
+                .token(token)
+                .active(true)
+                .lastUsedAt(new Date())
+                .build();
         UserData createdUserData = userDataRepository.save(userData);
         userDataCreatedPublisher.publish(createdUserData);
-      }
     }
   }
 

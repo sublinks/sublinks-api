@@ -395,7 +395,13 @@ public class UserAuthController extends AbstractLemmyApiController {
     passwordResetService.updatePasswordReset(passwordResetEntity);
     personService.updatePerson(person);
 
-    return LoginResponse.builder().jwt(jwtUtil.generateToken(person)).build();
+    userDataService.invalidateAllUserData(person);
+    String token = jwtUtil.generateToken(person);
+
+    userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
+        request.getHeader("User-Agent"));
+
+    return LoginResponse.builder().jwt(token).build();
   }
 
   @Operation(summary = "Verify your email.")
