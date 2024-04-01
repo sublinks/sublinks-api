@@ -25,6 +25,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ResourceUtils;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.context.IContext;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -110,10 +111,10 @@ public class EmailService {
 
   public JsonObject getSubjects() throws IOException {
 
-    String subjectsJson = FileUtils.readFromInputStream(
-        new FileInputStream("email-templates/subjects.json"));
+    File subjectsJson = ResourceUtils.getFile("classpath:email-templates/subjects.json");
 
-    return new Gson().fromJson(subjectsJson, JsonObject.class);
+    String data = FileUtils.readFromInputStream(new FileInputStream(subjectsJson));
+    return new Gson().fromJson(data, JsonObject.class);
   }
 
   public Map<String, Object> getDefaultPersonEmailParameters(final Person person) {

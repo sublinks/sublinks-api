@@ -5,21 +5,18 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserDataDeletedPublisher {
+public class UserDataUpdatedPublisher {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  public UserDataDeletedPublisher(
-      final ApplicationEventPublisher applicationEventPublisher
-  ) {
+  public UserDataUpdatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
 
     this.applicationEventPublisher = applicationEventPublisher;
   }
 
   public void publish(final UserData userData) {
 
-    UserDataDeletedEvent userDataDeletedEvent = new UserDataDeletedEvent(
-        this, userData);
-    applicationEventPublisher.publishEvent(userDataDeletedEvent);
+    UserDataUpdateEvent userDataUpdateEvent = new UserDataUpdateEvent(this, userData);
+    applicationEventPublisher.publishEvent(userDataUpdateEvent);
   }
 }
