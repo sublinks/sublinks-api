@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.UserData;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.UserDataService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -68,8 +69,13 @@ public class JwtFilter extends OncePerRequestFilter {
         throw new UsernameNotFoundException("Invalid name");
       }
 
-      if (jwtUtil.validateToken(token, person.get())) {
-        userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(),
+      final Optional<UserData> userData = userDataService.getActiveUserDataByPersonAndToken(
+          person.get(), token);
+
+      if (userData.isPresent() && jwtUtil.validateToken(token, person.get())) {
+
+        // Add a check if token and ip was changed? To give like a "warning" to the user that he has a new ip logged into his account
+        userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(), token,
             request.getHeader("User-Agent"));
         final JwtPerson authenticationToken = new JwtPerson(person.get(),
             person.get().getAuthorities());

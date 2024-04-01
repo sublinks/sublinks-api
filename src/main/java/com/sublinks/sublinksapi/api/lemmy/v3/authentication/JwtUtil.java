@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.services.UserDataService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -24,7 +25,7 @@ public class JwtUtil implements Serializable {
   private static final long serialVersionUID = -2550185165626007488L;
   private final String secret;
 
-  public JwtUtil(@Value("${jwt.secret}") final String secret) {
+  public JwtUtil(@Value("${jwt.secret}") final String secret, UserDataService userDataService) {
 
     this.secret = secret;
   }
