@@ -25,7 +25,7 @@ public class JwtUtil implements Serializable {
   private static final long serialVersionUID = -2550185165626007488L;
   private final String secret;
 
-  public JwtUtil(@Value("${jwt.secret}") final String secret, UserDataService userDataService) {
+  public JwtUtil(@Value("${jwt.secret}") final String secret) {
 
     this.secret = secret;
   }
