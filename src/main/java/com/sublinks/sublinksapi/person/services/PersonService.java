@@ -123,6 +123,7 @@ public class PersonService {
     rolePermissions.add(RolePermission.DELETE_COMMENT);
 
     rolePermissions.add(RolePermission.UPDATE_USER_SETTINGS);
+    rolePermissions.add(RolePermission.RESET_PASSWORD);
 
     rolePermissions.add(RolePermission.MODERATOR_REMOVE_POST);
     rolePermissions.add(RolePermission.MODERATOR_REMOVE_COMMENT);
@@ -175,6 +176,12 @@ public class PersonService {
       }
     }
     return Optional.empty();
+  }
+
+  public boolean isPasswordEqual(final Person person, final String password) {
+
+    PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    return passwordEncoder.matches(password, person.getPassword());
   }
 
   @Transactional
@@ -231,6 +238,12 @@ public class PersonService {
 
     personRepository.save(person);
     personUpdatedPublisher.publish(person);
+  }
+
+  public String encodePassword(final String password) {
+
+    PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    return passwordEncoder.encode(password);
   }
 
   public Person getDefaultNewUser(final String name) {
