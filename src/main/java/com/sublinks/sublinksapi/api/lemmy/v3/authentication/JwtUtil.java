@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
 import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.services.UserDataService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
