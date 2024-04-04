@@ -212,5 +212,5 @@ ALTER TABLE `comment_history`
 /**
   Password Reset table
  */
-ALTER TABLE `password_resets`
+ALTER TABLE `reset_password`
   ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
