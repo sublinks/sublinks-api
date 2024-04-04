@@ -819,3 +819,20 @@ CREATE TABLE `reset_password`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
+/**
+  Person Verification table
+ */
+
+CREATE TABLE `person_email_verification`
+(
+  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `person_id`  BIGINT       NOT NULL,
+  `token`      VARCHAR(255) NOT NULL,
+  `ip_address` VARCHAR(255) NOT NULL,
+  `user_agent` TEXT         NULL,
+  `active`     TINYINT      NOT NULL DEFAULT 1,
+  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `updated_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
