@@ -18,6 +18,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmail;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
@@ -32,11 +33,13 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Captcha;
 import com.sublinks.sublinksapi.person.dto.PasswordReset;
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.PersonEmailVerification;
 import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.person.services.PasswordResetService;
+import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.person.services.UserDataService;
@@ -92,6 +95,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final Optional<Producer> federationProducer;
   private final UserDataService userDataService;
   private final PasswordResetService passwordResetService;
+  private final PersonEmailVerificationService personEmailVerificationService;
 
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
@@ -168,12 +172,22 @@ public class UserAuthController extends AbstractLemmyApiController {
         if (person.getEmail() == null) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
         }
+
+        send_verification_email = true;
+        PersonEmailVerification personEmailVerification = null;
+
+        try {
+          personEmailVerification = personEmailVerificationService.create(person,
+              request.getRemoteAddr(), request.getHeader("User-Agent"));
+        } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+              "creating_email_verification_failed");
+        }
         Map<String, Object> params = emailService.getDefaultEmailParameters();
 
         params.put("person", person);
-        params.put("verificationUrl",
-            localInstanceContext.instance().getDomain() + "/api/v3/user/verify_email?token="
-                + "TODO");
+        params.put("verificationUrl", localInstanceContext.instance().getDomain() + "/verify_email/"
+            + personEmailVerification.getToken());
         try {
           final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
           emailService.sendEmail(CreateEmailRequest.builder()
@@ -184,7 +198,7 @@ public class UserAuthController extends AbstractLemmyApiController {
               .htmlBody(emailService.formatEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
               .build());
-          send_verification_email = true;
+
         } catch (Exception e) {
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               "email_sending_failed");
@@ -227,7 +241,8 @@ public class UserAuthController extends AbstractLemmyApiController {
       userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
           request.getHeader("User-Agent"));
     }
-
+    person.setEmailVerified(!send_verification_email);
+    personService.updatePerson(person);
     return LoginResponse.builder()
         .jwt(token)
         .registration_created(true)
@@ -262,6 +277,14 @@ public class UserAuthController extends AbstractLemmyApiController {
     final Person person = personRepository.findOneByName(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
+
+    if (person.isDeleted()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user_deleted");
+    }
+
+    if (!person.isEmailVerified()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_not_verified");
+    }
 
     String totpSecret = person.getTotpVerifiedSecret();
     if (totpSecret != null) {
@@ -408,11 +431,30 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = VerifyEmailResponse.class))})})
   @PostMapping("verify_email")
-  VerifyEmailResponse verifyEmail() {
+  SuccessResponse verifyEmail(@RequestBody VerifyEmail verifyEmailForm) {
 
-    // @todo: implement verify Email
+    Optional<PersonEmailVerification> personEmailVerification = personEmailVerificationService.getActiveVerificationByToken(
+        verifyEmailForm.token());
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    if (personEmailVerification.isEmpty()) {
+      return SuccessResponse.builder().success(false).error("token_not_found").build();
+    }
+
+    PersonEmailVerification personEmailVerificationEntity = personEmailVerification.get();
+
+    if (personEmailVerificationEntity.getPerson() == null) {
+      return SuccessResponse.builder().success(false).error("person_not_found").build();
+    }
+
+    Person person = personEmailVerificationEntity.getPerson();
+
+    person.setEmailVerified(true);
+    personService.updatePerson(person);
+
+    personEmailVerificationEntity.setActive(false);
+    personEmailVerificationService.update(personEmailVerificationEntity);
+
+    return SuccessResponse.builder().success(true).build();
   }
 
   @Operation(summary = "Change your user password.")
