@@ -181,6 +181,7 @@ public class UserAuthController extends AbstractLemmyApiController {
           personEmailVerification = personEmailVerificationService.create(person,
               request.getRemoteAddr(), request.getHeader("User-Agent"));
         } catch (Exception e) {
+          personRepository.delete(person);
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               "creating_email_verification_failed");
         }
