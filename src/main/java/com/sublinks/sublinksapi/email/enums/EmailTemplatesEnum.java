@@ -7,7 +7,7 @@ public enum EmailTemplatesEnum {
   NEW_REPORT("new_report"),
   REGISTRATION_APPROVED("registration_approved"),
   REGISTRATION_SUCCESS("registration_success"),
-  VERIFY_EMAIL("verify_email"),
+  VERIFY_EMAIL("verification_email"),
   ;
 
 
