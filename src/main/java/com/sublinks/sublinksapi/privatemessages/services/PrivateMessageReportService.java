@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.privatemessages.services;
 
+import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageReportCreatedPublisher;
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageReportUpdatedPublisher;
@@ -34,5 +35,10 @@ public class PrivateMessageReportService {
   public void deletePrivateMessage(final PrivateMessageReport privateMessageReport) {
 
     privateMessageReportRepository.delete(privateMessageReport);
+  }
+
+  public void resolveAllReportsByPerson(Person personToBan, Person resolver) {
+
+    privateMessageReportRepository.resolveAllReportsByPerson(personToBan, resolver);
   }
 }

@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
 import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.Person;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -61,7 +62,7 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
     cq.orderBy(cb.desc(commentReportTable.get("createdAt")));
 
     int perPage = Math.min(Math.abs(commentReportSearchCriteria.perPage()), 20);
-    
+
     TypedQuery<CommentReport> query = em.createQuery(cq);
 
     applyPagination(query, commentReportSearchCriteria.page(), perPage);
