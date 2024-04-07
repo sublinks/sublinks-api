@@ -111,7 +111,7 @@ public class UserController extends AbstractLemmyApiController {
     } else if (getPersonDetailsForm.username() != null) {
       person = personRepository.findOneByName(getPersonDetailsForm.username())
           .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_username_given"));
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
