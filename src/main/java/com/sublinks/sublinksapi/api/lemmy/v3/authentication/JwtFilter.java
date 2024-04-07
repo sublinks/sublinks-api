@@ -35,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
       final HttpServletResponse response, final FilterChain filterChain)
       throws ServletException, IOException {
 
-    String authorizingToken = request.getHeader("authorization");
+    String authorizingToken = request.getHeader("Authorization");
 
     if (authorizingToken == null && request.getCookies() != null) {
       for (Cookie cookie : request.getCookies()) {
@@ -69,10 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
         throw new UsernameNotFoundException("Invalid name");
       }
 
-      final Optional<UserData> userData = userDataService.getActiveUserDataByPersonAndToken(
-          person.get(), token);
-
-      if (userData.isPresent() && jwtUtil.validateToken(token, person.get())) {
+      if (jwtUtil.validateToken(token, person.get())) {
 
         // Add a check if token and ip was changed? To give like a "warning" to the user that he has a new ip logged into his account
         userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(), token,
