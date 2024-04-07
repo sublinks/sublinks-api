@@ -1,6 +1,9 @@
 package com.sublinks.sublinksapi.post.repositories;
 
 import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
+import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.models.PostReportSearchCriteria;
@@ -99,5 +102,35 @@ public class PostReportRepositoryImpl implements PostReportRepositorySearch {
   public long countAllPostReportsReportsByResolvedFalse() {
 
     return countAllPostReportsByResolvedFalseAndCommunity(null);
+  }
+
+  @Override
+  public void resolveAllPostReportsByPerson(Person person, Person resolver) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<PostReport> cq = cb.createQuery(PostReport.class);
+
+    final Root<PostReport> postReportTable = cq.from(PostReport.class);
+    final List<Predicate> predicates = new ArrayList<>();
+
+    predicates.add(cb.equal(postReportTable.get("resolved"), false));
+
+    Join<PostReport, Post> postJoin = postReportTable.join("post", JoinType.LEFT);
+    Join<Post, LinkPersonPost> linkJoin = postJoin.join("linkPersonPost", JoinType.LEFT);
+
+    predicates.add(cb.equal(linkJoin.get("linkType"), LinkPersonPostType.creator));
+    predicates.add(cb.equal(linkJoin.get("person"), person));
+
+    cq.where(predicates.toArray(new Predicate[0]));
+
+    TypedQuery<PostReport> query = em.createQuery(cq);
+
+    List<PostReport> postReports = query.getResultList();
+
+    postReports.forEach(postReport -> {
+      postReport.setResolved(true);
+      postReport.setResolver(resolver);
+      em.merge(postReport);
+    });
   }
 }

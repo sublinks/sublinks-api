@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.post.services;
 
+import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.PostReport;
 import com.sublinks.sublinksapi.post.events.PostReportCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostReportUpdatedPublisher;
@@ -28,5 +29,12 @@ public class PostReportService {
 
     postReportRepository.save(postReport);
     postReportUpdatedPublisher.publish(postReport);
+  }
+
+
+  @Transactional
+  public void resolveAllReportsByPerson(final Person person, final Person resolver) {
+
+    postReportRepository.resolveAllPostReportsByPerson(person, resolver);
   }
 }
