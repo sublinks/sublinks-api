@@ -2,7 +2,6 @@ package com.sublinks.sublinksapi.api.lemmy.v3.common.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import java.util.Optional;
 import java.util.function.Supplier;
 import org.springframework.http.HttpStatus;
@@ -51,16 +50,14 @@ public abstract class AbstractLemmyApiController {
    */
   public Person getPersonOrThrowUnauthorized(JwtPerson principal) throws ResponseStatusException {
 
-    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).filter(
-            p -> p.getRegistrationApplication() == null
-                || p.getRegistrationApplication().getApplicationStatus()
-                == PersonRegistrationApplicationStatus.approved)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED)
+    );
   }
 
   public Person getPerson(JwtPerson principal) {
 
-    return getOptionalPerson(principal).orElseGet(() -> null);
+    return getOptionalPerson(principal).orElse(null);
   }
 
   public Optional<Person> getOptionalPerson(JwtPerson principal) {
