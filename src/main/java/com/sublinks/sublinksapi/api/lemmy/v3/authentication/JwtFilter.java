@@ -1,9 +1,11 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
 import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.dto.UserData;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.UserDataService;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -29,12 +31,11 @@ public class JwtFilter extends OncePerRequestFilter {
   private final UserDataService userDataService;
 
   @Override
-  protected void doFilterInternal(
-      final HttpServletRequest request,
-      final HttpServletResponse response,
-      final FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(final HttpServletRequest request,
+      final HttpServletResponse response, final FilterChain filterChain)
+      throws ServletException, IOException {
 
-    String authorizingToken = request.getHeader("authorization");
+    String authorizingToken = request.getHeader("Authorization");
 
     if (authorizingToken == null && request.getCookies() != null) {
       for (Cookie cookie : request.getCookies()) {
@@ -58,8 +59,8 @@ public class JwtFilter extends OncePerRequestFilter {
         }
         userName = jwtUtil.extractUsername(token);
       }
-    } catch (ExpiredJwtException ex) {
-      response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+    } catch (ExpiredJwtException | SignatureException ex) {
+      response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid_token");
     }
 
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -69,7 +70,9 @@ public class JwtFilter extends OncePerRequestFilter {
       }
 
       if (jwtUtil.validateToken(token, person.get())) {
-        userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(),
+
+        // Add a check if token and ip was changed? To give like a "warning" to the user that he has a new ip logged into his account
+        userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(), token,
             request.getHeader("User-Agent"));
         final JwtPerson authenticationToken = new JwtPerson(person.get(),
             person.get().getAuthorities());

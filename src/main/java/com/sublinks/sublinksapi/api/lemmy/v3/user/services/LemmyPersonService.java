@@ -8,15 +8,18 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -56,9 +59,9 @@ public class LemmyPersonService {
     Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
     linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.moderator)
         .forEach(community -> {
-          communityModeratorViews.add(CommunityModeratorView.builder().community(
-                  conversionService.convert(community,
-                      com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+          communityModeratorViews.add(CommunityModeratorView.builder()
+              .community(conversionService.convert(community,
+                  com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
               .moderator(conversionService.convert(person,
                   com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
               .build());
@@ -66,13 +69,14 @@ public class LemmyPersonService {
     return communityModeratorViews;
   }
 
+  @Transactional
   public Collection<CommentView> getPersonComments(Person person) {
 
     Collection<CommentView> commentViews = new ArrayList<>();
 
-    // @TODO: Fix this?!???
-//    person.getComments().forEach(
-//            comment -> commentViews.add(lemmyCommentService.createCommentView(comment, person)));
+    person.getComments()
+        .forEach(
+            comment -> commentViews.add(lemmyCommentService.createCommentView(comment, person)));
 
     return commentViews;
   }

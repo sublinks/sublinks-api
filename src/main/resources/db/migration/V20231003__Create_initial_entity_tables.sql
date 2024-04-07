@@ -759,8 +759,10 @@ CREATE TABLE `user_data`
 (
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `person_id`    BIGINT                                    NOT NULL,
+  `token`        VARCHAR(255)                              NOT NULL,
   `ip_address`   VARCHAR(255)                              NOT NULL,
   `user_agent`   TEXT                                      NULL,
+  `active`       TINYINT                                   NOT NULL DEFAULT 1,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   `last_used_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL ON UPDATE CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
@@ -800,3 +802,20 @@ CREATE TABLE `comment_history`
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
+
+
+/**
+  Reset Password table
+ */
+
+CREATE TABLE `reset_password`
+(
+  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `person_id`  BIGINT       NOT NULL,
+  `token`      VARCHAR(255) NOT NULL,
+  `is_used`    TINYINT      NOT NULL DEFAULT 0,
+  `created_at` TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+

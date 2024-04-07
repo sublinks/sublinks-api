@@ -32,12 +32,14 @@ public class CustomEmojiService {
 
   private CustomEmoji addKeywords(final CustomEmoji customEmoji, final Iterable<String> keywords) {
     var customEmojiKeywords = new ArrayList<CustomEmojiKeyword>();
-    for (var keyword : keywords) {
-      customEmojiKeywords.add(
-          CustomEmojiKeyword.builder()
-              .keyword(keyword.toLowerCase().trim())
-              .emoji(customEmoji)
-              .build());
+    if (keywords != null) {
+      for (var keyword : keywords) {
+        customEmojiKeywords.add(
+            CustomEmojiKeyword.builder()
+                .keyword(keyword.toLowerCase().trim())
+                .emoji(customEmoji)
+                .build());
+      }
     }
     customEmoji.setKeywords(customEmojiKeywords);
     return customEmojiRepository.save(customEmoji);

@@ -289,8 +289,8 @@ public class PostController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, switch (createPostLikeForm.score()) {
       case 1 -> RolePermission.POST_UPVOTE;
       case -1 -> RolePermission.POST_DOWNVOTE;
-      case 0 -> RolePermission.POST_NEUTRAL;
-      default -> RolePermission.POST_NEUTRAL;
+      case 0 -> RolePermission.POST_NEUTRALVOTE;
+      default -> RolePermission.POST_NEUTRALVOTE;
     }, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById(createPostLikeForm.post_id())

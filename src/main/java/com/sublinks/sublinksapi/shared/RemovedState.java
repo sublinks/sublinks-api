@@ -5,4 +5,5 @@ public enum RemovedState {
   REMOVED,
   REMOVED_BY_COMMUNITY,
   REMOVED_BY_INSTANCE,
+  PURGED,
 }

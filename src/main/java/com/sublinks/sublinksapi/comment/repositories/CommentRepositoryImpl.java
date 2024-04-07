@@ -5,10 +5,6 @@ import com.sublinks.sublinksapi.comment.dto.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
-import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -23,7 +19,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
@@ -136,6 +131,5 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
-
   }
 }

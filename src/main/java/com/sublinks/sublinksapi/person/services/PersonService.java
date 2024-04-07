@@ -52,11 +52,8 @@ public class PersonService {
 
   public Set<Role> generateInitialRoles() {
 
-    Role adminRole = roleRepository.save(Role.builder()
-        .description("Admin role for admins")
-        .name("Admin")
-        .isActive(true)
-        .build());
+    Role adminRole = roleRepository.save(
+        Role.builder().description("Admin role for admins").name("Admin").isActive(true).build());
 
     adminRole.setRolePermissions(Collections.singleton(rolePermissionsRepository.save(
         com.sublinks.sublinksapi.authorization.dto.RolePermissions.builder()
@@ -80,12 +77,10 @@ public class PersonService {
         .isActive(true)
         .build());
 
-    bannedRole.setRolePermissions(
-        rolePermissions.stream().map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder()
-                .role(bannedRole)
-                .permission(rolePermission)
-                .build())).collect(Collectors.toSet()));
+    bannedRole.setRolePermissions(rolePermissions.stream()
+        .map(rolePermission -> rolePermissionsRepository.save(
+            RolePermissions.builder().role(bannedRole).permission(rolePermission).build()))
+        .collect(Collectors.toSet()));
 
     rolePermissions.remove(RolePermission.BANNED);
     rolePermissions.add(RolePermission.DEFAULT);
@@ -96,20 +91,20 @@ public class PersonService {
         .isActive(true)
         .build());
 
-    defaultUserRole.setRolePermissions(
-        rolePermissions.stream().map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder()
-                .role(defaultUserRole)
-                .permission(rolePermission)
-                .build())).collect(Collectors.toSet()));
+    defaultUserRole.setRolePermissions(rolePermissions.stream()
+        .map(rolePermission -> rolePermissionsRepository.save(
+            RolePermissions.builder().role(defaultUserRole).permission(rolePermission).build()))
+        .collect(Collectors.toSet()));
 
     rolePermissions.remove(RolePermission.DEFAULT);
     rolePermissions.add(RolePermission.REGISTERED);
 
     rolePermissions.add(RolePermission.POST_UPVOTE);
     rolePermissions.add(RolePermission.POST_DOWNVOTE);
+    rolePermissions.add(RolePermission.POST_NEUTRALVOTE);
     rolePermissions.add(RolePermission.COMMENT_UPVOTE);
     rolePermissions.add(RolePermission.COMMENT_DOWNVOTE);
+    rolePermissions.add(RolePermission.COMMENT_NEUTRALVOTE);
 
     rolePermissions.add(RolePermission.CREATE_PRIVATE_MESSAGE);
     rolePermissions.add(RolePermission.UPDATE_PRIVATE_MESSAGE);
@@ -128,6 +123,7 @@ public class PersonService {
     rolePermissions.add(RolePermission.DELETE_COMMENT);
 
     rolePermissions.add(RolePermission.UPDATE_USER_SETTINGS);
+    rolePermissions.add(RolePermission.RESET_PASSWORD);
 
     rolePermissions.add(RolePermission.MODERATOR_REMOVE_POST);
     rolePermissions.add(RolePermission.MODERATOR_REMOVE_COMMENT);
@@ -161,12 +157,10 @@ public class PersonService {
         .isActive(true)
         .build());
 
-    registeredUserRole.setRolePermissions(
-        rolePermissions.stream().map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder()
-                .role(registeredUserRole)
-                .permission(rolePermission)
-                .build())).collect(Collectors.toSet()));
+    registeredUserRole.setRolePermissions(rolePermissions.stream()
+        .map(rolePermission -> rolePermissionsRepository.save(
+            RolePermissions.builder().role(registeredUserRole).permission(rolePermission).build()))
+        .collect(Collectors.toSet()));
 
     return new HashSet<>(roleRepository.findAll());
   }
@@ -182,6 +176,12 @@ public class PersonService {
       }
     }
     return Optional.empty();
+  }
+
+  public boolean isPasswordEqual(final Person person, final String password) {
+
+    PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    return passwordEncoder.matches(password, person.getPassword());
   }
 
   @Transactional
@@ -203,8 +203,11 @@ public class PersonService {
     boolean isInitialAdmin = localInstanceContext.instance().getDomain().isEmpty();
     if (isInitialAdmin) {
       Set<Role> roles = generateInitialRoles();
-      person.setRole(roles.stream().filter(x -> x.getRolePermissions().stream()
-              .anyMatch(y -> y.getPermission().equals(RolePermission.ADMIN))).findFirst()
+      person.setRole(roles.stream()
+          .filter(x -> x.getRolePermissions()
+              .stream()
+              .anyMatch(y -> y.getPermission().equals(RolePermission.ADMIN)))
+          .findFirst()
           .orElseThrow(() -> new RuntimeException("Admin role not found!")));
     } else {
       person.setRole(roleAuthorizingService.getUserRole());
@@ -235,6 +238,12 @@ public class PersonService {
 
     personRepository.save(person);
     personUpdatedPublisher.publish(person);
+  }
+
+  public String encodePassword(final String password) {
+
+    PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    return passwordEncoder.encode(password);
   }
 
   public Person getDefaultNewUser(final String name) {

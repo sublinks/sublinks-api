@@ -208,3 +208,9 @@ ALTER TABLE `post_history`
  */
 ALTER TABLE `comment_history`
   ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+/**
+  Password Reset table
+ */
+ALTER TABLE `reset_password`
+  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
