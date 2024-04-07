@@ -55,7 +55,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -183,13 +186,14 @@ public class PostController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
         RolePermission.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-    final List<Long> communityIds = new ArrayList<>();
-    Community community = null;
+    List<Long> communityIds = null;
+    Community community;
     if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
       Long communityId =
           getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
       community = communityRepository.findCommunityByIdOrTitleSlug(communityId,
           getPostsForm.community_name());
+      communityIds = new ArrayList<>();
       communityIds.add(community.getId());
     }
 
@@ -197,13 +201,17 @@ public class PostController extends AbstractLemmyApiController {
       switch (getPostsForm.type_()) {
         case Subscribed -> {
           final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
-          for (LinkPersonCommunity l : personCommunities) {
-            if (l.getLinkType() == LinkPersonCommunityType.follower) {
-              communityIds.add(l.getCommunity().getId());
+          if (!personCommunities.isEmpty()) {
+            communityIds = new ArrayList<>();
+            for (LinkPersonCommunity l : personCommunities) {
+              if (l.getLinkType() == LinkPersonCommunityType.follower) {
+                communityIds.add(l.getCommunity().getId());
+              }
             }
           }
         }
         case Local -> {
+          communityIds = new ArrayList<>();
           for (Community c : communityRepository.findAll()) { // @todo find local
             communityIds.add(c.getId());
           }
@@ -217,7 +225,7 @@ public class PostController extends AbstractLemmyApiController {
 
     InstanceConfig config = localInstanceContext.instance().getInstanceConfig();
 
-    SortType sortType = null; // @todo set to site default
+    SortType sortType; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
     } else {
@@ -243,10 +251,12 @@ public class PostController extends AbstractLemmyApiController {
         .sortType(sortType)
         .person(person.orElse(null))
         .communityIds(communityIds)
+        .cursorBasedPageable(getPostsForm.page_cursor())
         .build();
 
-    final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
+    final List<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
     final Collection<PostView> postViewCollection = new LinkedHashSet<>();
+
     for (Post post : posts) {
       if (person.isPresent()) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
@@ -255,7 +265,15 @@ public class PostController extends AbstractLemmyApiController {
       }
     }
 
-    return GetPostsResponse.builder().posts(postViewCollection).build();
+    Post lastPost = posts.get(posts.size()-1);
+    String originalInput = lastPost.getId().toString();
+    String encodedString = Base64.getEncoder().encodeToString(originalInput.getBytes());
+    String cursor = URLEncoder.encode(encodedString, StandardCharsets.UTF_8);
+
+    return GetPostsResponse.builder()
+        .posts(postViewCollection)
+        .next_page(cursor)
+        .build();
   }
 
   @Operation(summary = "Like / vote on a post.")

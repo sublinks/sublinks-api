@@ -6,23 +6,20 @@ import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.post.dto.CrossPost;
 import com.sublinks.sublinksapi.post.dto.Post;
 import com.sublinks.sublinksapi.post.repositories.CrossPostRepository;
-import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
 import com.sublinks.sublinksapi.search.repositories.CommentSearchRepository;
 import com.sublinks.sublinksapi.search.repositories.CommunitySearchRepository;
 import com.sublinks.sublinksapi.search.repositories.PersonSearchRepository;
 import com.sublinks.sublinksapi.search.repositories.PostSearchRepository;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -60,7 +57,7 @@ public class SearchService {
                 PageRequest.of(page, pageSize, sort), posts.size());
     }
 
-    public Page<Person> seearchPerson(final String query, final int page, final int pageSize, final Sort sort) {
+    public Page<Person> searchPerson(final String query, final int page, final int pageSize, final Sort sort) {
         return personSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
     }
 }

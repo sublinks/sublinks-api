@@ -112,7 +112,7 @@ public class SearchController extends AbstractLemmyApiController {
     }
 
     if (searchForm.type_() == SearchType.Users || isAll) {
-      List<Person> people = searchService.seearchPerson(searchForm.q(), page, limit, sort)
+      List<Person> people = searchService.searchPerson(searchForm.q(), page, limit, sort)
           .getContent();
       peopleViewList.addAll(people.stream().map(lemmyPersonService::getPersonView).toList());
 

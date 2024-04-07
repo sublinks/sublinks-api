@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.instance.dto.Instance;
 import com.sublinks.sublinksapi.language.dto.Language;
 import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
 import com.sublinks.sublinksapi.shared.RemovedState;
+import com.sublinks.sublinksapi.utils.models.CursorPageable;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,7 +42,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Post extends CursorPageable {
 
   /**
    * Relationships.
