@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
@@ -21,6 +24,9 @@ public class EmailConfig {
 
   @Value("${sublinks.settings.email.enabled}")
   private boolean enabled;
+
+  @Value("${sublinks.settings.email.delivery_rate_per_minute}")
+  private int delivery_rate_per_minute;
 
   @Value("${sublinks.settings.email.sender}")
   private String sender;
@@ -119,5 +125,15 @@ public class EmailConfig {
     SpringTemplateEngine templateEngine = new SpringTemplateEngine();
     templateEngine.setTemplateResolver(textTemplateResolver);
     return templateEngine;
+  }
+
+  @Bean
+  public TaskScheduler taskScheduler() {
+
+    ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+    scheduler.setPoolSize(1);
+    scheduler.setThreadNamePrefix("email-task-scheduler");
+    scheduler.initialize();
+    return scheduler;
   }
 }
