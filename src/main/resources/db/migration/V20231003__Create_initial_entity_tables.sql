@@ -836,3 +836,46 @@ CREATE TABLE `person_email_verification`
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Email Table
+ */
+
+CREATE TABLE `email`
+(
+  `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `subject`      TEXT         NOT NULL,
+  `html_content` TEXT         NOT NULL,
+  `text_content` TEXT         NOT NULL,
+  `created_at`   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  `last_try_at`  TIMESTAMP(3) NULL     DEFAULT CURRENT_TIMESTAMP(3)
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+/**
+  Email Data Table
+ */
+
+CREATE TABLE `email_data`
+(
+  `id`        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `recipient` VARCHAR(255) NOT NULL,
+  `email_id`  BIGINT       NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
+
+
+/**
+  Email Person Table
+ */
+
+CREATE TABLE `email_person_recipients`
+(
+  `id`        BIGINT AUTO_INCREMENT PRIMARY KEY,
+  `person_id` BIGINT NOT NULL,
+  `email_id`  BIGINT NOT NULL
+) ENGINE = InnoDB
+  DEFAULT CHARSET `utf8mb4`
+  COLLATE = 'utf8mb4_unicode_ci';
