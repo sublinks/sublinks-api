@@ -284,6 +284,11 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     if (banPersonForm.ban()) {
       if (banPersonForm.remove_data()) {
+
+        postReportService.resolveAllReportsByPersonAndCommunity(personToBan, community, person);
+        commentReportService.resolveAllReportsByCommentCreatorAndCommunity(personToBan, community,
+            person);
+
         commentService.removeAllCommentsFromCommunityAndUser(community, personToBan, true);
         postService.removeAllPostsFromCommunityAndUser(community, personToBan, true);
       }
@@ -301,10 +306,6 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
             LinkPersonCommunityType.banned);
       }
     }
-
-    postReportService.resolveAllReportsByPersonAndCommunity(personToBan, community, person);
-    commentReportService.resolveAllReportsByCommentCreatorAndCommunity(personToBan, community,
-        person);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
