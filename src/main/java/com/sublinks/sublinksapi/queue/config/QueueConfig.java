@@ -51,6 +51,7 @@ public class QueueConfig {
   @Bean
   @ConditionalOnProperty(name = {"BACKEND_QUEUE_NAME", "BACKEND_TOPIC_NAME", "FEDERATION_ROUTING_KEY"}, matchIfMissing = false)
   public Queue federationQueue() {
+    System.out.println("queue enabled");
     return new Queue(this.backendQueueName, true);
   }
 

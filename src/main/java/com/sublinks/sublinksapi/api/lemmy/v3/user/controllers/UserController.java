@@ -337,7 +337,7 @@ public class UserController extends AbstractLemmyApiController {
               .public_key(person.getPublicKey())
               .build();
 
-      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
     });
 
     return LoginResponse.builder().jwt(null).registration_created(false).verify_email_sent(false)
