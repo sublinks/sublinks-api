@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.comment.services;
 
+import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.events.CommentReportCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentReportUpdatedPublisher;
@@ -45,5 +46,11 @@ public class CommentReportService {
   public void resolveAllReportsByCommentCreator(final Person creator, final Person resolver) {
 
     commentReportRepository.resolveAllReportsByCommentCreator(creator, resolver);
+  }
+
+  @Transactional
+  public void resolveAllReportsByComment(final Comment comment, final Person resolver) {
+
+    commentReportRepository.resolveAllReportsByComment(comment, resolver);
   }
 }
