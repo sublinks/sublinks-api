@@ -238,7 +238,7 @@ public class UserAuthController extends AbstractLemmyApiController {
           .public_key(person.getPublicKey())
           .build();
 
-      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
     });
 
     if (token != null && !token.isEmpty()) {
