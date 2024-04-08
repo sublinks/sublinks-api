@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.comment.dto.CommentReport;
 import com.sublinks.sublinksapi.comment.events.CommentReportCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentReportUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -46,6 +47,14 @@ public class CommentReportService {
   public void resolveAllReportsByCommentCreator(final Person creator, final Person resolver) {
 
     commentReportRepository.resolveAllReportsByCommentCreator(creator, resolver);
+  }
+
+  @Transactional
+  public void resolveAllReportsByCommentCreatorAndCommunity(final Person creator,
+      final Community community, final Person resolver) {
+
+    commentReportRepository.resolveAllReportsByCommentCreatorAndCommunity(creator, community,
+        resolver);
   }
 
   @Transactional
