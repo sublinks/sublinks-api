@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.comment.repositories;
 
 import com.sublinks.sublinksapi.comment.dto.Comment;
 import com.sublinks.sublinksapi.comment.dto.CommentReport;
+import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.person.dto.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -18,6 +19,12 @@ public interface CommentReportRepository extends JpaRepository<CommentReport, Lo
 
   @Modifying
   @Query("UPDATE CommentReport cr SET cr.resolved = true, cr.resolver = :resolver WHERE cr.resolved = false AND cr.comment.person = :creator")
-  void resolveAllReportsByCommentCreator(@Param("creator") Person creator, @Param("resolver") Person resolver);
+  void resolveAllReportsByCommentCreator(@Param("creator") Person creator,
+      @Param("resolver") Person resolver);
+
+  @Modifying
+  @Query("UPDATE CommentReport cr SET cr.resolved = true, cr.resolver = :resolver WHERE cr.resolved = false AND cr.comment.person = :creator AND cr.comment.community = :community")
+  void resolveAllReportsByCommentCreatorAndCommunity(@Param("creator") Person creator,
+      @Param("community") Community community, @Param("resolver") Person resolver);
 }
 

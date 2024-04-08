@@ -31,12 +31,6 @@ public class PrivateMessageReportService {
     privateMessageReportUpdatedPublisher.publish(privateMessageReport);
   }
 
-  @Transactional
-  public void deletePrivateMessage(final PrivateMessageReport privateMessageReport) {
-
-    privateMessageReportRepository.delete(privateMessageReport);
-  }
-
   public void resolveAllReportsByPerson(Person personToBan, Person resolver) {
 
     privateMessageReportRepository.resolveAllReportsByPerson(personToBan, resolver);

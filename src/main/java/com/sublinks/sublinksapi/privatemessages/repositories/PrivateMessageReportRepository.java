@@ -11,7 +11,7 @@ public interface PrivateMessageReportRepository extends JpaRepository<PrivateMes
     PrivateMessageReportSearchRepository {
 
   @Modifying
-  @Query("UPDATE PrivateMessageReport pmr SET pmr.resolved = true, pmr.resolver = :resolver WHERE pmr.privateMessage.sender = :sender")
+  @Query("UPDATE PrivateMessageReport pmr SET pmr.resolved = true, pmr.resolver = :resolver WHERE pmr.resolved = false AND pmr.privateMessage.sender = :sender")
   void resolveAllReportsByPerson(@Param("sender") Person sender,
       @Param("resolver") Person resolver);
 }
