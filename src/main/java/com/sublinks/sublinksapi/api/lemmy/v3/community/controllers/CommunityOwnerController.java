@@ -162,7 +162,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
               .public_key(community.getPublicKey())
               .build();
 
-      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
     });
 
     linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities);
@@ -232,7 +232,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
               .public_key(community.getPublicKey())
               .build();
 
-      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
     });
 
     return lemmyCommunityService.createCommunityResponse(community, person);

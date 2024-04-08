@@ -1,0 +1,3 @@
+[submodule "docker"]
+	path = docker
+	url = git@github.com:sublinks/sublinks-docker.git

@@ -120,7 +120,7 @@ public class UserController extends AbstractLemmyApiController {
     } else if (getPersonDetailsForm.username() != null) {
       person = personRepository.findOneByName(getPersonDetailsForm.username())
           .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_username_given"));
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
@@ -356,7 +356,7 @@ public class UserController extends AbstractLemmyApiController {
               .public_key(person.getPublicKey())
               .build();
 
-      service.sendMessage(federationExchange, RoutingKey.ACTORCREATED.getValue(), actorMessage);
+      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
     });
 
     return LoginResponse.builder()
