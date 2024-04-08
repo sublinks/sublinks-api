@@ -91,6 +91,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
     commentService.updateComment(comment);
 
+    commentReportService.resolveAllReportsByComment(comment, person);
+
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
         .actionType(ModlogActionType.ModRemoveComment)
