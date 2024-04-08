@@ -210,7 +210,6 @@ public class UserAuthController extends AbstractLemmyApiController {
     }
 
     federationProducer.ifPresent(service -> {
-      System.out.println("INSIDE THE USER PRODUCER");
       final Actor actorMessage = Actor.builder()
           .actor_id(person.getActorId())
           .actor_type(ActorType.USER.getValue())

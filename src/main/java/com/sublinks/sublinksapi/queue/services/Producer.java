@@ -12,7 +12,6 @@ public class Producer {
 
   @Autowired
   public Producer(RabbitTemplate rabbitTemplate) {
-    System.out.println("registering the producer!!!!!!!!!!!!");
     this.rabbitTemplate = rabbitTemplate;
   }
 
