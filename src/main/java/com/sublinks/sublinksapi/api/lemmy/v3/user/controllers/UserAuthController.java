@@ -151,8 +151,8 @@ public class UserAuthController extends AbstractLemmyApiController {
     person.setEmail(registerForm.email());
     person.setPassword(registerForm.password());
     if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
-      throw new RuntimeException("Passwords do not match");
       // @todo throw lemmy error code
+      throw new RuntimeException("Passwords do not match");
     }
     personService.createPerson(person);
     String token = jwtUtil.generateToken(person);
@@ -173,7 +173,6 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
 
       if (instanceConfig.isRequireEmailVerification()) {
-        // @todo: Implement email verification
         if (person.getEmail() == null) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
         }
