@@ -56,7 +56,6 @@ public class QueueConfig {
   @Bean
   @ConditionalOnProperty(name = {"sublinks.backend_queue.name", "sublinks.backend_topic.name", "sublinks.federation.exchange"}, matchIfMissing = false)
   public Queue federationQueue() {
-    System.out.println("queue enabled");
     return new Queue(this.backendQueueName, true);
   }
 
