@@ -108,6 +108,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
         modRemovePostForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
     postService.updatePost(post);
 
+    postReportService.resolveAllReportsByPost(post, person);
+
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
         .actionType(ModlogActionType.ModRemovePost)
