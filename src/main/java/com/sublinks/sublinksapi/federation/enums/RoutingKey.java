@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.federation.enums;
 
 public enum RoutingKey {
-  ACTORCREATED("actor.created");
+  ACTOR_CREATE("actor.create");
 
   private final String value;
 
