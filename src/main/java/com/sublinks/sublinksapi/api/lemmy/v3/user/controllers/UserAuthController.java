@@ -22,8 +22,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmail;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.email.dto.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
-import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.federation.enums.ActorType;
 import com.sublinks.sublinksapi.federation.enums.RoutingKey;
@@ -57,12 +57,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -96,6 +99,8 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final UserDataService userDataService;
   private final PasswordResetService passwordResetService;
   private final PersonEmailVerificationService personEmailVerificationService;
+
+  private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
 
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
@@ -186,12 +191,12 @@ public class UserAuthController extends AbstractLemmyApiController {
             + personEmailVerification.getToken());
         try {
           final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
-          emailService.sendEmail(CreateEmailRequest.builder()
-              .to(List.of(person.getEmail()))
+          emailService.saveToQueue(Email.builder()
+              .personRecipients(List.of(person))
               .subject(emailService.getSubjects().get(template_name).getAsString())
-              .body(emailService.formatTextEmailTemplate(template_name,
+              .htmlContent(emailService.formatTextEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
-              .htmlBody(emailService.formatEmailTemplate(template_name,
+              .textContent(emailService.formatEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
               .build());
 
@@ -201,7 +206,7 @@ public class UserAuthController extends AbstractLemmyApiController {
               "email_sending_failed");
         }
       }
-    } else {
+    } else if (person.getEmail() != null && !person.getEmail().isEmpty()) {
       Map<String, Object> properties = emailService.getDefaultEmailParameters();
       properties.put("person", person);
 
@@ -209,14 +214,16 @@ public class UserAuthController extends AbstractLemmyApiController {
         final Context context = new Context(Locale.getDefault(), properties);
 
         final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
-        emailService.sendEmail(CreateEmailRequest.builder()
-            .to(List.of(person.getEmail()))
+        emailService.saveToQueue(Email.builder()
+            .personRecipients(List.of(person))
             .subject(emailService.getSubjects().get(template_name).getAsString())
-            .body(emailService.formatTextEmailTemplate(template_name, context))
-            .htmlBody(emailService.formatEmailTemplate(template_name, context))
+            .htmlContent(emailService.formatTextEmailTemplate(template_name, context))
+            .textContent(emailService.formatEmailTemplate(template_name, context))
             .build());
-      } catch (Exception e) {
-        // @todo log error?
+      } catch (IOException e) {
+        personRepository.delete(person);
+        logger.error("Error reading Subjects!", e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "email_sending_failed");
       }
     }
 
@@ -365,12 +372,12 @@ public class UserAuthController extends AbstractLemmyApiController {
       // #todo: implement the password reset in the frontend
       params.put("resetUrl", url);
 
-      emailService.sendEmail(CreateEmailRequest.builder()
-          .to(List.of(foundPerson.getEmail()))
+      emailService.saveToQueue(Email.builder()
+          .personRecipients(List.of(foundPerson))
           .subject(emailService.getSubjects().get(template_name).getAsString())
-          .body(emailService.formatTextEmailTemplate(template_name,
+          .htmlContent(emailService.formatTextEmailTemplate(template_name,
               new Context(Locale.getDefault(), params)))
-          .htmlBody(emailService.formatEmailTemplate(template_name,
+          .textContent(emailService.formatEmailTemplate(template_name,
               new Context(Locale.getDefault(), params)))
           .build());
     } catch (Exception e) {
@@ -450,7 +457,22 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     personEmailVerificationEntity.setActive(false);
     personEmailVerificationService.update(personEmailVerificationEntity);
+    Map<String, Object> properties = emailService.getDefaultEmailParameters();
+    properties.put("person", person);
 
+    try {
+      final Context context = new Context(Locale.getDefault(), properties);
+
+      final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
+      emailService.saveToQueue(Email.builder()
+          .personRecipients(List.of(person))
+          .subject(emailService.getSubjects().get(template_name).getAsString())
+          .htmlContent(emailService.formatTextEmailTemplate(template_name, context))
+          .textContent(emailService.formatEmailTemplate(template_name, context))
+          .build());
+    } catch (IOException e) {
+      logger.error("Error reading Subjects!", e);
+    }
     return SuccessResponse.builder().success(true).build();
   }
 
