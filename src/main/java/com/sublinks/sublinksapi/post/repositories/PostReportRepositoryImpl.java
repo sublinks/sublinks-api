@@ -133,4 +133,38 @@ public class PostReportRepositoryImpl implements PostReportRepositorySearch {
       em.merge(postReport);
     });
   }
+
+  @Override
+  public void resolveAllPostReportsByPersonAndCommunity(Person person, Community community,
+      Person resolver) {
+
+    final CriteriaBuilder cb = em.getCriteriaBuilder();
+    final CriteriaQuery<PostReport> cq = cb.createQuery(PostReport.class);
+
+    final Root<PostReport> postReportTable = cq.from(PostReport.class);
+    final List<Predicate> predicates = new ArrayList<>();
+
+    predicates.add(cb.equal(postReportTable.get("resolved"), false));
+
+    Join<PostReport, Post> postJoin = postReportTable.join("post", JoinType.LEFT);
+
+    predicates.add(cb.equal(postJoin.get("community"), community));
+
+    Join<Post, LinkPersonPost> linkJoin = postJoin.join("linkPersonPost", JoinType.LEFT);
+
+    predicates.add(cb.equal(linkJoin.get("linkType"), LinkPersonPostType.creator));
+    predicates.add(cb.equal(linkJoin.get("person"), person));
+
+    cq.where(predicates.toArray(new Predicate[0]));
+
+    TypedQuery<PostReport> query = em.createQuery(cq);
+
+    List<PostReport> postReports = query.getResultList();
+
+    postReports.forEach(postReport -> {
+      postReport.setResolved(true);
+      postReport.setResolver(resolver);
+      em.merge(postReport);
+    });
+  }
 }

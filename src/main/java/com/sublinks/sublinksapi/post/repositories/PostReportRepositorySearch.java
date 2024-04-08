@@ -17,4 +17,7 @@ public interface PostReportRepositorySearch {
   long countAllPostReportsReportsByResolvedFalse();
 
   void resolveAllPostReportsByPerson(Person person, Person resolver);
+
+  void resolveAllPostReportsByPersonAndCommunity(Person person, Community community, Person resolver);
+
 }
