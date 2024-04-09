@@ -1,16 +1,15 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.dto.UserData;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserDataCreatedPublisher {
+public class UserDataCreatedEventPublisher {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  public UserDataCreatedPublisher(
+  public UserDataCreatedEventPublisher(
       final ApplicationEventPublisher applicationEventPublisher
   ) {
 

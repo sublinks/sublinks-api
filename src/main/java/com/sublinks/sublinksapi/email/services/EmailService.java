@@ -3,10 +3,10 @@ package com.sublinks.sublinksapi.email.services;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.sublinks.sublinksapi.email.config.EmailConfig;
-import com.sublinks.sublinksapi.email.events.EmailCreatedEvent;
+import com.sublinks.sublinksapi.email.dto.Email;
 import com.sublinks.sublinksapi.email.events.EmailCreatedPublisher;
 import com.sublinks.sublinksapi.email.models.CreateEmailEvent;
-import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
+import com.sublinks.sublinksapi.email.repositories.EmailRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.dto.Person;
 import com.sublinks.sublinksapi.utils.FileUtils;
@@ -16,6 +16,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -39,41 +40,55 @@ public class EmailService {
   private final SpringTemplateEngine templateEngine;
   private final SpringTemplateEngine textTemplateEngine;
   private final EmailCreatedPublisher emailCreatedPublisher;
+  private final EmailRepository emailRepository;
 
   private JavaMailSender getMailSender() {
 
     return emailConfig.getJavaMailSender();
   }
 
-  public void sendEmail(@NonNull CreateEmailRequest request)
+  public void saveToQueue(Email request) {
+
+    emailRepository.save(request);
+  }
+
+  public void sendEmail(@NonNull Email request)
       throws MessagingException, UnsupportedEncodingException {
 
     if (!emailConfig.isEnabled()) {
       return;
     }
-    if (request.to().isEmpty()) {
+    if (request.getPersonRecipients().isEmpty() && request.getEmailData().isEmpty()) {
       return;
     }
+
     JavaMailSender sender = getMailSender();
+
+    final ArrayList<String> recipients = new ArrayList<>();
+    request.getPersonRecipients().forEach(person -> {
+      if (person.getEmail() != null && !person.getEmail().isEmpty()) {
+        recipients.add(person.getEmail());
+      }
+    });
+
+    request.getEmailData().forEach(emailData -> {
+      if (emailData.getRecipient() != null && !emailData.getRecipient().isEmpty()) {
+        recipients.add(emailData.getRecipient());
+      }
+    });
 
     final MimeMessage msg = sender.createMimeMessage();
 
     MimeMessageHelper helper = new MimeMessageHelper(msg, true);
 
     helper.setFrom(emailConfig.getSender(), emailConfig.getSenderName());
-    helper.setTo(request.to().toArray(new String[0]));
-    helper.setSubject(request.subject());
-    helper.setText(request.body(), request.htmlBody());
-
-    if (request.attachments() != null) {
-      for (File file : request.attachments()) {
-        helper.addAttachment(file.getName(), file);
-      }
-    }
+    helper.setTo(recipients.toArray(new String[0]));
+    helper.setSubject(request.getSubject());
+    helper.setText(request.getTextContent(), request.getHtmlContent());
 
     getMailSender().send(msg);
 
-    emailCreatedPublisher.publish(CreateEmailEvent.builder().createEmailRequest(request).build());
+    emailCreatedPublisher.publish(CreateEmailEvent.builder().email(request).build());
 
   }
 
