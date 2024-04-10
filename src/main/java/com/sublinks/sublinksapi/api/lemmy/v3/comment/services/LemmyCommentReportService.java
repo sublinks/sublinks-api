@@ -25,16 +25,16 @@ public class LemmyCommentReportService {
 
   @NonNull
   public CommentReportView createCommentReportView(
-      final com.sublinks.sublinksapi.comment.dto.CommentReport commentReport,
-      final com.sublinks.sublinksapi.person.dto.Person Person) {
+      final com.sublinks.sublinksapi.comment.entities.CommentReport commentReport,
+      final com.sublinks.sublinksapi.person.entities.Person Person) {
 
     return commentViewBuilder(commentReport, Person).build();
   }
 
   @NonNull
   private CommentReportView.CommentReportViewBuilder commentViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.CommentReport commentReport,
-      final com.sublinks.sublinksapi.person.dto.Person Person) {
+      final com.sublinks.sublinksapi.comment.entities.CommentReport commentReport,
+      final com.sublinks.sublinksapi.person.entities.Person Person) {
 
     final CommentReport lemmyCommentReport = conversionService.convert(commentReport,
         CommentReport.class);
@@ -44,7 +44,7 @@ public class LemmyCommentReportService {
     final Person lemmyResolver = conversionService.convert(commentReport.getResolver(),
         Person.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person creator = commentReport.getCreator();
+    final com.sublinks.sublinksapi.person.entities.Person creator = commentReport.getCreator();
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
 
     final Comment lemmyComment = conversionService.convert(commentReport.getComment(),

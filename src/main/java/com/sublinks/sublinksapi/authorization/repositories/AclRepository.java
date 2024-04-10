@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.authorization.repositories;
 
-import com.sublinks.sublinksapi.authorization.dto.Acl;
+import com.sublinks.sublinksapi.authorization.entities.Acl;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import org.springframework.data.jpa.repository.JpaRepository;

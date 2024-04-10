@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.person.dto.PasswordReset;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.PasswordReset;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.events.PasswordResetCreatedEventPublisher;
 import com.sublinks.sublinksapi.person.events.PasswordResetUpdatedEventPublisher;
 import com.sublinks.sublinksapi.person.repositories.PasswordResetRepository;

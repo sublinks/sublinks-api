@@ -25,20 +25,20 @@ public class LemmyCommentReplyService {
 
   @NonNull
   public CommentReplyView createCommentReplyView(
-      final com.sublinks.sublinksapi.comment.dto.CommentReply commentReply,
-      final com.sublinks.sublinksapi.person.dto.Person Person) {
+      final com.sublinks.sublinksapi.comment.entities.CommentReply commentReply,
+      final com.sublinks.sublinksapi.person.entities.Person Person) {
 
     return commentReplyViewBuilder(commentReply, Person).build();
   }
 
   @NonNull
   private CommentReplyView.CommentReplyViewBuilder commentReplyViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.CommentReply commentReply,
-      final com.sublinks.sublinksapi.person.dto.Person Person) {
+      final com.sublinks.sublinksapi.comment.entities.CommentReply commentReply,
+      final com.sublinks.sublinksapi.person.entities.Person Person) {
 
     final CommentReplyView.CommentReplyViewBuilder commentReplyViewBuilder = CommentReplyView.builder();
 
-    final com.sublinks.sublinksapi.person.dto.Person creator = commentReply.getComment()
+    final com.sublinks.sublinksapi.person.entities.Person creator = commentReply.getComment()
         .getPerson();
 
     final Person lemmyCreator = conversionService.convert(creator, Person.class);

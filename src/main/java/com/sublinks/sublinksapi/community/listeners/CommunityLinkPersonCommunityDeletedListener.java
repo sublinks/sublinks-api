@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.community.listeners;
 
-import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
 import com.sublinks.sublinksapi.community.repositories.CommunityAggregateRepository;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedEvent;

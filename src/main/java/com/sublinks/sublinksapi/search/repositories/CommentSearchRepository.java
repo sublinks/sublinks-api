@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.search.repositories;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.comment.entities.Comment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

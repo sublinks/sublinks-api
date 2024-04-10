@@ -15,14 +15,14 @@ public class LemmyPrivateMessageReportService {
   private final ConversionService conversionService;
 
   public PrivateMessageReportView createPrivateMessageReportView(
-      final com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport privateMessageReport
+      final com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport privateMessageReport
   ) {
 
     return privateMessageReportViewBuilder(privateMessageReport).build();
   }
 
   private PrivateMessageReportView.PrivateMessageReportViewBuilder privateMessageReportViewBuilder(
-      final com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport privateMessageReport
+      final com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport privateMessageReport
   ) {
 
     final PrivateMessageReport lemmyPrivateMessageReport = conversionService.convert(
@@ -33,14 +33,14 @@ public class LemmyPrivateMessageReportService {
         privateMessageReport.getPrivateMessage(),
         PrivateMessage.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person sender = privateMessageReport.getPrivateMessage()
+    final com.sublinks.sublinksapi.person.entities.Person sender = privateMessageReport.getPrivateMessage()
         .getSender();
     final Person lemmySender = conversionService.convert(sender, Person.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person creator = privateMessageReport.getCreator();
+    final com.sublinks.sublinksapi.person.entities.Person creator = privateMessageReport.getCreator();
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person resolver = privateMessageReport.getResolver();
+    final com.sublinks.sublinksapi.person.entities.Person resolver = privateMessageReport.getResolver();
     final Person lemmyResolver = conversionService.convert(resolver, Person.class);
 
     return PrivateMessageReportView.builder()

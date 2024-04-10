@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

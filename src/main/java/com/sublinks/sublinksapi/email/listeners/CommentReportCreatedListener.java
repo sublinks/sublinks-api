@@ -1,12 +1,6 @@
 package com.sublinks.sublinksapi.email.listeners;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentReply;
-import com.sublinks.sublinksapi.comment.events.CommentCreatedEvent;
 import com.sublinks.sublinksapi.comment.events.CommentReportCreatedEvent;
-import com.sublinks.sublinksapi.comment.services.CommentReplyService;
-import com.sublinks.sublinksapi.comment.services.CommentService;
-import java.util.Optional;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import lombok.RequiredArgsConstructor;

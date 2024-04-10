@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.privatemessages.repositories;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

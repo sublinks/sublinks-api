@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.comment.services;
 
-import com.sublinks.sublinksapi.comment.dto.CommentReply;
+import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.events.CommentReplyCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentReplyUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;

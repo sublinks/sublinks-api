@@ -2,7 +2,6 @@ package com.sublinks.sublinksapi.person.services;
 
 import cn.apiclub.captcha.backgrounds.BackgroundProducer;
 import cn.apiclub.captcha.backgrounds.GradiatedBackgroundProducer;
-import cn.apiclub.captcha.backgrounds.SquigglesBackgroundProducer;
 import cn.apiclub.captcha.gimpy.BlockGimpyRenderer;
 import cn.apiclub.captcha.gimpy.GimpyRenderer;
 import cn.apiclub.captcha.gimpy.RippleGimpyRenderer;
@@ -11,7 +10,7 @@ import cn.apiclub.captcha.noise.StraightLineNoiseProducer;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.Producers.LinesProducer;
 import com.sublinks.sublinksapi.person.config.CaptchaConfiguration;
-import com.sublinks.sublinksapi.person.dto.Captcha;
+import com.sublinks.sublinksapi.person.entities.Captcha;
 import com.sublinks.sublinksapi.person.repositories.CaptchaRepository;
 import jakarta.transaction.Transactional;
 import java.awt.Color;
