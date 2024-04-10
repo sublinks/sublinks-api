@@ -17,17 +17,17 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogServic
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentReport;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.shared.RemovedState;
@@ -90,6 +90,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         removeCommentForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
 
     commentService.updateComment(comment);
+
+    commentReportService.resolveAllReportsByComment(comment, person);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()

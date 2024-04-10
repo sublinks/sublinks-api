@@ -19,15 +19,17 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogServic
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -69,6 +71,8 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
   private final CommentService commentService;
   private final PostService postService;
   private final ModerationLogService moderationLogService;
+  private final PostReportService postReportService;
+  private final CommentReportService commentReportService;
 
   @Operation(summary = "Hide a community from public / \"All\" view. Admins only.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -91,14 +95,19 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModHideCommunity).hidden(hideCommunityForm.hidden())
-        .entityId(community.getId()).communityId(community.getId())
-        .instance(community.getInstance()).adminPersonId(person.getId())
-        .reason(hideCommunityForm.reason()).build();
+        .actionType(ModlogActionType.ModHideCommunity)
+        .hidden(hideCommunityForm.hidden())
+        .entityId(community.getId())
+        .communityId(community.getId())
+        .instance(community.getInstance())
+        .adminPersonId(person.getId())
+        .reason(hideCommunityForm.reason())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return CommunityResponse.builder()
-        .community_view(lemmyCommunityService.communityViewFromCommunity(community)).build();
+        .community_view(lemmyCommunityService.communityViewFromCommunity(community))
+        .build();
   }
 
   @Operation(summary = "Delete a community.")
@@ -116,21 +125,27 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN));
 
     final Community community = communityRepository.findById(
-        (long) deleteCommunityForm.community_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+            (long) deleteCommunityForm.community_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
     community.setDeleted(deleteCommunityForm.deleted());
     communityRepository.save(community);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModRemoveCommunity).removed(deleteCommunityForm.deleted())
-        .entityId(community.getId()).communityId(community.getId())
-        .instance(community.getInstance()).adminPersonId(person.getId()).build();
+        .actionType(ModlogActionType.ModRemoveCommunity)
+        .removed(deleteCommunityForm.deleted())
+        .entityId(community.getId())
+        .communityId(community.getId())
+        .instance(community.getInstance())
+        .adminPersonId(person.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return CommunityResponse.builder()
-        .community_view(lemmyCommunityService.communityViewFromCommunity(community)).build();
+        .community_view(lemmyCommunityService.communityViewFromCommunity(community))
+        .build();
   }
 
   @Operation(summary = "A moderator remove for a community.")
@@ -147,8 +162,9 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById(
-        (long) removeCommunityForm.community_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+            (long) removeCommunityForm.community_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
     final boolean isAllowed =
         linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.moderator)
@@ -163,14 +179,19 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModRemoveCommunity).removed(removeCommunityForm.removed())
-        .entityId(community.getId()).communityId(community.getId())
-        .instance(community.getInstance()).moderationPersonId(person.getId())
-        .reason(removeCommunityForm.reason()).build();
+        .actionType(ModlogActionType.ModRemoveCommunity)
+        .removed(removeCommunityForm.removed())
+        .entityId(community.getId())
+        .communityId(community.getId())
+        .instance(community.getInstance())
+        .moderationPersonId(person.getId())
+        .reason(removeCommunityForm.reason())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return CommunityResponse.builder()
-        .community_view(lemmyCommunityService.communityViewFromCommunity(community)).build();
+        .community_view(lemmyCommunityService.communityViewFromCommunity(community))
+        .build();
   }
 
   @Operation(summary = "Transfer your community to an existing moderator.")
@@ -187,8 +208,9 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById(
-        (long) transferCommunityForm.community_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+            (long) transferCommunityForm.community_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
     final boolean isAllowed =
         RoleAuthorizingService.isAdmin(person) || linkPersonCommunityService.hasLink(person,
@@ -207,7 +229,9 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
     }
 
     final Person oldOwner = linkPersonCommunityService.getPersonsFromCommunityAndListTypes(
-            community, List.of(LinkPersonCommunityType.owner)).stream().findFirst()
+            community, List.of(LinkPersonCommunityType.owner))
+        .stream()
+        .findFirst()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "owner_not_found"));
     linkPersonCommunityService.addLink(oldOwner, community, LinkPersonCommunityType.moderator);
     linkPersonCommunityService.removeLink(oldOwner, community, LinkPersonCommunityType.owner);
@@ -217,13 +241,18 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModTransferCommunity).entityId(community.getId())
-        .communityId(community.getId()).instance(community.getInstance())
-        .moderationPersonId(person.getId()).otherPersonId(newOwner.getId()).build();
+        .actionType(ModlogActionType.ModTransferCommunity)
+        .entityId(community.getId())
+        .communityId(community.getId())
+        .instance(community.getInstance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(newOwner.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return GetCommunityResponse.builder()
-        .community_view(lemmyCommunityService.communityViewFromCommunity(community)).build();
+        .community_view(lemmyCommunityService.communityViewFromCommunity(community))
+        .build();
   }
 
   @Operation(summary = "Ban a user from a community.")
@@ -255,6 +284,11 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     if (banPersonForm.ban()) {
       if (banPersonForm.remove_data()) {
+
+        postReportService.resolveAllReportsByPersonAndCommunity(personToBan, community, person);
+        commentReportService.resolveAllReportsByCommentCreatorAndCommunity(personToBan, community,
+            person);
+
         commentService.removeAllCommentsFromCommunityAndUser(community, personToBan, true);
         postService.removeAllPostsFromCommunityAndUser(community, personToBan, true);
       }
@@ -275,16 +309,22 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModBanFromCommunity).banned(banPersonForm.ban())
-        .entityId(community.getId()).communityId(community.getId())
-        .instance(community.getInstance()).moderationPersonId(person.getId())
-        .otherPersonId(personToBan.getId()).reason(banPersonForm.reason())
+        .actionType(ModlogActionType.ModBanFromCommunity)
+        .banned(banPersonForm.ban())
+        .entityId(community.getId())
+        .communityId(community.getId())
+        .instance(community.getInstance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(personToBan.getId())
+        .reason(banPersonForm.reason())
         .expires(banPersonForm.expires() == null ? null : new Date(banPersonForm.expires() * 1000L))
         .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return BanFromCommunityResponse.builder().banned(banPersonForm.ban())
-        .person_view(lemmyPersonService.getPersonView(personToBan)).build();
+    return BanFromCommunityResponse.builder()
+        .banned(banPersonForm.ban())
+        .person_view(lemmyPersonService.getPersonView(personToBan))
+        .build();
   }
 
   @Operation(summary = "Add a moderator to your community.")
@@ -302,8 +342,9 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById(
-        (long) addModToCommunityForm.community_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+            (long) addModToCommunityForm.community_id())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
     final boolean isAllowed =
         linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.moderator)
@@ -333,19 +374,25 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
     Collection<Person> moderators = linkPersonCommunityService.getPersonsFromCommunityAndListTypes(
         community, List.of(LinkPersonCommunityType.moderator));
 
-    List<CommunityModeratorView> moderatorsView = moderators.stream().map(
-            moderator -> CommunityModeratorView.builder().moderator(conversionService.convert(moderator,
-                com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class)).community(
-                conversionService.convert(community,
-                    com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class)).build())
+    List<CommunityModeratorView> moderatorsView = moderators.stream()
+        .map(moderator -> CommunityModeratorView.builder()
+            .moderator(conversionService.convert(moderator,
+                com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
+            .community(conversionService.convert(community,
+                com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+            .build())
         .toList();
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
-        .actionType(ModlogActionType.ModAddCommunity).entityId(community.getId())
-        .communityId(community.getId()).removed(!addModToCommunityForm.added())
-        .instance(community.getInstance()).moderationPersonId(person.getId())
-        .otherPersonId(personToAdd.getId()).build();
+        .actionType(ModlogActionType.ModAddCommunity)
+        .entityId(community.getId())
+        .communityId(community.getId())
+        .removed(!addModToCommunityForm.added())
+        .instance(community.getInstance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(personToAdd.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
     return AddModToCommunityResponse.builder().moderators(moderatorsView).build();

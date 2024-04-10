@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.community.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityAggregates;
-import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

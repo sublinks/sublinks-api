@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmoji;
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmojiKeyword;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiKeywordRepository;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
 

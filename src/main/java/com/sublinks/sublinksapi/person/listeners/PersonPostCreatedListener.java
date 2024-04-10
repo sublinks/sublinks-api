@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.listeners;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonAggregate;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
 import com.sublinks.sublinksapi.post.services.PostService;

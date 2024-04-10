@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.post.repositories;
 
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostHistory;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostHistory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

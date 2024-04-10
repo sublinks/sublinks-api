@@ -7,18 +7,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.LocalSiteRateLimit;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteView;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
-import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
-import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
-import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -36,7 +32,7 @@ public class LemmySiteService {
   public Collection<Language> allLanguages(final LanguageRepository languageRepository) {
 
     final Collection<Language> languages = new LinkedHashSet<>();
-    for (com.sublinks.sublinksapi.language.dto.Language language : languageRepository.findAll()) {
+    for (com.sublinks.sublinksapi.language.entities.Language language : languageRepository.findAll()) {
       Language l = Language.builder().id(language.getId()).code(language.getCode())
           .name(language.getName()).build();
       languages.add(l);

@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.comment.events;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.entities.Comment;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

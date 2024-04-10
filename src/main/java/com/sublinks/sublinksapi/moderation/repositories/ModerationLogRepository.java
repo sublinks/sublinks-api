@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.moderation.repositories;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

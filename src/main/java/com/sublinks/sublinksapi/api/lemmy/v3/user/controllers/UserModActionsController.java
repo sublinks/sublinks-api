@@ -17,19 +17,23 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
+import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.services.LanguageService;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
+import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageReportRepository;
+import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageReportService;
+import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -61,7 +65,6 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final AnnouncementRepository announcementRepository;
   private final CommentReportRepository commentReportRepository;
   private final PostReportRepository postReportRepository;
-  private final PrivateMessageReportRepository privateMessageReportRepository;
   private final CommunityRepository communityRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final RoleAuthorizingService roleAuthorizingService;
@@ -74,6 +77,11 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final ConversionService conversionService;
   private final LemmySiteService lemmySiteService;
   private final LanguageService languageService;
+  private final PostReportService postReportService;
+  private final CommentReportService commentReportService;
+  private final PrivateMessageReportRepository privateMessageReportRepository;
+  private final PrivateMessageService privateMessageService;
+  private final PrivateMessageReportService privateMessageReportService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -94,26 +102,39 @@ public class UserModActionsController extends AbstractLemmyApiController {
     if (banPersonForm.ban()) {
       personToBan.setRole(roleAuthorizingService.getBannedRole());
       if (banPersonForm.remove_data()) {
+        // Resolve all reports by content of the user
+        postReportService.resolveAllReportsByPerson(personToBan, person);
+        commentReportService.resolveAllReportsByCommentCreator(personToBan, person);
+        privateMessageReportService.resolveAllReportsByPerson(personToBan, person);
+
+        // Remove all posts and comments by the user
         postService.removeAllPostsFromUser(personToBan, true);
         commentService.removeAllCommentsFromUser(personToBan, true);
       }
     } else {
+      // Restore all posts and comments by the user previously removed
       postService.removeAllPostsFromUser(personToBan, false);
       commentService.removeAllCommentsFromUser(personToBan, false);
       personToBan.setRole(roleAuthorizingService.getUserRole());
     }
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModBan)
-        .banned(banPersonForm.ban()).entityId(personToBan.getId())
-        .instance(personToBan.getInstance()).moderationPersonId(person.getId())
-        .otherPersonId(personToBan.getId()).reason(banPersonForm.reason())
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModBan)
+        .banned(banPersonForm.ban())
+        .entityId(personToBan.getId())
+        .instance(personToBan.getInstance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(personToBan.getId())
+        .reason(banPersonForm.reason())
         .expires(banPersonForm.expires() == null ? null : new Date(banPersonForm.expires() * 1000L))
         .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return BanPersonResponse.builder().banned(banPersonForm.ban())
-        .person_view(lemmyPersonService.getPersonView(personToBan)).build();
+    return BanPersonResponse.builder()
+        .banned(banPersonForm.ban())
+        .person_view(lemmyPersonService.getPersonView(personToBan))
+        .build();
   }
 
   @Operation(summary = "Block a person.")
@@ -217,19 +238,30 @@ public class UserModActionsController extends AbstractLemmyApiController {
     person.setRole(roleAuthorizingService.getUserRole());
 
     // Create Moderation Log
-    ModerationLog moderationLog = ModerationLog.builder().actionType(ModlogActionType.ModAdd)
-        .entityId(person.getId()).removed(true).instance(localInstanceContext.instance())
-        .moderationPersonId(person.getId()).otherPersonId(person.getId()).build();
+    ModerationLog moderationLog = ModerationLog.builder()
+        .actionType(ModlogActionType.ModAdd)
+        .entityId(person.getId())
+        .removed(true)
+        .instance(localInstanceContext.instance())
+        .moderationPersonId(person.getId())
+        .otherPersonId(person.getId())
+        .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return GetSiteResponse.builder().version("0.19.0") // @todo grab this from config?
-        .taglines(announcementRepository.findAll().stream()
-            .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
+    return GetSiteResponse.builder()
+        .version("0.19.0") // @todo grab this from config?
+        .taglines(announcementRepository.findAll()
+            .stream()
+            .map(tagline -> conversionService.convert(tagline, Tagline.class))
+            .toList())
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
-        .custom_emojis(lemmySiteService.customEmojis()).admins(
-            roleAuthorizingService.getAdmins().stream().map(lemmyPersonService::getPersonView)
-                .toList()).build();
+        .custom_emojis(lemmySiteService.customEmojis())
+        .admins(roleAuthorizingService.getAdmins()
+            .stream()
+            .map(lemmyPersonService::getPersonView)
+            .toList())
+        .build();
   }
 }

@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CommunityMapper extends
-    Converter<com.sublinks.sublinksapi.community.dto.Community, Community> {
+    Converter<com.sublinks.sublinksapi.community.entities.Community, Community> {
 
   @Override
   @Mapping(target = "posting_restricted_to_mods", source = "community.postingRestrictedToMods")
@@ -26,5 +26,5 @@ public interface CommunityMapper extends
   @Mapping(target = "icon", source = "community.iconImageUrl")
   @Mapping(target = "inbox_url", constant = "https://aol.com")
   @Mapping(target = "followers_url", constant = "https://yahoo.com")
-  Community convert(@Nullable com.sublinks.sublinksapi.community.dto.Community community);
+  Community convert(@Nullable com.sublinks.sublinksapi.community.entities.Community community);
 }

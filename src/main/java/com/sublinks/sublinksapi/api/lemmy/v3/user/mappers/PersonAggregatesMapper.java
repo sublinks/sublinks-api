@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonAggregates;
-import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.person.entities.PersonAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

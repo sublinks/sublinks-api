@@ -19,14 +19,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostReport;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.models.PostReportSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
@@ -107,6 +106,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
     post.setRemovedState(
         modRemovePostForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
     postService.updatePost(post);
+
+    postReportService.resolveAllReportsByPost(post, person);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()

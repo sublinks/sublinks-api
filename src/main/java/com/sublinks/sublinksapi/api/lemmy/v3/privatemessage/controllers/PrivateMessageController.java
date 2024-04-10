@@ -22,10 +22,10 @@ import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivat
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport;
 import com.sublinks.sublinksapi.privatemessages.enums.PrivateMessageSortType;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageReportSearchCriteria;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageSearchCriteria;

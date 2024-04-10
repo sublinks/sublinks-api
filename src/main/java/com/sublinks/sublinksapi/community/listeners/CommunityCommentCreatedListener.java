@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.community.listeners;
 
 import com.sublinks.sublinksapi.comment.events.CommentCreatedEvent;
-import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
 import com.sublinks.sublinksapi.community.repositories.CommunityAggregateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;

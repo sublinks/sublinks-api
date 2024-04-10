@@ -1,9 +1,7 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
-import com.sublinks.sublinksapi.comment.dto.CommentLike;
-import com.sublinks.sublinksapi.comment.dto.CommentReply;
+import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.models.CommentLikeSearchCriteria;
-import com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -11,7 +9,6 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 

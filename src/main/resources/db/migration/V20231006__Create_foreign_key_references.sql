@@ -210,7 +210,26 @@ ALTER TABLE `comment_history`
   ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 /**
+  Person Email Verifications table
+ */
+ALTER TABLE `person_email_verification`
+  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
   Password Reset table
  */
 ALTER TABLE `reset_password`
+  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Email Data table
+ */
+ALTER TABLE `email_data`
+  ADD FOREIGN KEY (`email_id`) REFERENCES `email` (`id`) ON DELETE CASCADE;
+
+/**
+  Email Person Table
+ */
+ALTER TABLE `email_person_recipients`
+  ADD FOREIGN KEY (`email_id`) REFERENCES `email` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;

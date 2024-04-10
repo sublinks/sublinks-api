@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.utils.TotpUtil;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

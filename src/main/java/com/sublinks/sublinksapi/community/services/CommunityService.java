@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.community.services;
 
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
 import com.sublinks.sublinksapi.community.events.CommunityCreatedPublisher;
 import com.sublinks.sublinksapi.community.repositories.CommunityAggregateRepository;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
