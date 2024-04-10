@@ -1,9 +1,8 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentLike;
-import com.sublinks.sublinksapi.person.dto.Person;
-import java.util.List;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentLike;
+import com.sublinks.sublinksapi.person.entities.Person;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

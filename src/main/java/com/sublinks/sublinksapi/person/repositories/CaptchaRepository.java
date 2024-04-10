@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.repositories;
 
-import com.sublinks.sublinksapi.person.dto.Captcha;
+import com.sublinks.sublinksapi.person.entities.Captcha;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;

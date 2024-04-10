@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.PersonEmailVerification;
+import com.sublinks.sublinksapi.person.entities.PersonEmailVerification;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

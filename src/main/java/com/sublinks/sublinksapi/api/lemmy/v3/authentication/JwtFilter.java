@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.authentication;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.UserData;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.UserDataService;
 import io.jsonwebtoken.ExpiredJwtException;

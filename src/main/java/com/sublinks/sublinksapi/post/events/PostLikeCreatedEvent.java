@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.post.events;
 
-import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.entities.PostLike;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

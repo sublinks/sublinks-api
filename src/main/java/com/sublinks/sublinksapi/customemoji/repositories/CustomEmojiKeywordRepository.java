@@ -1,7 +1,7 @@
 
 package com.sublinks.sublinksapi.customemoji.repositories;
 
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmojiKeyword;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

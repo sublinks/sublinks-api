@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.person.dto.PersonMention;
+import com.sublinks.sublinksapi.person.entities.PersonMention;
 import com.sublinks.sublinksapi.person.events.PersonMentionCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonMentionUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;

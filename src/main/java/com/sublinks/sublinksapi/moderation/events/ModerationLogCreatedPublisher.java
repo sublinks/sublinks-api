@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.moderation.events;
 
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
