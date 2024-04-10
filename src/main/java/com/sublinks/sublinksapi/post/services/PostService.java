@@ -1,12 +1,12 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostAggregate;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
 import com.sublinks.sublinksapi.post.events.PostUpdatedPublisher;

@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.RegistrationApplication;
-import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
+import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import jakarta.annotation.Nullable;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

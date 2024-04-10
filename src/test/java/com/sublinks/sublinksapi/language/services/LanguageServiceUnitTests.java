@@ -3,8 +3,8 @@ package com.sublinks.sublinksapi.language.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.sublinks.sublinksapi.instance.dto.Instance;
-import com.sublinks.sublinksapi.language.dto.Language;
+import com.sublinks.sublinksapi.instance.entities.Instance;
+import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

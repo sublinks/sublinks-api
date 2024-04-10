@@ -1,8 +1,7 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
-import com.sublinks.sublinksapi.comment.dto.CommentReply;
+import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria;
-import com.sublinks.sublinksapi.community.dto.Community;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -12,7 +11,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 

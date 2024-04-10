@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CommentReportMapper extends
-    Converter<com.sublinks.sublinksapi.comment.dto.CommentReport, CommentReport> {
+    Converter<com.sublinks.sublinksapi.comment.entities.CommentReport, CommentReport> {
 
   @Override
   @Mapping(target = "updated", source = "comment.updatedAt",
@@ -21,5 +21,5 @@ public interface CommentReportMapper extends
   @Mapping(target = "resolver_id", source = "comment.resolver.id")
   @Mapping(target = "comment_id", source = "comment.comment.id")
   @Mapping(target = "original_comment_text", source = "comment.originalContent")
-  CommentReport convert(@Nullable com.sublinks.sublinksapi.comment.dto.CommentReport comment);
+  CommentReport convert(@Nullable com.sublinks.sublinksapi.comment.entities.CommentReport comment);
 }

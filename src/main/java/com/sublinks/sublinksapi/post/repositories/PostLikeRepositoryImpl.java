@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.post.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.models.PostLikeSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -13,7 +13,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @AllArgsConstructor
 public class PostLikeRepositoryImpl implements PostLikeRepositorySearch {

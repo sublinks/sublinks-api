@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.mappers;
 
-import com.sublinks.sublinksapi.announcement.dto.Announcement;
+import com.sublinks.sublinksapi.announcement.entities.Announcement;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.mapstruct.Mapper;

@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.repositories;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import java.util.List;
 import java.util.Optional;

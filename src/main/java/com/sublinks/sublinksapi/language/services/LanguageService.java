@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.language.services;
 
-import com.sublinks.sublinksapi.instance.dto.Instance;
-import com.sublinks.sublinksapi.language.dto.Language;
+import com.sublinks.sublinksapi.instance.entities.Instance;
+import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import java.util.ArrayList;
 import java.util.Collection;

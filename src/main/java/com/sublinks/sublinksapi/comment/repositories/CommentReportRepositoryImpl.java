@@ -2,10 +2,10 @@ package com.sublinks.sublinksapi.comment.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentReport;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

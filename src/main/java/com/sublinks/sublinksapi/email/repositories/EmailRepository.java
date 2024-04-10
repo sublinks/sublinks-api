@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.email.repositories;
 
-import com.sublinks.sublinksapi.email.dto.Email;
+import com.sublinks.sublinksapi.email.entities.Email;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

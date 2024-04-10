@@ -1,17 +1,17 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.authorization.dto.Role;
-import com.sublinks.sublinksapi.authorization.dto.RolePermissions;
+import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsRepository;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.language.dto.Language;
-import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonAggregate;
+import com.sublinks.sublinksapi.language.entities.Language;
+import com.sublinks.sublinksapi.person.entities.LinkPersonInstance;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonAggregate;
 import com.sublinks.sublinksapi.person.enums.PostListingMode;
 import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
@@ -56,7 +56,7 @@ public class PersonService {
         Role.builder().description("Admin role for admins").name("Admin").isActive(true).build());
 
     adminRole.setRolePermissions(Collections.singleton(rolePermissionsRepository.save(
-        com.sublinks.sublinksapi.authorization.dto.RolePermissions.builder()
+        com.sublinks.sublinksapi.authorization.entities.RolePermissions.builder()
             .role(adminRole)
             .permission(RolePermission.ADMIN)
             .build())));

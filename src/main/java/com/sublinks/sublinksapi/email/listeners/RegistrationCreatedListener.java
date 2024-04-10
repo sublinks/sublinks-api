@@ -1,10 +1,10 @@
 package com.sublinks.sublinksapi.email.listeners;
 
-import com.sublinks.sublinksapi.email.dto.Email;
+import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.events.PersonRegistrationApplicationCreatedEvent;
 import java.util.List;
 import java.util.Locale;
