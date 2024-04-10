@@ -95,15 +95,13 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final RoleAuthorizingService roleAuthorizingService;
   private final ConversionService conversionService;
   private final EmailService emailService;
-  private final Optional<Producer> federationProducer;
   private final UserDataService userDataService;
   private final PasswordResetService passwordResetService;
   private final PersonEmailVerificationService personEmailVerificationService;
 
   private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
 
-  @Value("${sublinks.federation.exchange}")
-  private String federationExchange;
+
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -225,20 +223,6 @@ public class UserAuthController extends AbstractLemmyApiController {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "email_sending_failed");
       }
     }
-
-    federationProducer.ifPresent(service -> {
-      final Actor actorMessage = Actor.builder()
-          .actor_id(person.getActorId())
-          .actor_type(ActorType.USER.getValue())
-          .bio(person.getBiography())
-          .display_name(person.getDisplayName())
-          .matrix_user_id(person.getMatrixUserId())
-          .private_key(person.getPrivateKey())
-          .public_key(person.getPublicKey())
-          .build();
-
-      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
-    });
 
     if (token != null && !token.isEmpty()) {
       userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
