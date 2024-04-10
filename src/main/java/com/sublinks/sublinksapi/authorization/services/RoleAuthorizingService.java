@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.authorization.services;
 
-import com.sublinks.sublinksapi.authorization.dto.Role;
+import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;

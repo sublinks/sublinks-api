@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PostReportMapper extends
-    Converter<com.sublinks.sublinksapi.post.dto.PostReport, PostReport> {
+    Converter<com.sublinks.sublinksapi.post.entities.PostReport, PostReport> {
 
   @Override
   @Mapping(target = "published", source = "post.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
@@ -21,5 +21,5 @@ public interface PostReportMapper extends
   @Mapping(target = "original_post_name", source = "postReport.originalTitle")
   @Mapping(target = "original_post_url", source = "postReport.originalUrl")
   @Mapping(target = "original_post_body", source = "postReport.originalBody")
-  PostReport convert(@Nullable com.sublinks.sublinksapi.post.dto.PostReport postReport);
+  PostReport convert(@Nullable com.sublinks.sublinksapi.post.entities.PostReport postReport);
 }

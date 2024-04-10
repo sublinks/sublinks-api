@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.comment.events;
 
-import com.sublinks.sublinksapi.comment.dto.CommentHistory;
-import com.sublinks.sublinksapi.post.dto.PostHistory;
+import com.sublinks.sublinksapi.comment.entities.CommentHistory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

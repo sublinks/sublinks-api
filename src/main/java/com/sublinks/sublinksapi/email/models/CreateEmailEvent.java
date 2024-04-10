@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.email.models;
 
-import com.sublinks.sublinksapi.email.dto.Email;
+import com.sublinks.sublinksapi.email.entities.Email;
 import lombok.Builder;
 
 @Builder

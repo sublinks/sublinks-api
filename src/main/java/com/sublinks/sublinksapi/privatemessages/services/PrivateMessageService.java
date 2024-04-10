@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.privatemessages.services;
 
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage;
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageCreatedPublisher;
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageUpdatedPublisher;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
@@ -19,7 +19,7 @@ public class PrivateMessageService {
   private final LocalInstanceContext localInstanceContext;
 
   public String generateActivityPubId(
-      final com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage privateMessage) {
+      final com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage privateMessage) {
 
     String domain = localInstanceContext.instance().getDomain();
     return String.format("%s/private_message/%d", domain, privateMessage.getId());

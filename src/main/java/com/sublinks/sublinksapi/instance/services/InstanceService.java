@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.instance.services;
 
-import com.sublinks.sublinksapi.instance.dto.Instance;
+import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.instance.repositories.InstanceAggregateRepository;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;

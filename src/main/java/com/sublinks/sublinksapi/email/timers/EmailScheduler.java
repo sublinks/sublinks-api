@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.email.timers;
 
 import com.sublinks.sublinksapi.email.config.EmailConfig;
-import com.sublinks.sublinksapi.email.dto.Email;
+import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.repositories.EmailRepository;
 import com.sublinks.sublinksapi.email.services.EmailService;
 import java.io.UnsupportedEncodingException;
@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.concurrent.DefaultManagedTaskScheduler;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 

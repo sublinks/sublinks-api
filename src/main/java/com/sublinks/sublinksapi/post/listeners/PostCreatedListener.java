@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.post.listeners;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.post.dto.CrossPost;
-import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.post.entities.CrossPost;
+import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
 import com.sublinks.sublinksapi.post.repositories.CrossPostRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;

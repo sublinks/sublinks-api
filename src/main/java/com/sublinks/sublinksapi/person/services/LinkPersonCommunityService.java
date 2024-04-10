@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedPublisher;
