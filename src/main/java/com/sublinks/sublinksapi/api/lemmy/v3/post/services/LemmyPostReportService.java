@@ -4,11 +4,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportView;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import com.sublinks.sublinksapi.post.dto.PostLike;
-import com.sublinks.sublinksapi.post.dto.PostReport;
+import com.sublinks.sublinksapi.post.entities.PostLike;
+import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
@@ -30,13 +30,13 @@ public class LemmyPostReportService {
 
 
   public PostReportView postReportViewFromPost(final PostReport postReport,
-      final com.sublinks.sublinksapi.person.dto.Person person) {
+      final Person person) {
 
     return postReportViewBuilder(postReport, person).build();
   }
 
   private PostReportView.PostReportViewBuilder postReportViewBuilder(final PostReport postReport,
-      final com.sublinks.sublinksapi.person.dto.Person person) {
+      final Person person) {
 
     final com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReport lemmyPostReport = conversionService.convert(
         postReport, com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReport.class);

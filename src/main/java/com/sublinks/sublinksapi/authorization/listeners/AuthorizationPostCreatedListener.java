@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.authorization.listeners;
 
-import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.post.events.PostCreatedEvent;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;

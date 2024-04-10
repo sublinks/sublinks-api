@@ -13,11 +13,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
 import org.springframework.core.convert.converter.Converter;
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmojiKeyword;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CustomEmojiViewMapper
-    extends Converter<com.sublinks.sublinksapi.customemoji.dto.CustomEmoji, CustomEmojiView> {
+    extends Converter<com.sublinks.sublinksapi.customemoji.entities.CustomEmoji, CustomEmojiView> {
 
   @Mapping(target = "custom_emoji.id", source = "customEmoji.id")
   @Mapping(target = "custom_emoji.local_site_id", source = "customEmoji.localSiteId")
@@ -28,7 +28,7 @@ public interface CustomEmojiViewMapper
   @Mapping(target = "custom_emoji.published", source = "customEmoji.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "custom_emoji.updated", source = "customEmoji.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "keywords", source = "customEmoji.keywords", qualifiedByName = "mapKeywords")
-  CustomEmojiView convert(@Nullable com.sublinks.sublinksapi.customemoji.dto.CustomEmoji customEmoji);
+  CustomEmojiView convert(@Nullable com.sublinks.sublinksapi.customemoji.entities.CustomEmoji customEmoji);
 
   @Named("mapKeywords")
   default List<String> map(List<CustomEmojiKeyword> keywords) {

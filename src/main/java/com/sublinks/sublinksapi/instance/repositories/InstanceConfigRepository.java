@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.instance.repositories;
 
-import com.sublinks.sublinksapi.instance.dto.Instance;
-import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.entities.Instance;
+import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 

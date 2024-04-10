@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.instance.listeners;
 
-import com.sublinks.sublinksapi.instance.dto.InstanceAggregate;
+import com.sublinks.sublinksapi.instance.entities.InstanceAggregate;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceAggregateRepository;
 import com.sublinks.sublinksapi.post.events.PostCreatedEvent;

@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.events.PostLikeCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostLikeUpdatedEvent;
 import com.sublinks.sublinksapi.post.events.PostLikeUpdatedPublisher;

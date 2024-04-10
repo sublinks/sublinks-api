@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.post.dto.PostReport;
+import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.events.PostReportCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostReportUpdatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;

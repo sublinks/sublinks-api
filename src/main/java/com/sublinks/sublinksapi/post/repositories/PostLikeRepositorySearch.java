@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.post.repositories;
 
-import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.models.PostLikeSearchCriteria;
 import java.util.List;
 

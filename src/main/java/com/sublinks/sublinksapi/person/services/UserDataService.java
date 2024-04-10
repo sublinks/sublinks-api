@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.person.services;
 
 import com.sublinks.sublinksapi.person.config.UserDataConfig;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.UserData;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.UserData;
 import com.sublinks.sublinksapi.person.events.UserDataCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.UserDataInvalidationEventPublisher;
 import com.sublinks.sublinksapi.person.events.UserDataUpdatedPublisher;

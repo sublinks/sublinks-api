@@ -8,7 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
-import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
@@ -28,7 +28,7 @@ public class LemmyCommentService {
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
 
-  public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+  public String generateActivityPubId(final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     String domain = localInstanceContext.instance().getDomain();
     return String.format("%s/comment/%d", domain, comment.getId());
@@ -36,22 +36,22 @@ public class LemmyCommentService {
 
 
   @NonNull
-  public CommentView createCommentView(final com.sublinks.sublinksapi.comment.dto.Comment comment,
-      final com.sublinks.sublinksapi.person.dto.Person person) {
+  public CommentView createCommentView(final com.sublinks.sublinksapi.comment.entities.Comment comment,
+      final com.sublinks.sublinksapi.person.entities.Person person) {
 
     return commentViewBuilder(comment, person).build();
   }
 
   @NonNull
-  public CommentView createCommentView(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+  public CommentView createCommentView(final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     return commentViewBuilder(comment).build();
   }
 
   @NonNull
   private CommentView.CommentViewBuilder commentViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment,
-      final com.sublinks.sublinksapi.person.dto.Person person) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment,
+      final com.sublinks.sublinksapi.person.entities.Person person) {
 
     CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
 
@@ -67,11 +67,11 @@ public class LemmyCommentService {
 
   @NonNull
   private CommentView.CommentViewBuilder commentViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     final Comment lemmyComment = conversionService.convert(comment, Comment.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person creator = comment.getPerson();
+    final com.sublinks.sublinksapi.person.entities.Person creator = comment.getPerson();
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
 
     final Community lemmyCommunity = conversionService.convert(comment.getCommunity(),

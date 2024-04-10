@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.authorization.repositories;
 
-import com.sublinks.sublinksapi.authorization.dto.Role;
+import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import java.util.Collection;
 import java.util.Set;

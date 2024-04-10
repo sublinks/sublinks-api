@@ -1,12 +1,11 @@
 package com.sublinks.sublinksapi.search.services;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.post.dto.CrossPost;
-import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.post.entities.CrossPost;
+import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.CrossPostRepository;
-import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
 import com.sublinks.sublinksapi.search.repositories.CommentSearchRepository;
 import com.sublinks.sublinksapi.search.repositories.CommunitySearchRepository;
@@ -17,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 

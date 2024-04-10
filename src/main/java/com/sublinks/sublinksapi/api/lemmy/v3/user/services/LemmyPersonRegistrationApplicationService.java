@@ -2,8 +2,8 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.RegistrationApplicationView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
