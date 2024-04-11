@@ -5,7 +5,6 @@ import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
-import com.sublinks.sublinksapi.community.dto.Community;
 import com.sublinks.sublinksapi.community.entities.Community;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
