@@ -13,7 +13,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @AllArgsConstructor
 public class PrivateMessageReportRepositoryImpl implements PrivateMessageReportSearchRepository {
