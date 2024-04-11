@@ -254,6 +254,9 @@ public class CommentController extends AbstractLemmyApiController {
     }
 
     final Comment commentEntity = comment.get();
+    if (commentEntity.getPerson() != person) {
+      throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
+    }
 
     commentEntity.setDeleted(true);
 
