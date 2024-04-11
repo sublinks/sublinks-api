@@ -5,23 +5,16 @@ import com.sublinks.sublinksapi.federation.enums.RoutingKey;
 import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.events.PersonCreatedEvent;
-import com.sublinks.sublinksapi.queue.services.Producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnBean(RabbitTemplate.class)
-public class PersonActorCreateListener implements ApplicationListener<PersonCreatedEvent> {
-  @Value("${sublinks.federation.exchange}")
-  private String federationExchange;
-
-  Producer federationProducer;
-
+public class PersonActorCreateListener extends FederationListener implements ApplicationListener<PersonCreatedEvent> {
   private static final Logger logger = LoggerFactory.getLogger(PersonActorCreateListener.class);
 
   @Override
