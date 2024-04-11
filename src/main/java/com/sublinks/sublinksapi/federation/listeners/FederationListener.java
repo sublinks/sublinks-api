@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 
 @ConditionalOnBean(RabbitTemplate.class)
 public class FederationListener {
+
   @Value("${sublinks.federation.exchange}")
   public String federationExchange;
   public Producer federationProducer;

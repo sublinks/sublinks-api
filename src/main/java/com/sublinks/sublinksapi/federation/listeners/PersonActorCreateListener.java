@@ -14,11 +14,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnBean(RabbitTemplate.class)
-public class PersonActorCreateListener extends FederationListener implements ApplicationListener<PersonCreatedEvent> {
+public class PersonActorCreateListener extends FederationListener implements
+    ApplicationListener<PersonCreatedEvent> {
+
   private static final Logger logger = LoggerFactory.getLogger(PersonActorCreateListener.class);
 
   @Override
   public void onApplicationEvent(PersonCreatedEvent event) {
+
     Person person = event.getPerson();
 
     final Actor actorMessage = Actor.builder()
@@ -32,7 +35,8 @@ public class PersonActorCreateListener extends FederationListener implements App
         .public_key(person.getPublicKey())
         .build();
 
-    federationProducer.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
+    federationProducer.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(),
+        actorMessage);
     logger.info(String.format("person actor created %s", person.getActorId()));
   }
 }

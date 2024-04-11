@@ -12,16 +12,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class CommunityActorCreateUnitTests {
+
   @Mock
   private Producer federationProducer;
 
@@ -29,6 +26,7 @@ public class CommunityActorCreateUnitTests {
 
   @BeforeEach
   void setUp() {
+
     MockitoAnnotations.openMocks(this);
     listener = new CommunityActorCreateListener();
     listener.federationExchange = "testExchange";
@@ -37,6 +35,7 @@ public class CommunityActorCreateUnitTests {
 
   @Test
   void testOnApplicationEvent() {
+
     Community community = new Community();
     community.setActivityPubId("testId");
     community.setDescription("testDescription");
@@ -50,7 +49,8 @@ public class CommunityActorCreateUnitTests {
 
     listener.onApplicationEvent(event);
 
-    verify(federationProducer, times(1)).sendMessage(eq("testExchange"), eq(RoutingKey.ACTOR_CREATE.getValue()), actorCaptor.capture());
+    verify(federationProducer, times(1)).sendMessage(eq("testExchange"),
+        eq(RoutingKey.ACTOR_CREATE.getValue()), actorCaptor.capture());
 
     Actor capturedActor = actorCaptor.getValue();
     assertAll(
