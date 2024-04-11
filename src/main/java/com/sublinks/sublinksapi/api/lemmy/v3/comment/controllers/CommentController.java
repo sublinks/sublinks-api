@@ -8,6 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentLike;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CreateCommentReport;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.DeleteComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.EditComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentLikes;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
@@ -67,6 +68,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -236,13 +238,33 @@ public class CommentController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping("delete")
-  CommentResponse delete(final JwtPerson principal) {
+  CommentResponse delete(@RequestBody final DeleteComment deleteCommentForm,
+      final JwtPerson principal) {
     // @todo Implement delete comment
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+
+    final Optional<Comment> comment = commentRepository.findById(
+        (long) deleteCommentForm.comment_id());
+
+    if (comment.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found");
+    }
+
+    final Comment commentEntity = comment.get();
+
+    commentEntity.setDeleted(true);
+
+    commentService.updateComment(commentEntity);
+
+    final CommentView commentView = lemmyCommentService.createCommentView(commentEntity, person);
+
+    return CommentResponse.builder()
+        .comment_view(commentView)
+        .recipient_ids(new ArrayList<>())
+        .build();
   }
 
   @Operation(summary = "Mark a comment as read.")
