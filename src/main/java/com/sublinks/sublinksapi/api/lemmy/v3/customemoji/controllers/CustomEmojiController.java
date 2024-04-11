@@ -11,7 +11,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.EditCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmoji;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
 import com.sublinks.sublinksapi.customemoji.services.CustomEmojiService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;

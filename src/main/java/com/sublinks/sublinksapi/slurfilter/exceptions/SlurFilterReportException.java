@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.slurfilter.exceptions;
 
-import com.sublinks.sublinksapi.slurfilter.dto.SlurFilter;
+import com.sublinks.sublinksapi.slurfilter.entities.SlurFilter;
 import lombok.Getter;
 
 @Getter

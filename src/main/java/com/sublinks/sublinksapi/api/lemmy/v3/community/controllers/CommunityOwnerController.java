@@ -9,13 +9,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.language.dto.Language;
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.language.entities.Language;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;

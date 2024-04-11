@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.customemoji.services;
 
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmoji;
-import com.sublinks.sublinksapi.customemoji.dto.CustomEmojiKeyword;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmojiKeyword;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiKeywordRepository;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
 import org.junit.jupiter.api.BeforeEach;

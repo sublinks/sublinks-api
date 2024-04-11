@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.person.repositories;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.enums.CommentSortType;
-import com.sublinks.sublinksapi.person.dto.PersonMention;
+import com.sublinks.sublinksapi.person.entities.PersonMention;
 import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -12,7 +11,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 

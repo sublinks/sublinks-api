@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.privatemessages.events;
 
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

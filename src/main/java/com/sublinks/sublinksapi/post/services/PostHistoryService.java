@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.post.config.PostHistoryConfig;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostHistory;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostHistory;
 import com.sublinks.sublinksapi.post.events.PostHistoryCreatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
 import lombok.RequiredArgsConstructor;

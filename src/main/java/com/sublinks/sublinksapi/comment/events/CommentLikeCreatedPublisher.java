@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.comment.events;
 
-import com.sublinks.sublinksapi.comment.dto.CommentLike;
+import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;

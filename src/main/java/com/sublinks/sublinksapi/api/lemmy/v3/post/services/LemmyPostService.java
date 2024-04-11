@@ -3,11 +3,11 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
@@ -32,7 +32,7 @@ public class LemmyPostService {
   }
 
   public PostView postViewFromPost(final Post post,
-      final com.sublinks.sublinksapi.person.dto.Person person) {
+      final com.sublinks.sublinksapi.person.entities.Person person) {
 
     Optional<PostLike> postLike = postLikeService.getPostLike(post, person);
     int vote = 0;

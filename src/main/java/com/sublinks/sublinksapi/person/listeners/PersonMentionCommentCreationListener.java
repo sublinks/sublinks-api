@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.person.listeners;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
+import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.events.CommentCreatedEvent;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonMention;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonMention;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonMentionService;
 import com.sublinks.sublinksapi.utils.MentionUtils;

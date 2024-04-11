@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonEmailVerification;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonEmailVerification;
 import com.sublinks.sublinksapi.person.events.PersonEmailVerificationCreatedEventPublisher;
 import com.sublinks.sublinksapi.person.events.PersonEmailVerificationUpdatedEventPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonEmailVerificationRepository;

@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface PrivateMessageReportMapper extends
-    Converter<com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport, PrivateMessageReport> {
+    Converter<com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport, PrivateMessageReport> {
 
   @Override
   @Mapping(target = "updated", source = "privateMessageReport.updatedAt",
@@ -22,5 +22,5 @@ public interface PrivateMessageReportMapper extends
   @Mapping(target = "private_message_id", source = "privateMessageReport.privateMessage.id")
   @Mapping(target = "original_pm_text", source = "privateMessageReport.originalContent")
   PrivateMessageReport convert(
-      @Nullable com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport privateMessageReport);
+      @Nullable com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport privateMessageReport);
 }

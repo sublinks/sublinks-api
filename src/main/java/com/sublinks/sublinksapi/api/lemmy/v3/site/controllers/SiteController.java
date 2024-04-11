@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.site.controllers;
 
-import com.sublinks.sublinksapi.announcement.dto.Announcement;
+import com.sublinks.sublinksapi.announcement.entities.Announcement;
 import com.sublinks.sublinksapi.announcement.repositories.AnnouncementRepository;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
@@ -16,16 +16,16 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
-import com.sublinks.sublinksapi.instance.dto.Instance;
-import com.sublinks.sublinksapi.instance.dto.InstanceBlock;
-import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.entities.Instance;
+import com.sublinks.sublinksapi.instance.entities.InstanceBlock;
+import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceBlockRepository;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.language.services.LanguageService;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

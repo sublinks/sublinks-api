@@ -1,12 +1,12 @@
 package com.sublinks.sublinksapi.comment.services;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentReport;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.events.CommentReportCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentReportUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.Person;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

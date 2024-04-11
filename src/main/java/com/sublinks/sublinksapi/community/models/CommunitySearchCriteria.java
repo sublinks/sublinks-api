@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.community.models;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import lombok.Builder;
 
 @Builder

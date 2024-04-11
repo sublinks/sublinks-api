@@ -1,13 +1,13 @@
 package com.sublinks.sublinksapi.comment.services;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentLike;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.events.CommentLikeCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentLikeUpdatedEvent;
 import com.sublinks.sublinksapi.comment.events.CommentLikeUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.models.CommentLikeSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentLikeRepository;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 
 import java.util.List;
 import java.util.Optional;
