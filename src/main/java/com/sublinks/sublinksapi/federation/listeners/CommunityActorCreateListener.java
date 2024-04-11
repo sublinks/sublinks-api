@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.federation.listeners;
 
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.events.CommunityCreatedEvent;
 import com.sublinks.sublinksapi.federation.enums.ActorType;
 import com.sublinks.sublinksapi.federation.enums.RoutingKey;
