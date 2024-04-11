@@ -14,11 +14,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConditionalOnBean(RabbitTemplate.class)
-public class CommunityActorCreateListener extends FederationListener implements ApplicationListener<CommunityCreatedEvent> {
+public class CommunityActorCreateListener extends FederationListener implements
+    ApplicationListener<CommunityCreatedEvent> {
+
   private static final Logger logger = LoggerFactory.getLogger(CommunityActorCreateListener.class);
 
   @Override
   public void onApplicationEvent(CommunityCreatedEvent event) {
+
     Community community = event.getCommunity();
 
     final Actor actorMessage = Actor.builder()
@@ -30,7 +33,8 @@ public class CommunityActorCreateListener extends FederationListener implements 
         .public_key(community.getPublicKey())
         .build();
 
-    federationProducer.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
+    federationProducer.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(),
+        actorMessage);
     logger.info(String.format("community actor created %s", community.getActivityPubId()));
   }
 }
