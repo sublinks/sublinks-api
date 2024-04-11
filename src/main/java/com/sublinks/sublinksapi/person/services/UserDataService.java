@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.person.services;
 
 import com.sublinks.sublinksapi.person.config.UserDataConfig;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.UserData;
-import com.sublinks.sublinksapi.person.events.UserDataCreatedPublisher;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.UserData;
+import com.sublinks.sublinksapi.person.events.UserDataCreatedEventPublisher;
 import com.sublinks.sublinksapi.person.events.UserDataInvalidationEventPublisher;
 import com.sublinks.sublinksapi.person.events.UserDataUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.UserDataRepository;
@@ -21,7 +21,7 @@ public class UserDataService {
 
   private final UserDataRepository userDataRepository;
   private final UserDataConfig userDataConfig;
-  private final UserDataCreatedPublisher userDataCreatedPublisher;
+  private final UserDataCreatedEventPublisher userDataCreatedEventPublisher;
   private final UserDataUpdatedPublisher userDataUpdatedPublisher;
   private final UserDataInvalidationEventPublisher userDataInvalidationEventPublisher;
 
@@ -66,7 +66,7 @@ public class UserDataService {
           .active(true)
           .build();
       UserData createdUserData = userDataRepository.save(userData);
-      userDataCreatedPublisher.publish(createdUserData);
+      userDataCreatedEventPublisher.publish(createdUserData);
     }
   }
 

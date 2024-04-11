@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostSave;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostSave;
 import com.sublinks.sublinksapi.post.events.PostSaveCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostSaveDeletedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostSaveRepository;

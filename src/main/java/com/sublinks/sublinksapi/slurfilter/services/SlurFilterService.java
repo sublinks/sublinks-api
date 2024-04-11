@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.slurfilter.services;
 
-import com.sublinks.sublinksapi.slurfilter.dto.SlurFilter;
+import com.sublinks.sublinksapi.slurfilter.entities.SlurFilter;
 import com.sublinks.sublinksapi.slurfilter.enums.SlurActionType;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;

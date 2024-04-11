@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.slurfilter.repositories;
 
-import com.sublinks.sublinksapi.slurfilter.dto.SlurFilter;
+import com.sublinks.sublinksapi.slurfilter.entities.SlurFilter;
 import com.sublinks.sublinksapi.slurfilter.enums.SlurActionType;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;

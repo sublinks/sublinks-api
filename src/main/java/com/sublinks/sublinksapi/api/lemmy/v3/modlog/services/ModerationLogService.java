@@ -37,7 +37,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import com.sublinks.sublinksapi.moderation.events.ModerationLogCreatedPublisher;
 import com.sublinks.sublinksapi.moderation.repositories.ModerationLogRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;

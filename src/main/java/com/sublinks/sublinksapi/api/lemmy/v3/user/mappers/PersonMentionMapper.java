@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
-import com.sublinks.sublinksapi.person.dto.PersonMention;
+import com.sublinks.sublinksapi.person.entities.PersonMention;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

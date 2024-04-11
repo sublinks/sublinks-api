@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.utils;
 import com.bastiaanjansen.otp.HMACAlgorithm;
 import com.bastiaanjansen.otp.SecretGenerator;
 import com.bastiaanjansen.otp.TOTPGenerator;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Clock;

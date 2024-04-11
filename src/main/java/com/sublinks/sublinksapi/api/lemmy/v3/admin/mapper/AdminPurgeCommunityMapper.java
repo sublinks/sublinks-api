@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.admin.mapper;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommunity;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

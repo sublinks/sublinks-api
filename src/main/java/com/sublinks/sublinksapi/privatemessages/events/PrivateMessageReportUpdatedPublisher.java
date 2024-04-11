@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.privatemessages.events;
 
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 

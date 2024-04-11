@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.post.models;
 
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import java.util.List;
 import lombok.Builder;
 

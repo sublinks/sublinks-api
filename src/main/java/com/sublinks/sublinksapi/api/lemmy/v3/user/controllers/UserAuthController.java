@@ -18,25 +18,28 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Register;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.SuccessResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmail;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
-import com.sublinks.sublinksapi.email.models.CreateEmailRequest;
 import com.sublinks.sublinksapi.email.services.EmailService;
 import com.sublinks.sublinksapi.federation.enums.ActorType;
 import com.sublinks.sublinksapi.federation.enums.RoutingKey;
 import com.sublinks.sublinksapi.federation.models.Actor;
-import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.dto.Captcha;
-import com.sublinks.sublinksapi.person.dto.PasswordReset;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
+import com.sublinks.sublinksapi.person.entities.Captcha;
+import com.sublinks.sublinksapi.person.entities.PasswordReset;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonEmailVerification;
+import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.CaptchaService;
 import com.sublinks.sublinksapi.person.services.PasswordResetService;
+import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.person.services.UserDataService;
@@ -54,12 +57,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -92,6 +98,9 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final Optional<Producer> federationProducer;
   private final UserDataService userDataService;
   private final PasswordResetService passwordResetService;
+  private final PersonEmailVerificationService personEmailVerificationService;
+
+  private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
 
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
@@ -142,8 +151,8 @@ public class UserAuthController extends AbstractLemmyApiController {
     person.setEmail(registerForm.email());
     person.setPassword(registerForm.password());
     if (!Objects.equals(registerForm.password(), registerForm.password_verify())) {
-      throw new RuntimeException("Passwords do not match");
       // @todo throw lemmy error code
+      throw new RuntimeException("Passwords do not match");
     }
     personService.createPerson(person);
     String token = jwtUtil.generateToken(person);
@@ -164,33 +173,39 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
 
       if (instanceConfig.isRequireEmailVerification()) {
-        // @todo: Implement email verification
         if (person.getEmail() == null) {
           throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
         }
+
+        send_verification_email = true;
+        token = "";
+
+        PersonEmailVerification personEmailVerification = personEmailVerificationService.create(
+            person, request.getRemoteAddr(), request.getHeader("User-Agent"));
+
         Map<String, Object> params = emailService.getDefaultEmailParameters();
 
         params.put("person", person);
-        params.put("verificationUrl",
-            localInstanceContext.instance().getDomain() + "/api/v3/user/verify_email?token="
-                + "TODO");
+        params.put("verificationUrl", localInstanceContext.instance().getDomain() + "/verify_email/"
+            + personEmailVerification.getToken());
         try {
           final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
-          emailService.sendEmail(CreateEmailRequest.builder()
-              .to(List.of(person.getEmail()))
+          emailService.saveToQueue(Email.builder()
+              .personRecipients(List.of(person))
               .subject(emailService.getSubjects().get(template_name).getAsString())
-              .body(emailService.formatTextEmailTemplate(template_name,
+              .htmlContent(emailService.formatTextEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
-              .htmlBody(emailService.formatEmailTemplate(template_name,
+              .textContent(emailService.formatEmailTemplate(template_name,
                   new Context(Locale.getDefault(), params)))
               .build());
-          send_verification_email = true;
+
         } catch (Exception e) {
+          personRepository.delete(person);
           throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
               "email_sending_failed");
         }
       }
-    } else {
+    } else if (person.getEmail() != null && !person.getEmail().isEmpty()) {
       Map<String, Object> properties = emailService.getDefaultEmailParameters();
       properties.put("person", person);
 
@@ -198,14 +213,16 @@ public class UserAuthController extends AbstractLemmyApiController {
         final Context context = new Context(Locale.getDefault(), properties);
 
         final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
-        emailService.sendEmail(CreateEmailRequest.builder()
-            .to(List.of(person.getEmail()))
+        emailService.saveToQueue(Email.builder()
+            .personRecipients(List.of(person))
             .subject(emailService.getSubjects().get(template_name).getAsString())
-            .body(emailService.formatTextEmailTemplate(template_name, context))
-            .htmlBody(emailService.formatEmailTemplate(template_name, context))
+            .htmlContent(emailService.formatTextEmailTemplate(template_name, context))
+            .textContent(emailService.formatEmailTemplate(template_name, context))
             .build());
-      } catch (Exception e) {
-        // @todo log error?
+      } catch (IOException e) {
+        personRepository.delete(person);
+        logger.error("Error reading Subjects!", e);
+        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "email_sending_failed");
       }
     }
 
@@ -227,7 +244,8 @@ public class UserAuthController extends AbstractLemmyApiController {
       userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
           request.getHeader("User-Agent"));
     }
-
+    person.setEmailVerified(!send_verification_email);
+    personService.updatePerson(person);
     return LoginResponse.builder()
         .jwt(token)
         .registration_created(true)
@@ -262,6 +280,14 @@ public class UserAuthController extends AbstractLemmyApiController {
     final Person person = personRepository.findOneByName(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
+
+    if (person.isDeleted()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "user_deleted");
+    }
+
+    if (!person.isEmailVerified()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_not_verified");
+    }
 
     String totpSecret = person.getTotpVerifiedSecret();
     if (totpSecret != null) {
@@ -345,12 +371,12 @@ public class UserAuthController extends AbstractLemmyApiController {
       // #todo: implement the password reset in the frontend
       params.put("resetUrl", url);
 
-      emailService.sendEmail(CreateEmailRequest.builder()
-          .to(List.of(foundPerson.getEmail()))
+      emailService.saveToQueue(Email.builder()
+          .personRecipients(List.of(foundPerson))
           .subject(emailService.getSubjects().get(template_name).getAsString())
-          .body(emailService.formatTextEmailTemplate(template_name,
+          .htmlContent(emailService.formatTextEmailTemplate(template_name,
               new Context(Locale.getDefault(), params)))
-          .htmlBody(emailService.formatEmailTemplate(template_name,
+          .textContent(emailService.formatEmailTemplate(template_name,
               new Context(Locale.getDefault(), params)))
           .build());
     } catch (Exception e) {
@@ -408,11 +434,45 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = VerifyEmailResponse.class))})})
   @PostMapping("verify_email")
-  VerifyEmailResponse verifyEmail() {
+  SuccessResponse verifyEmail(@RequestBody VerifyEmail verifyEmailForm) {
 
-    // @todo: implement verify Email
+    Optional<PersonEmailVerification> personEmailVerification = personEmailVerificationService.getActiveVerificationByToken(
+        verifyEmailForm.token());
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    if (personEmailVerification.isEmpty()) {
+      return SuccessResponse.builder().success(false).error("token_not_found").build();
+    }
+
+    PersonEmailVerification personEmailVerificationEntity = personEmailVerification.get();
+
+    if (personEmailVerificationEntity.getPerson() == null) {
+      return SuccessResponse.builder().success(false).error("person_not_found").build();
+    }
+
+    Person person = personEmailVerificationEntity.getPerson();
+
+    person.setEmailVerified(true);
+    personService.updatePerson(person);
+
+    personEmailVerificationEntity.setActive(false);
+    personEmailVerificationService.update(personEmailVerificationEntity);
+    Map<String, Object> properties = emailService.getDefaultEmailParameters();
+    properties.put("person", person);
+
+    try {
+      final Context context = new Context(Locale.getDefault(), properties);
+
+      final String template_name = EmailTemplatesEnum.REGISTRATION_SUCCESS.toString();
+      emailService.saveToQueue(Email.builder()
+          .personRecipients(List.of(person))
+          .subject(emailService.getSubjects().get(template_name).getAsString())
+          .htmlContent(emailService.formatTextEmailTemplate(template_name, context))
+          .textContent(emailService.formatEmailTemplate(template_name, context))
+          .build());
+    } catch (IOException e) {
+      logger.error("Error reading Subjects!", e);
+    }
+    return SuccessResponse.builder().success(true).build();
   }
 
   @Operation(summary = "Change your user password.")

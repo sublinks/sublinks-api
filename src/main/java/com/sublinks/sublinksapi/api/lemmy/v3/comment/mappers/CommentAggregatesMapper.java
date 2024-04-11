@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentAggregates;
-import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;

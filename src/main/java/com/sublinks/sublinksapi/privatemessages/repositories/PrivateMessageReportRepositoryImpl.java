@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.privatemessages.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageReportSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;

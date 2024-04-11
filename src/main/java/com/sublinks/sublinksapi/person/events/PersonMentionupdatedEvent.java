@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.PersonMention;
+import com.sublinks.sublinksapi.person.entities.PersonMention;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 

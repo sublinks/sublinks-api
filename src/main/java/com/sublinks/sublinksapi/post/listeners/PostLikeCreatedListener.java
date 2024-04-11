@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.post.listeners;
 
-import com.sublinks.sublinksapi.post.dto.PostAggregate;
+import com.sublinks.sublinksapi.post.entities.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostLikeCreatedEvent;
 import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.dto.PasswordReset;
+import com.sublinks.sublinksapi.person.entities.PasswordReset;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
