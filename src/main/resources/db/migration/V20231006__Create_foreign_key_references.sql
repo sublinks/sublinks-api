@@ -233,3 +233,10 @@ ALTER TABLE `email_data`
 ALTER TABLE `email_person_recipients`
   ADD FOREIGN KEY (`email_id`) REFERENCES `email` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE;
+
+/**
+  Comment Saves table
+ */
+ALTER TABLE `comment_saves`
+  ADD FOREIGN KEY (`person_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
+  ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;

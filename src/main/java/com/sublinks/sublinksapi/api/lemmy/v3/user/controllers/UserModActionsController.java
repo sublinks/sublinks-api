@@ -145,6 +145,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    // @todo: implement user block ( probably community block too )
+
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.USER_BLOCK,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
