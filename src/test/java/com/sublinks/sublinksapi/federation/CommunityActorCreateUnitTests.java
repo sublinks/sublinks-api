@@ -28,9 +28,8 @@ public class CommunityActorCreateUnitTests {
   void setUp() {
 
     MockitoAnnotations.openMocks(this);
-    listener = new CommunityActorCreateListener();
+    listener = new CommunityActorCreateListener(federationProducer);
     listener.federationExchange = "testExchange";
-    listener.federationProducer = federationProducer;
   }
 
   @Test
