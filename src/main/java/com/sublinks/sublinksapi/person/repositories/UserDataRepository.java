@@ -14,7 +14,7 @@ public interface UserDataRepository extends JpaRepository<UserData, Long> {
 
   List<UserData> findFirstByPersonAndIpAddress(Person person, String ipAddress);
 
-  Optional<UserData> findFirstByPersonAndIpAddressAndUserAgent(Person person, String ipAddress,
+  Optional<UserData> findFirstByPersonAndIpAddressAndUserAgentAndActiveIsTrue(Person person, String ipAddress,
       String userAgent);
 
   Optional<UserData> findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(Person person,
@@ -25,11 +25,13 @@ public interface UserDataRepository extends JpaRepository<UserData, Long> {
 
   Optional<UserData> findFirstByPersonAndTokenAndActiveIsTrue(Person person, String token);
 
-  @Modifying
-  @Query("update UserData u set u.active = false where u.person = :person")
-  void updateAllByPersonSetActiveToFalse(@Param(value = "person") Person person);
 
   List<UserData> findAllByPersonAndLastUsedAtBefore(Person person, Date lastUsedAt);
 
   List<UserData> findAllByLastUsedAtBefore(Date lastUsedAt);
+
+
+  @Modifying
+  @Query("update UserData u set u.active = false where u.person = :person")
+  void updateAllByPersonSetActiveToFalse(@Param(value = "person") Person person);
 }

@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.person.config;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -9,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 @Getter
 public class UserDataConfig {
 
-  @Value("${sublinks.save_user_ips}")
-  private boolean saveUserIps;
+  @Value("${sublinks.save_user_data}")
+  private boolean saveUserData;
 
   @Value("${sublinks.settings.userdata.clear_rate}")
   private long clearRate;
