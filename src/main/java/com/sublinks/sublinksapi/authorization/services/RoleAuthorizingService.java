@@ -20,7 +20,8 @@ public class RoleAuthorizingService {
 
   public static boolean isBanned(final Role role) {
 
-    return role.getRolePermissions().stream()
+    return role.getRolePermissions()
+        .stream()
         .anyMatch(x -> x.getPermission().equals(RolePermission.BANNED));
   }
 
@@ -44,7 +45,8 @@ public class RoleAuthorizingService {
 
   public static boolean isAdmin(@NonNull final Role role) {
 
-    return role.getRolePermissions().stream()
+    return role.getRolePermissions()
+        .stream()
         .anyMatch(x -> x.getPermission().equals(RolePermission.ADMIN));
   }
 
@@ -59,67 +61,87 @@ public class RoleAuthorizingService {
   public Set<Person> getAdmins() {
 
     // i didnt used hashset here because it is not safe to use as it could duplicate.
-    return roleRepository.findAllByRolePermissionContains(RolePermission.ADMIN).stream()
-        .map(role -> role.getPersons().stream().toList()).reduce(new ArrayList<>(), (arr, ele) -> {
+    return roleRepository.findAllByRolePermissionContains(RolePermission.ADMIN)
+        .stream()
+        .map(role -> role.getPersons().stream().toList())
+        .reduce(new ArrayList<>(), (arr, ele) -> {
           ele.forEach(x -> {
             if (!arr.contains(x)) {
               arr.add(x);
             }
           });
           return arr;
-        }).stream().collect(HashSet::new, HashSet::add, HashSet::addAll);
+        })
+        .stream()
+        .collect(HashSet::new, HashSet::add, HashSet::addAll);
   }
 
   public Set<Person> getUsers() {
 
     // i didnt used hashset here because it is not safe to use as it could duplicate.
-    return roleRepository.findAllByRolePermissionContains(RolePermission.DEFAULT).stream()
-        .map(role -> role.getPersons().stream().toList()).reduce(new ArrayList<>(), (arr, ele) -> {
+    return roleRepository.findAllByRolePermissionContains(RolePermission.DEFAULT)
+        .stream()
+        .map(role -> role.getPersons().stream().toList())
+        .reduce(new ArrayList<>(), (arr, ele) -> {
           ele.forEach(x -> {
             if (!arr.contains(x)) {
               arr.add(x);
             }
           });
           return arr;
-        }).stream().collect(HashSet::new, HashSet::add, HashSet::addAll);
+        })
+        .stream()
+        .collect(HashSet::new, HashSet::add, HashSet::addAll);
   }
 
   public Set<Person> getBannedUsers() {
 
     // i didnt used hashset here because it is not safe to use as it could duplicate.
-    return roleRepository.findAllByRolePermissionContains(RolePermission.BANNED).stream()
-        .map(role -> role.getPersons().stream().toList()).reduce(new ArrayList<>(), (arr, ele) -> {
+    return roleRepository.findAllByRolePermissionContains(RolePermission.BANNED)
+        .stream()
+        .map(role -> role.getPersons().stream().toList())
+        .reduce(new ArrayList<>(), (arr, ele) -> {
           ele.forEach(x -> {
             if (!arr.contains(x)) {
               arr.add(x);
             }
           });
           return arr;
-        }).stream().collect(HashSet::new, HashSet::add, HashSet::addAll);
+        })
+        .stream()
+        .collect(HashSet::new, HashSet::add, HashSet::addAll);
   }
 
   public Role getAdminRole() {
 
-    return roleRepository.findAllByRolePermissionContains(RolePermission.ADMIN).stream().findFirst()
+    return roleRepository.findAllByRolePermissionContains(RolePermission.ADMIN)
+        .stream()
+        .findFirst()
         .orElseThrow(() -> new RuntimeException("Admin role not found"));
   }
 
   public Role getUserRole() {
 
-    return roleRepository.findAllByRolePermissionContains(RolePermission.REGISTERED).stream()
-        .findFirst().orElse(getDefaultRole());
+    return roleRepository.findAllByRolePermissionContains(RolePermission.REGISTERED)
+        .stream()
+        .findFirst()
+        .orElse(getDefaultRole());
   }
 
   public Role getDefaultRole() {
 
-    return roleRepository.findAllByRolePermissionContains(RolePermission.DEFAULT).stream()
-        .findFirst().orElseThrow(() -> new RuntimeException("User role not found"));
+    return roleRepository.findAllByRolePermissionContains(RolePermission.DEFAULT)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("User role not found"));
   }
 
   public Role getBannedRole() {
 
-    return roleRepository.findAllByRolePermissionContains(RolePermission.BANNED).stream()
-        .findFirst().orElseThrow(() -> new RuntimeException("Banned role not found"));
+    return roleRepository.findAllByRolePermissionContains(RolePermission.BANNED)
+        .stream()
+        .findFirst()
+        .orElseThrow(() -> new RuntimeException("Banned role not found"));
   }
 
   public boolean hasAdminOrPermission(final Person person, final RolePermission rolePermission) {
@@ -177,6 +199,10 @@ public class RoleAuthorizingService {
 
     final Role role = person == null ? getDefaultRole() : person.getRole();
 
+    if(person != null && person.isDeleted()) {
+      throw exceptionSupplier.get();
+    }
+
     hasAdminOrPermissionOrThrow(role, rolePermission, exceptionSupplier);
   }
 
@@ -216,7 +242,8 @@ public class RoleAuthorizingService {
       return true;
     }
 
-    return role.getRolePermissions().stream()
+    return role.getRolePermissions()
+        .stream()
         .anyMatch(x -> x.getPermission().equals(rolePermission));
   }
 
@@ -249,8 +276,7 @@ public class RoleAuthorizingService {
     return rolePermissions.stream().allMatch(x -> hasPermission(role, x));
   }
 
-  public boolean hasAllPermissions(final Person person,
-      final Set<RolePermission> rolePermissions) {
+  public boolean hasAllPermissions(final Person person, final Set<RolePermission> rolePermissions) {
 
     final Role role = person == null ? getDefaultRole() : person.getRole();
 
