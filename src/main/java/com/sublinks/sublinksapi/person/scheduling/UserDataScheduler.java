@@ -1,10 +1,6 @@
 package com.sublinks.sublinksapi.person.scheduling;
 
-import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.config.CaptchaConfiguration;
 import com.sublinks.sublinksapi.person.config.UserDataConfig;
-import com.sublinks.sublinksapi.person.repositories.CaptchaRepository;
-import com.sublinks.sublinksapi.person.services.CaptchaService;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import com.sublinks.sublinksapi.person.services.UserDataService;
