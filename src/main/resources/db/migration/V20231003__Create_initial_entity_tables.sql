@@ -880,16 +880,3 @@ CREATE TABLE `email_person_recipients`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
-/**
-  Comment Saves Table
- */
-
-CREATE TABLE `comment_saves`
-(
-  `id`         BIGINT AUTO_INCREMENT PRIMARY KEY,
-  `person_id`  BIGINT                                    NOT NULL,
-  `comment_id` BIGINT                                    NOT NULL,
-  `created_at` TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
-) ENGINE = InnoDB
-  DEFAULT CHARSET `utf8mb4`
-  COLLATE = 'utf8mb4_unicode_ci';

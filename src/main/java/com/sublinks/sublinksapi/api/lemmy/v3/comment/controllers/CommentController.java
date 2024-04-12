@@ -26,25 +26,23 @@ import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
-import com.sublinks.sublinksapi.comment.entities.CommentSaveForLater;
+import com.sublinks.sublinksapi.comment.entities.CommentSave;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria.CommentSearchCriteriaBuilder;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
-import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
-import com.sublinks.sublinksapi.comment.repositories.CommentSaveForLaterRepository;
+import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentReadService;
 import com.sublinks.sublinksapi.comment.services.CommentReplyService;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
-import com.sublinks.sublinksapi.comment.services.CommentSaveForLaterService;
+import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
-import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
@@ -72,7 +70,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -97,8 +94,8 @@ public class CommentController extends AbstractLemmyApiController {
   private final CommentReplyService commentReplyService;
   private final SlurFilterService slurFilterService;
   private final RoleAuthorizingService roleAuthorizingService;
-  private final CommentSaveForLaterService commentSaveForLaterService;
-  private final CommentSaveForLaterRepository commentSaveForLaterRepository;
+  private final CommentSaveService commentSaveForLaterService;
+  private final ComentSaveRepository commentSaveForLaterRepository;
 
   @Operation(summary = "Create a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -383,7 +380,7 @@ public class CommentController extends AbstractLemmyApiController {
     Comment comment = commentRepository.findById((long) saveCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    Optional<CommentSaveForLater> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndCommentId(
+    Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndCommentId(
         person, comment.getId());
     if (saveCommentForm.save()) {
       if (commentSaveForLater.isPresent()) {
@@ -392,8 +389,8 @@ public class CommentController extends AbstractLemmyApiController {
             .recipient_ids(new ArrayList<>())
             .build();
       }
-      commentSaveForLaterService.createCommentSaveForLater(
-          CommentSaveForLater.builder().comment(comment).person(person).build());
+      commentSaveForLaterService.createCommentSave(
+          CommentSave.builder().comment(comment).person(person).build());
     } else {
       if (commentSaveForLater.isEmpty()) {
         return CommentResponse.builder()
@@ -402,7 +399,7 @@ public class CommentController extends AbstractLemmyApiController {
             .build();
       }
 
-      commentSaveForLaterService.deleteCommentSaveForLater(commentSaveForLater.get());
+      commentSaveForLaterService.deleteCommentSave(commentSaveForLater.get());
     }
 
     return CommentResponse.builder()

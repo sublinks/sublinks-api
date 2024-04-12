@@ -11,10 +11,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
-import com.sublinks.sublinksapi.comment.entities.CommentSaveForLater;
-import com.sublinks.sublinksapi.comment.repositories.CommentSaveForLaterRepository;
+import com.sublinks.sublinksapi.comment.entities.CommentSave;
+import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
-import com.sublinks.sublinksapi.comment.services.CommentSaveForLaterService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -33,7 +32,7 @@ public class LemmyCommentService {
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final CommentSaveForLaterRepository commentSaveForLaterRepository;
+  private final ComentSaveRepository commentSaveForLaterRepository;
   private final RoleAuthorizingService roleAuthorizingService;
 
   public String generateActivityPubId(
@@ -73,7 +72,7 @@ public class LemmyCommentService {
     commentView.subscribed(subscribedType).saved(false)// @todo check if saved
         .my_vote(personVote);
 
-    Optional<CommentSaveForLater> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndCommentId(
+    Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndCommentId(
         person, comment.getId());
 
     commentSaveForLater.ifPresent(value -> commentView.saved(true));
