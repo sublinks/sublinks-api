@@ -371,7 +371,7 @@ public class CommentController extends AbstractLemmyApiController {
   @PutMapping("save")
   CommentResponse saveForLater(@RequestBody final SaveComment saveCommentForm,
       final JwtPerson principal) {
-    // @todo Implement save comment
+
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_COMMENT,
@@ -380,8 +380,9 @@ public class CommentController extends AbstractLemmyApiController {
     Comment comment = commentRepository.findById((long) saveCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndCommentId(
-        person, comment.getId());
+    Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
+        person, comment);
+
     if (saveCommentForm.save()) {
       if (commentSaveForLater.isPresent()) {
         return CommentResponse.builder()

@@ -11,8 +11,11 @@ public interface ComentSaveRepository extends JpaRepository<CommentSave, Long> {
 
   List<CommentSave> findAllByPerson(Person person);
 
-  Optional<CommentSave> findFirstByPersonAndCommentId(Person person, Long commentId);
+  Optional<CommentSave> findFirstByPersonAndComment(Person person, Comment comment);
 
   List<CommentSave> findAllByComment(Comment comment);
+
+
+  boolean existsByPersonAndComment(Person person, Comment comment);
 
 }
