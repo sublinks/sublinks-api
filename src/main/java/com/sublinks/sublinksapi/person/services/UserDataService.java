@@ -36,43 +36,73 @@ public class UserDataService {
   public void checkAndAddIpRelation(Person person, String ipAddress, String token,
       @Nullable String userAgent) {
 
-    boolean saveUserIps = userDataConfig.isSaveUserIps();
-    Optional<UserData> foundData = getActiveUserDataByPersonAndToken(person, token);
+    boolean saveUserIps = userDataConfig.isSaveUserData();
+    Optional<UserData> foundData = getActiveUserDataByPersonAndIpAddress(person, token, ipAddress,
+        userAgent);
 
-    if (saveUserIps) {
-      if (foundData.isPresent()) {
+    if (foundData.isPresent()) {
 
-        UserData userData = foundData.get();
+      UserData userData = foundData.get();
 
-        userData.setLastUsedAt(new Date());
+      if (saveUserIps && userAgent != null && !userData.getUserAgent().equals(userAgent)) {
+        final UserData newUserData = UserData.builder()
+            .person(person)
+            .ipAddress(ipAddress)
+            .userAgent(userAgent)
+            .token(token)
+            .active(true)
+            .build();
 
-        if (userAgent != null && !userData.getUserAgent().equals(userAgent)) {
-          userData.setUserAgent(userAgent);
-        }
-
-        if (!userData.getIpAddress().equals(ipAddress)) {
-          userData.setIpAddress(ipAddress);
-        }
-
-        userDataRepository.save(userData);
-        userDataUpdatedPublisher.publish(userData);
+        userDataRepository.save(newUserData);
+        userDataCreatedEventPublisher.publish(newUserData);
         return;
       }
-      UserData userData = UserData.builder()
-          .person(person)
-          .ipAddress(ipAddress)
-          .userAgent(userAgent)
-          .token(token)
-          .active(true)
-          .build();
-      UserData createdUserData = userDataRepository.save(userData);
-      userDataCreatedEventPublisher.publish(createdUserData);
+
+      if (saveUserIps && !userData.getIpAddress().equals(ipAddress)) {
+        final UserData newUserData = UserData.builder()
+            .person(person)
+            .ipAddress(ipAddress)
+            .userAgent(userAgent)
+            .token(token)
+            .active(true)
+            .build();
+
+        userDataRepository.save(newUserData);
+        userDataCreatedEventPublisher.publish(newUserData);
+        return;
+      }
+
+      userData.setLastUsedAt(new Date());
+
+      userDataRepository.save(userData);
+      userDataUpdatedPublisher.publish(userData);
+      return;
     }
+    UserData userData = UserData.builder()
+        .person(person)
+        .ipAddress(saveUserIps ? ipAddress : null)
+        .userAgent(saveUserIps ? userAgent : null)
+        .token(token)
+        .active(true)
+        .build();
+    UserData createdUserData = userDataRepository.save(userData);
+    userDataCreatedEventPublisher.publish(createdUserData);
   }
 
   public Optional<UserData> getActiveUserDataByPersonAndToken(Person person, String token) {
 
     return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, token);
+  }
+
+  private Optional<UserData> getActiveUserDataByPersonAndIpAddress(Person person, String token,
+      String ipAddress, String userAgent) {
+
+    if (userDataConfig.isSaveUserData()) {
+      return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, ipAddress);
+    }
+
+    return userDataRepository.findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(
+        person, token, ipAddress, userAgent);
   }
 
   @Transactional
