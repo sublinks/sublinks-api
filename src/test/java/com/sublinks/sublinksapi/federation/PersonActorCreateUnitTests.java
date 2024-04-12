@@ -30,9 +30,8 @@ public class PersonActorCreateUnitTests {
   void setUp() {
 
     MockitoAnnotations.openMocks(this);
-    listener = new PersonActorCreateListener();
+    listener = new PersonActorCreateListener(federationProducer);
     listener.federationExchange = "testExchange";
-    listener.federationProducer = federationProducer;
   }
 
   @Test
