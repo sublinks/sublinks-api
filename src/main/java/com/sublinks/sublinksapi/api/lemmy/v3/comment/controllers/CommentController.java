@@ -239,7 +239,7 @@ public class CommentController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping("delete")
-  CommentResponse delete(@RequestBody final DeleteComment deleteCommentForm,
+  CommentResponse delete(@Valid @RequestBody final DeleteComment deleteCommentForm,
       final JwtPerson principal) {
     // @todo Implement delete comment
     final Person person = getPersonOrThrowUnauthorized(principal);
@@ -369,7 +369,7 @@ public class CommentController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
   @PutMapping("save")
-  CommentResponse saveForLater(@RequestBody final SaveComment saveCommentForm,
+  CommentResponse saveForLater(@Valid @RequestBody final SaveComment saveCommentForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
