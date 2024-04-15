@@ -40,7 +40,7 @@ public class UserData {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, name = "ip_address")
+  @Column(nullable = true, name = "ip_address")
   private String ipAddress;
 
   @Column(nullable = true, name = "user_agent")
