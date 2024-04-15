@@ -416,7 +416,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = VerifyEmailResponse.class))})})
   @PostMapping("verify_email")
-  SuccessResponse verifyEmail(@RequestBody VerifyEmail verifyEmailForm) {
+  SuccessResponse verifyEmail(@Valid @RequestBody VerifyEmail verifyEmailForm) {
 
     Optional<PersonEmailVerification> personEmailVerification = personEmailVerificationService.getActiveVerificationByToken(
         verifyEmailForm.token());
