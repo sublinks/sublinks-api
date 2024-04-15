@@ -294,7 +294,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     if (commentReply.isPresent()) {
       CommentReply commentReplyEntity = commentReply.get();
-      commentReplyEntity.setIsRead(true);
+      commentReplyEntity.setRead(true);
       commentReplyService.updateCommentReply(commentReplyEntity);
     }
 

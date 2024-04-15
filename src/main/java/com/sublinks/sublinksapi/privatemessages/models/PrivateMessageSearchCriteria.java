@@ -9,7 +9,7 @@ public record PrivateMessageSearchCriteria(
     PrivateMessageSortType privateMessageSortType,
     int perPage,
     int page,
-    boolean unresolvedOnly,
+    boolean unreadOnly,
     Person person
 ) {
 

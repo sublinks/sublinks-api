@@ -11,7 +11,7 @@ public record GetReplies(
     CommentReplySortType sort,
     Integer page,
     Integer limit,
-    Boolean unread_only
+    Optional<Boolean> unread_only
 ) {
 
 }

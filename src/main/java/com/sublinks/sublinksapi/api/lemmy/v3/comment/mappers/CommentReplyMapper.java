@@ -16,6 +16,6 @@ public interface CommentReplyMapper extends
   @Mapping(target = "published", source = "commentReply.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "comment_id", source = "commentReply.comment.id")
   @Mapping(target = "recipient_id", source = "commentReply.recipient.id")
-  @Mapping(target = "read", source = "commentReply.isRead")
+  @Mapping(target = "read", source = "commentReply.read")
   CommentReply convert(@Nullable com.sublinks.sublinksapi.comment.entities.CommentReply commentReply);
 }
