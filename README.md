@@ -119,4 +119,5 @@ Sublinks is free, open-source software, meaning no advertising, monetizing, or
 venture capital, ever. Your donations directly support full-time development of
 the project
 
+[Github Sponsor](https://github.com/sponsors/sublinks)
 // @todo add links to donate
