@@ -760,7 +760,7 @@ CREATE TABLE `user_data`
   `id`           BIGINT AUTO_INCREMENT PRIMARY KEY,
   `person_id`    BIGINT                                    NOT NULL,
   `token`        VARCHAR(255)                              NOT NULL,
-  `ip_address`   VARCHAR(255)                              NOT NULL,
+  `ip_address`   VARCHAR(255)                              NULL,
   `user_agent`   TEXT                                      NULL,
   `active`       TINYINT                                   NOT NULL DEFAULT 1,
   `created_at`   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,

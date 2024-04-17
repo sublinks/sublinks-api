@@ -49,7 +49,7 @@ public class CommentReply implements Serializable {
   private Long id;
 
   @Column(nullable = false, name = "is_read")
-  private Boolean isRead;
+  private boolean isRead;
 
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")

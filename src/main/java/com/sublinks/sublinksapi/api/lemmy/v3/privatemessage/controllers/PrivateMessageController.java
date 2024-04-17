@@ -93,6 +93,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         .perPage(perPage)
         .privateMessageSortType(sortType)
         .person(sender)
+        .unreadOnly(getPrivateMessagesForm.unread_only().orElse(false))
         .build();
 
     final List<PrivateMessage> privateMessages = privateMessageRepository.allPrivateMessagesBySearchCriteria(

@@ -29,8 +29,8 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
     final Root<PrivateMessage> privateMessageTable = cq.from(PrivateMessage.class);
     final List<Predicate> predicates = new ArrayList<>();
 
-    if (privateMessageSearchCriteria.unresolvedOnly()) {
-      predicates.add(cb.equal(privateMessageTable.get("resolved"), false));
+    if (privateMessageSearchCriteria.unreadOnly()) {
+      predicates.add(cb.equal(privateMessageTable.get("isRead"), false));
     }
 
     if (privateMessageSearchCriteria.person() != null) {
