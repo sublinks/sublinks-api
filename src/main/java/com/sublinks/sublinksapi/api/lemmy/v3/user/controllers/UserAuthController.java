@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.CaptchaResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ChangePassword;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ChangePasswordEmail;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccount;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
@@ -95,7 +96,6 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonEmailVerificationService personEmailVerificationService;
 
   private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
-
 
 
   @Operation(summary = "Register a new user.")
@@ -298,15 +298,20 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteAccountResponse.class))})})
   @PostMapping("delete_account")
-  DeleteAccountResponse delete(final JwtPerson principal) {
+  DeleteAccountResponse delete(@RequestBody final DeleteAccount deleteAccount,
+      final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    if (!personService.isPasswordEqual(person, deleteAccount.password())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
+    }
+
     roleAuthorizingService.hasAdminOrPermission(person, RolePermission.DELETE_USER);
 
-    // @todo: delete account
+    personService.deleteUserAccount(person, deleteAccount.delete_content());
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    return DeleteAccountResponse.builder().build();
   }
 
   @Operation(summary = "Reset your password.")
