@@ -85,8 +85,10 @@ public class PostService {
     post.setPrivateKey(keys.privateKey());
 
     post.setLocal(true);
-    final PostAggregate postAggregate = PostAggregate.builder().post(post)
-        .community(post.getCommunity()).build();
+    final PostAggregate postAggregate = PostAggregate.builder()
+        .post(post)
+        .community(post.getCommunity())
+        .build();
     post.setPostAggregate(postAggregate);
     post.setActivityPubId("");
     postRepository.save(post); // @todo fix second save making post look edited right away
@@ -103,6 +105,22 @@ public class PostService {
 
     postRepository.save(post);
     postDeletedPublisher.publish(post);
+  }
+
+  public List<Post> deleteAllPostsByPerson(final Person person) {
+
+    final List<Post> posts = postRepository.allPostsByPersonAndRemoved(person,
+        List.of(RemovedState.NOT_REMOVED, RemovedState.REMOVED_BY_INSTANCE,
+            RemovedState.REMOVED_BY_COMMUNITY, RemovedState.REMOVED));
+    posts.forEach(post -> {
+      post.setDeleted(true);
+      post.setTitle("*Permanently deleted by creator*");
+      post.setRemovedState(RemovedState.PURGED);
+      post.setPostBody("");
+      post.setLinkUrl("");
+      postRepository.save(post);
+    });
+    return posts;
   }
 
   @Transactional

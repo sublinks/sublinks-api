@@ -15,4 +15,6 @@ public interface PrivateMessageRepository extends JpaRepository<PrivateMessage, 
 
   @Query("SELECT pm FROM PrivateMessage pm WHERE pm.recipient = :recipient AND pm.isRead = false AND pm.isDeleted = false")
   List<PrivateMessage> findByRecipientAndReadIsFalse(@Param("recipient") Person recipient);
+
+  List<PrivateMessage> findAllBySender(Person sender);
 }

@@ -1,11 +1,15 @@
 package com.sublinks.sublinksapi.person.services;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.PrivateMessage;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsRepository;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.entities.Language;
@@ -14,9 +18,17 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.PersonAggregate;
 import com.sublinks.sublinksapi.person.enums.PostListingMode;
 import com.sublinks.sublinksapi.person.events.PersonCreatedPublisher;
+import com.sublinks.sublinksapi.person.events.PersonDeletedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
+import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.post.services.PostHistoryService;
+import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
+import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageService;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.BaseUrlUtil;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
@@ -45,10 +57,22 @@ public class PersonService {
   private final LocalInstanceContext localInstanceContext;
   private final PersonCreatedPublisher personCreatedPublisher;
   private final PersonUpdatedPublisher personUpdatedPublisher;
+  private final PostRepository postRepository;
+  private final PostService postService;
+  private final PostHistoryRepository postHistoryRepository;
+  private final PostHistoryService postHistoryService;
+  private final CommentRepository commentRepository;
+  private final CommentService commentService;
+  private final CommentHistoryRepository commentHistoryRepository;
+  private final CommentHistoryRepository commentHistoryService;
+  private final PrivateMessageRepository privateMessageRepository;
+  private final PrivateMessageService privateMessageService;
+
 
   private final RoleRepository roleRepository;
   private final RolePermissionsRepository rolePermissionsRepository;
   private final RoleAuthorizingService roleAuthorizingService;
+  private final PersonDeletedPublisher personDeletedPublisher;
 
   public Set<Role> generateInitialRoles() {
 
@@ -141,6 +165,7 @@ public class PersonService {
     rolePermissions.add(RolePermission.COMMUNITY_BLOCK);
 
     rolePermissions.add(RolePermission.USER_BLOCK);
+    rolePermissions.add(RolePermission.DELETE_USER);
 
     rolePermissions.add(RolePermission.REPORT_COMMENT);
     rolePermissions.add(RolePermission.REPORT_POST);
@@ -264,5 +289,25 @@ public class PersonService {
         .isShowNsfw(true)
         .postListingType(PostListingMode.List)
         .build();
+  }
+
+  public void deleteUserAccount(final Person person, final boolean deleteContent) {
+
+    if (deleteContent) {
+      postHistoryRepository.deleteAllByCreator(person);
+      postService.deleteAllPostsByPerson(person);
+      commentHistoryRepository.deleteAllByCreator(person);
+      commentService.deleteAllCommentsByPerson(person);
+      privateMessageService.deleteAllPrivateMessagesByPerson(person);
+    }
+
+    person.setBiography("*Permanently Deleted*");
+    person.setDisplayName("Deleted User-%s".formatted(person.getId()));
+
+    person.setDeleted(true);
+    person.setBannerImageUrl("");
+    person.setAvatarImageUrl("");
+
+    personDeletedPublisher.publish(personRepository.save(person));
   }
 }
