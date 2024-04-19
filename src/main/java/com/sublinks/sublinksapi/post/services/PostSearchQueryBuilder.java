@@ -1,13 +1,13 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostLike;
-import com.sublinks.sublinksapi.post.dto.Post_;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostLike;
+import com.sublinks.sublinksapi.post.entities.Post_;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
