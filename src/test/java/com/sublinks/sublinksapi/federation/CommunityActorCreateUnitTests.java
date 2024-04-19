@@ -1,5 +1,11 @@
 package com.sublinks.sublinksapi.federation;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.events.CommunityCreatedEvent;
 import com.sublinks.sublinksapi.federation.enums.ActorType;
@@ -9,27 +15,23 @@ import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.queue.services.Producer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-
+@ExtendWith(SpringExtension.class)
 public class CommunityActorCreateUnitTests {
 
-  @Mock
-  private Producer federationProducer;
-
+  @MockBean
+  private Producer producer;
   private CommunityActorCreateListener listener;
 
   @BeforeEach
   void setUp() {
 
-    MockitoAnnotations.openMocks(this);
-    listener = new CommunityActorCreateListener(federationProducer);
-    listener.federationExchange = "testExchange";
+    listener = new CommunityActorCreateListener(producer);
+    listener.setFederationExchange("testExchange");
   }
 
   @Test
@@ -48,7 +50,7 @@ public class CommunityActorCreateUnitTests {
 
     listener.onApplicationEvent(event);
 
-    verify(federationProducer, times(1)).sendMessage(eq("testExchange"),
+    verify(listener.getFederationProducer(), times(1)).sendMessage(eq("testExchange"),
         eq(RoutingKey.ACTOR_CREATE.getValue()), actorCaptor.capture());
 
     Actor capturedActor = actorCaptor.getValue();

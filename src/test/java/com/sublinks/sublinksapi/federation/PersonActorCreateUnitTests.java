@@ -1,37 +1,37 @@
 package com.sublinks.sublinksapi.federation;
 
-import com.sublinks.sublinksapi.person.events.PersonCreatedEvent;
-import com.sublinks.sublinksapi.federation.enums.ActorType;
-import com.sublinks.sublinksapi.federation.enums.RoutingKey;
-import com.sublinks.sublinksapi.federation.listeners.PersonActorCreateListener;
-import com.sublinks.sublinksapi.federation.models.Actor;
-import com.sublinks.sublinksapi.person.entities.Person;
-import com.sublinks.sublinksapi.queue.services.Producer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import com.sublinks.sublinksapi.federation.enums.ActorType;
+import com.sublinks.sublinksapi.federation.enums.RoutingKey;
+import com.sublinks.sublinksapi.federation.listeners.PersonActorCreateListener;
+import com.sublinks.sublinksapi.federation.models.Actor;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.events.PersonCreatedEvent;
+import com.sublinks.sublinksapi.queue.services.Producer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+@ExtendWith(SpringExtension.class)
 public class PersonActorCreateUnitTests {
 
-  @Mock
-  private Producer federationProducer;
-
+  @MockBean
+  private Producer producer;
   private PersonActorCreateListener listener;
 
   @BeforeEach
   void setUp() {
 
-    MockitoAnnotations.openMocks(this);
-    listener = new PersonActorCreateListener(federationProducer);
-    listener.federationExchange = "testExchange";
+    listener = new PersonActorCreateListener(producer);
+    listener.setFederationExchange("testExchange");
   }
 
   @Test
@@ -52,7 +52,7 @@ public class PersonActorCreateUnitTests {
 
     listener.onApplicationEvent(event);
 
-    verify(federationProducer, times(1)).sendMessage(eq("testExchange"),
+    verify(listener.getFederationProducer(), times(1)).sendMessage(eq("testExchange"),
         eq(RoutingKey.ACTOR_CREATE.getValue()), actorCaptor.capture());
 
     Actor capturedActor = actorCaptor.getValue();
