@@ -294,6 +294,7 @@ public class PersonService {
   public void deleteUserAccount(final Person person, final boolean deleteContent) {
 
     if (deleteContent) {
+      // Log results ? @todo
       postHistoryRepository.deleteAllByCreator(person);
       postService.deleteAllPostsByPerson(person);
       commentHistoryRepository.deleteAllByCreator(person);
