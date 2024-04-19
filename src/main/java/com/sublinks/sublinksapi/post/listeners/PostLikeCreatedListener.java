@@ -23,7 +23,7 @@ public class PostLikeCreatedListener implements ApplicationListener<PostLikeCrea
       postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() + 1);
       postAggregate.setScore(postAggregate.getScore() + 1);
     } else if (event.getPostLike().isDownVote()) {
-      postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() - 1);
+      postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() + 1);
       postAggregate.setScore(postAggregate.getScore() - 1);
     } else {
       return;
