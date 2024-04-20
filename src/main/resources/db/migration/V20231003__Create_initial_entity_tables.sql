@@ -7,7 +7,7 @@ CREATE TABLE `comments`
   `activity_pub_id` TEXT                                                                           NOT NULL,
   `language_id`     BIGINT                                                                         NOT NULL,
   `is_deleted`      TINYINT                                                                        NOT NULL DEFAULT 0,
-  `removed_state`   ENUM ('NOT_REMOVED', 'REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `removed_state`   ENUM ('NOT_REMOVED', 'REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE', 'PURGED') NOT NULL DEFAULT 'NOT_REMOVED',
   `is_local`        TINYINT                                                                        NOT NULL DEFAULT 0,
   `person_id`       BIGINT                                                                         NOT NULL,
   `community_id`    BIGINT                                                                         NOT NULL,
@@ -277,7 +277,7 @@ CREATE TABLE `posts`
   `activity_pub_id`          TEXT                                                                           NOT NULL,
   `language_id`              BIGINT                                                                         NOT NULL,
   `is_deleted`               TINYINT                                                                        NOT NULL DEFAULT 0,
-  `removed_state`            ENUM ('NOT_REMOVED', 'REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `removed_state`            ENUM ('NOT_REMOVED', 'REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE', 'PURGED') NOT NULL DEFAULT 'NOT_REMOVED',
   `is_local`                 TINYINT                                                                        NOT NULL DEFAULT 0,
   `is_locked`                TINYINT                                                                        NOT NULL DEFAULT 0,
   `community_id`             BIGINT                                                                         NOT NULL,
@@ -782,7 +782,7 @@ CREATE TABLE `post_history`
   `is_nsfw`       TINYINT                                                                       NOT NULL,
   `is_locked`     TINYINT                                                                       NOT NULL,
   `is_deleted`    TINYINT                                                                       NOT NULL,
-  `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE', 'PURGED') NOT NULL DEFAULT 'NOT_REMOVED',
   `created_at`    TIMESTAMP(3)                                                                           DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
@@ -797,7 +797,7 @@ CREATE TABLE `comment_history`
   `comment_id`    BIGINT                                                                        NOT NULL,
   `content`       TEXT                                                                          NOT NULL,
   `is_deleted`    TINYINT                                                                       NOT NULL,
-  `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE') NOT NULL DEFAULT 'NOT_REMOVED',
+  `removed_state` ENUM ('NOT_REMOVED','REMOVED', 'REMOVED_BY_COMMUNITY', 'REMOVED_BY_INSTANCE', 'PURGED') NOT NULL DEFAULT 'NOT_REMOVED',
   `created_at`    TIMESTAMP(3)                                                                  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 ) ENGINE = InnoDB
   DEFAULT CHARSET `utf8mb4`
