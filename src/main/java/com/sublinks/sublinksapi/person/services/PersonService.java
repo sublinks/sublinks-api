@@ -296,10 +296,10 @@ public class PersonService {
 
     if (deleteContent) {
       // Log results ? @todo
-      postHistoryRepository.deleteAllByCreator(person);
       postService.deleteAllPostsByPerson(person);
-      commentHistoryRepository.deleteAllByCreator(person);
+      postHistoryRepository.deleteAllByCreator(person);
       commentService.deleteAllCommentsByPerson(person);
+      commentHistoryRepository.deleteAllByCreator(person);
       privateMessageService.deleteAllPrivateMessagesByPerson(person);
     }
 
