@@ -291,6 +291,7 @@ public class PersonService {
         .build();
   }
 
+  @Transactional
   public void deleteUserAccount(final Person person, final boolean deleteContent) {
 
     if (deleteContent) {

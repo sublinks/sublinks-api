@@ -309,7 +309,9 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     roleAuthorizingService.hasAdminOrPermission(person, RolePermission.DELETE_USER);
 
-    personService.deleteUserAccount(person, deleteAccount.delete_content());
+    // Bug in the Lemmy UI delete_content() is always false but the api is just assuming true..., so we just ignore it
+    // @todo check when lemmy fixes this
+    personService.deleteUserAccount(person, true);
 
     return DeleteAccountResponse.builder().build();
   }
