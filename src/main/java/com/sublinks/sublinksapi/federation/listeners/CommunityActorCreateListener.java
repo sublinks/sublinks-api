@@ -6,32 +6,32 @@ import com.sublinks.sublinksapi.federation.enums.ActorType;
 import com.sublinks.sublinksapi.federation.enums.RoutingKey;
 import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.queue.services.Producer;
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CommunityActorCreateListener extends FederationListener implements
-    ApplicationListener<CommunityCreatedEvent> {
+@RequiredArgsConstructor
+@Getter
+@Setter
+public class CommunityActorCreateListener implements ApplicationListener<CommunityCreatedEvent> {
+
+  @Value("${sublinks.federation.exchange}")
+  private String federationExchange;
+  final private Producer federationProducer;
 
   private static final Logger logger = LoggerFactory.getLogger(CommunityActorCreateListener.class);
-
-  @Autowired
-  public CommunityActorCreateListener(Producer federationProducer) {
-
-    super(federationProducer);
-    logger.info("community actor listener instantiated");
-  }
 
   @Override
   public void onApplicationEvent(@NonNull CommunityCreatedEvent event) {
 
-    if (federationProducer == null) {
+    if (getFederationProducer() == null) {
       logger.error("federation producer is not instantiated properly");
       return;
     }
@@ -48,7 +48,7 @@ public class CommunityActorCreateListener extends FederationListener implements
         .public_key(community.getPublicKey())
         .build();
 
-    federationProducer.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(),
+    getFederationProducer().sendMessage(getFederationExchange(), RoutingKey.ACTOR_CREATE.getValue(),
         actorMessage);
     logger.info(String.format("community actor created %s", community.getActivityPubId()));
   }
