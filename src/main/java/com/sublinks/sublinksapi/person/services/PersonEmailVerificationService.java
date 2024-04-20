@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.person.services;
 
+import com.sublinks.sublinksapi.person.config.UserDataConfig;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.PersonEmailVerification;
 import com.sublinks.sublinksapi.person.events.PersonEmailVerificationCreatedEventPublisher;
@@ -18,13 +19,15 @@ public class PersonEmailVerificationService {
   private final PersonEmailVerificationUpdatedEventPublisher personEmailVerificationUpdatedEventPublisher;
   private final PersonEmailVerificationRepository personEmailVerificationRepository;
 
+  private final UserDataConfig userDataConfig;
+
   public PersonEmailVerification create(Person person, String ipAddress, String userAgent) {
 
     PersonEmailVerification personEmailVerification = new PersonEmailVerification();
     personEmailVerification.setPerson(person);
     personEmailVerification.setToken(UUID.randomUUID().toString());
-    personEmailVerification.setIpAddress(ipAddress);
-    personEmailVerification.setUserAgent(userAgent);
+    personEmailVerification.setIpAddress(userDataConfig.isSaveUserData() ? ipAddress : null);
+    personEmailVerification.setUserAgent(userDataConfig.isSaveUserData() ? userAgent : null);
     personEmailVerification.setActive(true);
 
     personEmailVerificationRepository.save(personEmailVerification);

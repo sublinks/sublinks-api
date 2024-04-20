@@ -45,7 +45,9 @@ import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
+import com.sublinks.sublinksapi.privatemessages.models.MarkAllAsReadResponse;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
+import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageService;
 import com.sublinks.sublinksapi.queue.services.Producer;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
@@ -99,6 +101,7 @@ public class UserController extends AbstractLemmyApiController {
   private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final Optional<Producer> federationProducer;
+  private final PrivateMessageService privateMessageService;
 
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
@@ -215,7 +218,7 @@ public class UserController extends AbstractLemmyApiController {
     final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
         com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
             .sortType(getReplies.sort())
-            .unreadOnly(getReplies.unread_only() != null && getReplies.unread_only())
+            .unreadOnly(getReplies.unread_only().orElse(false))
             .page(page)
             .perPage(perPage)
             .build());
@@ -251,10 +254,23 @@ public class UserController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetRepliesResponse.class))})})
   @PostMapping("mark_all_as_read")
-  GetRepliesResponse markAllAsRead() {
+  GetRepliesResponse markAllAsRead(final JwtPerson principal) {
     // @todo: Check if he has permission to read/update replies ( if not ignore
     //  )
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_REPLIES,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+
+    final MarkAllAsReadResponse readReplies = privateMessageService.markAllAsRead(person);
+
+    final List<CommentReplyView> commentReplyViews = new ArrayList<>();
+    readReplies.commentReplies()
+        .forEach(commentReply -> commentReplyViews.add(
+            lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
+
+    return GetRepliesResponse.builder().replies(commentReplyViews).build();
   }
 
   @Operation(summary = "Save your user settings.")
@@ -345,16 +361,15 @@ public class UserController extends AbstractLemmyApiController {
     personService.updatePerson(person);
 
     federationProducer.ifPresent(service -> {
-      final Actor actorMessage =
-          Actor.builder()
-              .actor_id(person.getActorId())
-              .actor_type(ActorType.USER.getValue())
-              .bio(person.getBiography())
-              .display_name(person.getDisplayName())
-              .matrix_user_id(person.getMatrixUserId())
-              .private_key(person.getPrivateKey())
-              .public_key(person.getPublicKey())
-              .build();
+      final Actor actorMessage = Actor.builder()
+          .actor_id(person.getActorId())
+          .actor_type(ActorType.USER.getValue())
+          .bio(person.getBiography())
+          .display_name(person.getDisplayName())
+          .matrix_user_id(person.getMatrixUserId())
+          .private_key(person.getPrivateKey())
+          .public_key(person.getPublicKey())
+          .build();
 
       service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
     });
@@ -383,14 +398,20 @@ public class UserController extends AbstractLemmyApiController {
     GetUnreadCountResponse.GetUnreadCountResponseBuilder builder = GetUnreadCountResponse.builder();
 
     if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_MENTION_USER)) {
-      builder.mentions((int) personMentionRepository.countByRecipientAndIsReadFalse(person));
+      builder.mentions((int) personMentionRepository.countByRecipientAndIsReadIsFalse(person));
+    } else {
+      builder.mentions(0);
     }
     if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_REPLIES)) {
-      builder.replies((int) commentReplyRepository.countByRecipientAndIsReadFalse(person));
+      builder.replies((int) commentReplyRepository.countByRecipientAndReadIsFalse(person));
+    } else {
+      builder.replies(0);
     }
     if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_PRIVATE_MESSAGES)) {
       builder.private_messages(
-          (int) privateMessageRepository.countByRecipientAndIsReadFalse(person));
+          (int) privateMessageRepository.countByRecipientAndReadIsFalse(person));
+    } else {
+      builder.private_messages(0);
     }
     return builder.build();
   }

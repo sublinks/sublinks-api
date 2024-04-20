@@ -43,7 +43,6 @@ import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.person.services.UserDataService;
-import com.sublinks.sublinksapi.queue.services.Producer;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
@@ -66,7 +65,6 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -95,15 +93,13 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final RoleAuthorizingService roleAuthorizingService;
   private final ConversionService conversionService;
   private final EmailService emailService;
-  private final Optional<Producer> federationProducer;
   private final UserDataService userDataService;
   private final PasswordResetService passwordResetService;
   private final PersonEmailVerificationService personEmailVerificationService;
 
   private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
 
-  @Value("${sublinks.federation.exchange}")
-  private String federationExchange;
+
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -225,20 +221,6 @@ public class UserAuthController extends AbstractLemmyApiController {
         throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "email_sending_failed");
       }
     }
-
-    federationProducer.ifPresent(service -> {
-      final Actor actorMessage = Actor.builder()
-          .actor_id(person.getActorId())
-          .actor_type(ActorType.USER.getValue())
-          .bio(person.getBiography())
-          .display_name(person.getDisplayName())
-          .matrix_user_id(person.getMatrixUserId())
-          .private_key(person.getPrivateKey())
-          .public_key(person.getPublicKey())
-          .build();
-
-      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
-    });
 
     if (token != null && !token.isEmpty()) {
       userDataService.checkAndAddIpRelation(person, request.getRemoteAddr(), token,
@@ -434,7 +416,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = VerifyEmailResponse.class))})})
   @PostMapping("verify_email")
-  SuccessResponse verifyEmail(@RequestBody VerifyEmail verifyEmailForm) {
+  SuccessResponse verifyEmail(@Valid @RequestBody VerifyEmail verifyEmailForm) {
 
     Optional<PersonEmailVerification> personEmailVerification = personEmailVerificationService.getActiveVerificationByToken(
         verifyEmailForm.token());

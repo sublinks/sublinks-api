@@ -199,7 +199,7 @@ public class RoleAuthorizingService {
 
     final Role role = person == null ? getDefaultRole() : person.getRole();
 
-    if(person != null && person.isDeleted()) {
+    if (person != null && person.isDeleted()) {
       throw exceptionSupplier.get();
     }
 

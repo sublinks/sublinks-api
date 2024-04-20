@@ -15,6 +15,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetComments;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.GetCommentsResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.ListCommentLikesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.MarkCommentReplyAsRead;
+import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.SaveComment;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.VoteView;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
@@ -25,22 +26,23 @@ import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
+import com.sublinks.sublinksapi.comment.entities.CommentSave;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria.CommentSearchCriteriaBuilder;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
-import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
+import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentReadService;
 import com.sublinks.sublinksapi.comment.services.CommentReplyService;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
+import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
-import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
@@ -68,7 +70,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -88,13 +89,13 @@ public class CommentController extends AbstractLemmyApiController {
   private final PersonService personService;
   private final CommentReadService commentReadService;
   private final LemmyCommentReportService lemmyCommentReportService;
-  private final CommentReportRepository commentReportRepository;
   private final CommentReportService commentReportService;
-  private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommentReplyRepository commentReplyRepository;
   private final CommentReplyService commentReplyService;
   private final SlurFilterService slurFilterService;
   private final RoleAuthorizingService roleAuthorizingService;
+  private final CommentSaveService commentSaveForLaterService;
+  private final ComentSaveRepository commentSaveForLaterRepository;
 
   @Operation(summary = "Create a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -238,7 +239,7 @@ public class CommentController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping("delete")
-  CommentResponse delete(@RequestBody final DeleteComment deleteCommentForm,
+  CommentResponse delete(@Valid @RequestBody final DeleteComment deleteCommentForm,
       final JwtPerson principal) {
     // @todo Implement delete comment
     final Person person = getPersonOrThrowUnauthorized(principal);
@@ -293,7 +294,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     if (commentReply.isPresent()) {
       CommentReply commentReplyEntity = commentReply.get();
-      commentReplyEntity.setIsRead(true);
+      commentReplyEntity.setRead(true);
       commentReplyService.updateCommentReply(commentReplyEntity);
     }
 
@@ -368,14 +369,46 @@ public class CommentController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
   @PutMapping("save")
-  CommentResponse saveForLater(final JwtPerson principal) {
-    // @todo Implement save comment
+  CommentResponse saveForLater(@Valid @RequestBody final SaveComment saveCommentForm,
+      final JwtPerson principal) {
+
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+
+    Comment comment = commentRepository.findById((long) saveCommentForm.comment_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+    Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
+        person, comment);
+
+    if (saveCommentForm.save()) {
+      if (commentSaveForLater.isPresent()) {
+        return CommentResponse.builder()
+            .comment_view(lemmyCommentService.createCommentView(comment, person))
+            .recipient_ids(new ArrayList<>())
+            .build();
+      }
+      commentSaveForLaterService.createCommentSave(
+          CommentSave.builder().comment(comment).person(person).build());
+    } else {
+      if (commentSaveForLater.isEmpty()) {
+        return CommentResponse.builder()
+            .comment_view(lemmyCommentService.createCommentView(comment, person))
+            .recipient_ids(new ArrayList<>())
+            .build();
+      }
+
+      commentSaveForLaterService.deleteCommentSave(commentSaveForLater.get());
+    }
+
+    return CommentResponse.builder()
+        .comment_view(lemmyCommentService.createCommentView(comment, person))
+        .recipient_ids(new ArrayList<>())
+        .build();
   }
+
 
   @Operation(summary = "Get / fetch comments.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
