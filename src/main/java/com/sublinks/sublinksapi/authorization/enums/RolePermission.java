@@ -26,7 +26,7 @@ public enum RolePermission {
 
   // Private message permissions
   READ_PRIVATE_MESSAGES("message", AuthorizeAction.READ),
-  MARK_PRIVATE_MESSAGE_AS_READ("comment-read", AuthorizeAction.UPDATE),
+  MARK_PRIVATE_MESSAGE_AS_READ("message-read", AuthorizeAction.UPDATE),
   CREATE_PRIVATE_MESSAGE("message", AuthorizeAction.CREATE),
   UPDATE_PRIVATE_MESSAGE("message", AuthorizeAction.UPDATE),
   DELETE_PRIVATE_MESSAGE("message", AuthorizeAction.DELETE),
