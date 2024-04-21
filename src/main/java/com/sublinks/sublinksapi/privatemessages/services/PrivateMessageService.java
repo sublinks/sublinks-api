@@ -14,7 +14,6 @@ import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageDeletedPubl
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageUpdatedPublisher;
 import com.sublinks.sublinksapi.privatemessages.models.MarkAllAsReadResponse;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
-import com.sublinks.sublinksapi.shared.RemovedState;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
