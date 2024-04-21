@@ -111,8 +111,8 @@ public class CommentController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final Post post = postRepository.findById((long) createCommentForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Post post = postRepository.findById((long) createCommentForm.post_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     if (post.isDeleted() || post.isRemoved()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found");
@@ -131,7 +131,7 @@ public class CommentController extends AbstractLemmyApiController {
     }
 
     if (language.isEmpty()) {
-      throw new RuntimeException("No language selected");
+      language = Optional.of(languageRepository.findLanguageByCode("und"));
     }
 
     final Comment comment = Comment.builder()
@@ -191,20 +191,14 @@ public class CommentController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-    Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    Comment comment = commentRepository.findById((long) editCommentForm.comment_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    Optional<Language> language;
     if (editCommentForm.language_id() != null) {
-      language = languageRepository.findById((long) editCommentForm.language_id());
-    } else {
-      language = personService.getPersonDefaultPostLanguage(person,
-          comment.getPost().getCommunity());
+      Optional<Language> language = languageRepository.findById(
+          (long) editCommentForm.language_id());
+      language.ifPresent(comment::setLanguage);
     }
-    if (language.isEmpty()) {
-      throw new RuntimeException("No language selected");
-    }
-    comment.setLanguage(language.get());
 
     boolean shouldReport = false;
 
@@ -261,7 +255,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     commentEntity.setDeleted(true);
 
-    commentService.updateComment(commentEntity);
+    commentService.softDeleteComment(commentEntity);
 
     final CommentView commentView = lemmyCommentService.createCommentView(commentEntity, person);
 
@@ -285,8 +279,8 @@ public class CommentController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById(
-            (long) markCommentReplyAsRead.comment_reply_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        (long) markCommentReplyAsRead.comment_reply_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     commentReadService.markCommentReadByPerson(comment, person);
 
     final Optional<CommentReply> commentReply = commentReplyRepository.findById(
@@ -377,8 +371,8 @@ public class CommentController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    Comment comment = commentRepository.findById((long) saveCommentForm.comment_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    Comment comment = commentRepository.findById((long) saveCommentForm.comment_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
         person, comment);
@@ -390,8 +384,10 @@ public class CommentController extends AbstractLemmyApiController {
             .recipient_ids(new ArrayList<>())
             .build();
       }
-      commentSaveForLaterService.createCommentSave(
-          CommentSave.builder().comment(comment).person(person).build());
+      commentSaveForLaterService.createCommentSave(CommentSave.builder()
+          .comment(comment)
+          .person(person)
+          .build());
     } else {
       if (commentSaveForLater.isEmpty()) {
         return CommentResponse.builder()
@@ -430,9 +426,8 @@ public class CommentController extends AbstractLemmyApiController {
     final ListingType listingType = conversionService.convert(getCommentsForm.type_(),
         ListingType.class);
 
-    final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria.builder()
-        .listingType(listingType)
-        .commentSortType(sortType);
+    final CommentSearchCriteriaBuilder searchBuilder = CommentSearchCriteria.builder().listingType(
+        listingType).commentSortType(sortType);
 
     if (post_id.isPresent()) {
       final Optional<Post> post = postRepository.findById((long) post_id.get());

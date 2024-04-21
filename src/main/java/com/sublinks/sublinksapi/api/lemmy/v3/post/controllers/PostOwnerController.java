@@ -81,24 +81,11 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_POST,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById((long) createPostForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-
-    // Language
-    Optional<Language> language;
-    if (createPostForm.language_id() != null) {
-      language = languageRepository.findById((long) createPostForm.language_id());
-    } else {
-      language = personService.getPersonDefaultPostLanguage(person, community);
-    }
-
-    if (language.isEmpty()) {
-      throw new RuntimeException("No language selected");
-    }
 
     String url = createPostForm.url();
     SiteMetadataUtil.SiteMetadata metadata = null;
@@ -108,11 +95,27 @@ public class PostOwnerController extends AbstractLemmyApiController {
       metadata = siteMetadataUtil.fetchSiteMetadata(url);
     }
 
-    final Post.PostBuilder postBuilder = Post.builder().instance(localInstanceContext.instance())
-        .community(community).language(language.get()).title(createPostForm.name())
+    final Post.PostBuilder postBuilder = Post.builder()
+        .instance(localInstanceContext.instance())
+        .community(community)
+        .title(createPostForm.name())
         .removedState(RemovedState.NOT_REMOVED)
-        .titleSlug(slugUtil.uniqueSlug(createPostForm.name())).postBody(createPostForm.body())
+        .titleSlug(slugUtil.uniqueSlug(createPostForm.name()))
+        .postBody(createPostForm.body())
         .isNsfw((createPostForm.nsfw() != null && createPostForm.nsfw()));
+    // Language
+    Optional<Language> language;
+    if (createPostForm.language_id() != null) {
+      language = languageRepository.findById((long) createPostForm.language_id());
+    } else {
+      language = personService.getPersonDefaultPostLanguage(person, community);
+    }
+
+    if (language.isPresent()) {
+      postBuilder.language(language.get());
+    } else {
+      postBuilder.language(languageRepository.findLanguageByCode("und"));
+    }
 
     boolean shouldReport = false;
 
@@ -137,8 +140,10 @@ public class PostOwnerController extends AbstractLemmyApiController {
     if (url != null) {
       postBuilder.linkUrl(url);
       if (metadata != null) {
-        postBuilder.linkTitle(metadata.title()).linkDescription(metadata.description())
-            .linkVideoUrl(metadata.videoUrl()).linkThumbnailUrl(metadata.imageUrl());
+        postBuilder.linkTitle(metadata.title())
+            .linkDescription(metadata.description())
+            .linkVideoUrl(metadata.videoUrl())
+            .linkThumbnailUrl(metadata.imageUrl());
       }
     }
 
@@ -147,14 +152,18 @@ public class PostOwnerController extends AbstractLemmyApiController {
     postService.createPost(post, person);
 
     if (shouldReport) {
-      postReportService.createPostReport(PostReport.builder().post(post).creator(person)
+      postReportService.createPostReport(PostReport.builder()
+          .post(post)
+          .creator(person)
           .reason("AUTOMATED: Post creation triggered a slur filter")
           .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
           .originalTitle(post.getTitle() == null ? "" : post.getTitle())
-          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl()).build());
+          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl())
+          .build());
     }
 
-    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 
@@ -166,20 +175,28 @@ public class PostOwnerController extends AbstractLemmyApiController {
   @PutMapping
   PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
-    final Post post = postRepository.findById((long) editPostForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Post post = postRepository.findById((long) editPostForm.post_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.UPDATE_POST,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.UPDATE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     post.setTitle(editPostForm.name());
     post.setPostBody(editPostForm.body());
     post.setNsfw((editPostForm.nsfw() != null && editPostForm.nsfw()));
-    post.setLanguage(languageRepository.findById((long) editPostForm.language_id())
-        .get()); // @todo catch errors here
+    Optional<Language> language;
+    if (editPostForm.language_id() != null) {
+      language = languageRepository.findById((long) editPostForm.language_id());
+    } else {
+      language = personService.getPersonDefaultPostLanguage(person, post.getCommunity());
+    }
+    if (language.isPresent()) {
+      post.setLanguage(language.get());
+    } else {
+      post.setLanguage(languageRepository.findLanguageByCode("und"));
+    }
     post.setLinkUrl(editPostForm.url());
 
     boolean shouldReport = false;
@@ -205,14 +222,18 @@ public class PostOwnerController extends AbstractLemmyApiController {
     postService.updatePost(post);
 
     if (shouldReport) {
-      postReportService.createPostReport(PostReport.builder().post(post).creator(person)
+      postReportService.createPostReport(PostReport.builder()
+          .post(post)
+          .creator(person)
           .reason("AUTOMATED: Post update triggered a slur filter")
           .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
           .originalTitle(post.getTitle() == null ? "" : post.getTitle())
-          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl()).build());
+          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl())
+          .build());
     }
 
-    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 
@@ -226,18 +247,18 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.DELETE_POST,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.DELETE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final Post post = postRepository.findById((long) deletePostForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Post post = postRepository.findById((long) deletePostForm.post_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     post.setDeleted(deletePostForm.deleted());
 
     postService.softDeletePost(post);
 
-    return PostResponse.builder().post_view(lemmyPostService.postViewFromPost(post, person))
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
         .build();
   }
 }
