@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.PrivateMessage;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
@@ -8,7 +7,6 @@ import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsReposi
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
-import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -23,12 +21,8 @@ import com.sublinks.sublinksapi.person.events.PersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
-import com.sublinks.sublinksapi.post.repositories.PostRepository;
-import com.sublinks.sublinksapi.post.services.PostHistoryService;
 import com.sublinks.sublinksapi.post.services.PostService;
-import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
 import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageService;
-import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.BaseUrlUtil;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
@@ -57,15 +51,10 @@ public class PersonService {
   private final LocalInstanceContext localInstanceContext;
   private final PersonCreatedPublisher personCreatedPublisher;
   private final PersonUpdatedPublisher personUpdatedPublisher;
-  private final PostRepository postRepository;
   private final PostService postService;
   private final PostHistoryRepository postHistoryRepository;
-  private final PostHistoryService postHistoryService;
-  private final CommentRepository commentRepository;
   private final CommentService commentService;
   private final CommentHistoryRepository commentHistoryRepository;
-  private final CommentHistoryRepository commentHistoryService;
-  private final PrivateMessageRepository privateMessageRepository;
   private final PrivateMessageService privateMessageService;
 
 

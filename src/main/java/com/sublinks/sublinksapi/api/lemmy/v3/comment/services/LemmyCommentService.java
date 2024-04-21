@@ -11,7 +11,6 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
-import com.sublinks.sublinksapi.comment.entities.CommentSave;
 import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentSaveService;
@@ -22,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
