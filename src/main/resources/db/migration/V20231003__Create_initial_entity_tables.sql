@@ -44,14 +44,14 @@ CREATE INDEX IDX_COMMENTS_POST_ID ON comments (post_id);
 CREATE TABLE comment_likes
 (
   id           BIGSERIAL PRIMARY KEY,
-  post_id      BIGINT NOT NULL,
-  person_id    BIGINT NOT NULL,
-  comment_id   BIGINT NOT NULL,
-  is_up_vote   BOOL   NULL  DEFAULT false,
-  is_down_vote BOOL   NULL  DEFAULT false,
-  score        BOOL   NULL  DEFAULT false,
-  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  post_id      BIGINT   NOT NULL,
+  person_id    BIGINT   NOT NULL,
+  comment_id   BIGINT   NOT NULL,
+  is_up_vote   BOOL     NULL DEFAULT false,
+  is_down_vote BOOL     NULL DEFAULT false,
+  score        SMALLINT NULL DEFAULT 0,
+  created_at   TIMESTAMP(3)  DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  updated_at   TIMESTAMP(3)  DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
 CREATE INDEX IDX_COMMENT_ID ON comment_likes (comment_id);
@@ -303,7 +303,7 @@ CREATE TABLE post_likes
   person_id    BIGINT NOT NULL,
   is_up_vote   BOOL   NOT NULL DEFAULT false,
   is_down_vote BOOL   NOT NULL DEFAULT false,
-  score        BOOL   NOT NULL DEFAULT false,
+  score        SMALLINT   NOT NULL DEFAULT 0,
   created_at   TIMESTAMP(3)    DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   updated_at   TIMESTAMP(3)    DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
