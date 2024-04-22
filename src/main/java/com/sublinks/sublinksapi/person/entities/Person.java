@@ -42,6 +42,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
@@ -59,17 +61,19 @@ public class Person implements UserDetails, Principal {
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonCommunity> linkPersonCommunity;
 
-  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
 
   @ManyToOne
   @JoinTable(name = "link_person_instances", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "instance_id"))
   private Instance instance;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
 
@@ -77,29 +81,36 @@ public class Person implements UserDetails, Principal {
   private LinkPersonInstance linkPersonInstance;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   private List<UserData> userData;
 
-  @OneToMany(fetch = FetchType.LAZY, mappedBy = "person")
+  @OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<CommentLike> commentLikes;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<CommentLike> commentReads;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<PostSave> postSaves;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<PostLike> postLikes;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<PostRead> postReads;
 
@@ -107,7 +118,8 @@ public class Person implements UserDetails, Principal {
   @PrimaryKeyJoinColumn
   private PersonAggregate personAggregate;
 
-  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @Fetch(FetchMode.SUBSELECT)
   @JoinTable(name = "person_languages", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
