@@ -56,11 +56,11 @@ public class Instance {
   @PrimaryKeyJoinColumn
   private InstanceAggregate instanceAggregate;
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(name = "instance_languages", joinColumns = @JoinColumn(name = "instance_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "instance")
+  @OneToOne(fetch = FetchType.EAGER, mappedBy = "instance")
   private InstanceConfig instanceConfig;
 
   /**

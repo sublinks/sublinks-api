@@ -42,7 +42,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Table(name = "communities")
 public class Community implements Serializable {
 
-  @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "community", fetch = FetchType.LAZY)
   Set<LinkPersonCommunity> linkPersonCommunity;
   /**
    * Relationships.
@@ -53,10 +53,10 @@ public class Community implements Serializable {
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @PrimaryKeyJoinColumn
   private CommunityAggregate communityAggregate;
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinTable(
       name = "community_languages",
       joinColumns = @JoinColumn(name = "community_id"),

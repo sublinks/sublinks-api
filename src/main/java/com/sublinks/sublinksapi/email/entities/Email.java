@@ -16,11 +16,11 @@ import java.util.List;
 @Table(name = "email")
 public class Email {
 
-  @ManyToMany(fetch = FetchType.EAGER)
+  @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "email_person_recipients", joinColumns = @JoinColumn(name = "email_id"), inverseJoinColumns = @JoinColumn(name = "person_id"))
   private List<Person> personRecipients;
 
-  @OneToMany(mappedBy = "email", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "email", fetch = FetchType.LAZY)
   private List<EmailData> emailData;
 
   @Id

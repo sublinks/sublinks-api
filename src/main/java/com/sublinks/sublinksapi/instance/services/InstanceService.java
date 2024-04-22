@@ -29,6 +29,13 @@ public class InstanceService {
   }
 
   @Transactional
+  public void createInstanceAndFlush(@NotNull Instance instance) {
+
+    createInstance(instance);
+    instanceRepository.flush();
+  }
+
+  @Transactional
   public void updateInstance(@NotNull Instance instance) {
 
     instanceRepository.save(instance);

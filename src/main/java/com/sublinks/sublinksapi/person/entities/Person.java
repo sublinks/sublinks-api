@@ -40,6 +40,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
@@ -58,17 +59,17 @@ public class Person implements UserDetails, Principal {
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonCommunity> linkPersonCommunity;
 
-  @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
 
   @ManyToOne
   @JoinTable(name = "link_person_instances", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "instance_id"))
   private Instance instance;
 
-  @ManyToOne(fetch = FetchType.EAGER)
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "role_id", nullable = false)
   private Role role;
 
@@ -78,7 +79,7 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person")
   private List<UserData> userData;
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "person")
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
 
@@ -106,7 +107,7 @@ public class Person implements UserDetails, Principal {
   @PrimaryKeyJoinColumn
   private PersonAggregate personAggregate;
 
-  @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
   @JoinTable(name = "person_languages", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
@@ -165,16 +166,19 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "default_theme")
   private String defaultTheme;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "default_listing_type")
+  @Enumerated(EnumType.STRING)
+
   private ListingType defaultListingType;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "default_sort_type")
+  @Enumerated(EnumType.STRING)
+
   private SortType defaultSortType;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "post_listing_type")
+  @Enumerated(EnumType.STRING)
+
   private PostListingMode postListingType;
 
   @Column(nullable = false, name = "is_infinite_scroll")

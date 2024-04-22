@@ -28,7 +28,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "roles")
 public class Role {
 
-  @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
   Set<RolePermissions> rolePermissions;
 
   @OneToMany(mappedBy = "role")
