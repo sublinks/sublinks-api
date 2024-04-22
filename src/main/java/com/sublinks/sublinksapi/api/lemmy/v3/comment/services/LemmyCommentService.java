@@ -31,7 +31,6 @@ public class LemmyCommentService {
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final ComentSaveRepository comentSaveRepository;
   private final CommentSaveService commentSaveService;
   private final RoleAuthorizingService roleAuthorizingService;
 

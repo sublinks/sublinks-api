@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -45,6 +46,7 @@ public class ModerationLog {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  // This is a "string" as this could change easily
   @Column(nullable = false, name = "action_type")
   @Enumerated(EnumType.STRING)
   private ModlogActionType actionType;
@@ -124,6 +126,7 @@ public class ModerationLog {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

@@ -1,103 +1,102 @@
 plugins {
-    id 'java'
-    id 'org.springframework.boot' version '3.2.4'
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'jacoco'
+  id 'java'
+  id 'org.springframework.boot' version '3.2.5'
+  id 'io.spring.dependency-management' version '1.1.4'
+  id 'jacoco'
 }
 
 group = 'com.sublinks'
 version = '0.0.1-SNAPSHOT'
 
 java {
-    sourceCompatibility = '17'
+  sourceCompatibility = '17'
 }
 
 configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
+  compileOnly {
+    extendsFrom annotationProcessor
+  }
 }
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 
 dependencies {
 
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.flywaydb:flyway-core'
-    implementation 'org.flywaydb:flyway-mysql'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-amqp'
-    testImplementation 'org.springframework.amqp:spring-rabbit-test'
+  implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+  implementation 'org.springframework.boot:spring-boot-starter-web'
+  implementation 'org.flywaydb:flyway-core'
+  implementation 'org.flywaydb:flyway-mysql'
+  implementation 'org.springframework.boot:spring-boot-starter-validation'
+  implementation 'org.springframework.boot:spring-boot-starter-security'
+  implementation 'org.springframework.boot:spring-boot-starter-amqp'
+  testImplementation 'org.springframework.amqp:spring-rabbit-test'
 
-    annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.4.Final"
+  annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.4.4.Final"
 
-    // Springdoc for Swagger API Docs
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+  // Springdoc for Swagger API Docs
+  implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
 
-    implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+  implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+  runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+  runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
 
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+  implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    implementation 'org.jsoup:jsoup:1.17.2'
+  implementation 'org.jsoup:jsoup:1.17.2'
 
-    implementation 'com.github.bastiaanjansen:otp-java:2.0.3'
+  implementation 'com.github.bastiaanjansen:otp-java:2.0.3'
 
-    implementation 'cn.apiclub.tool:simplecaptcha:1.2.2'
-    implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
+  implementation 'cn.apiclub.tool:simplecaptcha:1.2.2'
+  implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
 
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.5'
+  implementation 'org.apache.commons:commons-text:1.12.0'
+  implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
+  implementation 'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE'
 
-    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.4'
-    implementation 'org.apache.commons:commons-text:1.12.0'
-    implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
-    implementation 'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE'
+  implementation "org.mapstruct:mapstruct:1.5.5.Final"
+  compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+  compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
+  compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.1'
+  compileOnly 'org.projectlombok:lombok'
+  annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+  annotationProcessor 'org.projectlombok:lombok'
+  annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
+  testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
 
-    implementation "org.mapstruct:mapstruct:1.5.5.Final"
-    compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-    compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
-    compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.1'
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
-    annotationProcessor 'org.projectlombok:lombok'
-    annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
-    testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
+  developmentOnly 'org.springframework.boot:spring-boot-devtools'
+  runtimeOnly 'org.postgresql:postgresql:42.7.3'
+  testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
-    testImplementation 'org.mockito:mockito-core:5.+'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+  testImplementation 'org.mockito:mockito-core:5.+'
 }
 
 tasks.named("test") {
-    useJUnitPlatform()
+  useJUnitPlatform()
 
-    testLogging {
-      events "PASSED", "SKIPPED", "FAILED"
-    }
+  testLogging {
+    events "PASSED", "SKIPPED", "FAILED"
+  }
 }
 
 tasks.named("bootBuildImage") {
-    imageName.set("ghcr.io/sublinks/${project.name}:${project.version}")
-    publish = true
-    docker {
-        publishRegistry {
-            username = System.getenv('DOCKER_USER')
-            password = System.getenv('DOCKER_PASSWORD')
-        }
+  imageName.set("ghcr.io/sublinks/${project.name}:${project.version}")
+  publish = true
+  docker {
+    publishRegistry {
+      username = System.getenv('DOCKER_USER')
+      password = System.getenv('DOCKER_PASSWORD')
     }
+  }
 }
 
 tasks.named("jar") {
-    // Disable generation of the "plain" jar file and just generate the fat jar file
-    // See https://docs.spring.io/spring-boot/docs/3.2.3/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
-    enabled = false
+  // Disable generation of the "plain" jar file and just generate the fat jar file
+  // See https://docs.spring.io/spring-boot/docs/3.2.3/gradle-plugin/reference/htmlsingle/#packaging-executable.and-plain-archives
+  enabled = false
 }

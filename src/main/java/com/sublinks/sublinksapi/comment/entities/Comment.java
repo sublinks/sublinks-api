@@ -29,6 +29,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
@@ -64,7 +65,7 @@ public class Comment implements Serializable {
   @JoinColumn(name = "language_id")
   private Language language;
 
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   @PrimaryKeyJoinColumn
   private CommentAggregate commentAggregate;
 
@@ -83,6 +84,7 @@ public class Comment implements Serializable {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
+
   private RemovedState removedState;
 
   @Column(nullable = false, name = "is_local")

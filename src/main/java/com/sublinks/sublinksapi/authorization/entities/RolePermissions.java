@@ -16,6 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 
 @Getter
 @Setter
@@ -35,6 +36,6 @@ public class RolePermissions {
   private Role role;
 
   @Column(nullable = false, name = "permission")
-  @Enumerated(value = EnumType.STRING)
+  @Enumerated(EnumType.STRING)
   private RolePermission permission;
 }

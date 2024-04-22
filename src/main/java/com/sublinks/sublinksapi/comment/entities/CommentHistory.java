@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -53,6 +54,7 @@ public class CommentHistory implements Serializable {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
+
   private RemovedState removedState;
 
   @CreationTimestamp
