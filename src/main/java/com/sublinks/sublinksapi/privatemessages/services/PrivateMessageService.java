@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.services.PersonMentionService;
 import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage;
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageCreatedPublisher;
+import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageDeletedPublisher;
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageUpdatedPublisher;
 import com.sublinks.sublinksapi.privatemessages.models.MarkAllAsReadResponse;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
@@ -25,6 +26,7 @@ public class PrivateMessageService {
   private final PrivateMessageRepository privateMessageRepository;
   private final PrivateMessageCreatedPublisher privateMessageCreatedPublisher;
   private final PrivateMessageUpdatedPublisher privateMessageUpdatedPublisher;
+  private final PrivateMessageDeletedPublisher privateMessageDeletedPublisher;
   private final LocalInstanceContext localInstanceContext;
   private final CommentReplyService commentReplyService;
   private final CommentReplyRepository commentReplyRepository;
@@ -93,5 +95,19 @@ public class PrivateMessageService {
         .commentReplies(commentReplies)
         .personMentions(personMentions)
         .build();
+  }
+
+  @Transactional
+  public List<PrivateMessage> deleteAllPrivateMessagesByPerson(final Person person) {
+
+    final List<PrivateMessage> privateMessages = privateMessageRepository.findAllBySender(person);
+    privateMessages.forEach(privateMessage -> {
+      privateMessage.setDeleted(true);
+      privateMessage.setRead(true);
+      privateMessage.setContent("*Permanently deleted by creator*");
+
+      privateMessageDeletedPublisher.publish(privateMessageRepository.save(privateMessage));
+    });
+    return privateMessages;
   }
 }

@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.comment.services;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.events.CommentCreatedPublisher;
+import com.sublinks.sublinksapi.comment.events.CommentDeletedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
@@ -26,6 +27,7 @@ public class CommentService {
   private final CommentRepository commentRepository;
   private final CommentCreatedPublisher commentCreatedPublisher;
   private final CommentUpdatedPublisher commentUpdatedPublisher;
+  private final CommentDeletedPublisher commentDeletedPublisher;
   private final LocalInstanceContext localInstanceContext;
 
   private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CommentService.class);
@@ -36,7 +38,8 @@ public class CommentService {
    * @param comment The comment for which the ActivityPub ID is being generated.
    * @return A string representing the ActivityPub ID.
    */
-  public String generateActivityPubId(final com.sublinks.sublinksapi.comment.entities.Comment comment) {
+  public String generateActivityPubId(
+      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     String domain = localInstanceContext.instance().getDomain();
     return String.format("%s/comment/%d", domain, comment.getId());
@@ -106,17 +109,45 @@ public class CommentService {
    * @param comment The Comment object to be deleted.
    */
   public Comment deleteComment(final Comment comment) {
+
     String DELETED_REPLACEMENT_TEXT = "*Permanently Deleted*";
 
-    Comment foundComment = commentRepository.findById(comment.getId())
-        .orElseThrow(() -> {
-          logger.error("no comment found by id: {}", comment.getId());
-          return new EntityNotFoundException("could not find comment by Id");
-        });
+    Comment foundComment = commentRepository.findById(comment.getId()).orElseThrow(() -> {
+      logger.error("no comment found by id: {}", comment.getId());
+      return new EntityNotFoundException("could not find comment by Id");
+    });
     foundComment.setCommentBody(DELETED_REPLACEMENT_TEXT);
     foundComment.setRemovedState(RemovedState.PURGED);
 
-    return commentRepository.save(foundComment);
+    final Comment updatedComment = commentRepository.save(foundComment);
+    commentDeletedPublisher.publish(updatedComment);
+    return updatedComment;
+  }
+
+  public Comment softDeleteComment(final Comment comment) {
+
+    Comment foundComment = commentRepository.findById(comment.getId()).orElseThrow(() -> {
+      logger.error("no comment found by id: {}", comment.getId());
+      return new EntityNotFoundException("could not find comment by Id");
+    });
+
+    final Comment updatedComment = commentRepository.save(foundComment);
+    commentDeletedPublisher.publish(updatedComment);
+    return updatedComment;
+  }
+
+  public List<Comment> deleteAllCommentsByPerson(final Person person) {
+
+    List<Comment> comments = commentRepository.findByPerson(person);
+
+    comments.forEach(comment -> {
+      comment.setCommentBody("*Permanently deleted by creator*");
+      comment.setRemovedState(RemovedState.PURGED);
+      commentRepository.save(comment);
+      this.softDeleteComment(comment);
+    });
+
+    return comments;
   }
 
   /**

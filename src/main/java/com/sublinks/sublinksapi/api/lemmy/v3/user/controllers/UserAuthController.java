@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.CaptchaResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ChangePassword;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.ChangePasswordEmail;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccount;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.DeleteAccountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GenerateTotpSecretResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetCaptchaResponse;
@@ -25,9 +26,6 @@ import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.services.EmailService;
-import com.sublinks.sublinksapi.federation.enums.ActorType;
-import com.sublinks.sublinksapi.federation.enums.RoutingKey;
-import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.Captcha;
@@ -98,7 +96,6 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonEmailVerificationService personEmailVerificationService;
 
   private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
-
 
 
   @Operation(summary = "Register a new user.")
@@ -301,15 +298,22 @@ public class UserAuthController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteAccountResponse.class))})})
   @PostMapping("delete_account")
-  DeleteAccountResponse delete(final JwtPerson principal) {
+  DeleteAccountResponse delete(@RequestBody final DeleteAccount deleteAccount,
+      final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    if (!personService.isPasswordEqual(person, deleteAccount.password())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
+    }
+
     roleAuthorizingService.hasAdminOrPermission(person, RolePermission.DELETE_USER);
 
-    // @todo: delete account
+    // Bug in the Lemmy UI delete_content() is always false but the api is just assuming true..., so we just ignore it
+    // @todo check when lemmy fixes this
+    personService.deleteUserAccount(person, true);
 
-    throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
+    return DeleteAccountResponse.builder().build();
   }
 
   @Operation(summary = "Reset your password.")
