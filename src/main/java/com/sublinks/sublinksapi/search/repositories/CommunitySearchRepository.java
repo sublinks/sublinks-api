@@ -9,8 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface CommunitySearchRepository extends JpaRepository<Community, Long> {
 
-  @Query(value = "SELECT c.* FROM communities c WHERE MATCH(c.title, c.title_slug, c.description) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
-      countQuery = "SELECT COUNT(c.id) FROM communities c WHERE MATCH(c.title, c.title_slug, c.description) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
+  @Query(value = "SELECT c.* FROM communities c WHERE  to_tsquery(:keyword) @@ to_tsvector(c.title) OR to_tsquery(:keyword) @@ to_tsvector(c.description) OR to_tsquery(:keyword);",
+      countQuery = "SELECT COUNT(c.id) FROM communities c WHERE to_tsquery(:keyword) @@ to_tsvector(c.title) OR to_tsquery(:keyword) @@ to_tsvector(c.description) OR to_tsquery(:keyword);",
       nativeQuery = true)
   Page<Community> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

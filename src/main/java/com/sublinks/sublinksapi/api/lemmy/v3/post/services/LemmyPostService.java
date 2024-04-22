@@ -27,8 +27,13 @@ public class LemmyPostService {
   private final LinkPersonCommunityService linkPersonCommunityService;
 
   public PostView postViewFromPost(final Post post) {
-    return postViewBuilder(post).saved(false).read(false).creator_blocked(false).my_vote(0)
-        .unread_comments(0).build();
+
+    return postViewBuilder(post).saved(false)
+        .read(false)
+        .creator_blocked(false)
+        .my_vote(0)
+        .unread_comments(0)
+        .build();
   }
 
   public PostView postViewFromPost(final Post post,
@@ -40,8 +45,12 @@ public class LemmyPostService {
       vote = postLike.get().getScore();
     }
 
-    return postViewBuilder(post).saved(postSaveService.isPostSaved(post, person)).read(false)
-        .creator_blocked(false).my_vote(vote).unread_comments(0).build();
+    return postViewBuilder(post).saved(postSaveService.isPostSaved(post, person))
+        .read(false)
+        .creator_blocked(false)
+        .my_vote(vote)
+        .unread_comments(0)
+        .build();
   }
 
   private PostView.PostViewBuilder postViewBuilder(final Post post) {
@@ -59,7 +68,11 @@ public class LemmyPostService {
     final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         post.getCommunity(), LinkPersonCommunityType.banned);
 
-    return PostView.builder().post(lemmyPost).creator(lemmyCreator).community(community)
-        .counts(postAggregates).creator_banned_from_community(creatorBannedFromCommunity);
+    return PostView.builder()
+        .post(lemmyPost)
+        .creator(lemmyCreator)
+        .community(community)
+        .counts(postAggregates)
+        .creator_banned_from_community(creatorBannedFromCommunity);
   }
 }

@@ -30,6 +30,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
@@ -46,7 +47,7 @@ public class Post {
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
   @ManyToOne
   @JoinTable(name = "post_post_cross_post", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "cross_post_id"))
@@ -61,7 +62,7 @@ public class Post {
   @ManyToOne
   @JoinColumn(name = "language_id")
   private Language language;
-  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
+  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "post")
   private PostAggregate postAggregate;
   @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
   private List<PostLike> postLikes;
@@ -82,6 +83,7 @@ public class Post {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
+
   private RemovedState removedState;
 
   @Column(nullable = false, name = "is_local")

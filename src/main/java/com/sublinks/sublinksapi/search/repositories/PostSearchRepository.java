@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface PostSearchRepository extends JpaRepository<Post, Long> {
 
-  @Query(value = "SELECT p.*, ppc.* FROM posts p LEFT JOIN post_post_cross_post ppc ON ppc.post_id = p.id WHERE MATCH(p.title, p.post_body) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
-      countQuery = "SELECT COUNT(p.id) FROM posts p WHERE MATCH(p.title, p.post_body) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
-      nativeQuery = true)
+  @Query(value = "SELECT p.*, ppc.* FROM posts p LEFT JOIN post_post_cross_post ppc ON ppc.post_id = p.id WHERE to_tsquery(:keyword) @@ to_tsvector(p.post_body) OR to_tsquery(:keyword) @@ to_tsvector(p.title);", nativeQuery = true)
   Page<Post> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.post.entities;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
@@ -41,6 +42,7 @@ public class PostHistory {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
+
   private RemovedState removedState;
 
   @Column(nullable = false, name = "is_deleted")
@@ -82,6 +84,7 @@ public class PostHistory {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

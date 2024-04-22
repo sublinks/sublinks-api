@@ -19,6 +19,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
@@ -58,6 +59,7 @@ public class PersonRegistrationApplication {
 
   @Column(nullable = false, name = "application_status")
   @Enumerated(EnumType.STRING)
+
   private PersonRegistrationApplicationStatus applicationStatus;
 
   @CreationTimestamp
