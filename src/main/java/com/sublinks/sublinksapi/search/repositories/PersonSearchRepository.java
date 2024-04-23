@@ -9,8 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface PersonSearchRepository extends JpaRepository<Person, Long> {
 
-  @Query(value = "SELECT p.*, lpi.instance_id FROM people p LEFT JOIN link_person_instances lpi ON lpi.person_id = p.id WHERE MATCH(p.name, p.display_name) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
-      countQuery = "SELECT COUNT(p.id) FROM people p WHERE MATCH(p.name, p.display_name) AGAINST (CONCAT('*', :keyword, '*') IN BOOLEAN MODE);",
-      nativeQuery = true)
+  @Query(value = "SELECT p.*, lpi.instance_id FROM people p LEFT JOIN link_person_instances lpi ON lpi.person_id = p.id WHERE p.display_name_search @@ to_tsquery(:keyword) OR p.name_search @@ to_tsquery(:keyword) OR p.biography_search @@ to_tsquery(:keyword);", countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.display_name_search @@ to_tsquery(:keyword) OR p.name_search @@ to_tsquery(:keyword) OR p.biography_search @@ to_tsquery(:keyword);", nativeQuery = true)
   Page<Person> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

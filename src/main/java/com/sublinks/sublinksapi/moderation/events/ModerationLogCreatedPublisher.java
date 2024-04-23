@@ -21,7 +21,8 @@ public class ModerationLogCreatedPublisher {
    */
   public void publish(final ModerationLog moderationLog) {
 
-    final ModerationLogCreatedEvent moderationLogCreatedEvent = new ModerationLogCreatedEvent(this, moderationLog);
+    final ModerationLogCreatedEvent moderationLogCreatedEvent = new ModerationLogCreatedEvent(this,
+        moderationLog);
     applicationEventPublisher.publishEvent(moderationLogCreatedEvent);
   }
 }

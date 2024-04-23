@@ -6,25 +6,24 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 public class LanguageServiceUnitTests {
 
-  @Mock
-  LanguageRepository languageRepository;
-
   static Language english;
   static Language afrikaans;
+  @Mock
+  LanguageRepository languageRepository;
 
   @BeforeAll
   static void setup() {
@@ -54,8 +53,8 @@ public class LanguageServiceUnitTests {
     List<Long> expectedList = Arrays.asList(1L, 2L);
 
     assertTrue(expectedList.size() == discussionLanguages.size()
-         && expectedList.containsAll(discussionLanguages)
-         && discussionLanguages.containsAll(expectedList),
+            && expectedList.containsAll(discussionLanguages)
+            && discussionLanguages.containsAll(expectedList),
         "List of language ids returned did not match expected");
   }
 
@@ -73,6 +72,7 @@ public class LanguageServiceUnitTests {
 
     List<Language> languages = languageService.languageIdsToEntity(languageIds);
 
-    assertEquals(2, languages.size(), "Number of languages instances returned did not match expected");
+    assertEquals(2, languages.size(),
+        "Number of languages instances returned did not match expected");
   }
 }

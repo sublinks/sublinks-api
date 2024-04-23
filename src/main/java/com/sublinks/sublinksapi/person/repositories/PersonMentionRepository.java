@@ -2,10 +2,10 @@ package com.sublinks.sublinksapi.person.repositories;
 
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.PersonMention;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.List;
 
 public interface PersonMentionRepository extends JpaRepository<PersonMention, Long>,
     PersonMentionRepositorySearch {

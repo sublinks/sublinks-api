@@ -1,10 +1,20 @@
 package com.sublinks.sublinksapi.slurfilter.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.sublinks.sublinksapi.slurfilter.entities.SlurFilter;
 import com.sublinks.sublinksapi.slurfilter.enums.SlurActionType;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.repositories.SlurFilterRepository;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -12,14 +22,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class SlurFilterServiceUnitTests {
@@ -185,7 +187,8 @@ public class SlurFilterServiceUnitTests {
     blockFilter.setSlurRegex("\\bword.+?\\b");
     blockFilter.setSlurActionType(SlurActionType.BLOCK);
 
-    when(slurFilterRepository.findAll()).thenReturn(List.of(reportFilter, replaceFilter, blockFilter));
+    when(slurFilterRepository.findAll()).thenReturn(
+        List.of(reportFilter, replaceFilter, blockFilter));
 
     SlurFilter slurFilter = slurFilterService.getHighestSlurFilterMatchingText("Some words");
 
@@ -195,7 +198,7 @@ public class SlurFilterServiceUnitTests {
 
   @Test
   void givenTextThatDoesNotNeedCensoring_whenCensorText_thenReturnText()
-       throws SlurFilterReportException, SlurFilterBlockedException {
+      throws SlurFilterReportException, SlurFilterBlockedException {
 
     String safeText = "Nothing wrong with this";
     SlurFilter existingFilter = new SlurFilter();
@@ -318,7 +321,8 @@ public class SlurFilterServiceUnitTests {
     anotherReplaceFilter.setSlurActionType(SlurActionType.REPLACE);
 
     when(slurFilterRepository.findAll()).thenReturn(List.of(replaceFilter, anotherReplaceFilter));
-    when(slurFilterRepository.findBySlurActionType(SlurActionType.REPLACE)).thenReturn(List.of(replaceFilter, anotherReplaceFilter));
+    when(slurFilterRepository.findBySlurActionType(SlurActionType.REPLACE)).thenReturn(
+        List.of(replaceFilter, anotherReplaceFilter));
 
     String resultText = slurFilterService.censorText("Some mean words in here.");
 

@@ -9,23 +9,28 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Getter
-public class LemmyException extends Exception{
+public class LemmyException extends Exception {
+
   protected HttpStatusCode status = HttpStatusCode.valueOf(500);
 
   public LemmyException(String message) {
+
     super(message);
   }
 
   public LemmyException(String message, HttpStatusCode status) {
+
     super(message);
     this.status = status;
   }
 
   public LemmyException(String message, Throwable cause) {
+
     super(message, cause);
   }
 
   public Object getException() {
+
     String message = super.getMessage();
 
     if (message == null) {

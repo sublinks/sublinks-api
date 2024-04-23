@@ -39,7 +39,7 @@ public class LemmyPersonMentionService {
             com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonMention.class))
         .counts(conversionService.convert(commentAggregates, CommentAggregates.class))
         .creator(conversionService.convert(creator,
-                com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
+            com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
         .creator_blocked(false) // @todo check if user is blocked
         .comment(conversionService.convert(comment,
             com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment.class)).post(
@@ -49,7 +49,7 @@ public class LemmyPersonMentionService {
         .recipient(conversionService.convert(personMention.getRecipient(),
             com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
         .community(conversionService.convert(comment.getCommunity(),
-                com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+            com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
         .my_vote(commentLike == null ? 0 : commentLike.getScore())
         .creator_banned_from_community(
             linkPersonCommunityService.hasLink(creator, comment.getCommunity(),

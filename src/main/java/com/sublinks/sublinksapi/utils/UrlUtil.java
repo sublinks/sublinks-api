@@ -16,17 +16,14 @@ import org.springframework.stereotype.Component;
 public class UrlUtil {
 
   /**
-   * Normalizes a provided URL by removing tracking parameters.
-   * This method processes the URL, removes any known tracking parameters from its
-   * query string,
-   * and reconstructs the URL. It retains the original URL's protocol, authority,
-   * path, and fragment.
-   * If the URL is malformed or encounters a URI syntax issue, the original URL is
-   * returned.
+   * Normalizes a provided URL by removing tracking parameters. This method processes the URL,
+   * removes any known tracking parameters from its query string, and reconstructs the URL. It
+   * retains the original URL's protocol, authority, path, and fragment. If the URL is malformed or
+   * encounters a URI syntax issue, the original URL is returned.
    *
    * @param providedUrl The URL string to be normalized.
-   * @return The normalized URL string without tracking parameters. Returns the
-   *         original URL if any exceptions are encountered.
+   * @return The normalized URL string without tracking parameters. Returns the original URL if any
+   * exceptions are encountered.
    */
   public String normalizeUrl(final String providedUrl) {
 
@@ -66,15 +63,13 @@ public class UrlUtil {
   }
 
   /**
-   * Validates the protocol of a provided URL.
-   * This method checks if the URL's protocol is one of the accepted types: HTTP,
-   * HTTPS, or Magnet.
-   * If the protocol is not one of these or the URL is malformed, a
-   * RuntimeException is thrown.
+   * Validates the protocol of a provided URL. This method checks if the URL's protocol is one of
+   * the accepted types: HTTP, HTTPS, or Magnet. If the protocol is not one of these or the URL is
+   * malformed, a RuntimeException is thrown.
    *
    * @param providedUrl The URL string to be validated.
-   * @throws RuntimeException If the URL's protocol is not one of the accepted
-   *                          types or if the URL is malformed.
+   * @throws RuntimeException If the URL's protocol is not one of the accepted types or if the URL
+   *                          is malformed.
    */
   public void checkUrlProtocol(String providedUrl) {
 

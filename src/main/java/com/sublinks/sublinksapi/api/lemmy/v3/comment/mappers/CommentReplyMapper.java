@@ -1,11 +1,11 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReply;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
-import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
@@ -17,5 +17,6 @@ public interface CommentReplyMapper extends
   @Mapping(target = "comment_id", source = "commentReply.comment.id")
   @Mapping(target = "recipient_id", source = "commentReply.recipient.id")
   @Mapping(target = "read", source = "commentReply.read")
-  CommentReply convert(@Nullable com.sublinks.sublinksapi.comment.entities.CommentReply commentReply);
+  CommentReply convert(
+      @Nullable com.sublinks.sublinksapi.comment.entities.CommentReply commentReply);
 }
