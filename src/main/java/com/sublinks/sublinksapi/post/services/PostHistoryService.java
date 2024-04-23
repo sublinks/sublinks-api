@@ -6,12 +6,11 @@ import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostHistory;
 import com.sublinks.sublinksapi.post.events.PostHistoryCreatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostHistoryRepository;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -75,6 +74,7 @@ public class PostHistoryService {
 
   @Transactional
   public int deleteAllByCreator(Person person) {
+
     return postHistoryRepository.deleteAllByCreator(person);
   }
 }

@@ -58,31 +58,31 @@ experience, content authenticity, and networked social interaction
 - Open source, [MIT License](/LICENSE)
 - Self hostable, easy to deploy
 - Clean, mobile-friendly interface
-  - Only a minimum of a username and password is required to sign up!
-  - User avatar support
-  - Live-updating Comment threads
-  - Full vote scores `(+/-)` like old Reddit
-  - Themes, including light, dark, and solarized
-  - Emojis with autocomplete support. Start typing `:`
-  - User tagging using `@`, Community tagging using `!`
-  - Integrated image uploading in both posts and comments
-  - A post can consist of a title and any combination of self text, a URL, or
-  nothing else
-  - Notifications, on comment replies and when you're tagged
-    - Notifications can be sent via email
-    - Private messaging support
-  - i18n / internationalization support
-  - RSS / Atom feeds for `All`, `Subscribed`, `Inbox`, `User`, and `Community`
+    - Only a minimum of a username and password is required to sign up!
+    - User avatar support
+    - Live-updating Comment threads
+    - Full vote scores `(+/-)` like old Reddit
+    - Themes, including light, dark, and solarized
+    - Emojis with autocomplete support. Start typing `:`
+    - User tagging using `@`, Community tagging using `!`
+    - Integrated image uploading in both posts and comments
+    - A post can consist of a title and any combination of self text, a URL, or
+      nothing else
+    - Notifications, on comment replies and when you're tagged
+        - Notifications can be sent via email
+        - Private messaging support
+    - i18n / internationalization support
+    - RSS / Atom feeds for `All`, `Subscribed`, `Inbox`, `User`, and `Community`
 - Cross-posting support
-  - A _similar post search_ when creating new posts. Great for question /
-  answer communities
+    - A _similar post search_ when creating new posts. Great for question /
+      answer communities
 - Moderation abilities
-  - Public Moderation Logs
-  - Can sticky posts to the top of communities
-  - Both site admins, and community moderators, who can appoint other moderators
-  - Can lock, remove, and restore posts and comments
-  - Can ban and unban users from communities and the site
-  - Can transfer site and communities to others
+    - Public Moderation Logs
+    - Can sticky posts to the top of communities
+    - Both site admins, and community moderators, who can appoint other moderators
+    - Can lock, remove, and restore posts and comments
+    - Can ban and unban users from communities and the site
+    - Can transfer site and communities to others
 - Can fully erase your data, replacing all posts and comments
 - NSFW post / community support
 - High performance
@@ -102,11 +102,11 @@ To use this Docker setup you first need to complete a few steps:
 
 - Run `git submodule update --init --recursive` to pull down all submodules
 - `API_HOST=host.docker.internal docker-compose -f docker/docker-compose.backend.yaml up [-d]`
-  - `-d` to run in detached mode (don't include the [] brackets, they indicate
-  being optional)
-  - NOTE: The UI service will fail unless the API is already running. However,
-  the API will complain if the database is not running. However, it is recommended
-  to run the API first and ignore the errors until the database is running
+    - `-d` to run in detached mode (don't include the [] brackets, they indicate
+      being optional)
+    - NOTE: The UI service will fail unless the API is already running. However,
+      the API will complain if the database is not running. However, it is recommended
+      to run the API first and ignore the errors until the database is running
 
 ### Run
 

@@ -1,11 +1,11 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.post.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
-import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)

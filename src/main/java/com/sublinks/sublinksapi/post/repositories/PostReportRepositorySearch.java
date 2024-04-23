@@ -18,6 +18,7 @@ public interface PostReportRepositorySearch {
 
   void resolveAllPostReportsByPerson(Person person, Person resolver);
 
-  void resolveAllPostReportsByPersonAndCommunity(Person person, Community community, Person resolver);
+  void resolveAllPostReportsByPersonAndCommunity(Person person, Community community,
+      Person resolver);
 
 }

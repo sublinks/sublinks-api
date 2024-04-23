@@ -10,7 +10,7 @@ public class CommentSaveDeletedEvent extends ApplicationEvent {
   private final CommentSave commentSave;
 
   public CommentSaveDeletedEvent(final Object source,
-                                 final CommentSave commentSave) {
+      final CommentSave commentSave) {
 
     super(source);
     this.commentSave = commentSave;

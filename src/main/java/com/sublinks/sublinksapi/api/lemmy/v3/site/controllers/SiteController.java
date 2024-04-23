@@ -153,7 +153,6 @@ public class SiteController extends AbstractLemmyApiController {
 
     slurFilterService.updateOrCreateLemmySlur(createSiteForm.slur_filter_regex());
 
-
     instance.setInstanceConfig(instanceConfig);
     instanceService.updateInstance(instance);
 

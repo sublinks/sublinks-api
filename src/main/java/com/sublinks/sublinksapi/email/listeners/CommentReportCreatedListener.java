@@ -10,7 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
-public class CommentReportCreatedListener implements ApplicationListener<CommentReportCreatedEvent> {
+public class CommentReportCreatedListener implements
+    ApplicationListener<CommentReportCreatedEvent> {
 
   private final LocalInstanceContext localInstanceContext;
   private final PersonService personService;

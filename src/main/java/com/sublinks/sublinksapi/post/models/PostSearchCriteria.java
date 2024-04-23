@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.post.models;
 
 import com.sublinks.sublinksapi.person.entities.Person;
-
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import java.util.List;

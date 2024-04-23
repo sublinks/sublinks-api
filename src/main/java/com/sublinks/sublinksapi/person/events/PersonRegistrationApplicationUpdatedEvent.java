@@ -10,7 +10,7 @@ public class PersonRegistrationApplicationUpdatedEvent extends ApplicationEvent 
   private final PersonRegistrationApplication personRegistrationApplication;
 
   public PersonRegistrationApplicationUpdatedEvent(final Object source,
-                                                   final PersonRegistrationApplication personRegistrationApplication) {
+      final PersonRegistrationApplication personRegistrationApplication) {
 
     super(source);
     this.personRegistrationApplication = personRegistrationApplication;
