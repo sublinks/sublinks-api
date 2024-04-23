@@ -7,16 +7,15 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.EditCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
-import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.language.dto.Language;
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.language.entities.Language;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
@@ -56,7 +55,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final LocalInstanceContext localInstanceContext;
   private final LinkPersonCommunityRepository linkPersonCommunityRepository;
   private final CommunityService communityService;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final LemmyCommunityService lemmyCommunityService;
   private final SlugUtil slugUtil;
   private final CommunityRepository communityRepository;
@@ -71,13 +70,13 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     Person person = getPersonOrThrowUnauthorized(principal);
-    authorizationService.canPerson(person).performTheAction(AuthorizeAction.create)
-        .onEntity(AuthorizedEntityType.community)
-        .defaultingToAllow() // @todo use site setting to allow community creation
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
+        RolePermission.CREATE_COMMUNITY,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final List<Language> languages = new ArrayList<>();
-    if(createCommunityForm.discussion_languages() != null) {
+    if (createCommunityForm.discussion_languages() != null) {
       for (String languageCode : createCommunityForm.discussion_languages()) {
         final Optional<Language> language = localInstanceContext.languageRepository()
             .findById(Long.valueOf(languageCode));
@@ -115,7 +114,8 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     // Prevent users from creating duplicate communities
     final Optional<Community> oldCommunity = Optional.ofNullable(
-        communityRepository.findCommunityByIsLocalTrueAndTitleSlug(slugUtil.stringToSlug(createCommunityForm.name())));
+        communityRepository.findCommunityByIsLocalTrueAndTitleSlug(
+            slugUtil.stringToSlug(createCommunityForm.name())));
     if (oldCommunity.isPresent()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_already_exists");
     }
@@ -157,12 +157,12 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     Person person = getPersonOrThrowUnauthorized(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.UPDATE_COMMUNITY,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     Community community = communityRepository.findById(editCommunityForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-
-    authorizationService.canPerson(person).performTheAction(AuthorizeAction.update)
-        .onEntity(community)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     community.setIconImageUrl(editCommunityForm.icon());
     community.setBannerImageUrl(editCommunityForm.banner());

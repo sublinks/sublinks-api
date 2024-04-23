@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.privatemessages.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -12,12 +12,12 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
 
   @Override
@@ -29,8 +29,8 @@ public class PrivateMessageRepositoryImpl implements PrivateMessageRepositorySea
     final Root<PrivateMessage> privateMessageTable = cq.from(PrivateMessage.class);
     final List<Predicate> predicates = new ArrayList<>();
 
-    if (privateMessageSearchCriteria.unresolvedOnly()) {
-      predicates.add(cb.equal(privateMessageTable.get("resolved"), false));
+    if (privateMessageSearchCriteria.unreadOnly()) {
+      predicates.add(cb.equal(privateMessageTable.get("isRead"), false));
     }
 
     if (privateMessageSearchCriteria.person() != null) {

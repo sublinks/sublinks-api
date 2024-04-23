@@ -9,7 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.dto.Post, Post> {
+public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.entities.Post, Post> {
 
   @Override
   @Mapping(target = "creator_id", ignore = true)
@@ -27,7 +27,8 @@ public interface PostMapper extends Converter<com.sublinks.sublinksapi.post.dto.
   @Mapping(target = "embed_description", source = "post.linkDescription")
   @Mapping(target = "community_id", source = "post.community.id")
   @Mapping(target = "body", source = "post.postBody")
+  @Mapping(target = "removed", expression = "java(post.isRemoved())")
   @Mapping(target = "updated", source = "post.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "ap_id", source = "post.activityPubId")
-  Post convert(@Nullable com.sublinks.sublinksapi.post.dto.Post post);
+  Post convert(@Nullable com.sublinks.sublinksapi.post.entities.Post post);
 }

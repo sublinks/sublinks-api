@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.comment.listeners;
 
-import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.events.CommentLikeUpdatedEvent;
 import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import lombok.RequiredArgsConstructor;

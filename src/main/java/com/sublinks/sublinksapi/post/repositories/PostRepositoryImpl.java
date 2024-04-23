@@ -2,15 +2,17 @@ package com.sublinks.sublinksapi.post.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostLike;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
+import com.sublinks.sublinksapi.shared.RemovedState;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -22,12 +24,12 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class PostRepositoryImpl implements PostRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public List<Post> allPostsBySearchCriteria(final PostSearchCriteria postSearchCriteria) {
@@ -81,7 +83,12 @@ public class PostRepositoryImpl implements PostRepositorySearch {
   }
 
   @Override
-  public List<Post> allPostsByCommunityAndPerson(Community community, Person person) {
+  public List<Post> allPostsByCommunityAndPersonAndRemoved(Community community, Person person,
+      List<RemovedState> removedStates) {
+
+    if (community == null || person == null) {
+      throw new IllegalArgumentException("Community and person cannot be null");
+    }
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
@@ -90,17 +97,17 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     final List<Predicate> predicates = new ArrayList<>();
 
-    if (community != null) {
-      predicates.add(cb.equal(postTable.get("community"), community));
+    if (removedStates != null) {
+      final Expression<RemovedState> expression = postTable.get("removedState");
+      predicates.add(expression.in(removedStates));
     }
 
-    if (person != null) {
-      final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
-          JoinType.INNER);
-      predicates.add(cb.equal(linkPersonPostJoin.get("person"), person));
-      predicates.add(cb.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
+    predicates.add(cb.equal(postTable.get("community"), community));
 
-    }
+    final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
+        JoinType.INNER);
+    predicates.add(cb.equal(linkPersonPostJoin.get("person"), person));
+    predicates.add(cb.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
 
     cq.where(predicates.toArray(new Predicate[0]));
 
@@ -108,7 +115,8 @@ public class PostRepositoryImpl implements PostRepositorySearch {
   }
 
   @Override
-  public List<Post> allPostsByPerson(Person person) {
+  public List<Post> allPostsByPersonAndRemoved(@Nullable Person person,
+      @Nullable List<RemovedState> removedStates) {
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
@@ -117,12 +125,17 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     final List<Predicate> predicates = new ArrayList<>();
 
+    // Not removed filter
+    if (removedStates != null) {
+      final Expression<RemovedState> expression = postTable.get("removedState");
+      predicates.add(expression.in(removedStates));
+    }
+
     if (person != null) {
       final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
           JoinType.INNER);
       predicates.add(cb.equal(linkPersonPostJoin.get("person"), person));
       predicates.add(cb.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
-
     }
 
     cq.where(predicates.toArray(new Predicate[0]));

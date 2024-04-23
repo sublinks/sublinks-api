@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.privatemessages.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.privatemessages.dto.PrivateMessageReport;
+import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessageReport;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageReportSearchCriteria;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -12,12 +12,12 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class PrivateMessageReportRepositoryImpl implements PrivateMessageReportSearchRepository {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
 
   @Override

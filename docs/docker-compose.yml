@@ -2,6 +2,7 @@ version: "3.7"
 
 volumes:
   letsencrypt:
+  queue_data:
 
 x-logging: &default-logging
   driver: "json-file"
@@ -29,18 +30,29 @@ services:
       - lemmy-ui
 
   federation:
-    image: ghcr.io/sublinks/federation:main
+    image: ghcr.io/sublinks/sublinks-federation:main
     restart: always
     ports:
       - "8081:8080"
     environment:
-      LEMMY_USER: federation
-      LEMMY_PASSWORD: doesntmatter
+      DB_DSN: "federation:federation@tcp(federationdb:3306)/federation?charset=utf8mb4&parseTime=True&loc=Local"
+      AMQP_SERVER_URL: "amqp://sublinks:sublinks@queue:5672"
+      HOSTNAME: sublinks.org"
     depends_on:
       - sublinks
 
+  federationdb:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=federation
+      - MYSQL_USER=federation
+      - MYSQL_PASSWORD=federation
+    restart: always
+    logging: *default-logging
+
   sublinks:
-    image: ghcr.io/sublinks/sublinks:0.0.1-snapshot
+    image: ghcr.io/sublinks/sublinks-api:0.0.1-snapshot
     restart: always
     ports:
       - "8080"
@@ -51,11 +63,20 @@ services:
       SUBLINKS_JWT_SECRET: <JWT-SECRET>
       SUBLINKS_BASE_URL: https://demo.sublinks.org
       SUBLINKS_PICTRS_URL: http://pictrs:8080
+      FEDERATION_QUEUE_HOST: localhost
+      FEDERATION_QUEUE_PORT: 5672
+      FEDERATION_QUEUE_USER: sublinks
+      FEDERATION_QUEUE_PASS: sublinks
+      FEDERATION_QUEUE_NAME: federation
+      FEDERATION_EXCHANGE_NAME: federation
+      BACKEND_QUEUE_NAME: backend
+      BACKEND_TOPIC_NAME: backend
     logging: *default-logging
     depends_on:
       - db
       - pictrs
-  
+      - queue
+
   db:
     image: mysql:latest
     environment:
@@ -67,7 +88,7 @@ services:
     logging: *default-logging
 
   lemmy-ui:
-    image: dessalines/lemmy-ui:0.19.0-rc.4
+    image: dessalines/lemmy-ui:0.19.3
     environment:
       #- LEMMY_UI_DEBUG=true
       - LEMMY_UI_DISABLE_CSP=true
@@ -87,3 +108,15 @@ services:
     user: 991:991
     restart: always
     logging: *default-logging
+
+  queue:
+    image: rabbitmq:3-management
+    restart: always
+    volumes:
+      - queue_data:/var/lib/rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=sublinks
+      - RABBITMQ_DEFAULT_PASS=sublinks
+    ports:
+      - "15672:15672"
+      - "5672:5672"

@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.post.listeners;
 
-import com.sublinks.sublinksapi.post.dto.PostAggregate;
+import com.sublinks.sublinksapi.post.entities.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostLikeCreatedEvent;
 import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class PostLikeCreatedListener implements ApplicationListener<PostLikeCrea
       postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() + 1);
       postAggregate.setScore(postAggregate.getScore() + 1);
     } else if (event.getPostLike().isDownVote()) {
-      postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() - 1);
+      postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() + 1);
       postAggregate.setScore(postAggregate.getScore() - 1);
     } else {
       return;

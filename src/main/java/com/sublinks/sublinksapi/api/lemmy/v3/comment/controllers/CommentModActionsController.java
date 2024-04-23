@@ -14,20 +14,24 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentServic
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentReport;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.shared.RemovedState;
+import io.jsonwebtoken.lang.Collections;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -37,6 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -58,7 +63,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   private final LemmyCommentService lemmyCommentService;
   private final CommentReportRepository commentReportRepository;
   private final CommentReportService commentReportService;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommunityRepository communityRepository;
   private final CommentRepository commentRepository;
@@ -73,13 +78,20 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.MODERATOR_REMOVE_COMMENT, RolePermission.REMOVE_COMMENT),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    //@todo: check if he is mod if not REMOVE_COMMENT
 
     final Comment comment = commentRepository.findById((long) removeCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    comment.setRemoved(removeCommentForm.removed());
+    comment.setRemovedState(
+        removeCommentForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
 
     commentService.updateComment(comment);
+
+    commentReportService.resolveAllReportsByComment(comment, person);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
@@ -96,7 +108,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     moderationLogService.createModerationLog(moderationLog);
 
     return CommentResponse.builder()
-        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();
+        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson()))
+        .build();
   }
 
   @Operation(summary = "Distinguishes a comment (speak as moderator).")
@@ -108,7 +121,11 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Collections.setOf(RolePermission.ADMIN_SPEAK, RolePermission.MODERATOR_SPEAK),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
+    // @todo: check if he is mod if not ADMIN_SPEAK
     final Comment comment = commentRepository.findById((long) distinguishCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
@@ -117,7 +134,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     commentService.updateComment(comment);
 
     return CommentResponse.builder()
-        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson())).build();
+        .comment_view(lemmyCommentService.createCommentView(comment, comment.getPerson()))
+        .build();
   }
 
   @Operation(summary = "Resolve a comment report. Only a mod can do this.")
@@ -128,12 +146,17 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       @Valid @RequestBody ResolveCommentReport resolveCommentReportForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Collections.setOf(RolePermission.REPORT_COMMUNITY_RESOLVE,
+            RolePermission.REPORT_INSTANCE_RESOLVE),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final CommentReport commentReport = commentReportRepository.findById(
             (long) resolveCommentReportForm.report_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
+        RolePermission.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
       final boolean isModerator =
@@ -149,9 +172,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
     commentReport.setResolver(person);
     commentReportService.updateCommentReport(commentReport);
 
-    return CommentReportResponse.builder().comment_report_view(
-        lemmyCommentReportService.createCommentReportView(commentReport,
-            commentReport.getCreator())).build();
+    return CommentReportResponse.builder()
+        .comment_report_view(lemmyCommentReportService.createCommentReportView(commentReport,
+            commentReport.getCreator()))
+        .build();
   }
 
   @Operation(summary = "List comment reports.")
@@ -162,11 +186,19 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.REPORT_COMMUNITY_READ, RolePermission.REPORT_INSTANCE_READ),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
+        RolePermission.REPORT_INSTANCE_READ);
 
     final List<CommentReport> commentReports = new ArrayList<>();
 
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(listCommentReportsForm.page(),
+        1);
+    final int limit = PaginationControllerUtils.getAbsoluteMinNumber(listCommentReportsForm.limit(),
+        20);
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
 
@@ -178,8 +210,9 @@ public class CommentModActionsController extends AbstractLemmyApiController {
             LinkPersonCommunityType.moderator));
       } else {
         Community community = communityRepository.findById(
-            (long) listCommentReportsForm.community_id()).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+                (long) listCommentReportsForm.community_id())
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
         if (!linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner)
             && !linkPersonCommunityService.hasLink(person, community,
             LinkPersonCommunityType.moderator)) {
@@ -188,28 +221,34 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         moderatingCommunities.add(community);
       }
       commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-          CommentReportSearchCriteria.builder().unresolvedOnly(
-                  listCommentReportsForm.unresolved_only() == null
-                      || listCommentReportsForm.unresolved_only())
-              .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
-              .community(moderatingCommunities).build()));
+          CommentReportSearchCriteria.builder()
+              .unresolvedOnly(listCommentReportsForm.unresolved_only() == null
+                  || listCommentReportsForm.unresolved_only())
+              .perPage(limit)
+              .page(page)
+              .community(moderatingCommunities)
+              .build()));
     } else {
       if (listCommentReportsForm.community_id() != null) {
         Community community = communityRepository.findById(
-            (long) listCommentReportsForm.community_id()).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+                (long) listCommentReportsForm.community_id())
+            .orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
         commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-            CommentReportSearchCriteria.builder().unresolvedOnly(
-                    listCommentReportsForm.unresolved_only() != null
-                        && listCommentReportsForm.unresolved_only())
-                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
-                .community(List.of(community)).build()));
+            CommentReportSearchCriteria.builder()
+                .unresolvedOnly(listCommentReportsForm.unresolved_only() != null
+                    && listCommentReportsForm.unresolved_only())
+                .perPage(limit)
+                .page(page)
+                .community(List.of(community))
+                .build()));
       } else {
         commentReports.addAll(commentReportRepository.allCommentReportsBySearchCriteria(
-            CommentReportSearchCriteria.builder().unresolvedOnly(
-                    listCommentReportsForm.unresolved_only() != null
-                        && listCommentReportsForm.unresolved_only())
-                .perPage(listCommentReportsForm.limit()).page(listCommentReportsForm.page())
+            CommentReportSearchCriteria.builder()
+                .unresolvedOnly(listCommentReportsForm.unresolved_only() != null
+                    && listCommentReportsForm.unresolved_only())
+                .perPage(limit)
+                .page(page)
                 .build()));
       }
     }

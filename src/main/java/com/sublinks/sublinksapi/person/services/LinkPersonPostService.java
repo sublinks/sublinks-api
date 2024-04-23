@@ -1,12 +1,12 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostDeletedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
-import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import java.util.LinkedHashSet;
 import java.util.Objects;

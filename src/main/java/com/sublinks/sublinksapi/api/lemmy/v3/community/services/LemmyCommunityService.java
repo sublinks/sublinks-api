@@ -5,11 +5,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModerator
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.community.dto.CommunityAggregate;
-import com.sublinks.sublinksapi.language.dto.Language;
-import com.sublinks.sublinksapi.person.dto.LinkPersonCommunity;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
+import com.sublinks.sublinksapi.language.entities.Language;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import java.util.ArrayList;
 import java.util.List;

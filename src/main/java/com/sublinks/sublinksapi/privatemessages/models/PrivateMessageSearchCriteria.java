@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.privatemessages.models;
 
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.privatemessages.enums.PrivateMessageSortType;
 import lombok.Builder;
 
@@ -9,7 +9,7 @@ public record PrivateMessageSearchCriteria(
     PrivateMessageSortType privateMessageSortType,
     int perPage,
     int page,
-    boolean unresolvedOnly,
+    boolean unreadOnly,
     Person person
 ) {
 

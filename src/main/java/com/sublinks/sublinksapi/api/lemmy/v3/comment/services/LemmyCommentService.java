@@ -8,8 +8,12 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
-import com.sublinks.sublinksapi.comment.dto.CommentAggregate;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
+import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
+import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -27,8 +31,12 @@ public class LemmyCommentService {
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final ComentSaveRepository comentSaveRepository;
+  private final CommentSaveService commentSaveService;
+  private final RoleAuthorizingService roleAuthorizingService;
 
-  public String generateActivityPubId(final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+  public String generateActivityPubId(
+      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     String domain = localInstanceContext.instance().getDomain();
     return String.format("%s/comment/%d", domain, comment.getId());
@@ -37,48 +45,45 @@ public class LemmyCommentService {
 
   @NonNull
   public CommentView createCommentView(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment,
-      final com.sublinks.sublinksapi.person.dto.Person person
-  ) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment,
+      final com.sublinks.sublinksapi.person.entities.Person person) {
 
     return commentViewBuilder(comment, person).build();
   }
 
   @NonNull
   public CommentView createCommentView(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment
-  ) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     return commentViewBuilder(comment).build();
   }
 
   @NonNull
   private CommentView.CommentViewBuilder commentViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment,
-      final com.sublinks.sublinksapi.person.dto.Person person
-  ) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment,
+      final com.sublinks.sublinksapi.person.entities.Person person) {
 
     CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
 
     final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
-        person, comment.getCommunity()
-    );
+        person, comment.getCommunity());
     final int personVote = commentLikeService.getPersonCommentVote(person, comment);
 
-    commentView.subscribed(subscribedType)
-        .saved(false)// @todo check if saved
+    commentView.subscribed(subscribedType).saved(false)// @todo check if saved
         .my_vote(personVote);
+
+    commentView.saved(commentSaveService.isCommentSavedByPerson(comment, person));
 
     return commentView;
   }
 
   @NonNull
   private CommentView.CommentViewBuilder commentViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.Comment comment) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
     final Comment lemmyComment = conversionService.convert(comment, Comment.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person creator = comment.getPerson();
+    final com.sublinks.sublinksapi.person.entities.Person creator = comment.getPerson();
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
 
     final Community lemmyCommunity = conversionService.convert(comment.getCommunity(),
@@ -96,6 +101,12 @@ public class LemmyCommentService {
     final boolean isBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         comment.getCommunity(), LinkPersonCommunityType.banned);
 
+    final boolean createIsAdmin = roleAuthorizingService.hasAdminOrPermission(creator,
+        RolePermission.ADMIN);
+
+    final boolean creatorIsModerator = linkPersonCommunityService.hasLink(creator,
+        comment.getCommunity(), LinkPersonCommunityType.moderator);
+
     return CommentView.builder()
         .comment(lemmyComment)
         .creator(lemmyCreator)
@@ -103,6 +114,9 @@ public class LemmyCommentService {
         .post(lemmyPost)
         .counts(lemmyCommentAggregates)
         .creator_banned_from_community(isBannedFromCommunity)
-        .creator_blocked(false);
+        .creator_blocked(
+            false) // @todo check if creator is blocked by the viewer ( only for logged in users )
+        .creator_is_moderator(creatorIsModerator)
+        .creator_is_admin(createIsAdmin);
   }
 }

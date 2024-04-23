@@ -1,21 +1,15 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.modlog.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommentView;
-import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgeCommunityView;
-import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePersonView;
-import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.admin.models.AdminPurgePostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityView;
-import com.sublinks.sublinksapi.api.lemmy.v3.community.models.TransferCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.GetModLog;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.GetModlogResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModAddCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModAddView;
-import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBanFromCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBanFromCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModBanView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModFeaturePostView;
@@ -23,14 +17,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModHideCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModLockPostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommentView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommunityView;
-import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
-import com.sublinks.sublinksapi.api.lemmy.v3.post.models.FeaturePost;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BannedPersonsResponse;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,6 +50,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "Miscellaneous")
 public class ModerationLogController extends AbstractLemmyApiController {
   private final ModerationLogService moderationLogService;
+  private final RoleAuthorizingService roleAuthorizingService;
 
   @Operation(summary = "Get the modlog.")
   @ApiResponses(value = {
@@ -65,7 +59,14 @@ public class ModerationLogController extends AbstractLemmyApiController {
               schema = @Schema(implementation = GetModlogResponse.class))})
   })
   @GetMapping
-  GetModlogResponse index(@Valid final GetModLog getModLogForm) {
+  GetModlogResponse index(@Valid final GetModLog getModLogForm, final JwtPerson principal) {
+
+    final Optional<Person> person = getOptionalPerson(principal);
+
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
+        RolePermission.READ_MODLOG,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     // Lemmy limit is 20 per ModLog table and there are 15 tables
     final int limit = 300;
 

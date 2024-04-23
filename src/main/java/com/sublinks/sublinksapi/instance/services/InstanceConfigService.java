@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.instance.services;
 
-import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.events.InstanceConfigCreatedPublisher;
 import com.sublinks.sublinksapi.instance.events.InstanceConfigUpdatedPublisher;
 import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
@@ -29,6 +29,5 @@ public class InstanceConfigService {
 
     instanceConfigRepository.save(instance);
     instanceConfigUpdatedPublisher.publish(instance);
-
   }
 }

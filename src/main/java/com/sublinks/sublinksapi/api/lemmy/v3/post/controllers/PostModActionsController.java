@@ -16,20 +16,22 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ResolvePostReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
-import com.sublinks.sublinksapi.authorization.services.AuthorizationService;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.moderation.dto.ModerationLog;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
+import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostReport;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.models.PostReportSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,6 +41,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -61,9 +64,8 @@ public class PostModActionsController extends AbstractLemmyApiController {
   private final PostReportService postReportService;
   private final LemmyPostReportService lemmyPostReportService;
   private final PostReportRepository postReportRepository;
-  private final AuthorizationService authorizationService;
+  private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final CommunityRepository communityRepository;
   private final PostRepository postRepository;
   private final LemmyPostService lemmyPostService;
   private final PostService postService;
@@ -80,10 +82,15 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
+    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
+        Set.of(RolePermission.MODERATOR_REMOVE_POST, RolePermission.REMOVE_POST),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     final Post post = postRepository.findById(modRemovePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
+        RolePermission.REMOVE_POST);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -96,8 +103,11 @@ public class PostModActionsController extends AbstractLemmyApiController {
       }
     }
 
-    post.setRemoved(modRemovePostForm.removed());
+    post.setRemovedState(
+        modRemovePostForm.removed() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
     postService.updatePost(post);
+
+    postReportService.resolveAllReportsByPost(post, person);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
@@ -130,7 +140,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById(modLockPostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -174,7 +184,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final Post post = postRepository.findById((long) featurePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =
@@ -232,7 +242,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     final PostReport postReport = postReportRepository.findById(
             (long) resolvePostReportForm.report_id())
@@ -254,8 +264,10 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     postReportService.updatePostReport(postReport);
 
-    return PostReportResponse.builder().post_report_view(
-        lemmyPostReportService.postReportViewFromPost(postReport, postReport.getCreator())).build();
+    return PostReportResponse.builder()
+        .post_report_view(
+            lemmyPostReportService.postReportViewFromPost(postReport, postReport.getCreator()))
+        .build();
   }
 
   @Operation(summary = "List post reports.")
@@ -271,9 +283,12 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    final boolean isAdmin = authorizationService.isAdmin(person);
+    final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
 
     final List<PostReport> postReports = new ArrayList<>();
+    final int page = PaginationControllerUtils.getAbsoluteMinNumber(listPostReportsForm.page(), 1);
+    final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(listPostReportsForm.limit(),
+        20);
 
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
@@ -284,16 +299,21 @@ public class PostModActionsController extends AbstractLemmyApiController {
           LinkPersonCommunityType.moderator));
 
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
-          PostReportSearchCriteria.builder().unresolvedOnly(
-                  listPostReportsForm.unresolved_only() == null
-                      || listPostReportsForm.unresolved_only()).perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page()).community(moderatingCommunities).build()));
+          PostReportSearchCriteria.builder()
+              .unresolvedOnly(listPostReportsForm.unresolved_only() == null
+                  || listPostReportsForm.unresolved_only())
+              .perPage(perPage)
+              .page(page)
+              .community(moderatingCommunities)
+              .build()));
     } else {
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
-          PostReportSearchCriteria.builder().unresolvedOnly(
-                  listPostReportsForm.unresolved_only() != null
-                      && listPostReportsForm.unresolved_only()).perPage(listPostReportsForm.limit())
-              .page(listPostReportsForm.page()).build()));
+          PostReportSearchCriteria.builder()
+              .unresolvedOnly(listPostReportsForm.unresolved_only() != null
+                  && listPostReportsForm.unresolved_only())
+              .perPage(perPage)
+              .page(page)
+              .build()));
     }
 
     List<PostReportView> postReportView = new ArrayList<>();

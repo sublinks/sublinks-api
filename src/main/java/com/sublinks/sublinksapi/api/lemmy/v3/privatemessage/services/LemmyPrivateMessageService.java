@@ -14,23 +14,23 @@ public class LemmyPrivateMessageService {
   private final ConversionService conversionService;
 
   public PrivateMessageView createPrivateMessageView(
-      final com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage privateMessage
+      final com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage privateMessage
   ) {
 
     return privateMessageViewBuilder(privateMessage).build();
   }
 
   private PrivateMessageView.PrivateMessageViewBuilder privateMessageViewBuilder(
-      final com.sublinks.sublinksapi.privatemessages.dto.PrivateMessage privateMessage
+      final com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage privateMessage
   ) {
 
     final PrivateMessage lemmyPrivateMessage = conversionService.convert(privateMessage,
         PrivateMessage.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person sender = privateMessage.getSender();
+    final com.sublinks.sublinksapi.person.entities.Person sender = privateMessage.getSender();
     final Person lemmySender = conversionService.convert(sender, Person.class);
 
-    final com.sublinks.sublinksapi.person.dto.Person recipient = privateMessage.getRecipient();
+    final com.sublinks.sublinksapi.person.entities.Person recipient = privateMessage.getRecipient();
     final Person lemmyRecipient = conversionService.convert(recipient, Person.class);
 
     return PrivateMessageView.builder()

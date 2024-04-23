@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Application Boot.
  */
 @SpringBootApplication
+@EnableScheduling
 public class SublinksApiApplication {
 
   /**
@@ -45,14 +47,14 @@ public class SublinksApiApplication {
   public GroupedOpenApi v3LemmyApi(@Value("${springdoc.version}") String appVersion,
       @Value("#{${springdoc.servers}}") List<String> servers) {
 
-    return GroupedOpenApi.builder().group("v3")
+    return GroupedOpenApi.builder()
+        .group("v3")
         .addOperationCustomizer((operation, handlerMethod) -> {
           operation.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
           return operation;
         })
-        .addOpenApiCustomizer(openApi -> openApi.info(new Info()
-                .title("Lemmy OpenAPI Documentation")
-                .version(appVersion))
+        .addOpenApiCustomizer(openApi -> openApi.info(
+                new Info().title("Lemmy OpenAPI Documentation").version(appVersion))
             .servers(servers.stream().map(s -> new Server().url(s)).toList()))
         .pathsToMatch("/api/v3/**")
         .build();

@@ -7,18 +7,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.LocalSiteRateLimit;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteView;
-import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.instance.dto.InstanceConfig;
+import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
+import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
-import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
-import com.sublinks.sublinksapi.person.enums.LinkPersonInstanceType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import java.util.Collection;
 import java.util.LinkedHashSet;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -30,26 +26,13 @@ public class LemmySiteService {
   private final ConversionService conversionService;
   private final LocalInstanceContext localInstanceContext;
   private final LemmyPersonService lemmyPersonService;
-  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
   private final SlurFilterService slurFilterService;
-
-  // @todo finish admin list
-  public Collection<PersonView> admins() {
-
-    Collection<LinkPersonInstance> admins = linkPersonInstanceRepository.getLinkPersonInstancesByInstanceAndLinkTypeIsIn(
-        localInstanceContext.instance(),
-        List.of(LinkPersonInstanceType.admin, LinkPersonInstanceType.super_admin));
-    final Collection<PersonView> adminViews = new LinkedHashSet<>();
-    for (LinkPersonInstance linkPersonInstance : admins) {
-      adminViews.add(lemmyPersonService.getPersonView(linkPersonInstance.getPerson()));
-    }
-    return adminViews;
-  }
+  private final CustomEmojiRepository customEmojiRepository;
 
   public Collection<Language> allLanguages(final LanguageRepository languageRepository) {
 
     final Collection<Language> languages = new LinkedHashSet<>();
-    for (com.sublinks.sublinksapi.language.dto.Language language : languageRepository.findAll()) {
+    for (com.sublinks.sublinksapi.language.entities.Language language : languageRepository.findAll()) {
       Language l = Language.builder().id(language.getId()).code(language.getCode())
           .name(language.getName()).build();
       languages.add(l);
@@ -57,10 +40,12 @@ public class LemmySiteService {
     return languages;
   }
 
-  // @todo custom emojis
   public Collection<CustomEmojiView> customEmojis() {
-
     final Collection<CustomEmojiView> emojiViews = new LinkedHashSet<>();
+    for (var emoji : customEmojiRepository.findAll()) {
+      emojiViews.add(conversionService.convert(emoji,
+          CustomEmojiView.class));
+    }
     return emojiViews;
   }
 

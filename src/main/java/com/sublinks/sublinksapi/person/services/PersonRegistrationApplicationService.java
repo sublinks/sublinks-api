@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.services;
 
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.dto.PersonRegistrationApplication;
+import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.events.PersonRegistrationApplicationCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.PersonRegistrationApplicationUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;

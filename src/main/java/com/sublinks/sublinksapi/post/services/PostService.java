@@ -1,22 +1,24 @@
 package com.sublinks.sublinksapi.post.services;
 
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
-import com.sublinks.sublinksapi.person.dto.Person;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
-import com.sublinks.sublinksapi.post.dto.Post;
-import com.sublinks.sublinksapi.post.dto.PostAggregate;
+import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.post.entities.PostAggregate;
 import com.sublinks.sublinksapi.post.events.PostCreatedPublisher;
 import com.sublinks.sublinksapi.post.events.PostDeletedPublisher;
 import com.sublinks.sublinksapi.post.events.PostUpdatedPublisher;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,8 +85,10 @@ public class PostService {
     post.setPrivateKey(keys.privateKey());
 
     post.setLocal(true);
-    final PostAggregate postAggregate = PostAggregate.builder().post(post)
-        .community(post.getCommunity()).build();
+    final PostAggregate postAggregate = PostAggregate.builder()
+        .post(post)
+        .community(post.getCommunity())
+        .build();
     post.setPostAggregate(postAggregate);
     post.setActivityPubId("");
     postRepository.save(post); // @todo fix second save making post look edited right away
@@ -103,22 +107,44 @@ public class PostService {
     postDeletedPublisher.publish(post);
   }
 
+  public List<Post> deleteAllPostsByPerson(final Person person) {
+
+    final List<Post> posts = postRepository.allPostsByPersonAndRemoved(person,
+        List.of(RemovedState.NOT_REMOVED, RemovedState.REMOVED_BY_INSTANCE,
+            RemovedState.REMOVED_BY_COMMUNITY, RemovedState.REMOVED));
+    posts.forEach(post -> {
+      post.setDeleted(true);
+      post.setTitle("*Permanently deleted by creator*");
+      post.setRemovedState(RemovedState.PURGED);
+      post.setPostBody("");
+      post.setLinkUrl("");
+      postRepository.save(post);
+    });
+    return posts;
+  }
+
   @Transactional
   public void removeAllPostsFromCommunityAndUser(final Community community, final Person person,
       final boolean removed) {
 
-    postRepository.allPostsByCommunityAndPerson(community, person).forEach(post -> {
-      post.setRemoved(removed);
-      postRepository.save(post);
-    });
+    postRepository.allPostsByCommunityAndPersonAndRemoved(community, person,
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_COMMUNITY))
+        .forEach(post -> {
+          post.setRemovedState(
+              removed ? RemovedState.REMOVED_BY_COMMUNITY : RemovedState.NOT_REMOVED);
+          postRepository.save(post);
+        });
   }
 
   @Transactional
   public void removeAllPostsFromUser(final Person person, final boolean removed) {
 
-    postRepository.allPostsByPerson(person).forEach(post -> {
-      post.setRemoved(removed);
-      postRepository.save(post);
-    });
+    postRepository.allPostsByPersonAndRemoved(person,
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_INSTANCE))
+        .forEach(post -> {
+          post.setRemovedState(
+              removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED);
+          postRepository.save(post);
+        });
   }
 }

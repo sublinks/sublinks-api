@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.models;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.enums.PostListingMode;
 import java.util.Collection;
 import lombok.Builder;
 
@@ -25,10 +26,15 @@ public record SaveUserSettings(
     Boolean bot_account,
     Boolean show_bot_accounts,
     Boolean show_read_posts,
-    Boolean show_new_post_notifs,
     Collection<String> discussion_languages,
-    Boolean generate_totp_2fa,
-    Boolean open_links_in_new_tab
+    Boolean open_links_in_new_tab,
+    Boolean auto_expand,
+    Boolean blur_nsfw,
+    Boolean collapse_bot_comments,
+    Boolean enable_keyboard_navigation,
+    Boolean infinite_scroll_enabled,
+    Boolean enable_animated_images,
+    PostListingMode post_listing_mode
 ) {
 
 }

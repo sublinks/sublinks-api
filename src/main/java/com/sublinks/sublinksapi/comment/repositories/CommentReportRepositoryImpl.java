@@ -2,10 +2,10 @@ package com.sublinks.sublinksapi.comment.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentReport;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
-import com.sublinks.sublinksapi.community.dto.Community;
+import com.sublinks.sublinksapi.community.entities.Community;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -17,12 +17,12 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class CommentReportRepositoryImpl implements CommentReportRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public List<CommentReport> allCommentReportsBySearchCriteria(
@@ -60,7 +60,7 @@ public class CommentReportRepositoryImpl implements CommentReportRepositorySearc
     cq.orderBy(cb.desc(commentReportTable.get("createdAt")));
 
     int perPage = Math.min(Math.abs(commentReportSearchCriteria.perPage()), 20);
-    
+
     TypedQuery<CommentReport> query = em.createQuery(cq);
 
     applyPagination(query, commentReportSearchCriteria.page(), perPage);

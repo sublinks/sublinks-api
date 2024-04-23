@@ -7,12 +7,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReplyView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
-import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
-import com.sublinks.sublinksapi.person.dto.LinkPersonInstance;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.core.convert.ConversionService;
@@ -28,20 +25,20 @@ public class LemmyCommentReplyService {
 
   @NonNull
   public CommentReplyView createCommentReplyView(
-      final com.sublinks.sublinksapi.comment.dto.CommentReply commentReply,
-      final com.sublinks.sublinksapi.person.dto.Person Person) {
+      final com.sublinks.sublinksapi.comment.entities.CommentReply commentReply,
+      final com.sublinks.sublinksapi.person.entities.Person Person) {
 
     return commentReplyViewBuilder(commentReply, Person).build();
   }
 
   @NonNull
   private CommentReplyView.CommentReplyViewBuilder commentReplyViewBuilder(
-      final com.sublinks.sublinksapi.comment.dto.CommentReply commentReply,
-      final com.sublinks.sublinksapi.person.dto.Person Person) {
+      final com.sublinks.sublinksapi.comment.entities.CommentReply commentReply,
+      final com.sublinks.sublinksapi.person.entities.Person Person) {
 
     final CommentReplyView.CommentReplyViewBuilder commentReplyViewBuilder = CommentReplyView.builder();
 
-    final com.sublinks.sublinksapi.person.dto.Person creator = commentReply.getComment()
+    final com.sublinks.sublinksapi.person.entities.Person creator = commentReply.getComment()
         .getPerson();
 
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
@@ -80,6 +77,8 @@ public class LemmyCommentReplyService {
         .subscribed(linkPersonCommunityService.hasLink(Person,
             commentReply.getComment().getCommunity(), LinkPersonCommunityType.follower))
         .creator_banned_from_community(creatorBannedFromCommunity)
+        .creator_is_moderator(false) // @todo: Check if creator is moderator
+        .creator_is_admin(false) // @todo: Check if creator is admin
         .creator_blocked(false)
         .saved(false);
 

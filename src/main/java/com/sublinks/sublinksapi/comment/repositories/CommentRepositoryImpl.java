@@ -1,32 +1,31 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
-import com.sublinks.sublinksapi.comment.dto.Comment;
-import com.sublinks.sublinksapi.comment.dto.CommentRead;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.dto.LinkPersonPost;
-import com.sublinks.sublinksapi.person.dto.Person;
-import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
-import com.sublinks.sublinksapi.post.dto.Post;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.shared.RemovedState;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
+@AllArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositorySearch {
 
-  @Autowired
-  EntityManager em;
+  private final EntityManager em;
 
   @Override
   public List<Comment> allCommentsBySearchCriteria(CommentSearchCriteria commentSearchCriteria) {
@@ -79,7 +78,12 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
   }
 
   @Override
-  public List<Comment> allCommentsByCommunityAndPerson(Community community, Person person) {
+  public List<Comment> allCommentsByCommunityAndPersonAndRemoved(Community community, Person person,
+      @Nullable List<RemovedState> removedStates) {
+
+    if (community == null || person == null) {
+      throw new IllegalArgumentException("Community and person must be provided");
+    }
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Comment> cq = cb.createQuery(Comment.class);
@@ -88,13 +92,14 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     final List<Predicate> predicates = new ArrayList<>();
 
-    if (community != null) {
-      predicates.add(cb.equal(commentTable.get("community"), community));
+    if (removedStates != null) {
+      Expression<RemovedState> removedStateExpression = commentTable.get("removedState");
+      predicates.add(removedStateExpression.in(removedStates));
     }
 
-    if (person != null) {
-      predicates.add(cb.equal(commentTable.get("person"), person));
-    }
+    predicates.add(cb.equal(commentTable.get("community"), community));
+
+    predicates.add(cb.equal(commentTable.get("person"), person));
 
     cq.where(predicates.toArray(new Predicate[0]));
 
@@ -102,7 +107,12 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
   }
 
   @Override
-  public List<Comment> allCommentsByPerson(Person person) {
+  public List<Comment> allCommentsByPersonAndRemoved(Person person,
+      @Nullable List<RemovedState> removedStates) {
+
+    if (person == null) {
+      throw new IllegalArgumentException("Person must be provided");
+    }
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Comment> cq = cb.createQuery(Comment.class);
@@ -111,13 +121,15 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     final List<Predicate> predicates = new ArrayList<>();
 
-    if (person != null) {
-      predicates.add(cb.equal(commentTable.get("person"), person));
+    if (removedStates != null) {
+      Expression<RemovedState> removedStateExpression = commentTable.get("removedState");
+      predicates.add(removedStateExpression.in(removedStates));
     }
+
+    predicates.add(cb.equal(commentTable.get("person"), person));
 
     cq.where(predicates.toArray(new Predicate[0]));
 
     return em.createQuery(cq).getResultList();
-
   }
 }

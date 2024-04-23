@@ -3,14 +3,15 @@ package com.sublinks.sublinksapi.api.lemmy.v3.site.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityBlockView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityFollowerView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CommunityModeratorView;
+import com.sublinks.sublinksapi.api.lemmy.v3.site.models.InstanceBlockView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUserView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.MyUserInfo;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonBlockView;
-import com.sublinks.sublinksapi.community.dto.Community;
-import com.sublinks.sublinksapi.language.dto.Language;
+import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class MyUserInfoService {
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
 
-  public MyUserInfo getMyUserInfo(com.sublinks.sublinksapi.person.dto.Person person) {
+  public MyUserInfo getMyUserInfo(com.sublinks.sublinksapi.person.entities.Person person) {
 
     return MyUserInfo.builder()
         .local_user_view(LocalUserView.builder()
@@ -37,13 +38,22 @@ public class MyUserInfoService {
         .follows(getUserCommunityFollows(person))
         .moderates(getUserCommunityModerates(person))
         .community_blocks(getUserCommunitiesBlocked(person))
+        .instance_blocks(getInstanceBlocked(person))
         .person_blocks(getUserPeopleBlocked(person))
         .discussion_languages(getDiscussionLanguages(person))
         .build();
   }
 
+  public Collection<InstanceBlockView> getInstanceBlocked(
+      com.sublinks.sublinksapi.person.entities.Person person) {
+
+    // @todo block instances
+    Collection<InstanceBlockView> blocked = new ArrayList<>();
+    return blocked;
+  }
+
   public Collection<Long> getDiscussionLanguages(
-      com.sublinks.sublinksapi.person.dto.Person person) {
+      com.sublinks.sublinksapi.person.entities.Person person) {
 
     Collection<Long> languages = new ArrayList<>();
     for (Language language : person.getLanguages()) {
@@ -53,7 +63,7 @@ public class MyUserInfoService {
   }
 
   public Collection<CommunityFollowerView> getUserCommunityFollows(
-      com.sublinks.sublinksapi.person.dto.Person person) {
+      com.sublinks.sublinksapi.person.entities.Person person) {
 
     Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person,
         LinkPersonCommunityType.follower);
@@ -71,7 +81,7 @@ public class MyUserInfoService {
   }
 
   public Collection<CommunityModeratorView> getUserCommunityModerates(
-      com.sublinks.sublinksapi.person.dto.Person person) {
+      com.sublinks.sublinksapi.person.entities.Person person) {
 
     // @todo make this a single query
     Collection<Community> communitiesOwned = linkPersonCommunityService.getPersonLinkByType(person,
@@ -100,7 +110,7 @@ public class MyUserInfoService {
   }
 
   public Collection<CommunityBlockView> getUserCommunitiesBlocked(
-      com.sublinks.sublinksapi.person.dto.Person person) {
+      com.sublinks.sublinksapi.person.entities.Person person) {
 
     Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person,
         LinkPersonCommunityType.blocked);
@@ -117,7 +127,7 @@ public class MyUserInfoService {
   }
 
   public Collection<PersonBlockView> getUserPeopleBlocked(
-      com.sublinks.sublinksapi.person.dto.Person person) {
+      com.sublinks.sublinksapi.person.entities.Person person) {
 
     return new ArrayList<>(); // @todo people blocks
   }

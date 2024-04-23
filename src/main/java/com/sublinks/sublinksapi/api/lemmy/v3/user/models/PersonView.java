@@ -5,7 +5,8 @@ import lombok.Builder;
 @Builder
 public record PersonView(
     Person person,
-    PersonAggregates counts
+    PersonAggregates counts,
+    boolean is_admin
 ) {
 
 }
