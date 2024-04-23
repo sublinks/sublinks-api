@@ -39,11 +39,11 @@ public class CommunityActorCreateListener implements ApplicationListener<Communi
     Community community = event.getCommunity();
 
     final Actor actorMessage = Actor.builder()
-        .actor_id(community.getActivityPubId())
+        .id(community.getActivityPubId())
         .actor_type(ActorType.COMMUNITY.getValue())
         .bio(community.getDescription())
         .username(community.getTitleSlug())
-        .display_name(community.getTitle())
+        .name(community.getTitle())
         .private_key(community.getPrivateKey())
         .public_key(community.getPublicKey())
         .build();
