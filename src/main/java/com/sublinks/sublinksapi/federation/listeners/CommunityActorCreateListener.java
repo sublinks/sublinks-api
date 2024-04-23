@@ -22,11 +22,10 @@ import org.springframework.stereotype.Component;
 @Setter
 public class CommunityActorCreateListener implements ApplicationListener<CommunityCreatedEvent> {
 
+  private static final Logger logger = LoggerFactory.getLogger(CommunityActorCreateListener.class);
+  final private Producer federationProducer;
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
-  final private Producer federationProducer;
-
-  private static final Logger logger = LoggerFactory.getLogger(CommunityActorCreateListener.class);
 
   @Override
   public void onApplicationEvent(@NonNull CommunityCreatedEvent event) {

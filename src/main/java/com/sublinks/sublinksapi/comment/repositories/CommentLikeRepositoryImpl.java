@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.models.CommentLikeSearchCriteria;
 import jakarta.persistence.EntityManager;
@@ -8,11 +10,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import lombok.AllArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class CommentLikeRepositoryImpl implements CommentLikeRepositorySearch {

@@ -14,7 +14,6 @@ public class CommentHistoryRepositoryImpl implements CommentHistoryRepositoryExt
 
   public int deleteAllByCreator(@NonNull Person creator) {
 
-
     final NativeQuery<PostHistory> query = (NativeQuery<PostHistory>) em.createNativeQuery(
         "DELETE FROM comment_history WHERE comment_id IN (SELECT c.id FROM comments c WHERE c.person_id = :creatorId)");
     query.setParameter("creatorId", creator.getId());

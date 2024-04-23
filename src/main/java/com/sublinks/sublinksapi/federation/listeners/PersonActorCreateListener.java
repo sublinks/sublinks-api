@@ -23,10 +23,9 @@ import org.springframework.stereotype.Component;
 public class PersonActorCreateListener implements ApplicationListener<PersonCreatedEvent> {
 
   private static final Logger logger = LoggerFactory.getLogger(PersonActorCreateListener.class);
-
+  final private Producer federationProducer;
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
-  final private Producer federationProducer;
 
   @Override
   public void onApplicationEvent(@NonNull PersonCreatedEvent event) {

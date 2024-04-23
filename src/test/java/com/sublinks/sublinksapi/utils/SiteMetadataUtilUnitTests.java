@@ -1,6 +1,10 @@
 package com.sublinks.sublinksapi.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil.SiteMetadata;
+import java.io.IOException;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,10 +16,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
 public class SiteMetadataUtilUnitTests {
@@ -36,7 +36,8 @@ public class SiteMetadataUtilUnitTests {
   Elements videoElement;
 
   @Test
-  void givenUrlThatCausesIOException_whenFetchSiteMetadata_thenReturnSiteMetadataWithNullFields() throws IOException {
+  void givenUrlThatCausesIOException_whenFetchSiteMetadata_thenReturnSiteMetadataWithNullFields()
+      throws IOException {
 
     String urlThatCausesIOException = "https://www.sublinks.com";
 
@@ -58,7 +59,8 @@ public class SiteMetadataUtilUnitTests {
   }
 
   @Test
-  void givenUrlWithNoOgTags_whenFetchSiteMetadata_thenReturnSiteMetadataFallingBackOnHtmlTags() throws IOException {
+  void givenUrlWithNoOgTags_whenFetchSiteMetadata_thenReturnSiteMetadataFallingBackOnHtmlTags()
+      throws IOException {
 
     String normalizedUrl = "https://www.sublinks.com";
 
@@ -81,7 +83,8 @@ public class SiteMetadataUtilUnitTests {
 
       SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
 
-      assertEquals("Title", siteMetadata.title(), "SiteMetadata title value did not match expected");
+      assertEquals("Title", siteMetadata.title(),
+          "SiteMetadata title value did not match expected");
       assertNull(siteMetadata.description(), "SiteMetadata description value should be null");
       assertNull(siteMetadata.imageUrl(), "SiteMetadata image value should be null");
       assertNull(siteMetadata.videoUrl(), "SiteMetadata video value should be null");
@@ -89,7 +92,8 @@ public class SiteMetadataUtilUnitTests {
   }
 
   @Test
-  void givenUrlWithOgTags_whenFetchSiteMetadata_thenReturnSiteMetadataFromOgTags() throws IOException {
+  void givenUrlWithOgTags_whenFetchSiteMetadata_thenReturnSiteMetadataFromOgTags()
+      throws IOException {
 
     String normalizedUrl = "https://www.sublinks.com";
     String tagTitle = "Title from tag";
@@ -110,11 +114,9 @@ public class SiteMetadataUtilUnitTests {
       Mockito.when(descriptionElement.isEmpty()).thenReturn(false);
       Mockito.when(descriptionElement.first().attr("content")).thenReturn(tagDescription);
 
-
       Mockito.when(document.select("meta[property=og:image]")).thenReturn(imageElement);
       Mockito.when(imageElement.isEmpty()).thenReturn(false);
       Mockito.when(imageElement.first().attr("content")).thenReturn(tagImage);
-
 
       Mockito.when(document.select("meta[property=og:video:url]")).thenReturn(videoElement);
       Mockito.when(videoElement.isEmpty()).thenReturn(false);
@@ -122,10 +124,14 @@ public class SiteMetadataUtilUnitTests {
 
       SiteMetadata siteMetadata = siteMetadataUtil.fetchSiteMetadata(normalizedUrl);
 
-      assertEquals(tagTitle, siteMetadata.title(), "SiteMetadata title value did not match expected");
-      assertEquals(tagDescription, siteMetadata.description(), "SiteMetadata description value did not match expected");
-      assertEquals(tagImage, siteMetadata.imageUrl(), "SiteMetadata image value did not match expected");
-      assertEquals(tagVideo, siteMetadata.videoUrl(), "SiteMetadata video value did not match expected");
+      assertEquals(tagTitle, siteMetadata.title(),
+          "SiteMetadata title value did not match expected");
+      assertEquals(tagDescription, siteMetadata.description(),
+          "SiteMetadata description value did not match expected");
+      assertEquals(tagImage, siteMetadata.imageUrl(),
+          "SiteMetadata image value did not match expected");
+      assertEquals(tagVideo, siteMetadata.videoUrl(),
+          "SiteMetadata video value did not match expected");
     }
   }
 }
