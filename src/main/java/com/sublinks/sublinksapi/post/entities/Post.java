@@ -32,6 +32,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -47,26 +49,29 @@ public class Post {
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
   @ManyToOne
   @JoinTable(name = "post_post_cross_post", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "cross_post_id"))
   CrossPost crossPost;
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "community_id")
   private Community community;
-  @OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
+  @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", fetch = FetchType.EAGER)
   private List<Comment> comments;
   @ManyToOne
   private Instance instance;
   @ManyToOne
   @JoinColumn(name = "language_id")
   private Language language;
-  @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "post")
+  @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
   private PostAggregate postAggregate;
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   private List<PostLike> postLikes;
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   private List<PostHistory> postHistory;
   /**
    * Attributes.
@@ -164,7 +169,8 @@ public class Post {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 
   public boolean isRemoved() {

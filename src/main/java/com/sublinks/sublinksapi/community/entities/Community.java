@@ -30,6 +30,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -42,7 +44,8 @@ import org.hibernate.proxy.HibernateProxy;
 @Table(name = "communities")
 public class Community implements Serializable {
 
-  @OneToMany(mappedBy = "community", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonCommunity> linkPersonCommunity;
   /**
    * Relationships.
@@ -50,18 +53,19 @@ public class Community implements Serializable {
   @ManyToOne
   @JoinColumn(name = "instance_id")
   private Instance instance;
+
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
-  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
   @PrimaryKeyJoinColumn
   private CommunityAggregate communityAggregate;
-  @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  @JoinTable(
-      name = "community_languages",
-      joinColumns = @JoinColumn(name = "community_id"),
-      inverseJoinColumns = @JoinColumn(name = "language_id")
-  )
+
+  @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
+  @JoinTable(name = "community_languages", joinColumns = @JoinColumn(name = "community_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
   /**
@@ -144,6 +148,7 @@ public class Community implements Serializable {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }
