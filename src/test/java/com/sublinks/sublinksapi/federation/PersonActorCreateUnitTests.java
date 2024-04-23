@@ -67,4 +67,38 @@ public class PersonActorCreateUnitTests {
     );
 
   }
+
+  @Test
+  void testOnApplicationEventWithBlankDisplayName() {
+
+    Person person = new Person();
+    person.setActivityPubId("testId");
+    person.setActorId("testId");
+    person.setBiography("testBio");
+    person.setName("testName");
+    person.setDisplayName("");
+    person.setPrivateKey("testPrivateKey");
+    person.setPublicKey("testPublicKey");
+
+    PersonCreatedEvent event = new PersonCreatedEvent(this, person);
+
+    ArgumentCaptor<Actor> actorCaptor = ArgumentCaptor.forClass(Actor.class);
+
+    listener.onApplicationEvent(event);
+
+    verify(listener.getFederationProducer(), times(1)).sendMessage(eq("testExchange"),
+        eq(RoutingKey.ACTOR_CREATE.getValue()), actorCaptor.capture());
+
+    Actor capturedActor = actorCaptor.getValue();
+    assertAll(
+        () -> assertEquals("testId", capturedActor.id()),
+        () -> assertEquals(ActorType.USER.getValue(), capturedActor.actor_type()),
+        () -> assertEquals("testBio", capturedActor.bio()),
+        () -> assertEquals("testName", capturedActor.name()),
+        () -> assertEquals("testName", capturedActor.username()),
+        () -> assertEquals("testPrivateKey", capturedActor.private_key()),
+        () -> assertEquals("testPublicKey", capturedActor.public_key())
+    );
+
+  }
 }
