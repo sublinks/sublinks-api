@@ -42,7 +42,7 @@ public class PersonActorCreateListener implements ApplicationListener<PersonCrea
         .id(person.getActorId())
         .actor_type(ActorType.USER.getValue())
         .bio(person.getBiography())
-        .name(person.getDisplayName())
+        .name(person.getDisplayName() != null ? person.getDisplayName() : person.getName())
         .username(person.getUsername())
         .matrix_user_id(person.getMatrixUserId())
         .private_key(person.getPrivateKey())
