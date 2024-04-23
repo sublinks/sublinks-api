@@ -57,10 +57,10 @@ public class PersonActorCreateUnitTests {
 
     Actor capturedActor = actorCaptor.getValue();
     assertAll(
-        () -> assertEquals("testId", capturedActor.actor_id()),
+        () -> assertEquals("testId", capturedActor.id()),
         () -> assertEquals(ActorType.USER.getValue(), capturedActor.actor_type()),
         () -> assertEquals("testBio", capturedActor.bio()),
-        () -> assertEquals("testName", capturedActor.display_name()),
+        () -> assertEquals("testDisplayName", capturedActor.name()),
         () -> assertEquals("testName", capturedActor.username()),
         () -> assertEquals("testPrivateKey", capturedActor.private_key()),
         () -> assertEquals("testPublicKey", capturedActor.public_key())
