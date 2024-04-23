@@ -17,6 +17,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.proxy.HibernateProxy;
 
 @Getter
@@ -32,12 +34,15 @@ public class Language {
    * Relationships.
    */
   @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Person> people;
 
   @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Instance> instances;
 
   @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Community> communities;
 
   /**
@@ -77,6 +82,7 @@ public class Language {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

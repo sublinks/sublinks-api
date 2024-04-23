@@ -4,6 +4,8 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import java.util.Date;
 import java.util.List;
 
@@ -16,11 +18,13 @@ import java.util.List;
 @Table(name = "email")
 public class Email {
 
-  @ManyToMany(fetch = FetchType.LAZY)
+  @ManyToMany(fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   @JoinTable(name = "email_person_recipients", joinColumns = @JoinColumn(name = "email_id"), inverseJoinColumns = @JoinColumn(name = "person_id"))
   private List<Person> personRecipients;
 
-  @OneToMany(mappedBy = "email", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "email", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   private List<EmailData> emailData;
 
   @Id
