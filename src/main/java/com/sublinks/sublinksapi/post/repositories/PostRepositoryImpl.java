@@ -1,15 +1,11 @@
 package com.sublinks.sublinksapi.post.repositories;
 
-import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
-
 import com.sublinks.sublinksapi.community.entities.Community;
-import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.entities.Post;
-import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.CursorBasedPageable;
