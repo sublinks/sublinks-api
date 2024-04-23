@@ -39,10 +39,10 @@ public class PersonActorCreateListener implements ApplicationListener<PersonCrea
     Person person = event.getPerson();
 
     final Actor actorMessage = Actor.builder()
-        .actor_id(person.getActorId())
+        .id(person.getActorId())
         .actor_type(ActorType.USER.getValue())
         .bio(person.getBiography())
-        .display_name(person.getName())
+        .name(person.getDisplayName().isBlank() ? person.getName() : person.getDisplayName())
         .username(person.getUsername())
         .matrix_user_id(person.getMatrixUserId())
         .private_key(person.getPrivateKey())
