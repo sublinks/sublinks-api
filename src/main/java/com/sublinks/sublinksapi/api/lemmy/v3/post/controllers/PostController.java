@@ -46,6 +46,8 @@ import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
+import com.sublinks.sublinksapi.post.sorts.SortFactory;
+import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -55,10 +57,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -98,6 +97,7 @@ public class PostController extends AbstractLemmyApiController {
   private final LemmyPostReportService lemmyPostReportService;
   private final LocalInstanceContext localInstanceContext;
   private final RoleAuthorizingService roleAuthorizingService;
+  private final SortFactory sortFactory;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -186,6 +186,7 @@ public class PostController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
         RolePermission.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     List<Long> communityIds = null;
     Community community;
     if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
@@ -225,12 +226,15 @@ public class PostController extends AbstractLemmyApiController {
 
     InstanceConfig config = localInstanceContext.instance().getInstanceConfig();
 
-    SortType sortType; // @todo set to site default
+    SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
-    } else {
+    }
+    if (sortType == null) {
       sortType = SortType.New;
     }
+    SortingTypeInterface sorting = sortFactory.createSort(sortType);
+
     ListingType listingType = config != null ? localInstanceContext.instance()
         .getInstanceConfig()
         .getDefaultPostListingType() : null;
@@ -243,9 +247,11 @@ public class PostController extends AbstractLemmyApiController {
 
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
         .page(page)
-        .listingType(conversionService.convert(listingType,
-            com.sublinks.sublinksapi.person.enums.ListingType.class))
-        .perPage(perPage)
+        .listingType(conversionService.convert(
+            listingType,
+            com.sublinks.sublinksapi.person.enums.ListingType.class)
+        )
+        .perPage(perPage + 1)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType)
@@ -255,20 +261,23 @@ public class PostController extends AbstractLemmyApiController {
         .build();
 
     final List<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
-    final Collection<PostView> postViewCollection = new LinkedHashSet<>();
 
-    for (Post post : posts) {
-      if (person.isPresent()) {
+    String cursor = null;
+    if (posts.size() > perPage) {
+      cursor = sorting.getCursor(posts);
+      posts.remove(posts.size() - 1);
+    }
+
+    final Collection<PostView> postViewCollection = new LinkedHashSet<>();
+    if (person.isPresent()) {
+      for (Post post : posts) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
-      } else {
+      }
+    } else {
+      for (Post post : posts) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post));
       }
     }
-
-    Post lastPost = posts.get(posts.size()-1);
-    String originalInput = lastPost.getId().toString();
-    String encodedString = Base64.getEncoder().encodeToString(originalInput.getBytes());
-    String cursor = URLEncoder.encode(encodedString, StandardCharsets.UTF_8);
 
     return GetPostsResponse.builder()
         .posts(postViewCollection)
@@ -289,7 +298,6 @@ public class PostController extends AbstractLemmyApiController {
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, switch (createPostLikeForm.score()) {
       case 1 -> RolePermission.POST_UPVOTE;
       case -1 -> RolePermission.POST_DOWNVOTE;
-      case 0 -> RolePermission.POST_NEUTRALVOTE;
       default -> RolePermission.POST_NEUTRALVOTE;
     }, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 

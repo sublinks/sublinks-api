@@ -7,7 +7,8 @@ import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
-import com.sublinks.sublinksapi.post.entities.Post_;
+import com.sublinks.sublinksapi.post.sorts.SortFactory;
+import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -20,20 +21,20 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.stereotype.Service;
 
 @AllArgsConstructor
 @Service
-public class PostSearchQueryBuilder {
+public class PostSearchQueryService {
 
   private final EntityManager entityManager;
+  private final SortFactory sortFactory;
 
   public Builder builder() {
 
-    return new Builder(entityManager, entityManager.getCriteriaBuilder());
+    return new Builder(entityManager, entityManager.getCriteriaBuilder(), sortFactory);
   }
 
   public Results results(Builder builder) {
@@ -54,23 +55,9 @@ public class PostSearchQueryBuilder {
       this.builder = builder;
     }
 
-    public Results setSortType(final SortType sortType) {
-
-      if (Objects.requireNonNull(sortType) == SortType.Old) {
-        builder.getCriteriaQuery()
-            .orderBy(builder.getCriteriaBuilder()
-                .asc(builder.getPostTable().get("createdAt")));
-      } else {
-        builder.getCriteriaQuery()
-            .orderBy(builder.getCriteriaBuilder()
-                .desc(builder.getPostTable().get("createdAt")));
-      }
-      return this;
-    }
-
     public Results setPerPage(final Integer perPage) {
 
-      this.perPage = Math.min(Math.abs(perPage), 20);
+      this.perPage = Math.min(Math.abs(perPage), 21);
       return this;
     }
 
@@ -81,8 +68,16 @@ public class PostSearchQueryBuilder {
       return this;
     }
 
-
     private TypedQuery<Post> getQuery() {
+
+      if (builder.getSorter() != null) {
+        builder.getSorter()
+            .applySorting(builder);
+        if (builder.getCursor() != null && !builder.getCursor().isBlank()) {
+          builder.getSorter()
+              .applyCursor(builder);
+        }
+      }
 
       builder.getCriteriaQuery()
           .where(builder.getPredicates().toArray(new Predicate[0]));
@@ -115,18 +110,23 @@ public class PostSearchQueryBuilder {
 
     private final EntityManager entityManager;
     private final CriteriaBuilder criteriaBuilder;
+    private final SortFactory sortFactory;
     private final Root<Post> postTable;
     final List<Predicate> predicates = new ArrayList<>();
     private final CriteriaQuery<Post> criteriaQuery;
     private Person person;
+    private String cursor;
+    private SortingTypeInterface sorter;
 
     public Builder(
         EntityManager entityManager,
-        CriteriaBuilder criteriaBuilder
+        CriteriaBuilder criteriaBuilder,
+        SortFactory sortFactory
     ) {
 
       this.entityManager = entityManager;
       this.criteriaBuilder = criteriaBuilder;
+      this.sortFactory = sortFactory;
       this.criteriaQuery = criteriaBuilder.createQuery(Post.class);
       this.postTable = criteriaQuery.from(Post.class);
     }
@@ -139,6 +139,12 @@ public class PostSearchQueryBuilder {
         predicates.add(expression.in(communityIds));
       }
       return this;
+    }
+
+    public Builder filterByListingType(ListingType listingType, Person person) {
+
+      this.setPerson(person);
+      return this.filterByListingType(listingType);
     }
 
     public Builder filterByListingType(ListingType listingType) {
@@ -155,6 +161,12 @@ public class PostSearchQueryBuilder {
       return this;
     }
 
+    public Builder addPersonLikesToPost(Person person) {
+
+      this.setPerson(person);
+      return addPersonLikesToPost();
+    }
+
     public Builder addPersonLikesToPost() {
 
       if (this.person == null) {
@@ -167,12 +179,21 @@ public class PostSearchQueryBuilder {
       return this;
     }
 
+    public Builder setSorter(final SortingTypeInterface sorter) {
+
+      this.sorter = sorter;
+      return this;
+    }
+
+    public Builder setSortType(final SortType sortType) {
+
+      return setSorter(sortFactory.createSort(sortType));
+    }
+
     public Builder setCursor(final String cursor) {
 
       byte[] decodedBytes = Base64.getDecoder().decode(cursor);
-      String decodedString = new String(decodedBytes);
-
-      predicates.add(criteriaBuilder.greaterThan(postTable.get(Post_.ID), decodedString));
+      this.cursor = new String(decodedBytes);
       return this;
     }
 

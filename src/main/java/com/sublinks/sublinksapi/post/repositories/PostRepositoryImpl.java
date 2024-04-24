@@ -7,9 +7,9 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
-import com.sublinks.sublinksapi.post.services.PostSearchQueryBuilder;
-import com.sublinks.sublinksapi.post.services.PostSearchQueryBuilder.Builder;
-import com.sublinks.sublinksapi.post.services.PostSearchQueryBuilder.Results;
+import com.sublinks.sublinksapi.post.services.PostSearchQueryService;
+import com.sublinks.sublinksapi.post.services.PostSearchQueryService.Builder;
+import com.sublinks.sublinksapi.post.services.PostSearchQueryService.Results;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -28,12 +28,12 @@ import lombok.AllArgsConstructor;
 public class PostRepositoryImpl implements PostRepositorySearch {
 
   private final EntityManager em;
-  private final PostSearchQueryBuilder postSearchQueryBuilder;
+  private final PostSearchQueryService postSearchQueryService;
 
   @Override
   public List<Post> allPostsBySearchCriteria(final PostSearchCriteria postSearchCriteria) {
 
-    final Builder searchBuilder = postSearchQueryBuilder.builder();
+    final Builder searchBuilder = postSearchQueryService.builder();
     if (postSearchCriteria.person() != null) {
       searchBuilder
           .setPerson(postSearchCriteria.person())
@@ -51,15 +51,16 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     if (postSearchCriteria.cursorBasedPageable() != null) {
       searchBuilder.setCursor(postSearchCriteria.cursorBasedPageable());
     }
-    Results results = postSearchQueryBuilder.results(searchBuilder);
     if (postSearchCriteria.sortType() != null) {
-      results.setSortType(postSearchCriteria.sortType());
+      searchBuilder.setSortType(postSearchCriteria.sortType());
     }
+
+    Results results = postSearchQueryService.results(searchBuilder);
     results.setPerPage(postSearchCriteria.perPage());
     if (postSearchCriteria.cursorBasedPageable() != null) {
       return results.getCursorResults();
     }
-    results.setPage(1);
+    results.setPage(postSearchCriteria.page());
     return results.getResults();
   }
 
