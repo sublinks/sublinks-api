@@ -9,6 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface PostSearchRepository extends JpaRepository<Post, Long> {
 
-  @Query(value = "SELECT p.* FROM posts p WHERE p.title_search @@ to_tsquery(:keyword) OR p.title_slug_search @@ to_tsquery(:keyword) OR p.post_body_search @@ to_tsquery(:keyword);", countQuery = "SELECT COUNT(p.id)FROM posts p WHERE p.title_search @@ to_tsquery(:keyword) OR p.title_slug_search @@ to_tsquery(:keyword) OR p.post_body_search @@ to_tsquery(:keyword);", nativeQuery = true)
+  @Query(value = "SELECT p.*, ppcp.* FROM posts p JOIN post_post_cross_post ppcp on p.id = ppcp.post_id WHERE p.search_vector @@ to_tsquery('english', :keyword);", countQuery = "SELECT COUNT(p.id)FROM posts p WHERE p.search_vector @@ to_tsquery('english', :keyword) ;", nativeQuery = true)
   Page<Post> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }

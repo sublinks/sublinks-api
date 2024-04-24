@@ -9,6 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 public interface CommunitySearchRepository extends JpaRepository<Community, Long> {
 
-  @Query(value = "SELECT c.* FROM communities c WHERE c.title_search @@ to_tsquery(:keyword) OR c.title_slug_search @@ to_tsquery(:keyword) OR c.description_search @@ to_tsquery(:keyword);", countQuery = "SELECT COUNT(c.id) FROM communities c WHERE c.title_search @@ to_tsquery(:keyword) OR c.title_slug_search @@ to_tsquery(:keyword) OR c.description_search @@ to_tsquery(:keyword);", nativeQuery = true)
+  @Query(value = "SELECT c.* FROM communities c WHERE c.search_vector @@ to_tsquery('english', :keyword);", countQuery = "SELECT COUNT(c.id) FROM communities c WHERE c.search_vector @@ to_tsquery('english', :keyword);", nativeQuery = true)
   Page<Community> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }
