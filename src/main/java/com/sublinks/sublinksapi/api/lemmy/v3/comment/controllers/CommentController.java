@@ -41,6 +41,7 @@ import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
+import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.services.PersonService;
@@ -96,6 +97,7 @@ public class CommentController extends AbstractLemmyApiController {
   private final RoleAuthorizingService roleAuthorizingService;
   private final CommentSaveService commentSaveForLaterService;
   private final ComentSaveRepository commentSaveForLaterRepository;
+  private final LanguageService languageService;
 
   @Operation(summary = "Create a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -131,7 +133,7 @@ public class CommentController extends AbstractLemmyApiController {
     }
 
     if (language.isEmpty()) {
-      throw new RuntimeException("No language selected");
+      language = Optional.ofNullable(languageRepository.findLanguageByCode("und"));
     }
 
     final Comment comment = Comment.builder()
@@ -141,7 +143,8 @@ public class CommentController extends AbstractLemmyApiController {
         .removedState(RemovedState.NOT_REMOVED)
         .post(post)
         .community(post.getCommunity())
-        .language(language.get())
+        .language(language.orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "language_not_found")))
         .build();
     boolean shouldReport = false;
     try {
@@ -198,13 +201,14 @@ public class CommentController extends AbstractLemmyApiController {
     if (editCommentForm.language_id() != null) {
       language = languageRepository.findById((long) editCommentForm.language_id());
     } else {
-      language = personService.getPersonDefaultPostLanguage(person,
-          comment.getPost().getCommunity());
+      language = Optional.ofNullable(comment.getLanguage());
     }
     if (language.isEmpty()) {
-      throw new RuntimeException("No language selected");
+      language = Optional.ofNullable(languageRepository.findLanguageByCode("und"));
     }
-    comment.setLanguage(language.get());
+
+    comment.setLanguage(language.orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "language_not_found")));
 
     boolean shouldReport = false;
 

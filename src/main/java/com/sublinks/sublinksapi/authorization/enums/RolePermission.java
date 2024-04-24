@@ -26,7 +26,7 @@ public enum RolePermission {
 
   // Private message permissions
   READ_PRIVATE_MESSAGES("message", AuthorizeAction.READ),
-  MARK_PRIVATE_MESSAGE_AS_READ("comment-read", AuthorizeAction.UPDATE),
+  MARK_PRIVATE_MESSAGE_AS_READ("message-read", AuthorizeAction.UPDATE),
   CREATE_PRIVATE_MESSAGE("message", AuthorizeAction.CREATE),
   UPDATE_PRIVATE_MESSAGE("message", AuthorizeAction.UPDATE),
   DELETE_PRIVATE_MESSAGE("message", AuthorizeAction.DELETE),
@@ -179,10 +179,13 @@ public enum RolePermission {
    */
   ADMIN("admin", AuthorizeAction.READ),
 
+  /**
+   * Ignore User blocks
+   */
   IGNORE_BLOCK("admin-ignore", AuthorizeAction.READ),
 
   /**
-   * The role who has this permission is the default role unreigstered users and for users if there
+   * The role who has this permission is the default role unregistered users and for users if there
    * is no "registered" role.
    */
   DEFAULT("default", AuthorizeAction.READ),

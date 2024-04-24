@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.2.4'
+    id 'org.springframework.boot' version '3.2.5'
     id 'io.spring.dependency-management' version '1.1.4'
     id 'jacoco'
 }
@@ -52,9 +52,8 @@ dependencies {
     implementation 'cn.apiclub.tool:simplecaptcha:1.2.2'
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'
 
-
-    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.4'
-    implementation 'org.apache.commons:commons-text:1.11.0'
+    implementation 'org.springframework.boot:spring-boot-starter-mail:3.2.5'
+    implementation 'org.apache.commons:commons-text:1.12.0'
     implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
     implementation 'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE'
 
