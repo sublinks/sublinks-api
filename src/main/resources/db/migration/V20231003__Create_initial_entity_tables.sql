@@ -16,21 +16,21 @@ $$ language 'plpgsql';
  */
 CREATE TABLE comments
 (
-  id                  BIGSERIAL PRIMARY KEY,
-  activity_pub_id     TEXT         NOT NULL,
-  language_id         BIGINT       NOT NULL,
-  is_deleted          BOOL         NOT NULL DEFAULT false,
-  removed_state       VARCHAR(255) NULL     DEFAULT 'NOT_REMOVED',
-  is_local            BOOL         NOT NULL DEFAULT false,
-  person_id           BIGINT       NOT NULL,
-  community_id        BIGINT       NOT NULL,
-  post_id             BIGINT       NOT NULL,
-  is_featured         BOOL         NOT NULL DEFAULT false,
-  comment_body        TEXT         NULL,
-  comment_body_search TSVECTOR GENERATED ALWAYS AS (to_tsvector(comment_body)) STORED,
-  path                VARCHAR(512),
-  created_at          TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at          TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  id              BIGSERIAL PRIMARY KEY,
+  activity_pub_id TEXT         NOT NULL,
+  language_id     BIGINT       NOT NULL,
+  is_deleted      BOOL         NOT NULL DEFAULT false,
+  removed_state   VARCHAR(255) NULL     DEFAULT 'NOT_REMOVED',
+  is_local        BOOL         NOT NULL DEFAULT false,
+  person_id       BIGINT       NOT NULL,
+  community_id    BIGINT       NOT NULL,
+  post_id         BIGINT       NOT NULL,
+  is_featured     BOOL         NOT NULL DEFAULT false,
+  comment_body    TEXT         NULL,
+  search_vector   TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', comment_body)) STORED,
+  path            VARCHAR(512),
+  created_at      TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  updated_at      TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
 
@@ -38,7 +38,8 @@ CREATE INDEX IDX_COMMENTS_LANGUAGE_ID ON comments (language_id);
 CREATE INDEX IDX_COMMENTS_PERSON_ID ON comments (person_id);
 CREATE INDEX IDX_COMMENTS_COMMUNITY_ID ON comments (community_id);
 CREATE INDEX IDX_COMMENTS_POST_ID ON comments (post_id);
-CREATE INDEX IDX_COMMENTS_COMMENT_BODY_SEARCH ON comments USING GIN (comment_body_search);
+
+CREATE INDEX IDX_COMMENTS_SEARCH_VECTOR ON comments USING GIN (search_vector);
 
 
 /**
@@ -85,11 +86,8 @@ CREATE TABLE communities
   activity_pub_id               TEXT         NOT NULL,
   instance_id                   BIGINT       NOT NULL,
   title                         VARCHAR(255) NULL,
-  title_search                  TSVECTOR GENERATED ALWAYS AS (to_tsvector(title)) STORED,
   title_slug                    VARCHAR(255) NOT NULL,
-  title_slug_search             TSVECTOR GENERATED ALWAYS AS (to_tsvector(title_slug)) STORED,
   description                   TEXT         NULL,
-  description_search            TSVECTOR GENERATED ALWAYS AS (to_tsvector(description)) STORED,
   is_deleted                    BOOL         NULL DEFAULT false,
   is_removed                    BOOL         NULL DEFAULT false,
   is_local                      BOOL         NULL DEFAULT false,
@@ -99,6 +97,12 @@ CREATE TABLE communities
   banner_image_url              TEXT         NULL,
   public_key                    TEXT         NOT NULL,
   private_key                   TEXT         NULL,
+  search_vector                 TSVECTOR GENERATED ALWAYS AS (to_tsvector('english',
+                                                                          coalesce(title, '') ||
+                                                                          ' ' ||
+                                                                          coalesce(title_slug, '') ||
+                                                                          ' ' ||
+                                                                          coalesce(description, ''))) STORED,
   created_at                    TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   updated_at                    TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
@@ -110,9 +114,8 @@ CREATE INDEX IDX_COMMUNITIES_IS_REMOVED ON communities (is_removed);
 CREATE INDEX IDX_COMMUNITIES_IS_LOCAL ON communities (is_local);
 CREATE INDEX IDX_COMMUNITIES_IS_NSFW ON communities (is_nsfw);
 CREATE INDEX IDX_COMMUNITIES_IS_POSTING_RESTRICTED_TO_MODS ON communities (is_posting_restricted_to_mods);
-CREATE INDEX IDX_COMMUNITIES_TITLE_SEARCH ON communities USING GIN (title_search);
-CREATE INDEX IDX_COMMUNITIES_TITLE_SLUG_SEARCH ON communities USING GIN (title_slug_search);
-CREATE INDEX IDX_COMMUNITIES_DESCRIPTION_SEARCH ON communities USING GIN (description_search);
+
+CREATE INDEX IDX_COMMUNITIES_SEARCH_VECTOR ON communities USING GIN (search_vector);
 
 /**
  Community Languages table
@@ -201,16 +204,19 @@ CREATE TABLE people
   actor_id                       TEXT         NOT NULL,
   role_id                        BIGINT       NOT NULL,
   name                           VARCHAR(255) NULL,
-  name_search                    TSVECTOR GENERATED ALWAYS AS (to_tsvector(name)) STORED,
+  search_vector                  TSVECTOR GENERATED ALWAYS AS (to_tsvector('english',
+                                                                           coalesce(name, '') ||
+                                                                           ' ' ||
+                                                                           coalesce(display_name, '') ||
+                                                                           ' ' ||
+                                                                           coalesce(biography, ''))) STORED,
   display_name                   VARCHAR(255) NULL,
-  display_name_search            TSVECTOR GENERATED ALWAYS AS (to_tsvector(display_name)) STORED,
   email                          VARCHAR(255) NULL,
   is_email_verified              BOOL         NULL     DEFAULT false,
   password                       VARCHAR(255) NOT NULL,
   avatar_image_url               TEXT         NULL,
   banner_image_url               TEXT         NULL,
   biography                      TEXT         NULL,
-  biography_search               TSVECTOR GENERATED ALWAYS AS (to_tsvector(biography)) STORED,
   interface_language             VARCHAR(20)  NULL,
   default_theme                  VARCHAR(255) NULL,
   default_listing_type           VARCHAR(255) NULL,
@@ -242,9 +248,8 @@ CREATE INDEX IDX_PEOPLE_NAME ON people (name);
 CREATE INDEX IDX_PEOPLE_EMAIL ON people (email);
 CREATE INDEX IDX_PEOPLE_IS_LOCAL ON people (is_local);
 CREATE INDEX IDX_PEOPLE_ROLE_ID ON people (role_id);
-CREATE INDEX IDX_PEOPLE_NAME_SEARCH ON people USING GIN (name_search);
-CREATE INDEX IDX_PEOPLE_DISPLAY_NAME_SEARCH ON people USING GIN (display_name_search);
-CREATE INDEX IDX_PEOPLE_BIOGRAPHY_SEARCH ON people USING GIN (biography_search);
+
+CREATE INDEX IDX_PEOPLE_SEARCH_VECTOR ON people USING GIN (search_vector);
 
 CREATE TABLE person_languages
 (
@@ -291,13 +296,17 @@ CREATE TABLE posts
   link_video_url           TEXT         NULL,
   is_nsfw                  BOOL         NULL     DEFAULT false,
   title                    VARCHAR(255) NOT NULL,
-  title_search             TSVECTOR GENERATED ALWAYS AS (to_tsvector(title)) STORED,
+
   title_slug               VARCHAR(255) NOT NULL,
-  title_slug_search        TSVECTOR GENERATED ALWAYS AS (to_tsvector(title_slug)) STORED,
   post_body                TEXT         NULL,
-  post_body_search         TSVECTOR GENERATED ALWAYS AS (to_tsvector(post_body)) STORED,
   public_key               TEXT         NOT NULL,
   private_key              TEXT         NULL,
+  search_vector            TSVECTOR GENERATED ALWAYS AS (to_tsvector('english',
+                                                                     coalesce(title, '') ||
+                                                                     ' ' ||
+                                                                     coalesce(title_slug, '') ||
+                                                                     ' ' ||
+                                                                     coalesce(post_body, ''))) STORED,
   created_at               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   updated_at               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
 
@@ -310,9 +319,8 @@ CREATE INDEX IDX_POSTS_IS_NSFW ON posts (is_nsfw);
 CREATE INDEX IDX_POSTS_IS_FEATURED ON posts (is_featured);
 CREATE INDEX IDX_POSTS_IS_FEATURED_IN_COMMUNITY ON posts (is_featured_in_community);
 CREATE INDEX IDX_POSTS_TITLE_SLUG ON posts (title_slug);
-CREATE INDEX IDX_POSTS_TITLE_SEARCH ON posts USING GIN (title_search);
-CREATE INDEX IDX_POSTS_TITLE_SLUG_SEARCH ON posts USING GIN (title_slug_search);
-CREATE INDEX IDX_POSTS_POST_BODY_SEARCH ON posts USING GIN (post_body_search);
+
+CREATE INDEX IDX_POSTS_SEARCH_VECTOR ON posts USING GIN (search_vector);
 
 /**
  Post Likes table
