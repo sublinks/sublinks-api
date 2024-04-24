@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.person.Producers;
+package com.sublinks.sublinksapi.person.producers;
 
 import cn.apiclub.captcha.noise.CurvedLineNoiseProducer;
 import java.awt.BasicStroke;
@@ -52,7 +52,7 @@ public class LinesProducer extends CurvedLineNoiseProducer {
 
     // creates an iterator to define the boundary of the flattened curve
     PathIterator pi = cc.getPathIterator(null, 2);
-    Point2D tmp[] = new Point2D[200];
+    Point2D[] tmp = new Point2D[200];
     int i = 0;
 
     // while pi is iterating the curve, adds points to tmp array
