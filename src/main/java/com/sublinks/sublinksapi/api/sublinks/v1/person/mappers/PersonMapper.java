@@ -17,7 +17,6 @@ public abstract class PersonMapper implements Converter<Person, PersonResponse> 
 
   @Override
   @Mapping(target = "key", source = "person.name")
-
   @Mapping(target = "name", source = "person.name")
   @Mapping(target = "displayName", source = "person", qualifiedByName = "display_name")
   @Mapping(target = "avatar", source = "person", qualifiedByName = "avatar")
