@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 public class LinesProducer extends CurvedLineNoiseProducer {
+
   private static final Random RAND = new SecureRandom();
 
   private long linesToDraw = 1;
@@ -39,7 +40,9 @@ public class LinesProducer extends CurvedLineNoiseProducer {
       this.doNoise(image, colors.get(RAND.nextInt(colors.size())), RAND.nextInt(3) + 2);
     }
   }
+
   private void doNoise(BufferedImage image, Color _color, int _width) {
+
     int width = image.getWidth();
     int height = image.getHeight();
 
@@ -52,7 +55,7 @@ public class LinesProducer extends CurvedLineNoiseProducer {
 
     // creates an iterator to define the boundary of the flattened curve
     PathIterator pi = cc.getPathIterator(null, 2);
-    Point2D tmp[] = new Point2D[200];
+    Point2D[] tmp = new Point2D[200];
     int i = 0;
 
     // while pi is iterating the curve, adds points to tmp array

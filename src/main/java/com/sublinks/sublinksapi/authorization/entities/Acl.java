@@ -39,6 +39,7 @@ public class Acl {
 
   @Column(updatable = false, nullable = false, name = "entity_type")
   @Enumerated(EnumType.STRING)
+
   private AuthorizedEntityType entityType;
 
   @Column(updatable = true, nullable = false, name = "entity_id")
@@ -46,6 +47,7 @@ public class Acl {
 
   @Column(updatable = true, nullable = false, name = "authorized_action")
   @Enumerated(EnumType.STRING)
+
   private AuthorizeAction authorizedAction;
 
   @Column(updatable = true, nullable = false, name = "is_permitted")
@@ -85,6 +87,7 @@ public class Acl {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

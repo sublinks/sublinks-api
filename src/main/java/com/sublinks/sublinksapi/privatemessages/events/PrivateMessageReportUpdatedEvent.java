@@ -9,7 +9,8 @@ public class PrivateMessageReportUpdatedEvent extends ApplicationEvent {
 
   private final PrivateMessageReport privateMessageReport;
 
-  public PrivateMessageReportUpdatedEvent(final Object source, final PrivateMessageReport privateMessageReport) {
+  public PrivateMessageReportUpdatedEvent(final Object source,
+      final PrivateMessageReport privateMessageReport) {
 
     super(source);
     this.privateMessageReport = privateMessageReport;

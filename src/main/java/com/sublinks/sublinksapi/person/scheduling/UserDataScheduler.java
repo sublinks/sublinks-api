@@ -1,9 +1,9 @@
 package com.sublinks.sublinksapi.person.scheduling;
 
 import com.sublinks.sublinksapi.person.config.UserDataConfig;
+import com.sublinks.sublinksapi.person.services.UserDataService;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
-import com.sublinks.sublinksapi.person.services.UserDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;

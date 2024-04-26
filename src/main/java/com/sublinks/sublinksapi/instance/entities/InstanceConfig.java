@@ -46,6 +46,7 @@ public class InstanceConfig {
 
   @Column(name = "registration_mode")
   @Enumerated(EnumType.STRING)
+
   private RegistrationMode registrationMode;
 
   @Column(name = "registration_question")
@@ -92,6 +93,7 @@ public class InstanceConfig {
 
   @Column(name = "default_post_listing_type")
   @Enumerated(EnumType.STRING)
+
   private ListingType defaultPostListingType;
 
   @Column(name = "legal_information")

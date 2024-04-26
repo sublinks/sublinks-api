@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.comment.models;
 
 import com.sublinks.sublinksapi.community.entities.Community;
-import lombok.Builder;
 import java.util.List;
+import lombok.Builder;
 
 @Builder
 public record CommentReportSearchCriteria(

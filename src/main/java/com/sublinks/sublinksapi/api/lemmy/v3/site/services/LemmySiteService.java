@@ -41,6 +41,7 @@ public class LemmySiteService {
   }
 
   public Collection<CustomEmojiView> customEmojis() {
+
     final Collection<CustomEmojiView> emojiViews = new LinkedHashSet<>();
     for (var emoji : customEmojiRepository.findAll()) {
       emojiViews.add(conversionService.convert(emoji,

@@ -81,6 +81,7 @@ import org.thymeleaf.context.Context;
 @Tag(name = "User")
 public class UserAuthController extends AbstractLemmyApiController {
 
+  private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
   private final JwtUtil jwtUtil;
   private final PersonService personService;
   private final PersonRepository personRepository;
@@ -94,9 +95,6 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final UserDataService userDataService;
   private final PasswordResetService passwordResetService;
   private final PersonEmailVerificationService personEmailVerificationService;
-
-  private static final Logger logger = LoggerFactory.getLogger(UserAuthController.class);
-
 
   @Operation(summary = "Register a new user.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {

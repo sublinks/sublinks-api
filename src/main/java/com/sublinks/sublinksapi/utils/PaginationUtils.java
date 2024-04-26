@@ -10,7 +10,6 @@ public class PaginationUtils {
    * @param page The page number.
    * @param size The number of items per page.
    * @return The starting index for the given page.
-   * 
    */
   public static int getOffset(int page, int size) {
 

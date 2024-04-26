@@ -53,6 +53,7 @@ public class CommentHistory implements Serializable {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
+
   private RemovedState removedState;
 
   @CreationTimestamp

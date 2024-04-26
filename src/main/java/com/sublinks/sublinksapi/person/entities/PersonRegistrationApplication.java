@@ -58,6 +58,7 @@ public class PersonRegistrationApplication {
 
   @Column(nullable = false, name = "application_status")
   @Enumerated(EnumType.STRING)
+
   private PersonRegistrationApplicationStatus applicationStatus;
 
   @CreationTimestamp

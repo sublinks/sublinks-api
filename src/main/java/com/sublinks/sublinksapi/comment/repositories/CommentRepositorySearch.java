@@ -2,8 +2,8 @@ package com.sublinks.sublinksapi.comment.repositories;
 
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
-import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import java.util.List;
 
