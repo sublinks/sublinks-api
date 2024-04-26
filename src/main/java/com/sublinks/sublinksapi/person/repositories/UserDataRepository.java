@@ -2,19 +2,20 @@ package com.sublinks.sublinksapi.person.repositories;
 
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.UserData;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 public interface UserDataRepository extends JpaRepository<UserData, Long> {
 
   List<UserData> findFirstByPersonAndIpAddress(Person person, String ipAddress);
 
-  Optional<UserData> findFirstByPersonAndIpAddressAndUserAgentAndActiveIsTrue(Person person, String ipAddress,
+  Optional<UserData> findFirstByPersonAndIpAddressAndUserAgentAndActiveIsTrue(Person person,
+      String ipAddress,
       String userAgent);
 
   Optional<UserData> findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(Person person,

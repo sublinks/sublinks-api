@@ -30,9 +30,6 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
-import com.sublinks.sublinksapi.federation.enums.ActorType;
-import com.sublinks.sublinksapi.federation.enums.RoutingKey;
-import com.sublinks.sublinksapi.federation.models.Actor;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -48,7 +45,6 @@ import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.privatemessages.models.MarkAllAsReadResponse;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
 import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageService;
-import com.sublinks.sublinksapi.queue.services.Producer;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterBlockedException;
 import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
@@ -68,7 +64,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -100,11 +95,7 @@ public class UserController extends AbstractLemmyApiController {
   private final SlurFilterService slurFilterService;
   private final RoleAuthorizingService roleAuthorizingService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final Optional<Producer> federationProducer;
   private final PrivateMessageService privateMessageService;
-
-  @Value("${sublinks.federation.exchange}")
-  private String federationExchange;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -359,20 +350,6 @@ public class UserController extends AbstractLemmyApiController {
     person.setLanguages(languages);
 
     personService.updatePerson(person);
-
-    federationProducer.ifPresent(service -> {
-      final Actor actorMessage = Actor.builder()
-          .actor_id(person.getActorId())
-          .actor_type(ActorType.USER.getValue())
-          .bio(person.getBiography())
-          .display_name(person.getDisplayName())
-          .matrix_user_id(person.getMatrixUserId())
-          .private_key(person.getPrivateKey())
-          .public_key(person.getPublicKey())
-          .build();
-
-      service.sendMessage(federationExchange, RoutingKey.ACTOR_CREATE.getValue(), actorMessage);
-    });
 
     return LoginResponse.builder()
         .jwt(null)

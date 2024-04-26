@@ -23,10 +23,9 @@ import org.springframework.stereotype.Component;
 public class PersonActorCreateListener implements ApplicationListener<PersonCreatedEvent> {
 
   private static final Logger logger = LoggerFactory.getLogger(PersonActorCreateListener.class);
-
+  final private Producer federationProducer;
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
-  final private Producer federationProducer;
 
   @Override
   public void onApplicationEvent(@NonNull PersonCreatedEvent event) {
@@ -39,10 +38,10 @@ public class PersonActorCreateListener implements ApplicationListener<PersonCrea
     Person person = event.getPerson();
 
     final Actor actorMessage = Actor.builder()
-        .actor_id(person.getActorId())
+        .id(person.getActorId())
         .actor_type(ActorType.USER.getValue())
         .bio(person.getBiography())
-        .display_name(person.getName())
+        .name(person.getDisplayName().isBlank() ? person.getName() : person.getDisplayName())
         .username(person.getUsername())
         .matrix_user_id(person.getMatrixUserId())
         .private_key(person.getPrivateKey())

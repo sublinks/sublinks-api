@@ -56,6 +56,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Component
 @RequiredArgsConstructor
 public class ModerationLogService {
+
   private final ModerationLogRepository moderationLogRepository;
   private final ModerationLogCreatedPublisher moderationLogCreatedPublisher;
   private final CommunityRepository communityRepository;
@@ -67,13 +68,13 @@ public class ModerationLogService {
   /**
    * Search moderation logs and return a page of results
    *
-   * @param actionType Moderation Log Action Type
-   * @param communityId Community Id
+   * @param actionType         Moderation Log Action Type
+   * @param communityId        Community Id
    * @param moderationPersonId Moderation Person Id
-   * @param otherPersonId Other Person Id
-   * @param page the page number
-   * @param pageSize the size limit of a page
-   * @param sort the sort option
+   * @param otherPersonId      Other Person Id
+   * @param page               the page number
+   * @param pageSize           the size limit of a page
+   * @param sort               the sort option
    * @return a Page of moderation logs
    */
   public Page<ModerationLog> searchModerationLogs(ModlogActionType actionType,
@@ -83,6 +84,7 @@ public class ModerationLogService {
       final int page,
       final int pageSize,
       final Sort sort) {
+
     return moderationLogRepository.searchAllByActionTypeAndPersonIds(actionType,
         communityId,
         moderationPersonId,
@@ -97,6 +99,7 @@ public class ModerationLogService {
    */
   @Transactional
   public void createModerationLog(final ModerationLog moderationLog) {
+
     moderationLogRepository.save(moderationLog);
 
     moderationLogCreatedPublisher.publish(moderationLog);
@@ -109,6 +112,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModRemovePostView buildModRemovePostView(ModerationLog moderationLog) {
+
     return ModRemovePostView.builder()
         .mod_remove_post(conversionService.convert(moderationLog, ModRemovePost.class))
         .community(conversionService.convert(
@@ -130,13 +134,14 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModLockPostView buildModLockPostView(ModerationLog moderationLog) {
+
     return ModLockPostView.builder()
         .mod_lock_post(conversionService.convert(moderationLog, ModLockPost.class))
         .community(conversionService.convert(
             communityRepository.findById(moderationLog.getCommunityId())
                 .orElse(null), Community.class))
         .post(conversionService.convert(
-                    postRepository.findById(moderationLog.getPostId())
+            postRepository.findById(moderationLog.getPostId())
                 .orElse(null), Post.class))
         .moderator(conversionService.convert(
             personRepository.findById(moderationLog.getModerationPersonId())
@@ -151,6 +156,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModFeaturePostView buildModFeaturePostView(ModerationLog moderationLog) {
+
     return ModFeaturePostView.builder()
         .mod_feature_post(conversionService.convert(moderationLog, ModFeaturePost.class))
         .community(conversionService.convert(
@@ -172,6 +178,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModRemoveCommentView buildModRemoveCommentView(ModerationLog moderationLog) {
+
     return ModRemoveCommentView.builder()
         .mod_remove_comment(conversionService.convert(moderationLog, ModRemoveComment.class))
         .community(conversionService.convert(
@@ -199,6 +206,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModRemoveCommunityView buildModRemoveCommunityView(ModerationLog moderationLog) {
+
     return ModRemoveCommunityView.builder()
         .mod_remove_community(conversionService.convert(moderationLog, ModRemoveCommunity.class))
         .community(conversionService.convert(
@@ -217,6 +225,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModBanFromCommunityView buildModBanFromCommunityView(ModerationLog moderationLog) {
+
     return ModBanFromCommunityView.builder()
         .mod_ban_from_community(conversionService.convert(moderationLog, ModBanFromCommunity.class))
         .community(conversionService.convert(
@@ -238,6 +247,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModBanView buildModBanView(ModerationLog moderationLog) {
+
     return ModBanView.builder()
         .mod_ban(conversionService.convert(moderationLog, ModBan.class))
         .banned_person(conversionService.convert(
@@ -256,6 +266,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModAddCommunityView buildModAddCommunityView(ModerationLog moderationLog) {
+
     return ModAddCommunityView.builder()
         .mod_add_community(conversionService.convert(moderationLog, ModAddCommunity.class))
         .community(conversionService.convert(
@@ -277,8 +288,10 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModTransferCommunityView buildModTransferCommunityView(ModerationLog moderationLog) {
+
     return ModTransferCommunityView.builder()
-        .mod_transfer_community(conversionService.convert(moderationLog, ModTransferCommunity.class))
+        .mod_transfer_community(
+            conversionService.convert(moderationLog, ModTransferCommunity.class))
         .community(conversionService.convert(
             communityRepository.findById(moderationLog.getCommunityId())
                 .orElse(null), Community.class))
@@ -298,6 +311,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModAddView buildModAddView(ModerationLog moderationLog) {
+
     return ModAddView.builder()
         .mod_add(conversionService.convert(moderationLog, ModAdd.class))
         .modded_person(conversionService.convert(
@@ -316,6 +330,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgePersonView buildAdminPurgePersonView(ModerationLog moderationLog) {
+
     return AdminPurgePersonView.builder()
         .admin_purge_person(conversionService.convert(moderationLog, AdminPurgePerson.class))
         .admin(conversionService.convert(
@@ -331,6 +346,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgeCommunityView buildAdminPurgeCommunityView(ModerationLog moderationLog) {
+
     return AdminPurgeCommunityView.builder()
         .admin_purge_community(conversionService.convert(moderationLog, AdminPurgeCommunity.class))
         .admin(conversionService.convert(
@@ -346,6 +362,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgePostView buildAdminPurgePostView(ModerationLog moderationLog) {
+
     return AdminPurgePostView.builder()
         .admin_purge_post(conversionService.convert(moderationLog, AdminPurgePost.class))
         .community(conversionService.convert(
@@ -364,6 +381,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public AdminPurgeCommentView buildAdminPurgeCommentView(ModerationLog moderationLog) {
+
     return AdminPurgeCommentView.builder()
         .admin_purge_comment(conversionService.convert(moderationLog, AdminPurgeComment.class))
         .post(conversionService.convert(
@@ -382,6 +400,7 @@ public class ModerationLogService {
    * @return a moderation log view
    */
   public ModHideCommunityView buildModHideCommunityView(ModerationLog moderationLog) {
+
     return ModHideCommunityView.builder()
         .mod_hide_community(conversionService.convert(moderationLog, ModHideCommunity.class))
         .community(conversionService.convert(

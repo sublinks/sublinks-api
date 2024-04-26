@@ -27,8 +27,7 @@ public class CommentReplyService {
   }
 
   /**
-   * Updates an existing comment reply and publishes an event indicating its
-   * update.
+   * Updates an existing comment reply and publishes an event indicating its update.
    *
    * @param commentReply The CommentReply object to be updated.
    */

@@ -55,10 +55,10 @@ public class CommunityActorCreateUnitTests {
 
     Actor capturedActor = actorCaptor.getValue();
     assertAll(
-        () -> assertEquals("testId", capturedActor.actor_id()),
+        () -> assertEquals("testId", capturedActor.id()),
         () -> assertEquals(ActorType.COMMUNITY.getValue(), capturedActor.actor_type()),
         () -> assertEquals("testDescription", capturedActor.bio()),
-        () -> assertEquals("testTitle", capturedActor.display_name()),
+        () -> assertEquals("testTitle", capturedActor.name()),
         () -> assertEquals("testPrivateKey", capturedActor.private_key()),
         () -> assertEquals("testPublicKey", capturedActor.public_key())
     );

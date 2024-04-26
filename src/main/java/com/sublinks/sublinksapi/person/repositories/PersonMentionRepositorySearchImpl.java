@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.person.repositories;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.person.entities.PersonMention;
 import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
 import jakarta.persistence.EntityManager;
@@ -11,8 +13,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-
-import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
 @AllArgsConstructor
 public class PersonMentionRepositorySearchImpl implements PersonMentionRepositorySearch {

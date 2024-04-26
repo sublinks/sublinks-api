@@ -1,13 +1,12 @@
 package com.sublinks.sublinksapi.customemoji.entities;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 public class CustomEmojiTest {
 
@@ -37,7 +36,7 @@ public class CustomEmojiTest {
         .updatedAt(Date.valueOf("2024-03-05"))
         .build();
 
-      assertEquals(emoji, emoji2);
+    assertEquals(emoji, emoji2);
   }
 
   @Test
@@ -66,7 +65,7 @@ public class CustomEmojiTest {
         .updatedAt(Date.valueOf("2024-03-05"))
         .build();
 
-      assertNotEquals(emoji, emoji2);
+    assertNotEquals(emoji, emoji2);
   }
 
   @Test
@@ -95,7 +94,7 @@ public class CustomEmojiTest {
         .updatedAt(Date.valueOf("2024-03-05"))
         .build();
 
-      assertEquals(emoji, emoji2);
+    assertEquals(emoji, emoji2);
   }
 
   @Test
@@ -124,7 +123,7 @@ public class CustomEmojiTest {
         .updatedAt(Date.valueOf("2024-03-05"))
         .build();
 
-      assertNotEquals(emoji, emoji2);
+    assertNotEquals(emoji, emoji2);
   }
 
   @Test
@@ -269,7 +268,7 @@ public class CustomEmojiTest {
         .updatedAt(Date.valueOf("2024-03-05"))
         .build();
 
-    assertTrue(emoji.equals(emoji));
+    assertEquals(emoji, emoji);
   }
 
   @Test

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class BaseUrlUtil {
+
   @Value("${sublinks.settings.base_url}")
   String baseUrl;
 

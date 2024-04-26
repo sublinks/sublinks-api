@@ -8,7 +8,6 @@ import com.sublinks.sublinksapi.comment.events.CommentLikeUpdatedPublisher;
 import com.sublinks.sublinksapi.comment.models.CommentLikeSearchCriteria;
 import com.sublinks.sublinksapi.comment.repositories.CommentLikeRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
-
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;

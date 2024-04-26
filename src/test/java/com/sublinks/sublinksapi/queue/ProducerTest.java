@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.queue;
 
+import static org.mockito.Mockito.verify;
+
 import com.sublinks.sublinksapi.queue.services.Producer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -7,8 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-
-import static org.mockito.Mockito.verify;
 
 public class ProducerTest {
 
@@ -20,11 +20,13 @@ public class ProducerTest {
 
   @BeforeEach
   public void setup() {
+
     MockitoAnnotations.openMocks(this);
   }
 
   @Test
   public void whenSendMessage_thenRabbitTemplateCalled() {
+
     String message = "mock-message";
     String exchange = "mock-exchange";
     String routingKey = "mock-routing-key";

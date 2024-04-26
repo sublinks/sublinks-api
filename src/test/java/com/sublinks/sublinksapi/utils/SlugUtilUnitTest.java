@@ -1,10 +1,10 @@
 package com.sublinks.sublinksapi.utils;
 
-import org.junit.jupiter.api.Test;
-import java.util.regex.Pattern;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.regex.Pattern;
+import org.junit.jupiter.api.Test;
 
 public class SlugUtilUnitTest {
 
@@ -52,7 +52,7 @@ public class SlugUtilUnitTest {
 
     String uniqueSlug = slugUtil.uniqueSlug(titleString);
 
-    assertTrue(uniquePatter.matcher(uniqueSlug.substring(0,8)).matches(),
+    assertTrue(uniquePatter.matcher(uniqueSlug.substring(0, 8)).matches(),
         "Randomly generated string was not 8 a-z characters");
 
     assertEquals("-this_is_a_string", uniqueSlug.substring(8),

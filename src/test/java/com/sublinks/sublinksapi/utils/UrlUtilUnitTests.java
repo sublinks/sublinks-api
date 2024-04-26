@@ -1,16 +1,15 @@
 package com.sublinks.sublinksapi.utils;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
-import java.util.Collection;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Collection;
+import java.util.List;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 public class UrlUtilUnitTests {
 
@@ -22,10 +21,11 @@ public class UrlUtilUnitTests {
   // Making this list package private in UrlUtil.java would allow this class access and make this a little cleaner
   Collection<String> spyList = List.of("utm_source", "utm_medium", "utm_campaign", "utm_term",
       "utm_content", "gclid", "gclsrc", "dclid", "fbclid");
-  Collection<String> realParameters = List.of("real_query=real", "another_real_query=real", "last_real_query=real");
+  Collection<String> realParameters = List.of("real_query=real", "another_real_query=real",
+      "last_real_query=real");
   String mixOfParameters = "?real_query=real&utm_source=Source&utm_campaign=Campaign"
-        + "&utm_term=Term&utm_content=Content&another_real_query=real&gclid=gclid&gclsrc=gclsrc"
-        + "&dclid=dclid&fbclid=fbclid&last_real_query=real";
+      + "&utm_term=Term&utm_content=Content&another_real_query=real&gclid=gclid&gclsrc=gclsrc"
+      + "&dclid=dclid&fbclid=fbclid&last_real_query=real";
   String trackingParameters = "?utm_term=Term&utm_content=Content";
 
 
@@ -150,7 +150,8 @@ public class UrlUtilUnitTests {
   }
 
   @Test
-  @Disabled // URL does not provide a protocol handler for magnet by default
+  @Disabled
+    // URL does not provide a protocol handler for magnet by default
   void givenValidMagnetUrl_whenCheckUrlProtocol_thenDoNothing() {
 
     String providedMagnet = "magnet:?xt=urn:btih:5dee65101db281ac9c46344cd6b175cdcad53426&dn=download";
@@ -161,7 +162,8 @@ public class UrlUtilUnitTests {
   @Test
   void givenInvalidProtocol_whenCheckUrlProtocol_thenThrowRuntimeException() {
 
-    Exception exception = assertThrows(RuntimeException.class, () -> urlUtil.checkUrlProtocol(urlWithJunkProtocol));
+    Exception exception = assertThrows(RuntimeException.class,
+        () -> urlUtil.checkUrlProtocol(urlWithJunkProtocol));
 
     assertEquals("Invalid URL Scheme", exception.getMessage());
   }

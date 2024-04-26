@@ -22,11 +22,10 @@ import org.springframework.stereotype.Component;
 @Setter
 public class CommunityActorCreateListener implements ApplicationListener<CommunityCreatedEvent> {
 
+  private static final Logger logger = LoggerFactory.getLogger(CommunityActorCreateListener.class);
+  final private Producer federationProducer;
   @Value("${sublinks.federation.exchange}")
   private String federationExchange;
-  final private Producer federationProducer;
-
-  private static final Logger logger = LoggerFactory.getLogger(CommunityActorCreateListener.class);
 
   @Override
   public void onApplicationEvent(@NonNull CommunityCreatedEvent event) {
@@ -39,11 +38,11 @@ public class CommunityActorCreateListener implements ApplicationListener<Communi
     Community community = event.getCommunity();
 
     final Actor actorMessage = Actor.builder()
-        .actor_id(community.getActivityPubId())
+        .id(community.getActivityPubId())
         .actor_type(ActorType.COMMUNITY.getValue())
         .bio(community.getDescription())
         .username(community.getTitleSlug())
-        .display_name(community.getTitle())
+        .name(community.getTitle())
         .private_key(community.getPrivateKey())
         .public_key(community.getPublicKey())
         .build();

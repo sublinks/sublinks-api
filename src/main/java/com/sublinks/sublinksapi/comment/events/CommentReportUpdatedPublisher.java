@@ -13,7 +13,7 @@ public class CommentReportUpdatedPublisher {
 
   public void publish(final CommentReport commentReport) {
 
-    final CommentReportUpdatedEvent commentReportUpdatedEvent= new CommentReportUpdatedEvent(this,
+    final CommentReportUpdatedEvent commentReportUpdatedEvent = new CommentReportUpdatedEvent(this,
         commentReport);
     applicationEventPublisher.publishEvent(commentReportUpdatedEvent);
   }
