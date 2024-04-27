@@ -23,8 +23,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "user_data")
-public class UserData {
+@Table(name = "person_meta_data")
+public class PersonMetaData {
 
   /**
    * Relationships.
