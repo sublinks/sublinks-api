@@ -67,7 +67,7 @@ public class SearchService {
         PageRequest.of(page, pageSize, sort), posts.size());
   }
 
-  public Page<Person> seearchPerson(final String query, final int page, final int pageSize,
+  public Page<Person> searchPerson(final String query, final int page, final int pageSize,
       final Sort sort) {
 
     return personSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
