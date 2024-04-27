@@ -9,7 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.DeleteCustomEmoj
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.DeleteCustomEmojiResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.EditCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionEmojiTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
@@ -56,8 +56,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_EMOJI,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionEmojiTypes.CREATE_EMOJI,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final var customEmoji = CustomEmoji.builder()
@@ -91,8 +91,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.UPDATE_EMOJI,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionEmojiTypes.UPDATE_EMOJI,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     var emojiId = (long) editCustomEmojiForm.id();
@@ -129,8 +129,8 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.DELETE_EMOJI,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionEmojiTypes.DELETE_EMOJI,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     var emojiId = (long) deleteCustomEmojiForm.id();

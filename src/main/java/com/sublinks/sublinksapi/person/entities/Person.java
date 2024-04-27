@@ -81,7 +81,7 @@ public class Person implements UserDetails, Principal {
 
   @OneToMany(mappedBy = "person")
   @Fetch(FetchMode.SUBSELECT)
-  private List<UserData> userData;
+  private List<PersonMetaData> personMetaData;
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
   @Fetch(FetchMode.SUBSELECT)

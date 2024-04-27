@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.events;
 
 import com.sublinks.sublinksapi.person.entities.Person;
-import com.sublinks.sublinksapi.person.entities.UserData;
+import com.sublinks.sublinksapi.person.entities.PersonMetaData;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +23,10 @@ public class UserDataInvalidationEventPublisher {
     applicationEventPublisher.publishEvent(userDataInvalidationEvent);
   }
 
-  public void publish(final UserData userData) {
+  public void publish(final PersonMetaData personMetaData) {
 
     UserDataInvalidationEvent userDataInvalidationEvent = new UserDataInvalidationEvent(this,
-        userData);
+        personMetaData);
     applicationEventPublisher.publishEvent(userDataInvalidationEvent);
   }
 }

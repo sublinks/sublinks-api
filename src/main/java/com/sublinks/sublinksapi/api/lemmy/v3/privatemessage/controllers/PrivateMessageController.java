@@ -20,7 +20,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.models.ResolvePrivat
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivateMessageReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.privatemessage.services.LemmyPrivateMessageService;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessageTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
@@ -77,7 +78,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person sender = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(sender, RolePermission.READ_PRIVATE_MESSAGES,
+    roleAuthorizingService.isPermitted(sender,
+        RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo: add support for other sort types
@@ -117,8 +119,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person sender = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(sender,
-        RolePermission.CREATE_PRIVATE_MESSAGE,
+    roleAuthorizingService.isPermitted(sender,
+        RolePermissionPrivateMessageTypes.CREATE_PRIVATE_MESSAGE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Person recipient = personRepository.findById(
@@ -151,8 +153,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.UPDATE_PRIVATE_MESSAGE,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionPrivateMessageTypes.UPDATE_PRIVATE_MESSAGE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
@@ -181,8 +183,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.DELETE_PRIVATE_MESSAGE,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionPrivateMessageTypes.DELETE_PRIVATE_MESSAGE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
@@ -209,8 +211,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.MARK_PRIVATE_MESSAGE_AS_READ,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionPrivateMessageTypes.MARK_PRIVATE_MESSAGE_AS_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PrivateMessage privateMessage = privateMessageRepository.findById(
@@ -237,8 +239,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.REPORT_PRIVATE_MESSAGE,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionPrivateMessageTypes.REPORT_PRIVATE_MESSAGE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(
@@ -272,8 +274,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.REPORT_INSTANCE_RESOLVE,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final PrivateMessageReport privateMessageReport = privateMessageReportRepository.findById(
@@ -302,7 +304,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.REPORT_INSTANCE_READ,
+    roleAuthorizingService.isPermitted(person, RolePermissionInstanceTypes.REPORT_INSTANCE_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final int page = PaginationControllerUtils.getAbsoluteMinNumber(

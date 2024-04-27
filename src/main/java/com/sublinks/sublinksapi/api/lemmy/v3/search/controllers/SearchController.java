@@ -13,7 +13,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.search.models.Search;
 import com.sublinks.sublinksapi.api.lemmy.v3.search.models.SearchResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -64,8 +64,8 @@ public class SearchController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(jwtPerson);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.INSTANCE_SEARCH,
+    roleAuthorizingService.isPermitted(person.orElse(null),
+        RolePermissionInstanceTypes.INSTANCE_SEARCH,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final SearchResponse.SearchResponseBuilder responseBuilder = SearchResponse.builder();

@@ -21,7 +21,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmail;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
@@ -305,7 +305,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
     }
 
-    roleAuthorizingService.hasAdminOrPermission(person, RolePermission.DELETE_USER);
+    roleAuthorizingService.isPermitted(person, RolePermissionPersonTypes.DELETE_USER);
 
     // Bug in the Lemmy UI delete_content() is always false but the api is just assuming true..., so we just ignore it
     // @todo check when lemmy fixes this
@@ -468,7 +468,7 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermission(person, RolePermission.RESET_PASSWORD);
+    roleAuthorizingService.isPermitted(person, RolePermissionPersonTypes.RESET_PASSWORD);
 
     if (!personService.isPasswordEqual(person, changePasswordForm.old_password())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");

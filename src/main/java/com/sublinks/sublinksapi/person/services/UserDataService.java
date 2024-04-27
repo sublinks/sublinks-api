@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.person.services;
 
 import com.sublinks.sublinksapi.person.config.UserDataConfig;
 import com.sublinks.sublinksapi.person.entities.Person;
-import com.sublinks.sublinksapi.person.entities.UserData;
+import com.sublinks.sublinksapi.person.entities.PersonMetaData;
 import com.sublinks.sublinksapi.person.events.UserDataCreatedEventPublisher;
 import com.sublinks.sublinksapi.person.events.UserDataInvalidationEventPublisher;
 import com.sublinks.sublinksapi.person.events.UserDataUpdatedPublisher;
@@ -26,26 +26,26 @@ public class UserDataService {
   private final UserDataInvalidationEventPublisher userDataInvalidationEventPublisher;
 
 
-  public void invalidate(UserData userData) {
+  public void invalidate(PersonMetaData personMetaData) {
 
-    userData.setActive(false);
-    userDataRepository.save(userData);
-    userDataInvalidationEventPublisher.publish(userData);
+    personMetaData.setActive(false);
+    userDataRepository.save(personMetaData);
+    userDataInvalidationEventPublisher.publish(personMetaData);
   }
 
   public void checkAndAddIpRelation(Person person, String ipAddress, String token,
       @Nullable String userAgent) {
 
     boolean saveUserIps = userDataConfig.isSaveUserData();
-    Optional<UserData> foundData = getActiveUserDataByPersonAndIpAddress(person, token, ipAddress,
+    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndIpAddress(person, token, ipAddress,
         userAgent);
 
     if (foundData.isPresent()) {
 
-      UserData userData = foundData.get();
+      PersonMetaData personMetaData = foundData.get();
 
-      if (saveUserIps && userAgent != null && !userData.getUserAgent().equals(userAgent)) {
-        final UserData newUserData = UserData.builder()
+      if (saveUserIps && userAgent != null && !personMetaData.getUserAgent().equals(userAgent)) {
+        final PersonMetaData newPersonMetaData = PersonMetaData.builder()
             .person(person)
             .ipAddress(ipAddress)
             .userAgent(userAgent)
@@ -53,13 +53,13 @@ public class UserDataService {
             .active(true)
             .build();
 
-        userDataRepository.save(newUserData);
-        userDataCreatedEventPublisher.publish(newUserData);
+        userDataRepository.save(newPersonMetaData);
+        userDataCreatedEventPublisher.publish(newPersonMetaData);
         return;
       }
 
-      if (saveUserIps && !userData.getIpAddress().equals(ipAddress)) {
-        final UserData newUserData = UserData.builder()
+      if (saveUserIps && !personMetaData.getIpAddress().equals(ipAddress)) {
+        final PersonMetaData newPersonMetaData = PersonMetaData.builder()
             .person(person)
             .ipAddress(ipAddress)
             .userAgent(userAgent)
@@ -67,34 +67,34 @@ public class UserDataService {
             .active(true)
             .build();
 
-        userDataRepository.save(newUserData);
-        userDataCreatedEventPublisher.publish(newUserData);
+        userDataRepository.save(newPersonMetaData);
+        userDataCreatedEventPublisher.publish(newPersonMetaData);
         return;
       }
 
-      userData.setLastUsedAt(new Date());
+      personMetaData.setLastUsedAt(new Date());
 
-      userDataRepository.save(userData);
-      userDataUpdatedPublisher.publish(userData);
+      userDataRepository.save(personMetaData);
+      userDataUpdatedPublisher.publish(personMetaData);
       return;
     }
-    UserData userData = UserData.builder()
+    PersonMetaData personMetaData = PersonMetaData.builder()
         .person(person)
         .ipAddress(saveUserIps ? ipAddress : null)
         .userAgent(saveUserIps ? userAgent : null)
         .token(token)
         .active(true)
         .build();
-    UserData createdUserData = userDataRepository.save(userData);
-    userDataCreatedEventPublisher.publish(createdUserData);
+    PersonMetaData createdPersonMetaData = userDataRepository.save(personMetaData);
+    userDataCreatedEventPublisher.publish(createdPersonMetaData);
   }
 
-  public Optional<UserData> getActiveUserDataByPersonAndToken(Person person, String token) {
+  public Optional<PersonMetaData> getActiveUserDataByPersonAndToken(Person person, String token) {
 
     return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, token);
   }
 
-  private Optional<UserData> getActiveUserDataByPersonAndIpAddress(Person person, String token,
+  private Optional<PersonMetaData> getActiveUserDataByPersonAndIpAddress(Person person, String token,
       String ipAddress, String userAgent) {
 
     if (userDataConfig.isSaveUserData()) {
@@ -112,21 +112,21 @@ public class UserDataService {
     userDataInvalidationEventPublisher.publish(person);
   }
 
-  public void invalidateUserData(UserData userData) {
+  public void invalidateUserData(PersonMetaData personMetaData) {
 
-    invalidate(userData);
+    invalidate(personMetaData);
   }
 
   public void clearUserDataBefore(Person person, Date lastUsedAt) {
 
-    List<UserData> found = userDataRepository.findAllByPersonAndLastUsedAtBefore(person,
+    List<PersonMetaData> found = userDataRepository.findAllByPersonAndLastUsedAtBefore(person,
         lastUsedAt);
     found.forEach(this::invalidate);
   }
 
   public void clearUserDataBefore(Date lastUsedAt) {
 
-    List<UserData> found = userDataRepository.findAllByLastUsedAtBefore(lastUsedAt);
+    List<PersonMetaData> found = userDataRepository.findAllByLastUsedAtBefore(lastUsedAt);
     found.forEach(this::invalidate);
   }
 }
