@@ -20,6 +20,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * JwtFilter is a filter that performs authentication and authorization based on JWT (JSON Web
+ * Token). It extracts the JWT from the request header or cookie, validates it, and sets the
+ * authentication in the Spring Security context if it is valid. It also provides a method for
+ * deciding whether to filter a request based on the servlet path.
+ */
 @Component
 @RequiredArgsConstructor
 @Order(1)
