@@ -11,7 +11,8 @@ public interface PostRepositorySearch {
 
   List<Post> allPostsBySearchCriteria(PostSearchCriteria postSearchCriteria);
 
-  List<Post> allPostsByCommunityAndPersonAndRemoved(Community community, Person person, List<RemovedState> removedStates);
+  List<Post> allPostsByCommunityAndPersonAndRemoved(Community community, Person person,
+      List<RemovedState> removedStates);
 
   List<Post> allPostsByPersonAndRemoved(Person person, List<RemovedState> removedStates);
 }

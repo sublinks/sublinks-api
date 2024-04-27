@@ -187,15 +187,15 @@ ALTER TABLE `custom_emoji_keywords`
 /**
   Role Permissions table
  */
-ALTER TABLE `role_permissions`
-  ADD FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE;
+ALTER TABLE `acl_role_permissions`
+  ADD FOREIGN KEY (`role_id`) REFERENCES `acl_roles` (`id`) ON DELETE CASCADE;
 
 
 /**
   People table
  */
 ALTER TABLE `people`
-  ADD FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD FOREIGN KEY (`role_id`) REFERENCES `acl_roles` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 /**
   Post History table

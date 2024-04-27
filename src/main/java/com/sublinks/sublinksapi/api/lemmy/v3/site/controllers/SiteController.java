@@ -14,8 +14,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.instance.entities.InstanceBlock;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
@@ -68,6 +69,7 @@ public class SiteController extends AbstractLemmyApiController {
   private final AnnouncementRepository announcementRepository;
   private final ConversionService conversionService;
   private final LemmyPersonService lemmyPersonService;
+  private final RoleService roleService;
 
 
   @Operation(summary = "Gets the site, and your user data.")
@@ -77,14 +79,14 @@ public class SiteController extends AbstractLemmyApiController {
   public GetSiteResponse getSite(final JwtPerson principal) {
 
     GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
-        .version("0.19.0") // @todo grab this from config?
+        .version("0.19.3") // @todo grab this from config?
         .taglines(announcementRepository.findAll().stream()
             .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
         .custom_emojis(lemmySiteService.customEmojis()).admins(
-            roleAuthorizingService.getAdmins().stream().map(lemmyPersonService::getPersonView)
+            roleService.getAdmins().stream().map(lemmyPersonService::getPersonView)
                 .toList());
 
     getOptionalPerson(principal).ifPresent(
@@ -167,8 +169,8 @@ public class SiteController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.INSTANCE_UPDATE_SETTINGS,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionInstanceTypes.INSTANCE_UPDATE_SETTINGS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     if (editSiteForm.taglines().isPresent()) {
@@ -232,8 +234,8 @@ public class SiteController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.INSTANCE_DEFEDERATE_INSTANCE,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionInstanceTypes.INSTANCE_DEFEDERATE_INSTANCE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Instance> instance = instanceRepository.findById(

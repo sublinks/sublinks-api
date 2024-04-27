@@ -13,11 +13,11 @@ public interface ModerationLogRepository extends JpaRepository<ModerationLog, Lo
   /**
    * Search moderation logs and return a page of results
    *
-   * @param actionType Moderation Log Action Type
-   * @param communityId Community Id
+   * @param actionType         Moderation Log Action Type
+   * @param communityId        Community Id
    * @param moderationPersonId Moderation Person Id
-   * @param otherPersonId Other Person Id
-   * @param pageable Pagination information
+   * @param otherPersonId      Other Person Id
+   * @param pageable           Pagination information
    * @return a Page of moderation logs
    */
   @Query(value = "SELECT modLog "
@@ -26,7 +26,8 @@ public interface ModerationLogRepository extends JpaRepository<ModerationLog, Lo
       + " AND (:communityId IS NULL OR modLog.communityId = :communityId) "
       + " AND (:moderationPersonId IS NULL OR (modLog.moderationPersonId = :moderationPersonId OR modLog.adminPersonId = :moderationPersonId)) "
       + " AND (:otherPersonId IS NULL OR modLog.otherPersonId = :otherPersonId)")
-  Page<ModerationLog> searchAllByActionTypeAndPersonIds(@Param("actionType") ModlogActionType actionType,
+  Page<ModerationLog> searchAllByActionTypeAndPersonIds(
+      @Param("actionType") ModlogActionType actionType,
       @Param("communityId") Long communityId,
       @Param("moderationPersonId") Long moderationPersonId,
       @Param("otherPersonId") Long otherPersonId,

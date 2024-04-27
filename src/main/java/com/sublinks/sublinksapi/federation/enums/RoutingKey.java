@@ -6,10 +6,12 @@ public enum RoutingKey {
   private final String value;
 
   RoutingKey(String value) {
+
     this.value = value;
   }
 
   public String getValue() {
+
     return value;
   }
 }

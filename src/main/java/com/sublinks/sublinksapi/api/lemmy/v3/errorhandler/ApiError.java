@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 @SuppressWarnings("RecordComponentName")
 public class ApiError {
+
   private final HttpStatusCode status;
   private final String message;
   private final List<String> errors;

@@ -101,6 +101,7 @@ public class ImageController extends AbstractLemmyApiController {
   )
   @GetMapping("delete/{token}/{filename}")
   Mono<ResponseEntity<String>> delete(@PathVariable String token, @PathVariable String filename) {
+
     var webClient = WebClient.builder().baseUrl(pictrsUri).build();
     String url = "/image/delete/" + token + "/" + filename;
 

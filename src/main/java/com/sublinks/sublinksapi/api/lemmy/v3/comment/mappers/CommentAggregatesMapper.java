@@ -1,12 +1,12 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.comment.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentAggregates;
+import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
-import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)

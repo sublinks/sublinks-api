@@ -20,7 +20,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommunityVie
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionModLogTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -49,6 +49,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping(path = "/api/v3/modlog")
 @Tag(name = "Miscellaneous")
 public class ModerationLogController extends AbstractLemmyApiController {
+
   private final ModerationLogService moderationLogService;
   private final RoleAuthorizingService roleAuthorizingService;
 
@@ -63,8 +64,8 @@ public class ModerationLogController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_MODLOG,
+    roleAuthorizingService.isPermitted(person.orElse(null),
+        RolePermissionModLogTypes.READ_MODLOG,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // Lemmy limit is 20 per ModLog table and there are 15 tables
@@ -95,45 +96,58 @@ public class ModerationLogController extends AbstractLemmyApiController {
         limit,
         Sort.by("createdAt").descending());
 
-    for(ModerationLog moderationLog : moderationLogs.getContent()) {
+    for (ModerationLog moderationLog : moderationLogs.getContent()) {
       switch (moderationLog.getActionType()) {
-          case ModRemovePost -> removed_posts.add(moderationLogService.buildModRemovePostView(moderationLog));
-          case ModLockPost -> locked_posts.add(moderationLogService.buildModLockPostView(moderationLog));
-          case ModFeaturePost -> featured_posts.add(moderationLogService.buildModFeaturePostView(moderationLog));
-          case ModRemoveComment -> removed_comments.add(moderationLogService.buildModRemoveCommentView(moderationLog));
-          case ModRemoveCommunity -> removed_communities.add(moderationLogService.buildModRemoveCommunityView(moderationLog));
-          case ModBanFromCommunity -> banned_from_community.add(moderationLogService.buildModBanFromCommunityView(moderationLog));
-          case ModAddCommunity -> added_to_community.add(moderationLogService.buildModAddCommunityView(moderationLog));
-          case ModTransferCommunity -> transferred_to_community.add(moderationLogService.buildModTransferCommunityView(moderationLog));
-          case ModAdd -> added.add(moderationLogService.buildModAddView(moderationLog));
-          case ModBan -> banned.add(moderationLogService.buildModBanView(moderationLog));
-          case ModHideCommunity -> hidden_communities.add(moderationLogService.buildModHideCommunityView(moderationLog));
-          case AdminPurgePerson -> admin_purged_persons.add(moderationLogService.buildAdminPurgePersonView(moderationLog));
-          case AdminPurgeCommunity -> admin_purged_communities.add(moderationLogService.buildAdminPurgeCommunityView(moderationLog));
-          case AdminPurgePost -> admin_purged_posts.add(moderationLogService.buildAdminPurgePostView(moderationLog));
-          case AdminPurgeComment -> admin_purged_comments.add(moderationLogService.buildAdminPurgeCommentView(moderationLog));
-          default -> {
-            // Nothing is needed for All
-          }
+        case ModRemovePost -> removed_posts.add(
+            moderationLogService.buildModRemovePostView(moderationLog));
+        case ModLockPost -> locked_posts.add(
+            moderationLogService.buildModLockPostView(moderationLog));
+        case ModFeaturePost -> featured_posts.add(
+            moderationLogService.buildModFeaturePostView(moderationLog));
+        case ModRemoveComment -> removed_comments.add(
+            moderationLogService.buildModRemoveCommentView(moderationLog));
+        case ModRemoveCommunity -> removed_communities.add(
+            moderationLogService.buildModRemoveCommunityView(moderationLog));
+        case ModBanFromCommunity -> banned_from_community.add(
+            moderationLogService.buildModBanFromCommunityView(moderationLog));
+        case ModAddCommunity -> added_to_community.add(
+            moderationLogService.buildModAddCommunityView(moderationLog));
+        case ModTransferCommunity -> transferred_to_community.add(
+            moderationLogService.buildModTransferCommunityView(moderationLog));
+        case ModAdd -> added.add(moderationLogService.buildModAddView(moderationLog));
+        case ModBan -> banned.add(moderationLogService.buildModBanView(moderationLog));
+        case ModHideCommunity -> hidden_communities.add(
+            moderationLogService.buildModHideCommunityView(moderationLog));
+        case AdminPurgePerson -> admin_purged_persons.add(
+            moderationLogService.buildAdminPurgePersonView(moderationLog));
+        case AdminPurgeCommunity -> admin_purged_communities.add(
+            moderationLogService.buildAdminPurgeCommunityView(moderationLog));
+        case AdminPurgePost -> admin_purged_posts.add(
+            moderationLogService.buildAdminPurgePostView(moderationLog));
+        case AdminPurgeComment -> admin_purged_comments.add(
+            moderationLogService.buildAdminPurgeCommentView(moderationLog));
+        default -> {
+          // Nothing is needed for All
+        }
       }
     }
 
     return GetModlogResponse.builder()
-      .removed_posts(removed_posts)
-      .locked_posts(locked_posts)
-      .featured_posts(featured_posts)
-      .removed_comments(removed_comments)
-      .removed_communities(removed_communities)
-      .banned_from_community(banned_from_community)
-      .banned(banned)
-      .added_to_community(added_to_community)
-      .transferred_to_community(transferred_to_community)
-      .added(added)
-      .admin_purged_persons(admin_purged_persons)
-      .admin_purged_communities(admin_purged_communities)
-      .admin_purged_posts(admin_purged_posts)
-      .admin_purged_comments(admin_purged_comments)
-      .hidden_communities(hidden_communities)
-      .build();
+        .removed_posts(removed_posts)
+        .locked_posts(locked_posts)
+        .featured_posts(featured_posts)
+        .removed_comments(removed_comments)
+        .removed_communities(removed_communities)
+        .banned_from_community(banned_from_community)
+        .banned(banned)
+        .added_to_community(added_to_community)
+        .transferred_to_community(transferred_to_community)
+        .added(added)
+        .admin_purged_persons(admin_purged_persons)
+        .admin_purged_communities(admin_purged_communities)
+        .admin_purged_posts(admin_purged_posts)
+        .admin_purged_comments(admin_purged_comments)
+        .hidden_communities(hidden_communities)
+        .build();
   }
 }

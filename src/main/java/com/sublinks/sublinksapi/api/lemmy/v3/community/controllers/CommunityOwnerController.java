@@ -7,7 +7,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.EditCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -71,8 +71,8 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_COMMUNITY,
+    roleAuthorizingService.isPermitted(person,
+        RolePermissionCommunityTypes.CREATE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final List<Language> languages = new ArrayList<>();
@@ -158,7 +158,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.UPDATE_COMMUNITY,
+    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.UPDATE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Community community = communityRepository.findById(editCommunityForm.community_id())

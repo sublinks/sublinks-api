@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.comment.repositories;
 
+import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
+
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
@@ -19,8 +21,6 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
-
-import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
 @AllArgsConstructor
 public class CommentRepositoryImpl implements CommentRepositorySearch {

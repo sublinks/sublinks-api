@@ -8,13 +8,10 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
-import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentSaveService;
-import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.RequiredArgsConstructor;
@@ -27,21 +24,10 @@ import org.springframework.stereotype.Service;
 public class LemmyCommentService {
 
   private final LemmyCommunityService lemmyCommunityService;
-  private final LocalInstanceContext localInstanceContext;
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final ComentSaveRepository comentSaveRepository;
   private final CommentSaveService commentSaveService;
-  private final RoleAuthorizingService roleAuthorizingService;
-
-  public String generateActivityPubId(
-      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
-
-    String domain = localInstanceContext.instance().getDomain();
-    return String.format("%s/comment/%d", domain, comment.getId());
-  }
-
 
   @NonNull
   public CommentView createCommentView(
@@ -101,8 +87,7 @@ public class LemmyCommentService {
     final boolean isBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         comment.getCommunity(), LinkPersonCommunityType.banned);
 
-    final boolean createIsAdmin = roleAuthorizingService.hasAdminOrPermission(creator,
-        RolePermission.ADMIN);
+    final boolean createIsAdmin = RoleAuthorizingService.isAdmin(creator);
 
     final boolean creatorIsModerator = linkPersonCommunityService.hasLink(creator,
         comment.getCommunity(), LinkPersonCommunityType.moderator);

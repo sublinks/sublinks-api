@@ -8,7 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.EditPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -81,7 +81,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_POST,
+    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById((long) createPostForm.community_id())
@@ -181,7 +181,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.UPDATE_POST,
+    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.UPDATE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     post.setTitle(editPostForm.name());
@@ -252,7 +252,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.DELETE_POST,
+    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.DELETE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) deletePostForm.post_id())
