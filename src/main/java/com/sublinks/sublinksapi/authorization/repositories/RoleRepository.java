@@ -9,6 +9,8 @@ public interface RoleRepository extends JpaRepository<Role, Long>, RoleSearchRep
 
   Optional<Collection<Role>> findAllByName(String name);
 
+  Optional<Role> findFirstByName(String name);
+
   Collection<Role> findByIdIn(Collection<Long> roleIds);
 
   Collection<Role> findAllByNameIn(Collection<String> roleNames);

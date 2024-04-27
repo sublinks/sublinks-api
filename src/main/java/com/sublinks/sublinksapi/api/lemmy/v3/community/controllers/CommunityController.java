@@ -18,7 +18,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
@@ -74,8 +74,8 @@ public class CommunityController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_COMMUNITY,
+    roleAuthorizingService.isPermitted(person.orElse(null),
+        RolePermissionCommunityTypes.READ_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = Optional.ofNullable(
@@ -110,8 +110,8 @@ public class CommunityController extends AbstractLemmyApiController {
     final Collection<CommunityView> communityViews = new LinkedHashSet<>();
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_COMMUNITIES,
+    roleAuthorizingService.isPermitted(person.orElse(null),
+        RolePermissionCommunityTypes.READ_COMMUNITIES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final int page = PaginationControllerUtils.getAbsoluteMinNumber(listCommunitiesForm.page(), 1);
@@ -156,7 +156,7 @@ public class CommunityController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.COMMUNITY_FOLLOW,
+    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_FOLLOW,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Community> community = communityRepository.findById(
@@ -191,7 +191,7 @@ public class CommunityController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.COMMUNITY_BLOCK,
+    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_BLOCK,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Community community = communityRepository.findById(blockCommunityForm.community_id())

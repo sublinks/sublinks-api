@@ -15,7 +15,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApi
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ModlogActionType;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
@@ -78,8 +80,9 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Set.of(RolePermission.MODERATOR_REMOVE_COMMENT, RolePermission.REMOVE_COMMENT),
+    roleAuthorizingService.isPermitted(person,
+        Set.of(RolePermissionCommentTypes.MODERATOR_REMOVE_COMMENT,
+            RolePermissionCommentTypes.REMOVE_COMMENT),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     //@todo: check if he is mod if not REMOVE_COMMENT
 
@@ -121,8 +124,9 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Collections.setOf(RolePermission.ADMIN_SPEAK, RolePermission.MODERATOR_SPEAK),
+    roleAuthorizingService.isPermitted(person,
+        Collections.setOf(RolePermissionCommentTypes.ADMIN_SPEAK,
+            RolePermissionCommentTypes.MODERATOR_SPEAK),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo: check if he is mod if not ADMIN_SPEAK
@@ -146,17 +150,17 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       @Valid @RequestBody ResolveCommentReport resolveCommentReportForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Collections.setOf(RolePermission.REPORT_COMMUNITY_RESOLVE,
-            RolePermission.REPORT_INSTANCE_RESOLVE),
+    roleAuthorizingService.isPermitted(person,
+        Collections.setOf(RolePermissionCommunityTypes.REPORT_COMMUNITY_RESOLVE,
+            RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final CommentReport commentReport = commentReportRepository.findById(
             (long) resolveCommentReportForm.report_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
-        RolePermission.REPORT_INSTANCE_RESOLVE);
+    final boolean isAdmin = roleAuthorizingService.isPermitted(person,
+        RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
       final boolean isModerator =
@@ -186,12 +190,13 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Set.of(RolePermission.REPORT_COMMUNITY_READ, RolePermission.REPORT_INSTANCE_READ),
+    roleAuthorizingService.isPermitted(person,
+        Set.of(RolePermissionCommunityTypes.REPORT_COMMUNITY_READ,
+            RolePermissionInstanceTypes.REPORT_INSTANCE_READ),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
-        RolePermission.REPORT_INSTANCE_READ);
+    final boolean isAdmin = roleAuthorizingService.isPermitted(person,
+        RolePermissionInstanceTypes.REPORT_INSTANCE_READ);
 
     final List<CommentReport> commentReports = new ArrayList<>();
 

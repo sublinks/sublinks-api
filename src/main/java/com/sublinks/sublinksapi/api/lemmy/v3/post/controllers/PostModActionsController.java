@@ -17,7 +17,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.ResolvePostReport;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostReportService;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
@@ -82,15 +82,15 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Set.of(RolePermission.MODERATOR_REMOVE_POST, RolePermission.REMOVE_POST),
+    roleAuthorizingService.isPermitted(person,
+        Set.of(RolePermissionPostTypes.MODERATOR_REMOVE_POST, RolePermissionPostTypes.REMOVE_POST),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById(modRemovePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = roleAuthorizingService.hasAdminOrPermission(person,
-        RolePermission.REMOVE_POST);
+    final boolean isAdmin = roleAuthorizingService.isPermitted(person,
+        RolePermissionPostTypes.REMOVE_POST);
 
     if (!isAdmin) {
       final boolean moderatesCommunity =

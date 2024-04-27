@@ -27,7 +27,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "roles")
+@Table(name = "acl_roles")
 public class Role {
 
   @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)

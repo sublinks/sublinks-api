@@ -1,10 +1,7 @@
 package com.sublinks.sublinksapi.authorization.entities;
 
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +20,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "role_permissions")
+@Table(name = "acl_role_permissions")
 public class RolePermissions {
 
   @Id
@@ -35,6 +32,5 @@ public class RolePermissions {
   private Role role;
 
   @Column(nullable = false, name = "permission")
-  @Enumerated(EnumType.STRING)
-  private RolePermission permission;
+  private String permission;
 }

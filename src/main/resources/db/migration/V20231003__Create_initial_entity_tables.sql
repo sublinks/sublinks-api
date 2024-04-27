@@ -686,11 +686,10 @@ CREATE TABLE custom_emoji_keywords
 
 CREATE INDEX IDX_CUSTOM_EMOJI_KEYWORD_CUSTOM_EMOJI_ID ON custom_emoji_keywords (custom_emoji_id);
 
-
 /**
   Roles table
  */
-CREATE TABLE roles
+CREATE TABLE acl_roles
 (
   id          BIGSERIAL PRIMARY KEY,
   name        VARCHAR(255)                              NOT NULL,
@@ -702,22 +701,22 @@ CREATE TABLE roles
 );
 
 /**
-  Rolepermissions table
+  Role permissions table
  */
-CREATE TABLE role_permissions
+CREATE TABLE acl_role_permissions
 (
   id         BIGSERIAL PRIMARY KEY,
   role_id    BIGINT NOT NULL,
   permission TEXT   NOT NULL
 );
 
-CREATE INDEX IDX_ROLE_PERMISSIONS_ROLE_ID ON role_permissions (role_id);
-CREATE UNIQUE INDEX IDX_ROLE_PERMISSIONS_ROLE_ID_PERMISSION ON role_permissions (role_id, permission);
+CREATE INDEX IDX_ACL_ROLE_PERMISSIONS_ROLE_ID ON acl_role_permissions (role_id);
+CREATE UNIQUE INDEX IDX_ACL_ROLE_PERMISSIONS_ROLE_ID_PERMISSION ON acl_role_permissions (role_id, permission);
 
 /**
-  User Data table
+  Person Meta Data table
  */
-CREATE TABLE user_data
+CREATE TABLE person_meta_data
 (
   id           BIGSERIAL PRIMARY KEY,
   person_id    BIGINT                                    NOT NULL,

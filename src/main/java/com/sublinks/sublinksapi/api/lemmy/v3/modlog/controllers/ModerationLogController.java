@@ -20,7 +20,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemoveCommunityVie
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionModLogTypes;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -64,8 +64,8 @@ public class ModerationLogController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_MODLOG,
+    roleAuthorizingService.isPermitted(person.orElse(null),
+        RolePermissionModLogTypes.READ_MODLOG,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // Lemmy limit is 20 per ModLog table and there are 15 tables
