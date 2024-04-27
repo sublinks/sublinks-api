@@ -50,7 +50,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "posts")
-public class Post extends CursorPageable implements AclEntityInterface {
+public class Post implements AclEntityInterface {
 
   /**
    * Relationships.
