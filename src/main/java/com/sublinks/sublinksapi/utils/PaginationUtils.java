@@ -1,12 +1,7 @@
 package com.sublinks.sublinksapi.utils;
 
-import com.sublinks.sublinksapi.utils.models.CursorPageable;
 import jakarta.persistence.TypedQuery;
 import org.springframework.lang.Nullable;
-
-import java.util.Date;
-
-import static java.util.Objects.requireNonNull;
 
 public class PaginationUtils {
 
