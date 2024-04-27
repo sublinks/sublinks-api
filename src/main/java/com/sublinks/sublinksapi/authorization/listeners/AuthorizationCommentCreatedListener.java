@@ -6,6 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * AuthorizationCommentCreatedListener is a class that listens to CommentCreatedEvent and performs
+ * authorization logic.
+ */
 @Component
 @RequiredArgsConstructor
 public class AuthorizationCommentCreatedListener implements
