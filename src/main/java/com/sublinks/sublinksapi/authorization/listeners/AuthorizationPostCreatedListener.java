@@ -7,6 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+/**
+ * This class is an implementation of the ApplicationListener interface and listens for the
+ * PostCreatedEvent. Upon receiving the event, it retrieves the creator of the post using the
+ * PostService.
+ */
 @Component
 @RequiredArgsConstructor
 public class AuthorizationPostCreatedListener implements ApplicationListener<PostCreatedEvent> {
