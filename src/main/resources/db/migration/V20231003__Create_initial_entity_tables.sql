@@ -468,7 +468,7 @@ CREATE INDEX IDX_POST_CROSS_POST_MD5_HASH ON post_cross_posts (md5_hash);
 
  Post Mention table
  */
-CREATE TABLE people_mentions
+CREATE TABLE person_mentions
 (
   id           BIGSERIAL PRIMARY KEY,
   recipient_id BIGINT                                    NOT NULL,
@@ -477,7 +477,7 @@ CREATE TABLE people_mentions
   created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
-CREATE UNIQUE INDEX IDX_PEOPLE_MENTIONS_RECIPIENT_ID ON people_mentions (recipient_id);
+CREATE UNIQUE INDEX IDX_PEOPLE_MENTIONS_RECIPIENT_ID ON person_mentions (recipient_id);
 
 /**
  Private Message

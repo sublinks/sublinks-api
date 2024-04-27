@@ -21,7 +21,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModRemovePostView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.models.ModTransferCommunityView;
 import com.sublinks.sublinksapi.api.lemmy.v3.modlog.services.ModerationLogService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionModLogTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +51,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class ModerationLogController extends AbstractLemmyApiController {
 
   private final ModerationLogService moderationLogService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Get the modlog.")
   @ApiResponses(value = {
@@ -64,7 +64,7 @@ public class ModerationLogController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.isPermitted(person.orElse(null),
+    rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionModLogTypes.READ_MODLOG,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 

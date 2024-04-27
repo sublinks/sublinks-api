@@ -19,7 +19,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -61,7 +61,7 @@ public class CommunityController extends AbstractLemmyApiController {
   private final LemmyCommunityService lemmyCommunityService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final ConversionService conversionService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Get / fetch a community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -74,7 +74,7 @@ public class CommunityController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.isPermitted(person.orElse(null),
+    rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionCommunityTypes.READ_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
@@ -110,7 +110,7 @@ public class CommunityController extends AbstractLemmyApiController {
     final Collection<CommunityView> communityViews = new LinkedHashSet<>();
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.isPermitted(person.orElse(null),
+    rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionCommunityTypes.READ_COMMUNITIES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
@@ -156,7 +156,7 @@ public class CommunityController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_FOLLOW,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_FOLLOW,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Community> community = communityRepository.findById(
@@ -191,7 +191,7 @@ public class CommunityController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_BLOCK,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_BLOCK,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Community community = communityRepository.findById(blockCommunityForm.community_id())

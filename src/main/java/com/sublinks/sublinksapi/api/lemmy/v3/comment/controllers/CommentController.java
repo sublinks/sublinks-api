@@ -21,7 +21,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReport
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
@@ -41,7 +41,6 @@ import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
-import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.services.PersonService;
@@ -74,6 +73,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller class for managing comments.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
@@ -94,11 +96,17 @@ public class CommentController extends AbstractLemmyApiController {
   private final CommentReplyRepository commentReplyRepository;
   private final CommentReplyService commentReplyService;
   private final SlurFilterService slurFilterService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final CommentSaveService commentSaveForLaterService;
   private final ComentSaveRepository commentSaveForLaterRepository;
-  private final LanguageService languageService;
 
+  /**
+   * Creates a comment.
+   *
+   * @param createCommentForm The form data for creating a comment.
+   * @param principal         The authenticated user.
+   * @return The created comment response.
+   */
   @Operation(summary = "Create a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
@@ -110,7 +118,7 @@ public class CommentController extends AbstractLemmyApiController {
     // @todo auth service
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createCommentForm.post_id())
@@ -184,6 +192,16 @@ public class CommentController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Updates a comment.
+   *
+   * @param editCommentForm The form data for editing a comment.
+   * @param principal       The authenticated user.
+   * @return The updated comment response.
+   * @throws ResponseStatusException If the user is not authorized or the comment or language is not
+   *                                 found.
+   * @throws ResponseStatusException If the comment is blocked by the slur filter.
+   */
   @Operation(summary = "Edit a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
@@ -192,7 +210,7 @@ public class CommentController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
     Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -239,6 +257,14 @@ public class CommentController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Deletes a comment.
+   *
+   * @param deleteCommentForm The form data for deleting a comment.
+   * @param principal         The authenticated user.
+   * @return The response after deleting a comment.
+   * @throws ResponseStatusException If the user is not authorized or the comment is not found.
+   */
   @Operation(summary = "Delete a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
@@ -248,7 +274,7 @@ public class CommentController extends AbstractLemmyApiController {
     // @todo Implement delete comment
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Comment> comment = commentRepository.findById(
@@ -275,6 +301,13 @@ public class CommentController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Mark a comment as read.
+   *
+   * @param markCommentReplyAsRead The data for marking a comment as read.
+   * @param principal              The authenticated user.
+   * @return The comment response after marking the comment as read.
+   */
   @Operation(summary = "Mark a comment as read.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
@@ -285,7 +318,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.MARK_COMMENT_AS_READ,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MARK_COMMENT_AS_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById(
@@ -309,6 +342,13 @@ public class CommentController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Like / Vote on a comment.
+   *
+   * @param createCommentLikeForm The data for liking/voting on a comment.
+   * @param principal             The authenticated user.
+   * @return The CommentResponse after liking/voting on the comment.
+   */
   @Operation(summary = "Like / Vote on a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
@@ -318,7 +358,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         switch (createCommentLikeForm.score()) {
           case 1 -> RolePermissionCommentTypes.COMMENT_UPVOTE;
           case -1 -> RolePermissionCommentTypes.COMMENT_DOWNVOTE;
@@ -343,6 +383,13 @@ public class CommentController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Retrieves the list of likes/votes on a comment.
+   *
+   * @param listCommentLikesForm The form data for listing comment likes/votes.
+   * @param principal            The authenticated user passed as a JwtPerson object.
+   * @return The response containing the list of comment likes/votes.
+   */
   @Operation(summary = "Get Votes on a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommentLikesResponse.class))})})
@@ -352,7 +399,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.COMMENT_LIST_VOTES,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.COMMENT_LIST_VOTES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById((long) listCommentLikesForm.comment_id())
@@ -368,6 +415,13 @@ public class CommentController extends AbstractLemmyApiController {
     return ListCommentLikesResponse.builder().comment_likes(voteViews).build();
   }
 
+  /**
+   * Save a comment for later.
+   *
+   * @param saveCommentForm The form data for saving a comment.
+   * @param principal       The authenticated user.
+   * @return The comment response after saving the comment.
+   */
   @Operation(summary = "Save a comment for later.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
@@ -377,7 +431,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.FAVORITE_COMMENT,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.FAVORITE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Comment comment = commentRepository.findById((long) saveCommentForm.comment_id())
@@ -413,6 +467,15 @@ public class CommentController extends AbstractLemmyApiController {
   }
 
 
+  /**
+   * Retrieves the list of comments based on the provided criteria.
+   *
+   * @param getCommentsForm The form data for retrieving comments.
+   * @param principal       The authenticated user.
+   * @return The response containing the list of comments.
+   * @throws ResponseStatusException If the user is not authorized or the post is not found.
+   * @throws ResponseStatusException If the provided pagination parameters are invalid.
+   */
   @Operation(summary = "Get / fetch comments.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCommentsResponse.class))})})
@@ -420,7 +483,7 @@ public class CommentController extends AbstractLemmyApiController {
   GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
     Optional<Person> person = getOptionalPerson(principal);
-    roleAuthorizingService.isPermitted(person.orElse(null),
+    rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionCommentTypes.READ_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
@@ -475,6 +538,15 @@ public class CommentController extends AbstractLemmyApiController {
     return GetCommentsResponse.builder().comments(commentViews).build();
   }
 
+  /**
+   * Reports a comment.
+   *
+   * @param createCommentReportForm The data to create a comment report.
+   * @param principal               The authenticated user.
+   * @return The comment report response.
+   * @throws ResponseStatusException If the user is not authorized, the comment is not found, or the
+   *                                 request is invalid.
+   */
   @Operation(summary = "Report a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentReportResponse.class))})})
@@ -485,7 +557,7 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.REPORT_COMMENT,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.REPORT_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById((long) createCommentReportForm.comment_id())

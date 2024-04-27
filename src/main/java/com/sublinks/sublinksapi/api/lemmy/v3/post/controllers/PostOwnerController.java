@@ -9,7 +9,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.EditPost;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.services.LemmyPostService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -48,6 +48,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller class for managing posts by the post owner.
+ */
 @RestController
 @RequiredArgsConstructor
 @Transactional
@@ -56,7 +59,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostOwnerController extends AbstractLemmyApiController {
 
   private final LocalInstanceContext localInstanceContext;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final PostRepository postRepository;
   private final LemmyPostService lemmyPostService;
   private final PostService postService;
@@ -81,7 +84,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById((long) createPostForm.community_id())
@@ -181,7 +184,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.UPDATE_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.UPDATE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     post.setTitle(editPostForm.name());
@@ -252,7 +255,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.DELETE_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) deletePostForm.post_id())

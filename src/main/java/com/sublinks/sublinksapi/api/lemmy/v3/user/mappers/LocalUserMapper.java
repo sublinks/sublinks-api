@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.LocalUser;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.utils.TotpUtil;
 import org.mapstruct.Mapper;
@@ -51,6 +51,6 @@ public interface LocalUserMapper extends Converter<Person, LocalUser> {
   @Named("is_admin")
   default boolean isAdmin(Person person) {
 
-    return RoleAuthorizingService.isAdmin(person);
+    return RolePermissionService.isAdmin(person);
   }
 }

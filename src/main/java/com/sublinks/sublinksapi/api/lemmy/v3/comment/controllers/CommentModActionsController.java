@@ -18,7 +18,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.models.CommentReportSearchCriteria;
@@ -55,6 +55,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller class for handling comment moderation actions.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/comment")
@@ -65,13 +68,20 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   private final LemmyCommentService lemmyCommentService;
   private final CommentReportRepository commentReportRepository;
   private final CommentReportService commentReportService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommunityRepository communityRepository;
   private final CommentRepository commentRepository;
   private final CommentService commentService;
   private final ModerationLogService moderationLogService;
 
+  /**
+   * Removes a comment as a moderator.
+   *
+   * @param removeCommentForm The form containing the comment ID, removed state, and reason.
+   * @param principal         The authenticated user.
+   * @return The updated comment response.
+   */
   @Operation(summary = "A moderator remove for a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
@@ -80,7 +90,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         Set.of(RolePermissionCommentTypes.MODERATOR_REMOVE_COMMENT,
             RolePermissionCommentTypes.REMOVE_COMMENT),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
@@ -115,6 +125,13 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Distinguishes a comment (speak as moderator).
+   *
+   * @param distinguishCommentForm The form containing the comment ID and the distinguished state.
+   * @param principal              The authenticated user.
+   * @return The updated comment response.
+   */
   @Operation(summary = "Distinguishes a comment (speak as moderator).")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
@@ -124,7 +141,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         Collections.setOf(RolePermissionCommentTypes.ADMIN_SPEAK,
             RolePermissionCommentTypes.MODERATOR_SPEAK),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
@@ -142,6 +159,14 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Resolve a comment report. Only a mod can do this.
+   *
+   * @param resolveCommentReportForm The form containing the report ID and resolved state. (type:
+   *                                 ResolveCommentReport)
+   * @param principal                The authenticated user. (type: JwtPerson)
+   * @return The updated comment report response. (type: CommentReportResponse)
+   */
   @Operation(summary = "Resolve a comment report. Only a mod can do this.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentReportResponse.class))})})
@@ -150,7 +175,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       @Valid @RequestBody ResolveCommentReport resolveCommentReportForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         Collections.setOf(RolePermissionCommunityTypes.REPORT_COMMUNITY_RESOLVE,
             RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
@@ -159,7 +184,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
             (long) resolveCommentReportForm.report_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-    final boolean isAdmin = roleAuthorizingService.isPermitted(person,
+    final boolean isAdmin = rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
@@ -182,6 +207,13 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Retrieves a list of comment reports based on the search criteria.
+   *
+   * @param listCommentReportsForm The form containing the search criteria.
+   * @param principal              The authenticated user.
+   * @return A response containing a list of comment report views.
+   */
   @Operation(summary = "List comment reports.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommentReportsResponse.class))})})
@@ -190,12 +222,12 @@ public class CommentModActionsController extends AbstractLemmyApiController {
       JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         Set.of(RolePermissionCommunityTypes.REPORT_COMMUNITY_READ,
             RolePermissionInstanceTypes.REPORT_INSTANCE_READ),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final boolean isAdmin = roleAuthorizingService.isPermitted(person,
+    final boolean isAdmin = rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.REPORT_INSTANCE_READ);
 
     final List<CommentReport> commentReports = new ArrayList<>();
