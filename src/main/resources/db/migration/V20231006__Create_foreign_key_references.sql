@@ -118,7 +118,7 @@ ALTER TABLE `private_messages`
 /**
   Person Mention table
  */
-ALTER TABLE `people_mentions`
+ALTER TABLE `person_mentions`
   ADD FOREIGN KEY (`recipient_id`) REFERENCES `people` (`id`) ON DELETE CASCADE,
   ADD FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE;
 

@@ -8,7 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.EditCommunity;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunityService;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
@@ -55,7 +55,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final LocalInstanceContext localInstanceContext;
   private final LinkPersonCommunityRepository linkPersonCommunityRepository;
   private final CommunityService communityService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final LemmyCommunityService lemmyCommunityService;
   private final SlugUtil slugUtil;
   private final CommunityRepository communityRepository;
@@ -71,7 +71,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.CREATE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
@@ -158,7 +158,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.UPDATE_COMMUNITY,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.UPDATE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Community community = communityRepository.findById(editCommunityForm.community_id())

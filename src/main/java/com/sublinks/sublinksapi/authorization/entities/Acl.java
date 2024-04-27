@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.authorization.entities;
 
-import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,8 +48,7 @@ public class Acl {
   private Long entityId;
 
   @Column(updatable = true, nullable = false, name = "authorized_action")
-  @Enumerated(EnumType.STRING)
-  private AuthorizeAction authorizedAction;
+  private String authorizedAction;
 
   @Column(updatable = true, nullable = false, name = "is_permitted")
   private boolean permitted;

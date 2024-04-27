@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for generating the initial roles for the application.
+ */
 @Service
 @RequiredArgsConstructor
 public class InitialRoleSetupService {
@@ -30,10 +33,12 @@ public class InitialRoleSetupService {
    */
   public void generateInitialRoles() {
 
-    createAdminRole();
-    createBannedRole();
-    createGuestRole();
-    createRegisteredRole();
+    if (roleRepository.findAll().isEmpty()) {
+      createAdminRole();
+      createBannedRole();
+      createGuestRole();
+      createRegisteredRole();
+    }
   }
 
   /**

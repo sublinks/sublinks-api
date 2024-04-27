@@ -10,7 +10,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.DeleteCustomEmoj
 import com.sublinks.sublinksapi.api.lemmy.v3.customemoji.models.EditCustomEmoji;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionEmojiTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
 import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
 import com.sublinks.sublinksapi.customemoji.services.CustomEmojiService;
@@ -40,7 +40,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class CustomEmojiController extends AbstractLemmyApiController {
 
   public final CustomEmojiService customEmojiService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final LocalInstanceContext localInstanceContext;
   private final CustomEmojiRepository customEmojiRepository;
   private final ConversionService conversionService;
@@ -56,7 +56,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionEmojiTypes.CREATE_EMOJI,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
@@ -91,7 +91,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionEmojiTypes.UPDATE_EMOJI,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
@@ -129,7 +129,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     final var person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionEmojiTypes.DELETE_EMOJI,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 

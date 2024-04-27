@@ -15,7 +15,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.instance.entities.InstanceBlock;
@@ -63,7 +63,7 @@ public class SiteController extends AbstractLemmyApiController {
   private final InstanceRepository instanceRepository;
   private final InstanceBlockRepository instanceBlockRepository;
   private final MyUserInfoService myUserInfoService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final InstanceConfigService instanceConfigService;
   private final SlurFilterService slurFilterService;
   private final AnnouncementRepository announcementRepository;
@@ -107,7 +107,7 @@ public class SiteController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
     final Person person = getPersonOrThrowUnauthorized(principal);
-    RoleAuthorizingService.isAdminElseThrow(person,
+    RolePermissionService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     final Instance instance = localInstanceContext.instance();
@@ -169,7 +169,7 @@ public class SiteController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_UPDATE_SETTINGS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
@@ -234,7 +234,7 @@ public class SiteController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_DEFEDERATE_INSTANCE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 

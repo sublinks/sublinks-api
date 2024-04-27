@@ -19,6 +19,29 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * The `LinkPersonInstance` class represents a link between a `Person` and an `Instance`.
+ *
+ * <p>Relationships:</p>
+ * <ul>
+ *   <li>{@link Person} - Represents the person related to this link.</li>
+ *   <li>{@link Instance} - Represents the instance related to this link.</li>
+ * </ul>
+ *
+ * <p>Attributes:</p>
+ * <ul>
+ *   <li>{@code id} - The unique identifier for this link.</li>
+ *   <li>{@code createdAt} - The date when this link was created.</li>
+ * </ul>
+ *
+ * <p>Usage:</p>
+ * <pre>{@code
+ *    // Creating a new link person instance
+ *    LinkPersonInstance link = new LinkPersonInstance();
+ *    link.setPerson(person);
+ *    link.setInstance(instance);
+ * }</pre>
+ */
 @Getter
 @Setter
 @AllArgsConstructor

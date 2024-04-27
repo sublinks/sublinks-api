@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.post.entities;
 
+import com.sublinks.sublinksapi.authorization.AclEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.instance.entities.Instance;
@@ -35,6 +37,11 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * The Post class represents a post in a community or instance. It contains various attributes such
+ * as the post body, title, link, and timestamps. It also has relationships with other entities such
+ * as comments, likes, and history.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -42,7 +49,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "posts")
-public class Post extends CursorPageable {
+public class Post extends CursorPageable implements AclEntityInterface {
 
   /**
    * Relationships.
@@ -169,5 +176,11 @@ public class Post extends CursorPageable {
   public boolean isRemoved() {
 
     return this.removedState != RemovedState.NOT_REMOVED;
+  }
+
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.post;
   }
 }
