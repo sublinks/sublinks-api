@@ -11,18 +11,16 @@ updates:
     schedule:
       interval: "weekly"
   # Maintain dependencies for Gradle
-  - package-ecosystem: "gradle"
-
   # Maintain dependencies for submodules
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     groups:
-       docker:
-          # Define patterns to include dependencies in the group (based on
-          # dependency name)
-          patterns:
-            - "*"       # A wildcard that matches all dependencies in the package
-                        # ecosystem. Note: using "*" may open a large pull request
+      docker:
+        # Define patterns to include dependencies in the group (based on
+        # dependency name)
+        patterns:
+          - "*"       # A wildcard that matches all dependencies in the package
+          # ecosystem. Note: using "*" may open a large pull request
     schedule:
       interval: "daily" # Change this to weekly some time in the future when things settle down
 
@@ -30,11 +28,11 @@ updates:
   - package-ecosystem: "docker"
     directory: "/"
     groups:
-       docker:
-          # Define patterns to include dependencies in the group (based on
-          # dependency name)
-          patterns:
-            - "*"       # A wildcard that matches all dependencies in the package
-                        # ecosystem. Note: using "*" may open a large pull request
+      docker:
+        # Define patterns to include dependencies in the group (based on
+        # dependency name)
+        patterns:
+          - "*"       # A wildcard that matches all dependencies in the package
+          # ecosystem. Note: using "*" may open a large pull request
     schedule:
       interval: "weekly"

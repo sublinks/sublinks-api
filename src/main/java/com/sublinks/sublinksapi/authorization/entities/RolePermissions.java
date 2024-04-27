@@ -35,6 +35,6 @@ public class RolePermissions {
   private Role role;
 
   @Column(nullable = false, name = "permission")
-  @Enumerated(value = EnumType.STRING)
+  @Enumerated(EnumType.STRING)
   private RolePermission permission;
 }

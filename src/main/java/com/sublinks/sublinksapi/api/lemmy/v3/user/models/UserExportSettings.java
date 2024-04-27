@@ -3,9 +3,8 @@ package com.sublinks.sublinksapi.api.lemmy.v3.user.models;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.enums.PostListingMode;
-import lombok.Builder;
-
 import java.util.Collection;
+import lombok.Builder;
 
 @Builder
 @SuppressWarnings("RecordComponentName")

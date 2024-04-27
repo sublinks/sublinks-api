@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Random;
 
 public class LinesProducer extends CurvedLineNoiseProducer {
+
   private static final Random RAND = new SecureRandom();
 
   private long linesToDraw = 1;
@@ -39,7 +40,9 @@ public class LinesProducer extends CurvedLineNoiseProducer {
       this.doNoise(image, colors.get(RAND.nextInt(colors.size())), RAND.nextInt(3) + 2);
     }
   }
+
   private void doNoise(BufferedImage image, Color _color, int _width) {
+
     int width = image.getWidth();
     int height = image.getHeight();
 

@@ -41,6 +41,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
@@ -59,9 +61,11 @@ public class Person implements UserDetails, Principal {
    * Relationships.
    */
   @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonCommunity> linkPersonCommunity;
 
   @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
 
   @ManyToOne
@@ -76,29 +80,36 @@ public class Person implements UserDetails, Principal {
   private LinkPersonInstance linkPersonInstance;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   private List<UserData> userData;
 
   @OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<CommentLike> commentLikes;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<CommentLike> commentReads;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<PostSave> postSaves;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<PostLike> postLikes;
 
   @OneToMany(mappedBy = "person")
+  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<PostRead> postReads;
 
@@ -107,6 +118,7 @@ public class Person implements UserDetails, Principal {
   private PersonAggregate personAggregate;
 
   @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+  @Fetch(FetchMode.SUBSELECT)
   @JoinTable(name = "person_languages", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
@@ -165,16 +177,19 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = false, name = "default_theme")
   private String defaultTheme;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "default_listing_type")
+  @Enumerated(EnumType.STRING)
+
   private ListingType defaultListingType;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "default_sort_type")
+  @Enumerated(EnumType.STRING)
+
   private SortType defaultSortType;
 
-  @Enumerated(EnumType.STRING)
   @Column(nullable = false, name = "post_listing_type")
+  @Enumerated(EnumType.STRING)
+
   private PostListingMode postListingType;
 
   @Column(nullable = false, name = "is_infinite_scroll")

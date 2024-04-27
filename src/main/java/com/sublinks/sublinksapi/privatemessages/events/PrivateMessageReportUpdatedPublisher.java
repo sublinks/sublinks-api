@@ -9,7 +9,8 @@ public class PrivateMessageReportUpdatedPublisher {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
-  public PrivateMessageReportUpdatedPublisher(final ApplicationEventPublisher applicationEventPublisher) {
+  public PrivateMessageReportUpdatedPublisher(
+      final ApplicationEventPublisher applicationEventPublisher) {
 
     this.applicationEventPublisher = applicationEventPublisher;
   }

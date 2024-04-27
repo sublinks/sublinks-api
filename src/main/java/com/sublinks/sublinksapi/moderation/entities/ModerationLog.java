@@ -45,6 +45,7 @@ public class ModerationLog {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  // This is a "string" as this could change easily
   @Column(nullable = false, name = "action_type")
   @Enumerated(EnumType.STRING)
   private ModlogActionType actionType;
@@ -124,6 +125,7 @@ public class ModerationLog {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

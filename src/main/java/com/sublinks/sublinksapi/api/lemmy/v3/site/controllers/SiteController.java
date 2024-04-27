@@ -78,14 +78,18 @@ public class SiteController extends AbstractLemmyApiController {
 
     GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
         .version("0.19.0") // @todo grab this from config?
-        .taglines(announcementRepository.findAll().stream()
-            .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
+        .taglines(announcementRepository.findAll()
+            .stream()
+            .map(tagline -> conversionService.convert(tagline, Tagline.class))
+            .toList())
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
-        .custom_emojis(lemmySiteService.customEmojis()).admins(
-            roleAuthorizingService.getAdmins().stream().map(lemmyPersonService::getPersonView)
-                .toList());
+        .custom_emojis(lemmySiteService.customEmojis())
+        .admins(roleAuthorizingService.getAdmins()
+            .stream()
+            .map(lemmyPersonService::getPersonView)
+            .toList());
 
     getOptionalPerson(principal).ifPresent(
         (person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
@@ -120,7 +124,7 @@ public class SiteController extends AbstractLemmyApiController {
         languageService.languageIdsToEntity(createSiteForm.discussion_languages()));
     instance.setBannerUrl(createSiteForm.banner());
     instance.setIconUrl(createSiteForm.icon());
-    instanceService.createInstance(instance);
+    instanceService.createInstanceAndFlush(instance);
 
     final InstanceConfig.InstanceConfigBuilder config = InstanceConfig.builder().instance(instance);
     config.registrationMode(createSiteForm.registration_mode());
@@ -145,14 +149,20 @@ public class SiteController extends AbstractLemmyApiController {
 
     final InstanceConfig instanceConfig = config.build();
 
+    instanceConfigService.createInstanceConfig(instanceConfig);
+
     slurFilterService.updateOrCreateLemmySlur(createSiteForm.slur_filter_regex());
 
     instance.setInstanceConfig(instanceConfig);
     instanceService.updateInstance(instance);
 
-    return SiteResponse.builder().site_view(lemmySiteService.getSiteView()).tag_lines(
-        announcementRepository.findAll().stream()
-            .map((x) -> conversionService.convert(x, Tagline.class)).toList()).build();
+    return SiteResponse.builder()
+        .site_view(lemmySiteService.getSiteView())
+        .tag_lines(announcementRepository.findAll()
+            .stream()
+            .map((x) -> conversionService.convert(x, Tagline.class))
+            .toList())
+        .build();
   }
 
   @Operation(summary = "Edit your site.")
@@ -173,11 +183,16 @@ public class SiteController extends AbstractLemmyApiController {
 
     if (editSiteForm.taglines().isPresent()) {
       announcementRepository.deleteAll();
-      editSiteForm.taglines().get().forEach(tagline -> announcementRepository.save(
-          Announcement.builder().content(tagline)
-              .localSiteId(localInstanceContext.instance().getId()).build()));
-      return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
-          .tag_lines(new ArrayList<>()).build();
+      editSiteForm.taglines()
+          .get()
+          .forEach(tagline -> announcementRepository.save(Announcement.builder()
+              .content(tagline)
+              .localSiteId(localInstanceContext.instance().getId())
+              .build()));
+      return SiteResponse.builder()
+          .site_view(lemmySiteService.getSiteView())
+          .tag_lines(new ArrayList<>())
+          .build();
     }
 
     final Instance instance = localInstanceContext.instance();
@@ -218,8 +233,10 @@ public class SiteController extends AbstractLemmyApiController {
 
     slurFilterService.updateOrCreateLemmySlur(editSiteForm.slur_filter_regex());
 
-    return SiteResponse.builder().site_view(lemmySiteService.getSiteView())
-        .tag_lines(new ArrayList<>()).build();
+    return SiteResponse.builder()
+        .site_view(lemmySiteService.getSiteView())
+        .tag_lines(new ArrayList<>())
+        .build();
   }
 
   @Operation(summary = "Block an instance.")

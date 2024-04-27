@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.person.entities.Person;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -16,6 +17,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.proxy.HibernateProxy;
 
 @Getter
@@ -30,13 +33,16 @@ public class Language {
   /**
    * Relationships.
    */
-  @ManyToMany(mappedBy = "languages")
+  @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Person> people;
 
-  @ManyToMany(mappedBy = "languages")
+  @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Instance> instances;
 
-  @ManyToMany(mappedBy = "languages")
+  @ManyToMany(mappedBy = "languages", fetch = FetchType.LAZY)
+  @Fetch(FetchMode.SUBSELECT)
   private List<Community> communities;
 
   /**
@@ -76,6 +82,7 @@ public class Language {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

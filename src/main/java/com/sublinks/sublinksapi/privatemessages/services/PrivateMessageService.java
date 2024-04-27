@@ -14,10 +14,10 @@ import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageDeletedPubl
 import com.sublinks.sublinksapi.privatemessages.events.PrivateMessageUpdatedPublisher;
 import com.sublinks.sublinksapi.privatemessages.models.MarkAllAsReadResponse;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

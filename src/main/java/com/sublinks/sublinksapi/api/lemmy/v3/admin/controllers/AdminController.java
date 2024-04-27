@@ -64,6 +64,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Tag(name = "Admin")
 public class AdminController extends AbstractLemmyApiController {
 
+  private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
   private final LocalInstanceContext localInstanceContext;
   private final PersonRepository personRepository;
   private final PersonRegistrationApplicationRepository personRegistrationApplicationRepository;
@@ -78,9 +79,6 @@ public class AdminController extends AbstractLemmyApiController {
   private final CommentRepository commentRepository;
   private final CommentService commentService;
   private final CommentHistoryConfig commentHistoryConfig;
-
-  private static final Logger logger = LoggerFactory.getLogger(AdminController.class);
-
 
   @Operation(summary = "Add an admin to your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {

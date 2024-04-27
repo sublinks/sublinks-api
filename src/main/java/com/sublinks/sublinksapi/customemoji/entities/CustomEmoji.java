@@ -1,13 +1,5 @@
 package com.sublinks.sublinksapi.customemoji.entities;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.proxy.HibernateProxy;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,11 +8,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.proxy.HibernateProxy;
 
 @Getter
 @Setter
@@ -76,10 +74,12 @@ public class CustomEmoji {
     if (o == null) {
       return false;
     }
-    Class<?> objectEffectiveClass = o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
-        .getPersistentClass() : o.getClass();
-    Class<?> thisEffectiveClass = this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass() : this.getClass();
+    Class<?> objectEffectiveClass =
+        o instanceof HibernateProxy ? ((HibernateProxy) o).getHibernateLazyInitializer()
+            .getPersistentClass() : o.getClass();
+    Class<?> thisEffectiveClass =
+        this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
+            .getPersistentClass() : this.getClass();
     if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
@@ -89,6 +89,7 @@ public class CustomEmoji {
 
   @Override
   public final int hashCode() {
+
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
         .getPersistentClass().hashCode() : getClass().hashCode();
   }

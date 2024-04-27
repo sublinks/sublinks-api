@@ -24,40 +24,52 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class SearchService {
-    private final PostSearchRepository postSearchRepository;
-    private final CommentSearchRepository commentSearchRepository;
-    private final CommunitySearchRepository communitySearchRepository;
-    private final PersonSearchRepository personSearchRepository;
-    private final PostService postService;
-    private final CrossPostRepository crossPostRepository;
-    private final UrlUtil urlUtil;
 
-    public Page<Community> searchCommunity(final String query, final int page, final int pageSize, final Sort sort) {
-        return communitySearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+  private final PostSearchRepository postSearchRepository;
+  private final CommentSearchRepository commentSearchRepository;
+  private final CommunitySearchRepository communitySearchRepository;
+  private final PersonSearchRepository personSearchRepository;
+  private final PostService postService;
+  private final CrossPostRepository crossPostRepository;
+  private final UrlUtil urlUtil;
+
+  public Page<Community> searchCommunity(final String query, final int page, final int pageSize,
+      final Sort sort) {
+
+    return communitySearchRepository.searchAllByKeyword(query,
+        PageRequest.of(page, pageSize, sort));
+  }
+
+  public Page<Post> searchPost(final String query, final int page, final int pageSize,
+      final Sort sort) {
+
+    return postSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+  }
+
+  public Page<Comment> searchComments(final String query, final int page, final int pageSize,
+      final Sort sort) {
+
+    return commentSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+  }
+
+  public Page<Post> searchPostByUrl(final String url, final int page, final int pageSize,
+      final Sort sort) {
+
+    String cleanUrl = urlUtil.normalizeUrl(url);
+    String hash = postService.getStringMd5Hash(cleanUrl);
+    Optional<CrossPost> crossPost = crossPostRepository.getCrossPostByMd5Hash(hash);
+
+    if (crossPost.isEmpty()) {
+      return Page.empty();
     }
+    List<Post> posts = crossPost.get().getPosts().stream().toList();
+    return new PageImpl<>(posts.subList(page * pageSize, (page + 1) * pageSize),
+        PageRequest.of(page, pageSize, sort), posts.size());
+  }
 
-    public Page<Post> searchPost(final String query, final int page, final int pageSize, final Sort sort) {
-        return postSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
-    }
+  public Page<Person> searchPerson(final String query, final int page, final int pageSize,
+      final Sort sort) {
 
-    public Page<Comment> searchComments(final String query, final int page, final int pageSize, final Sort sort) {
-        return commentSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
-    }
-
-    public Page<Post> searchPostByUrl(final String url, final int page, final int pageSize, final Sort sort) {
-        String cleanUrl = urlUtil.normalizeUrl(url);
-        String hash = postService.getStringMd5Hash(cleanUrl);
-        Optional<CrossPost> crossPost = crossPostRepository.getCrossPostByMd5Hash(hash);
-
-        if(crossPost.isEmpty()){
-            return Page.empty();
-        }
-        List<Post> posts = crossPost.get().getPosts().stream().toList();
-        return new PageImpl<>(posts.subList(page * pageSize, (page + 1) * pageSize),
-                PageRequest.of(page, pageSize, sort), posts.size());
-    }
-
-    public Page<Person> searchPerson(final String query, final int page, final int pageSize, final Sort sort) {
-        return personSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
-    }
+    return personSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+  }
 }

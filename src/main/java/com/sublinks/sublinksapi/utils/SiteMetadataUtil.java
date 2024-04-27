@@ -13,18 +13,13 @@ import org.springframework.stereotype.Service;
 public class SiteMetadataUtil {
 
   /**
-   * Fetches metadata from a website URL.
-   * This method connects to the given URL and extracts various metadata such as
-   * title, description,
-   * image URL, and video URL using Open Graph (og) tags. If og tags are not
-   * available, it uses
-   * default HTML tags where applicable.
+   * Fetches metadata from a website URL. This method connects to the given URL and extracts various
+   * metadata such as title, description, image URL, and video URL using Open Graph (og) tags. If og
+   * tags are not available, it uses default HTML tags where applicable.
    *
-   * @param normalizedUrl The normalized URL of the website to fetch metadata
-   *                      from.
-   * @return A SiteMetadata object containing the extracted metadata. In case of
-   *         an IOException,
-   *         returns an empty SiteMetadata object.
+   * @param normalizedUrl The normalized URL of the website to fetch metadata from.
+   * @return A SiteMetadata object containing the extracted metadata. In case of an IOException,
+   * returns an empty SiteMetadata object.
    */
   public SiteMetadata fetchSiteMetadata(String normalizedUrl) {
 

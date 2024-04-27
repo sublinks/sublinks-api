@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.email.config;
 
 import java.util.Properties;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;

@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SlurFilterRepository extends JpaRepository<SlurFilter, Long> {
 
-  public List<SlurFilter> findBySlurActionType(SlurActionType actionType);
+  List<SlurFilter> findBySlurActionType(SlurActionType actionType);
 }

@@ -1,10 +1,9 @@
 package com.sublinks.sublinksapi.customemoji.entities;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
 
 public class CustomEmojiKeywordTest {
 
@@ -13,9 +12,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
 
     assertEquals(emojiKeyword, emojiKeyword2);
   }
@@ -25,9 +24,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(1234L).build();
+        .keyword("word").emoji(e).id(1234L).build();
 
     assertNotEquals(emojiKeyword, emojiKeyword2);
   }
@@ -37,9 +36,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("keyword").emoji(e).id(123L).build();
+        .keyword("keyword").emoji(e).id(123L).build();
 
     assertEquals(emojiKeyword, emojiKeyword2);
   }
@@ -49,9 +48,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(1234L).build();
+        .keyword("word").emoji(e).id(1234L).build();
 
     assertNotEquals(emojiKeyword, emojiKeyword2);
   }
@@ -61,7 +60,7 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
 
     String abc = "abc";
 
@@ -73,9 +72,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
 
     assertEquals(emojiKeyword.hashCode(), emojiKeyword2.hashCode());
   }
@@ -85,9 +84,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("keyword").emoji(e).id(123L).build();
+        .keyword("keyword").emoji(e).id(123L).build();
 
     assertEquals(emojiKeyword.hashCode(), emojiKeyword2.hashCode());
   }
@@ -97,9 +96,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
     CustomEmojiKeyword emojiKeyword2 = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(1234L).build();
+        .keyword("word").emoji(e).id(1234L).build();
 
     assertEquals(emojiKeyword.hashCode(), emojiKeyword2.hashCode());
   }
@@ -109,7 +108,7 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
 
     String abc = "abc";
 
@@ -121,9 +120,9 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
 
-    assertTrue(emojiKeyword.equals(emojiKeyword));
+    assertEquals(emojiKeyword, emojiKeyword);
   }
 
   @Test
@@ -131,7 +130,7 @@ public class CustomEmojiKeywordTest {
 
     CustomEmoji e = CustomEmoji.builder().id(12345L).build();
     CustomEmojiKeyword emojiKeyword = CustomEmojiKeyword.builder()
-                                        .keyword("word").emoji(e).id(123L).build();
+        .keyword("word").emoji(e).id(123L).build();
 
     assertNotEquals(emojiKeyword, null);
   }

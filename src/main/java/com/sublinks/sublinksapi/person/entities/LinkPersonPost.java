@@ -51,6 +51,7 @@ public class LinkPersonPost {
 
   @Column(nullable = false, name = "link_type")
   @Enumerated(EnumType.STRING)
+
   private LinkPersonPostType linkType;
 
   @CreationTimestamp
@@ -83,6 +84,7 @@ public class LinkPersonPost {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

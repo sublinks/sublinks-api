@@ -1,25 +1,24 @@
 package com.sublinks.sublinksapi.customemoji.services;
 
-import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
-import com.sublinks.sublinksapi.customemoji.entities.CustomEmojiKeyword;
-import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiKeywordRepository;
-import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmoji;
+import com.sublinks.sublinksapi.customemoji.entities.CustomEmojiKeyword;
+import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiKeywordRepository;
+import com.sublinks.sublinksapi.customemoji.repositories.CustomEmojiRepository;
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomEmojiServiceTest {
