@@ -16,6 +16,11 @@ import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Utility class to generate and validate JSON Web Tokens (JWT). This class provides methods to
+ * generate a JWT token based on a Person object, validate a JWT token against a Person object, and
+ * extract information from a JWT token.
+ */
 @Component
 public class JwtUtil implements Serializable {
 

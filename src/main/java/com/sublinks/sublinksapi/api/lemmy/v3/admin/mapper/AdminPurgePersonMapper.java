@@ -9,6 +9,10 @@ import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
+/**
+ * The AdminPurgePersonMapper interface is responsible for mapping a ModerationLog object to an
+ * AdminPurgePerson object.
+ */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface AdminPurgePersonMapper extends Converter<ModerationLog, AdminPurgePerson> {
 
