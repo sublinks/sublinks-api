@@ -232,6 +232,6 @@ public class RoleAuthorizingService {
       return true;
     }
     return role.getRolePermissions().stream()
-        .anyMatch(x -> x.getPermission().equals(rolePermission));
+        .anyMatch(x -> x.getPermission().equals(rolePermission.toString()));
   }
 }
