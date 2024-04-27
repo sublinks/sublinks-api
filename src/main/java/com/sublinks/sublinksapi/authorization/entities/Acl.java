@@ -21,6 +21,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * This class represents an Access Control List (ACL) entity. An ACL is used to specify the access
+ * permissions for a particular entity and authorized action, for a specific person.
+ */
 @Getter
 @Setter
 @AllArgsConstructor

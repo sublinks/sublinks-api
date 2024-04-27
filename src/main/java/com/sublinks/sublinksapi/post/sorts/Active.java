@@ -7,6 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
+/**
+ * The Active class represents a sorting type that applies the "Active" sorting algorithm to the
+ * query results.
+ */
 public class Active implements SortingTypeInterface {
 
   @Override

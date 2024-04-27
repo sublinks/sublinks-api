@@ -63,6 +63,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * This class handles the admin related operations for the Lemmy API. It provides endpoints for
+ * adding admin, managing registration applications, purging users, communities, and posts from the
+ * database.
+ */
 @RestController
 @AllArgsConstructor
 @RequestMapping(path = "/api/v3/admin")
