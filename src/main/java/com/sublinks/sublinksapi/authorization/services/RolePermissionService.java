@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.authorization.services;
 
+import com.sublinks.sublinksapi.authorization.AclEntityInterface;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInterface;
 import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
@@ -11,11 +12,15 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service class for role authorization.
+ */
 @Service
 @RequiredArgsConstructor
-public class RoleAuthorizingService {
+public class RolePermissionService {
 
   private final RoleService roleService;
+  private final AclService aclService;
 
   /**
    * Checks if a role is banned.
@@ -36,13 +41,9 @@ public class RoleAuthorizingService {
    */
   public static boolean isBanned(final Person person) {
 
-    if (person == null) {
+    if (person == null || person.getRole() == null) {
       return false;
     }
-    if (person.getRole() == null) {
-      return true;
-    }
-
     return isBanned(person.getRole());
   }
 
@@ -54,13 +55,9 @@ public class RoleAuthorizingService {
    */
   public static boolean isAdmin(final Person person) {
 
-    if (person == null) {
+    if (person == null || person.getRole() == null) {
       return false;
     }
-    if (person.getRole() == null) {
-      return true;
-    }
-
     return isAdmin(person.getRole());
   }
 
@@ -91,6 +88,27 @@ public class RoleAuthorizingService {
     if (!isAdmin(person)) {
       throw exceptionSupplier.get();
     }
+  }
+
+  /**
+   * Checks if the given person is permitted to perform the specified role permission on the given
+   * entity.
+   *
+   * @param person         The person to check. Must not be null.
+   * @param entity         The entity on which the action is being performed. Must not be null.
+   * @param rolePermission The permission to check. Must not be null.
+   * @return True if the person is permitted to perform the action on the entity, false otherwise.
+   */
+  public boolean isPermitted(@NonNull final Person person, @NonNull final AclEntityInterface entity,
+      @NonNull RolePermissionInterface rolePermission) {
+
+    if (isAdmin(person)) {
+      return true;
+    }
+    return aclService.canPerson(person)
+        .performTheAction(rolePermission)
+        .onEntity(entity)
+        .isPermitted();
   }
 
   /**
@@ -225,7 +243,7 @@ public class RoleAuthorizingService {
    * @param rolePermission The permission to check.
    * @return True if the role has the permission, false otherwise.
    */
-  public boolean doesRoleHavePermission(final Role role,
+  private boolean doesRoleHavePermission(final Role role,
       final RolePermissionInterface rolePermission) {
 
     if (isAdmin(role)) {

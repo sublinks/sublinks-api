@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.person.entities;
 
 import com.sublinks.sublinksapi.authorization.entities.Role;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.instance.entities.Instance;
@@ -260,7 +260,7 @@ public class Person implements UserDetails, Principal {
       throw new RuntimeException("Role is null!");
     }
 
-    return RoleAuthorizingService.isBanned(getRole());
+    return RolePermissionService.isBanned(getRole());
   }
 
   public boolean isAdmin() {
@@ -269,7 +269,7 @@ public class Person implements UserDetails, Principal {
       throw new RuntimeException("Role is null!");
     }
 
-    return RoleAuthorizingService.isAdmin(getRole());
+    return RolePermissionService.isAdmin(getRole());
   }
 
   @Override

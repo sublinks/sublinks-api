@@ -17,7 +17,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
@@ -70,7 +70,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PostReportRepository postReportRepository;
   private final CommunityRepository communityRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final PersonRepository personRepository;
   private final PostService postService;
   private final CommentService commentService;
@@ -97,7 +97,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_USER,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_USER,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
@@ -155,7 +155,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     // @todo: implement user block ( probably community block too )
 
-    roleAuthorizingService.isPermitted(person, RolePermissionPersonTypes.USER_BLOCK,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_BLOCK,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     return BlockPersonResponse.builder().build();
@@ -171,7 +171,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         Set.of(RolePermissionInstanceTypes.REPORT_INSTANCE_READ,
             RolePermissionCommunityTypes.REPORT_COMMUNITY_READ),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
@@ -201,7 +201,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
       builder.private_message_reports(0);
     } else {
 
-      final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
+      final boolean isAdmin = RolePermissionService.isAdmin(person);
 
       if (isAdmin) {
         builder.comment_reports(
@@ -239,7 +239,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     if (roleService.getAdmins().size() == 1) {
