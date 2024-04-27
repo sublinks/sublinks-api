@@ -25,7 +25,7 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionRegistrationApplicationTypes;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
@@ -81,7 +81,7 @@ public class AdminController extends AbstractLemmyApiController {
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final LemmyPersonRegistrationApplicationService lemmyPersonRegistrationApplicationService;
   private final ModerationLogService moderationLogService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final PostHistoryService postHistoryService;
   private final CommentHistoryService commentHistoryService;
   private final LemmyPersonService lemmyPersonService;
@@ -98,13 +98,13 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_ADD_ADMIN,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_ADD_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToAdd = personRepository.findById((long) addAdminForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    if (RoleAuthorizingService.isAdmin(personToAdd)) {
+    if (RolePermissionService.isAdmin(personToAdd)) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "already_admin");
     }
 
@@ -138,7 +138,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(
@@ -156,7 +156,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionRegistrationApplicationTypes.REGISTRATION_APPLICATION_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
@@ -179,7 +179,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person,
+    rolePermissionService.isPermitted(person,
         RolePermissionRegistrationApplicationTypes.REGISTRATION_APPLICATION_UPDATE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
@@ -211,7 +211,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionPersonTypes.PURGE_USER,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.PURGE_USER,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToPurge = personRepository.findById((long) purgePersonForm.person_id())
@@ -234,7 +234,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommunityTypes.PURGE_COMMUNITY,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.PURGE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
@@ -249,7 +249,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionPostTypes.PURGE_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.PURGE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Post postToPurge = postRepository.getReferenceById((long) purgePostForm.post_id());
@@ -273,7 +273,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.isPermitted(person, RolePermissionCommentTypes.PURGE_COMMENT,
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.PURGE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Comment commentToPurge = commentRepository.getReferenceById(

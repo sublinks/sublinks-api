@@ -8,7 +8,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.services.LemmyCommunitySe
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SubscribedType;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentSaveService;
@@ -87,7 +87,7 @@ public class LemmyCommentService {
     final boolean isBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         comment.getCommunity(), LinkPersonCommunityType.banned);
 
-    final boolean createIsAdmin = RoleAuthorizingService.isAdmin(creator);
+    final boolean createIsAdmin = RolePermissionService.isAdmin(creator);
 
     final boolean creatorIsModerator = linkPersonCommunityService.hasLink(creator,
         comment.getCommunity(), LinkPersonCommunityType.moderator);

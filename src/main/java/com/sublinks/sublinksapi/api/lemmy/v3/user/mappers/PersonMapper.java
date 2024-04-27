@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.user.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -39,7 +39,7 @@ public abstract class PersonMapper implements
   @Named("is_banned")
   boolean mapIsBanned(Person person) {
 
-    return RoleAuthorizingService.isBanned(person);
+    return RolePermissionService.isBanned(person);
   }
 
   @Named("display_name")

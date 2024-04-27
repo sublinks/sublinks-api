@@ -4,7 +4,7 @@ import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
-import java.util.HashSet;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 public class RoleService {
 
   final private RoleRepository roleRepository;
+  private final PersonRepository personRepository;
 
   /**
    * Retrieves the admin role from the role repository.
@@ -126,7 +127,8 @@ public class RoleService {
    */
   public Set<Person> getAdmins() {
 
-    return new HashSet<>();
+    return personRepository.findAllByRole(getAdminRole(() -> new RuntimeException(
+        "Cannot produce list of admins because the Admin role doesn't exist.")));
   }
 
   /**
@@ -136,6 +138,7 @@ public class RoleService {
    */
   public Set<Person> getBannedUsers() {
 
-    return new HashSet<>();
+    return personRepository.findAllByRole(getBannedRole(() -> new RuntimeException(
+        "Cannot produce list of banned people because the Banned role doesn't exist.")));
   }
 }
