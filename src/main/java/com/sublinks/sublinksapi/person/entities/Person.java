@@ -60,11 +60,11 @@ public class Person implements UserDetails, Principal {
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonCommunity> linkPersonCommunity;
 
-  @OneToMany(mappedBy = "person", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
 
@@ -83,7 +83,7 @@ public class Person implements UserDetails, Principal {
   @Fetch(FetchMode.SUBSELECT)
   private List<UserData> userData;
 
-  @OneToMany(fetch = FetchType.EAGER, mappedBy = "person")
+  @OneToMany(fetch = FetchType.LAZY, mappedBy = "person")
   @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<Comment> comments;

@@ -44,7 +44,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Table(name = "communities")
 public class Community implements Serializable {
 
-  @OneToMany(mappedBy = "community", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "community", fetch = FetchType.LAZY)
   @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonCommunity> linkPersonCommunity;
   /**
