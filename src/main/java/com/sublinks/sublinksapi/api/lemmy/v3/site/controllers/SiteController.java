@@ -49,6 +49,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * This class represents a controller for managing site-related operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
@@ -69,7 +72,12 @@ public class SiteController extends AbstractLemmyApiController {
   private final ConversionService conversionService;
   private final LemmyPersonService lemmyPersonService;
 
-
+  /**
+   * Retrieves the site data along with the user's data.
+   *
+   * @param principal The authenticated user token.
+   * @return The GetSiteResponse containing the site data and user data.
+   */
   @Operation(summary = "Gets the site, and your user data.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetSiteResponse.class))})})
@@ -97,6 +105,13 @@ public class SiteController extends AbstractLemmyApiController {
     return builder.build();
   }
 
+  /**
+   * Creates a site with the given parameters.
+   *
+   * @param createSiteForm The form containing the data for creating the site.
+   * @param principal The authenticated user token.
+   * @return The SiteResponse containing the created site data.
+   */
   @Operation(summary = "Create your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SiteResponse.class))})})
@@ -165,6 +180,13 @@ public class SiteController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Updates the site settings with the given form data.
+   *
+   * @param editSiteForm The form containing the updated site settings.
+   * @param principal The authenticated user token.
+   * @return The SiteResponse containing the updated site data.
+   */
   @Operation(summary = "Edit your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SiteResponse.class))})})
@@ -239,6 +261,13 @@ public class SiteController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Blocks an instance.
+   *
+   * @param blockInstanceForm The form containing the instance ID and block flag.
+   * @param principal The authenticated user token.
+   * @return The BlockInstanceResponse indicating if the instance was successfully blocked.
+   */
   @Operation(summary = "Block an instance.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockInstanceResponse.class))})})
