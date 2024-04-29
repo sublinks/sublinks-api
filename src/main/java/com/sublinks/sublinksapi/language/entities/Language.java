@@ -27,7 +27,7 @@ import org.hibernate.proxy.HibernateProxy;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "languages")
+@Table(name = "languagesKeys")
 public class Language {
 
   /**

@@ -65,8 +65,8 @@ public class PersonService {
 
   public Set<Role> generateInitialRoles() {
 
-    Role adminRole = roleRepository.save(
-        Role.builder().description("Admin role for admins").name("Admin").isActive(true).build());
+    Role adminRole = roleRepository.save(Role.builder().description("Admin role for admins").name(
+        "Admin").isActive(true).build());
 
     adminRole.setRolePermissions(Collections.singleton(rolePermissionsRepository.save(
         com.sublinks.sublinksapi.authorization.entities.RolePermissions.builder()
@@ -91,22 +91,19 @@ public class PersonService {
         .build());
 
     bannedRole.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder().role(bannedRole).permission(rolePermission).build()))
+        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder().role(
+            bannedRole).permission(rolePermission).build()))
         .collect(Collectors.toSet()));
 
     rolePermissions.remove(RolePermission.BANNED);
     rolePermissions.add(RolePermission.DEFAULT);
 
-    Role defaultUserRole = roleRepository.save(Role.builder()
-        .description("Default role for all users")
-        .name("User")
-        .isActive(true)
-        .build());
+    Role defaultUserRole = roleRepository.save(Role.builder().description(
+        "Default role for all users").name("User").isActive(true).build());
 
     defaultUserRole.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder().role(defaultUserRole).permission(rolePermission).build()))
+        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder().role(
+            defaultUserRole).permission(rolePermission).build()))
         .collect(Collectors.toSet()));
 
     rolePermissions.remove(RolePermission.DEFAULT);
@@ -165,15 +162,12 @@ public class PersonService {
     rolePermissions.add(RolePermission.REPORT_COMMUNITY_RESOLVE);
     rolePermissions.add(RolePermission.REPORT_COMMUNITY_READ);
 
-    Role registeredUserRole = roleRepository.save(Role.builder()
-        .description("Default Role for all registered users")
-        .name("Registered")
-        .isActive(true)
-        .build());
+    Role registeredUserRole = roleRepository.save(Role.builder().description(
+        "Default Role for all registered users").name("Registered").isActive(true).build());
 
     registeredUserRole.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder().role(registeredUserRole).permission(rolePermission).build()))
+        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder().role(
+            registeredUserRole).permission(rolePermission).build()))
         .collect(Collectors.toSet()));
 
     return new HashSet<>(roleRepository.findAll());
@@ -230,10 +224,8 @@ public class PersonService {
     final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
     person.setActorId(userActorId);
 
-    person.setLinkPersonInstance(LinkPersonInstance.builder()
-        .instance(localInstanceContext.instance())
-        .person(person)
-        .build());
+    person.setLinkPersonInstance(LinkPersonInstance.builder().instance(
+        localInstanceContext.instance()).person(person).build());
 
     final List<Language> languages = new ArrayList<>(
         localInstanceContext.instance().getLanguages());
@@ -300,5 +292,12 @@ public class PersonService {
     person.setAvatarImageUrl("");
 
     personDeletedPublisher.publish(personRepository.save(person));
+  }
+
+  public void updatePassword(Person person, String newPassword) {
+
+    person.setPassword(encodePassword(newPassword));
+    personRepository.save(person);
+
   }
 }

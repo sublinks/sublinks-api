@@ -34,4 +34,11 @@ public class LanguageService {
     }
     return languages;
   }
+
+  public List<Language> instanceLanguages(final Instance instance) {
+
+    final List<Language> languages = new ArrayList<>();
+    languages.addAll(instance.getLanguages());
+    return languages;
+  }
 }

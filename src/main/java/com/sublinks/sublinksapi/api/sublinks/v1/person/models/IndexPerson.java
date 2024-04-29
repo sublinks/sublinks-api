@@ -1,12 +1,13 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.models;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.DateSort;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
+import java.util.List;
 import lombok.Builder;
 
 @Builder
 public record IndexPerson(String search,
                           boolean local,
-                          DateSort dateSort,
+                          SortOrder sortOrder,
                           int limit,
                           int page) {
 

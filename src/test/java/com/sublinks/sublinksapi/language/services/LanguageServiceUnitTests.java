@@ -73,6 +73,6 @@ public class LanguageServiceUnitTests {
     List<Language> languages = languageService.languageIdsToEntity(languageIds);
 
     assertEquals(2, languages.size(),
-        "Number of languages instances returned did not match expected");
+        "Number of languagesKeys instances returned did not match expected");
   }
 }

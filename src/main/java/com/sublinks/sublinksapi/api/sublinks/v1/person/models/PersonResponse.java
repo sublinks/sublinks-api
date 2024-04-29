@@ -1,14 +1,13 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.models;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role;
-import java.util.List;
 import java.util.Optional;
 import lombok.Builder;
 
 @Builder
 public record PersonResponse(String key,
                              String name,
-                             String displayNname,
+                             String displayName,
                              String avatarImageUrl,
                              String bannerImageUrl,
                              String bio,
@@ -20,7 +19,6 @@ public record PersonResponse(String key,
                              boolean isDeleted,
                              boolean isBotAccount,
                              Role role,
-                             List<Langauges> languages,
                              String createdAt,
                              String updatedAt) {
 

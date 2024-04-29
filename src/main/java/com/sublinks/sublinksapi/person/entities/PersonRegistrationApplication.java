@@ -58,7 +58,6 @@ public class PersonRegistrationApplication {
 
   @Column(nullable = false, name = "application_status")
   @Enumerated(EnumType.STRING)
-
   private PersonRegistrationApplicationStatus applicationStatus;
 
   @CreationTimestamp
@@ -95,6 +94,7 @@ public class PersonRegistrationApplication {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.RoleMapper;
+import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
 import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import org.mapstruct.Mapper;
@@ -26,7 +26,6 @@ public abstract class PersonMapper implements Converter<Person, PersonResponse> 
   @Mapping(target = "isDeleted", source = "person.deleted")
   @Mapping(target = "isBotAccount", source = "person.botAccount")
   @Mapping(target = "role", expression = "java(roleMapper.convert(person.getRole()))")
-  @Mapping(target = "languages", source = "person.languages")
   @Mapping(target = "createdAt", source = "person.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "updatedAt", source = "person.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract PersonResponse convert(@Nullable Person person);
