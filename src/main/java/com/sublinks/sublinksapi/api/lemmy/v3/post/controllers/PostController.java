@@ -46,6 +46,8 @@ import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
+import com.sublinks.sublinksapi.post.sorts.SortFactory;
+import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -75,8 +77,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
- * Controller class for managing posts in the Lemmy API.
- * Extends the AbstractLemmyApiController class.
+ * Controller class for managing posts in the Lemmy API. Extends the AbstractLemmyApiController
+ * class.
  */
 @RestController
 @RequiredArgsConstructor
@@ -99,6 +101,7 @@ public class PostController extends AbstractLemmyApiController {
   private final LemmyPostReportService lemmyPostReportService;
   private final LocalInstanceContext localInstanceContext;
   private final RolePermissionService rolePermissionService;
+  private final SortFactory sortFactory;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -187,13 +190,15 @@ public class PostController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionPostTypes.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-    final List<Long> communityIds = new ArrayList<>();
-    Community community = null;
+
+    List<Long> communityIds = null;
+    Community community;
     if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
       Long communityId =
           getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
       community = communityRepository.findCommunityByIdOrTitleSlug(communityId,
           getPostsForm.community_name());
+      communityIds = new ArrayList<>();
       communityIds.add(community.getId());
     }
 
@@ -201,13 +206,17 @@ public class PostController extends AbstractLemmyApiController {
       switch (getPostsForm.type_()) {
         case Subscribed -> {
           final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
-          for (LinkPersonCommunity l : personCommunities) {
-            if (l.getLinkType() == LinkPersonCommunityType.follower) {
-              communityIds.add(l.getCommunity().getId());
+          if (!personCommunities.isEmpty()) {
+            communityIds = new ArrayList<>();
+            for (LinkPersonCommunity l : personCommunities) {
+              if (l.getLinkType() == LinkPersonCommunityType.follower) {
+                communityIds.add(l.getCommunity().getId());
+              }
             }
           }
         }
         case Local -> {
+          communityIds = new ArrayList<>();
           for (Community c : communityRepository.findAll()) { // @todo find local
             communityIds.add(c.getId());
           }
@@ -224,9 +233,12 @@ public class PostController extends AbstractLemmyApiController {
     SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
-    } else {
+    }
+    if (sortType == null) {
       sortType = SortType.New;
     }
+    SortingTypeInterface sorting = sortFactory.createSort(sortType);
+
     ListingType listingType = config != null ? localInstanceContext.instance()
         .getInstanceConfig()
         .getDefaultPostListingType() : null;
@@ -239,27 +251,42 @@ public class PostController extends AbstractLemmyApiController {
 
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
         .page(page)
-        .listingType(conversionService.convert(listingType,
-            com.sublinks.sublinksapi.person.enums.ListingType.class))
-        .perPage(perPage)
+        .listingType(conversionService.convert(
+            listingType,
+            com.sublinks.sublinksapi.person.enums.ListingType.class)
+        )
+        .perPage(perPage + 1)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType)
         .person(person.orElse(null))
         .communityIds(communityIds)
+        .cursorBasedPageable(getPostsForm.page_cursor())
         .build();
 
-    final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
+    final List<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
+
+    String cursor = null;
+    if (posts.size() > perPage) {
+      cursor = sorting.getCursor(posts);
+      posts.remove(posts.size() - 1);
+    }
+
     final Collection<PostView> postViewCollection = new LinkedHashSet<>();
-    for (Post post : posts) {
-      if (person.isPresent()) {
+    if (person.isPresent()) {
+      for (Post post : posts) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
-      } else {
+      }
+    } else {
+      for (Post post : posts) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post));
       }
     }
 
-    return GetPostsResponse.builder().posts(postViewCollection).build();
+    return GetPostsResponse.builder()
+        .posts(postViewCollection)
+        .next_page(cursor)
+        .build();
   }
 
   @Operation(summary = "Like / vote on a post.")

@@ -5,7 +5,8 @@ import lombok.Builder;
 
 @Builder
 public record GetPostsResponse(
-    Collection<PostView> posts
+    Collection<PostView> posts,
+    String next_page
 ) {
 
 }
