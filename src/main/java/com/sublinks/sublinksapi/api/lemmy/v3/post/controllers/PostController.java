@@ -74,6 +74,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller class for managing posts in the Lemmy API.
+ * Extends the AbstractLemmyApiController class.
+ */
 @RestController
 @RequiredArgsConstructor
 @Transactional
