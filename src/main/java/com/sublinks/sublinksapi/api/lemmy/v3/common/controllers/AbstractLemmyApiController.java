@@ -55,11 +55,23 @@ public abstract class AbstractLemmyApiController {
     );
   }
 
+  /**
+   * Get the Person object or null.
+   *
+   * @param principal JwtPerson object that contains the person as its principal
+   * @return Person object if present, otherwise null
+   */
   public Person getPerson(JwtPerson principal) {
 
     return getOptionalPerson(principal).orElse(null);
   }
 
+  /**
+   * Get the optional Person object from the JwtPerson principal.
+   *
+   * @param principal the JwtPerson object that contains the Person as its principal
+   * @return an Optional object that contains the Person if present, otherwise empty
+   */
   public Optional<Person> getOptionalPerson(JwtPerson principal) {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal());

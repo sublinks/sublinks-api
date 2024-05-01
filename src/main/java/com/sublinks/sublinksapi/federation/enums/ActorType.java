@@ -1,5 +1,8 @@
 package com.sublinks.sublinksapi.federation.enums;
 
+/**
+ * The ActorType enum represents the types of actors in the system.
+ */
 public enum ActorType {
   USER("Person"),
   COMMUNITY("Group");

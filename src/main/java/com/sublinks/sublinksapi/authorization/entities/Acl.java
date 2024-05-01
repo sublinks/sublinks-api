@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.authorization.entities;
 
-import com.sublinks.sublinksapi.authorization.enums.AuthorizeAction;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,6 +20,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * This class represents an Access Control List (ACL) entity. An ACL is used to specify the access
+ * permissions for a particular entity and authorized action, for a specific person.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -46,9 +49,7 @@ public class Acl {
   private Long entityId;
 
   @Column(updatable = true, nullable = false, name = "authorized_action")
-  @Enumerated(EnumType.STRING)
-
-  private AuthorizeAction authorizedAction;
+  private String authorizedAction;
 
   @Column(updatable = true, nullable = false, name = "is_permitted")
   private boolean permitted;

@@ -21,8 +21,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotp;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UpdateTotpResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmail;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.VerifyEmailResponse;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.services.EmailService;
@@ -89,7 +89,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   private final PersonRegistrationApplicationService personRegistrationApplicationService;
   private final SlurFilterService slurFilterService;
   private final CaptchaService captchaService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final ConversionService conversionService;
   private final EmailService emailService;
   private final UserDataService userDataService;
@@ -276,7 +276,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
     }
 
-    if (!personService.isPasswordEqual(person, loginForm.password())) {
+    if (!personService.isValidPersonPassword(person, loginForm.password())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
     }
 
@@ -301,11 +301,11 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    if (!personService.isPasswordEqual(person, deleteAccount.password())) {
+    if (!personService.isValidPersonPassword(person, deleteAccount.password())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
     }
 
-    roleAuthorizingService.hasAdminOrPermission(person, RolePermission.DELETE_USER);
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.DELETE_USER);
 
     // Bug in the Lemmy UI delete_content() is always false but the api is just assuming true..., so we just ignore it
     // @todo check when lemmy fixes this
@@ -468,9 +468,9 @@ public class UserAuthController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermission(person, RolePermission.RESET_PASSWORD);
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.RESET_PASSWORD);
 
-    if (!personService.isPasswordEqual(person, changePasswordForm.old_password())) {
+    if (!personService.isValidPersonPassword(person, changePasswordForm.old_password())) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
     }
 

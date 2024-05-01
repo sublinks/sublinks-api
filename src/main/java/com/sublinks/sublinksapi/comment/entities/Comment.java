@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.comment.entities;
 
+import com.sublinks.sublinksapi.authorization.AclEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -33,6 +35,12 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * The Comment class represents a comment on a post in a community or instance. It contains various
+ * attributes such as the comment body, timestamps, and deleted state. It also has relationships
+ * with other entities such as the parent post, the person who made the comment, the community,
+ * likes, and comment aggregate.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -40,7 +48,7 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "comments")
-public class Comment implements Serializable {
+public class Comment implements Serializable, AclEntityInterface {
 
   /**
    * Relationships.
@@ -138,5 +146,11 @@ public class Comment implements Serializable {
   public boolean isRemoved() {
 
     return this.removedState != RemovedState.NOT_REMOVED;
+  }
+
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.comment;
   }
 }

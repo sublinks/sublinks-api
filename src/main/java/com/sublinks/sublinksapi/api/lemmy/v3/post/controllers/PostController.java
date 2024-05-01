@@ -27,8 +27,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadataResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
@@ -46,6 +46,8 @@ import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
+import com.sublinks.sublinksapi.post.sorts.SortFactory;
+import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -74,6 +76,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller class for managing posts in the Lemmy API. Extends the AbstractLemmyApiController
+ * class.
+ */
 @RestController
 @RequiredArgsConstructor
 @Transactional
@@ -94,7 +100,8 @@ public class PostController extends AbstractLemmyApiController {
   private final PostReportService postReportService;
   private final LemmyPostReportService lemmyPostReportService;
   private final LocalInstanceContext localInstanceContext;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
+  private final SortFactory sortFactory;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -110,8 +117,8 @@ public class PostController extends AbstractLemmyApiController {
 
     Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_POST,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionPostTypes.READ_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PostView postView;
@@ -159,7 +166,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.MARK_POST_AS_READ,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.MARK_POST_AS_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo support multiple posts
@@ -180,16 +187,18 @@ public class PostController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_POSTS,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionPostTypes.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-    final List<Long> communityIds = new ArrayList<>();
-    Community community = null;
+
+    List<Long> communityIds = null;
+    Community community;
     if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
       Long communityId =
           getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
       community = communityRepository.findCommunityByIdOrTitleSlug(communityId,
           getPostsForm.community_name());
+      communityIds = new ArrayList<>();
       communityIds.add(community.getId());
     }
 
@@ -197,13 +206,17 @@ public class PostController extends AbstractLemmyApiController {
       switch (getPostsForm.type_()) {
         case Subscribed -> {
           final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
-          for (LinkPersonCommunity l : personCommunities) {
-            if (l.getLinkType() == LinkPersonCommunityType.follower) {
-              communityIds.add(l.getCommunity().getId());
+          if (!personCommunities.isEmpty()) {
+            communityIds = new ArrayList<>();
+            for (LinkPersonCommunity l : personCommunities) {
+              if (l.getLinkType() == LinkPersonCommunityType.follower) {
+                communityIds.add(l.getCommunity().getId());
+              }
             }
           }
         }
         case Local -> {
+          communityIds = new ArrayList<>();
           for (Community c : communityRepository.findAll()) { // @todo find local
             communityIds.add(c.getId());
           }
@@ -220,9 +233,12 @@ public class PostController extends AbstractLemmyApiController {
     SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
       sortType = conversionService.convert(getPostsForm.sort(), SortType.class);
-    } else {
+    }
+    if (sortType == null) {
       sortType = SortType.New;
     }
+    SortingTypeInterface sorting = sortFactory.createSort(sortType);
+
     ListingType listingType = config != null ? localInstanceContext.instance()
         .getInstanceConfig()
         .getDefaultPostListingType() : null;
@@ -235,27 +251,42 @@ public class PostController extends AbstractLemmyApiController {
 
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
         .page(page)
-        .listingType(conversionService.convert(listingType,
-            com.sublinks.sublinksapi.person.enums.ListingType.class))
-        .perPage(perPage)
+        .listingType(conversionService.convert(
+            listingType,
+            com.sublinks.sublinksapi.person.enums.ListingType.class)
+        )
+        .perPage(perPage + 1)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType)
         .person(person.orElse(null))
         .communityIds(communityIds)
+        .cursorBasedPageable(getPostsForm.page_cursor())
         .build();
 
-    final Collection<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
+    final List<Post> posts = postRepository.allPostsBySearchCriteria(postSearchCriteria);
+
+    String cursor = null;
+    if (posts.size() > perPage) {
+      cursor = sorting.getCursor(posts);
+      posts.remove(posts.size() - 1);
+    }
+
     final Collection<PostView> postViewCollection = new LinkedHashSet<>();
-    for (Post post : posts) {
-      if (person.isPresent()) {
+    if (person.isPresent()) {
+      for (Post post : posts) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post, person.get()));
-      } else {
+      }
+    } else {
+      for (Post post : posts) {
         postViewCollection.add(lemmyPostService.postViewFromPost(post));
       }
     }
 
-    return GetPostsResponse.builder().posts(postViewCollection).build();
+    return GetPostsResponse.builder()
+        .posts(postViewCollection)
+        .next_page(cursor)
+        .build();
   }
 
   @Operation(summary = "Like / vote on a post.")
@@ -268,11 +299,10 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, switch (createPostLikeForm.score()) {
-      case 1 -> RolePermission.POST_UPVOTE;
-      case -1 -> RolePermission.POST_DOWNVOTE;
-      case 0 -> RolePermission.POST_NEUTRALVOTE;
-      default -> RolePermission.POST_NEUTRALVOTE;
+    rolePermissionService.isPermitted(person, switch (createPostLikeForm.score()) {
+      case 1 -> RolePermissionPostTypes.POST_UPVOTE;
+      case -1 -> RolePermissionPostTypes.POST_DOWNVOTE;
+      default -> RolePermissionPostTypes.POST_NEUTRALVOTE;
     }, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById(createPostLikeForm.post_id())
@@ -300,7 +330,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.POST_LIST_VOTES,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.POST_LIST_VOTES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) listPostLikesForm.post_id())
@@ -327,7 +357,7 @@ public class PostController extends AbstractLemmyApiController {
   public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
     final Person person = getPersonOrThrowUnauthorized(jwtPerson);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.FAVORITE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) savePostForm.post_id())
@@ -354,7 +384,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.REPORT_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.REPORT_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createPostReportForm.post_id())

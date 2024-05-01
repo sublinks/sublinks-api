@@ -23,7 +23,7 @@ import org.hibernate.annotations.CreationTimestamp;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "people_mentions")
+@Table(name = "person_mentions")
 public class PersonMention {
 
   /**

@@ -13,8 +13,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.search.models.Search;
 import com.sublinks.sublinksapi.api.lemmy.v3.search.models.SearchResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonView;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -50,7 +50,7 @@ public class SearchController extends AbstractLemmyApiController {
   private final LemmyCommentService lemmyCommentService;
   private final LemmyPostService lemmyPostService;
   private final LemmyPersonService lemmyPersonService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Search lemmy.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -64,8 +64,8 @@ public class SearchController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(jwtPerson);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.INSTANCE_SEARCH,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionInstanceTypes.INSTANCE_SEARCH,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final SearchResponse.SearchResponseBuilder responseBuilder = SearchResponse.builder();
@@ -112,7 +112,7 @@ public class SearchController extends AbstractLemmyApiController {
     }
 
     if (searchForm.type_() == SearchType.Users || isAll) {
-      List<Person> people = searchService.seearchPerson(searchForm.q(), page, limit, sort)
+      List<Person> people = searchService.searchPerson(searchForm.q(), page, limit, sort)
           .getContent();
       peopleViewList.addAll(people.stream().map(lemmyPersonService::getPersonView).toList());
 

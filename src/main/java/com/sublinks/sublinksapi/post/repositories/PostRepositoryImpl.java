@@ -1,20 +1,18 @@
 package com.sublinks.sublinksapi.post.repositories;
 
-import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
-
 import com.sublinks.sublinksapi.community.entities.Community;
-import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.entities.Post;
-import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
+import com.sublinks.sublinksapi.post.services.PostSearchQueryService;
+import com.sublinks.sublinksapi.post.services.PostSearchQueryService.Builder;
+import com.sublinks.sublinksapi.post.services.PostSearchQueryService.Results;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Expression;
@@ -30,56 +28,40 @@ import lombok.AllArgsConstructor;
 public class PostRepositoryImpl implements PostRepositorySearch {
 
   private final EntityManager em;
+  private final PostSearchQueryService postSearchQueryService;
 
   @Override
   public List<Post> allPostsBySearchCriteria(final PostSearchCriteria postSearchCriteria) {
 
-    final CriteriaBuilder cb = em.getCriteriaBuilder();
-    final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
-
-    final Root<Post> postTable = cq.from(Post.class);
-    final Join<Post, Community> communityJoin = postTable.join("community", JoinType.INNER);
-
-    final List<Predicate> predicates = new ArrayList<>();
-    // Community filter
-    if (postSearchCriteria.communityIds() != null && !postSearchCriteria.communityIds().isEmpty()) {
-      final Expression<Long> expression = communityJoin.get("id");
-      predicates.add(expression.in(postSearchCriteria.communityIds()));
+    final Builder searchBuilder = postSearchQueryService.builder();
+    if (postSearchCriteria.person() != null) {
+      searchBuilder
+          .setPerson(postSearchCriteria.person())
+          .addPersonLikesToPost();
     }
-    // Subscribed only filter
+    if (postSearchCriteria.communityIds() != null) {
+      searchBuilder
+          .filterByCommunities(postSearchCriteria.communityIds());
+    }
     if (postSearchCriteria.person() != null
         && postSearchCriteria.listingType() == ListingType.Subscribed) {
-      final Join<Community, LinkPersonCommunity> linkPersonCommunityJoin = communityJoin.join(
-          "linkPersonCommunity", JoinType.INNER);
-      predicates.add(cb.equal(linkPersonCommunityJoin.get("person"), postSearchCriteria.person()));
+      searchBuilder
+          .filterByListingType(postSearchCriteria.listingType());
     }
-    // Join for PostLike
-    if (postSearchCriteria.person() != null) {
-      final Join<Post, PostLike> postPostLikeJoin = postTable.join("postLikes", JoinType.LEFT);
-      postPostLikeJoin.on(cb.equal(postPostLikeJoin.get("person"), postSearchCriteria.person()));
+    if (postSearchCriteria.cursorBasedPageable() != null) {
+      searchBuilder.setCursor(postSearchCriteria.cursorBasedPageable());
     }
-
-    cq.where(predicates.toArray(new Predicate[0]));
-
-    switch (postSearchCriteria.sortType()) {
-      case New:
-        cq.orderBy(cb.desc(postTable.get("createdAt")));
-        break;
-      case Old:
-        cq.orderBy(cb.asc(postTable.get("createdAt")));
-        break;
-      default:
-        cq.orderBy(cb.desc(postTable.get("createdAt")));
-        break;
+    if (postSearchCriteria.sortType() != null) {
+      searchBuilder.setSortType(postSearchCriteria.sortType());
     }
 
-    int perPage = Math.min(Math.abs(postSearchCriteria.perPage()), 20);
-
-    TypedQuery<Post> query = em.createQuery(cq);
-
-    applyPagination(query, postSearchCriteria.page(), perPage);
-
-    return query.getResultList();
+    Results results = postSearchQueryService.results(searchBuilder);
+    results.setPerPage(postSearchCriteria.perPage());
+    if (postSearchCriteria.cursorBasedPageable() != null) {
+      return results.getCursorResults();
+    }
+    results.setPage(postSearchCriteria.page());
+    return results.getResults();
   }
 
   @Override
@@ -142,5 +124,4 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     return em.createQuery(cq).getResultList();
   }
-
 }

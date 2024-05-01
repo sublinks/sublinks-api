@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.person.Producers;
+package com.sublinks.sublinksapi.person.producers;
 
 import cn.apiclub.captcha.noise.CurvedLineNoiseProducer;
 import java.awt.BasicStroke;
