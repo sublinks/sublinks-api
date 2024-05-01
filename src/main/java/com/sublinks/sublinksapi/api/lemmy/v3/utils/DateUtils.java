@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.utils;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Date Utils
+ * Utility class for date formatting and parsing.
  */
 public class DateUtils {
 
