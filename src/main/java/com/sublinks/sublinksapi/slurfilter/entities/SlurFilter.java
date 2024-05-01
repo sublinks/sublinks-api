@@ -48,7 +48,7 @@ public class SlurFilter {
   private Date createdAt;
 
   @UpdateTimestamp
-  @Column(updatable = false, nullable = false, name = "updated_at")
+  @Column(updatable = true, nullable = false, name = "updated_at")
   private Date updatedAt;
 
   @Override
