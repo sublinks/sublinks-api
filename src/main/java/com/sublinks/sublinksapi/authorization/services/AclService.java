@@ -21,6 +21,7 @@ public class AclService {
 
   private final AclRepository aclRepository;
   private final RolePermissionService rolePermissionService;
+  private final RoleService roleService;
 
   /**
    * Determines if a person is allowed to perform an action according to the ACL rules.
@@ -31,9 +32,20 @@ public class AclService {
   public EntityPolicy canPerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(ActionType.check, aclRepository, rolePermissionService);
+      return new EntityPolicy(
+          ActionType.check,
+          aclRepository,
+          rolePermissionService,
+          roleService
+      );
     }
-    return new EntityPolicy(person, ActionType.check, aclRepository, rolePermissionService);
+    return new EntityPolicy(
+        person,
+        ActionType.check,
+        aclRepository,
+        rolePermissionService,
+        roleService
+    );
   }
 
   /**
@@ -45,9 +57,20 @@ public class AclService {
   public EntityPolicy allowPerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(ActionType.allow, aclRepository, rolePermissionService);
+      return new EntityPolicy(
+          ActionType.allow,
+          aclRepository,
+          rolePermissionService,
+          roleService
+      );
     }
-    return new EntityPolicy(person, ActionType.allow, aclRepository, rolePermissionService);
+    return new EntityPolicy(
+        person,
+        ActionType.allow,
+        aclRepository,
+        rolePermissionService,
+        roleService
+    );
   }
 
   /**
@@ -60,9 +83,20 @@ public class AclService {
   public EntityPolicy revokePerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(ActionType.revoke, aclRepository, rolePermissionService);
+      return new EntityPolicy(
+          ActionType.revoke,
+          aclRepository,
+          rolePermissionService,
+          roleService
+      );
     }
-    return new EntityPolicy(person, ActionType.revoke, aclRepository, rolePermissionService);
+    return new EntityPolicy(
+        person,
+        ActionType.revoke,
+        aclRepository,
+        rolePermissionService,
+        roleService
+    );
   }
 
   /**
@@ -85,6 +119,7 @@ public class AclService {
     private final ActionType actionType;
     private final AclRepository aclRepository;
     private final RolePermissionService rolePermissionService;
+    private final RoleService roleService;
     private final List<String> authorizedActions = new ArrayList<>();
     private boolean isPermitted = true;
     private AuthorizedEntityType entityType;
@@ -100,8 +135,10 @@ public class AclService {
     public EntityPolicy(
         final ActionType actionType,
         final AclRepository aclRepository,
-        final RolePermissionService rolePermissionService
+        final RolePermissionService rolePermissionService, RoleService roleService
     ) {
+
+      this.roleService = roleService;
 
       this.person = Person.builder().build();
       this.actionType = actionType;
@@ -121,13 +158,14 @@ public class AclService {
         final Person person,
         final ActionType actionType,
         final AclRepository aclRepository,
-        RolePermissionService rolePermissionService
+        RolePermissionService rolePermissionService, RoleService roleService
     ) {
 
       this.person = person;
       this.actionType = actionType;
       this.aclRepository = aclRepository;
       this.rolePermissionService = rolePermissionService;
+      this.roleService = roleService;
     }
 
     /**
@@ -187,7 +225,7 @@ public class AclService {
      */
     private void execute() {
 
-      if (person != null && entityType == null && entityId == null) {
+      if (entityType == null && entityId == null) {
         switch (actionType) {
           case allow -> throw new RuntimeException("Permissions cannot be granted to roles.");
           case revoke -> throw new RuntimeException("Permissions cannot be revoked from roles.");
@@ -203,16 +241,24 @@ public class AclService {
     }
 
     /**
-     * Checks the role permission for the current policy. It calls the
-     * {@link RolePermissionService#isPermitted(Person, RolePermissionInterface)} method and assigns
-     * the result to the {@code isPermitted} field.
+     * Checks the role permissions for the current policy. If a person is associated with the
+     * policy, it checks if the person is permitted to perform the specified role permission. If no
+     * person is associated with the policy, it checks if the default guest role is permitted to
+     * perform the specified role permission.
      */
     private void checkRolePermission() {
 
-      this.isPermitted = rolePermissionService.isPermitted(
-          this.person,
-          (RolePermissionInterface) this.authorizedActions
-      );
+      if (this.person != null) {
+        this.isPermitted = rolePermissionService.isPermitted(
+            this.person,
+            (RolePermissionInterface) this.authorizedActions
+        );
+      } else {
+        this.isPermitted = rolePermissionService.isPermitted(
+            roleService.getDefaultGuestRole(() -> new RuntimeException("No guest role defined.")),
+            (RolePermissionInterface) this.authorizedActions
+        );
+      }
     }
 
     /**
