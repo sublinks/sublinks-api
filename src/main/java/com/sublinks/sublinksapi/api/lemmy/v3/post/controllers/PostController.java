@@ -27,8 +27,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.GetSiteMetadataResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
@@ -76,6 +76,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Controller class for managing posts in the Lemmy API. Extends the AbstractLemmyApiController
+ * class.
+ */
 @RestController
 @RequiredArgsConstructor
 @Transactional
@@ -96,7 +100,7 @@ public class PostController extends AbstractLemmyApiController {
   private final PostReportService postReportService;
   private final LemmyPostReportService lemmyPostReportService;
   private final LocalInstanceContext localInstanceContext;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final SortFactory sortFactory;
 
   @Operation(summary = "Get / fetch a post.")
@@ -113,8 +117,8 @@ public class PostController extends AbstractLemmyApiController {
 
     Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_POST,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionPostTypes.READ_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PostView postView;
@@ -162,7 +166,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.MARK_POST_AS_READ,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.MARK_POST_AS_READ,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // @todo support multiple posts
@@ -183,8 +187,8 @@ public class PostController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_POSTS,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionPostTypes.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     List<Long> communityIds = null;
@@ -295,10 +299,10 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, switch (createPostLikeForm.score()) {
-      case 1 -> RolePermission.POST_UPVOTE;
-      case -1 -> RolePermission.POST_DOWNVOTE;
-      default -> RolePermission.POST_NEUTRALVOTE;
+    rolePermissionService.isPermitted(person, switch (createPostLikeForm.score()) {
+      case 1 -> RolePermissionPostTypes.POST_UPVOTE;
+      case -1 -> RolePermissionPostTypes.POST_DOWNVOTE;
+      default -> RolePermissionPostTypes.POST_NEUTRALVOTE;
     }, () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById(createPostLikeForm.post_id())
@@ -326,7 +330,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.POST_LIST_VOTES,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.POST_LIST_VOTES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) listPostLikesForm.post_id())
@@ -353,7 +357,7 @@ public class PostController extends AbstractLemmyApiController {
   public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
 
     final Person person = getPersonOrThrowUnauthorized(jwtPerson);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.FAVORITE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) savePostForm.post_id())
@@ -380,7 +384,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.REPORT_POST,
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.REPORT_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createPostReportForm.post_id())

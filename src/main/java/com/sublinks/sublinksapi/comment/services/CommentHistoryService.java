@@ -6,11 +6,11 @@ import com.sublinks.sublinksapi.comment.entities.CommentHistory;
 import com.sublinks.sublinksapi.comment.events.CommentHistoryCreatedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
+import java.util.Objects;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

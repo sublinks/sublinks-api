@@ -14,8 +14,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReportRepository;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
@@ -67,7 +70,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PostReportRepository postReportRepository;
   private final CommunityRepository communityRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final PersonRepository personRepository;
   private final PostService postService;
   private final CommentService commentService;
@@ -82,6 +85,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PrivateMessageReportRepository privateMessageReportRepository;
   private final PrivateMessageService privateMessageService;
   private final PrivateMessageReportService privateMessageReportService;
+  private final RoleService roleService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -93,14 +97,15 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_BAN_USER,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_USER,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
     if (banPersonForm.ban()) {
-      personToBan.setRole(roleAuthorizingService.getBannedRole());
+      personToBan.setRole(
+          roleService.getBannedRole(() -> new RuntimeException("No Banned role found.")));
       if (banPersonForm.remove_data()) {
         // Resolve all reports by content of the user
         postReportService.resolveAllReportsByPerson(personToBan, person);
@@ -115,7 +120,10 @@ public class UserModActionsController extends AbstractLemmyApiController {
       // Restore all posts and comments by the user previously removed
       postService.removeAllPostsFromUser(personToBan, false);
       commentService.removeAllCommentsFromUser(personToBan, false);
-      personToBan.setRole(roleAuthorizingService.getUserRole());
+      personToBan.setRole(
+          roleService.getDefaultRegisteredRole(
+              () -> new RuntimeException("No Registered role found."))
+      );
     }
 
     // Create Moderation Log
@@ -147,7 +155,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     // @todo: implement user block ( probably community block too )
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.USER_BLOCK,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_BLOCK,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     return BlockPersonResponse.builder().build();
@@ -163,8 +171,9 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Set.of(RolePermission.REPORT_INSTANCE_READ, RolePermission.REPORT_COMMUNITY_READ),
+    rolePermissionService.isPermitted(person,
+        Set.of(RolePermissionInstanceTypes.REPORT_INSTANCE_READ,
+            RolePermissionCommunityTypes.REPORT_COMMUNITY_READ),
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final GetReportCountResponse.GetReportCountResponseBuilder builder = GetReportCountResponse.builder();
@@ -192,7 +201,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
       builder.private_message_reports(0);
     } else {
 
-      final boolean isAdmin = RoleAuthorizingService.isAdmin(person);
+      final boolean isAdmin = RolePermissionService.isAdmin(person);
 
       if (isAdmin) {
         builder.comment_reports(
@@ -230,14 +239,17 @@ public class UserModActionsController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_REMOVE_ADMIN,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
-    if (roleAuthorizingService.getAdmins().size() == 1) {
+    if (roleService.getAdmins().size() == 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_leave_last_admin");
     }
 
-    person.setRole(roleAuthorizingService.getUserRole());
+    person.setRole(
+        roleService.getDefaultRegisteredRole(
+            () -> new RuntimeException("Now Registered role found."))
+    );
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
@@ -260,7 +272,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
         .custom_emojis(lemmySiteService.customEmojis())
-        .admins(roleAuthorizingService.getAdmins()
+        .admins(roleService.getAdmins()
             .stream()
             .map(lemmyPersonService::getPersonView)
             .toList())

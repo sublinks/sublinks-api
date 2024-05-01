@@ -5,10 +5,18 @@ import java.util.Collection;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
+/**
+ * JwtPerson is a class that represents a user authenticated using JWT (JSON Web Token). It extends
+ * the AbstractAuthenticationToken class.
+ */
 public class JwtPerson extends AbstractAuthenticationToken {
 
   private final Person person;
 
+  /**
+   * JwtPerson is a class that represents a user authenticated using JWT (JSON Web Token). It
+   * extends the AbstractAuthenticationToken class.
+   */
   public JwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
 
     super(authorities);

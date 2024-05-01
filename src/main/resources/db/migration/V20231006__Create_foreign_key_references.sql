@@ -118,7 +118,7 @@ ALTER TABLE private_messages
 /**
   Person Mention table
  */
-ALTER TABLE people_mentions
+ALTER TABLE person_mentions
   ADD FOREIGN KEY (recipient_id) REFERENCES people (id) ON DELETE CASCADE,
   ADD FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE;
 
@@ -187,15 +187,15 @@ ALTER TABLE custom_emoji_keywords
 /**
   Role Permissions table
  */
-ALTER TABLE role_permissions
-  ADD FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE;
+ALTER TABLE acl_role_permissions
+  ADD FOREIGN KEY (role_id) REFERENCES acl_roles (id) ON DELETE CASCADE;
 
 
 /**
   People table
  */
 ALTER TABLE people
-  ADD FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE RESTRICT ON UPDATE CASCADE;
+  ADD FOREIGN KEY (role_id) REFERENCES acl_roles (id) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 /**
   Post History table

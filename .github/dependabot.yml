@@ -11,6 +11,10 @@ updates:
     schedule:
       interval: "weekly"
   # Maintain dependencies for Gradle
+  - directory: "/"
+    schedule:
+      interval: "weekly"
+    package-ecosystem: "gradle"
   # Maintain dependencies for submodules
   - package-ecosystem: "gitsubmodule"
     directory: "/"

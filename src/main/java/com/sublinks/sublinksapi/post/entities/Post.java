@@ -1,5 +1,7 @@
 package com.sublinks.sublinksapi.post.entities;
 
+import com.sublinks.sublinksapi.authorization.AclEntityInterface;
+import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.instance.entities.Instance;
@@ -36,6 +38,11 @@ import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * The Post class represents a post in a community or instance. It contains various attributes such
+ * as the post body, title, link, and timestamps. It also has relationships with other entities such
+ * as comments, likes, and history.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
@@ -43,35 +50,42 @@ import org.hibernate.proxy.HibernateProxy;
 @Builder
 @Entity
 @Table(name = "posts")
-public class Post {
+public class Post implements AclEntityInterface {
 
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
   @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
+
   @ManyToOne
   @JoinTable(name = "post_post_cross_post", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "cross_post_id"))
   CrossPost crossPost;
+
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "community_id")
   private Community community;
+
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", fetch = FetchType.EAGER)
   private List<Comment> comments;
+
   @ManyToOne
   private Instance instance;
+
   @ManyToOne
   @JoinColumn(name = "language_id")
   private Language language;
+
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
   private PostAggregate postAggregate;
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @Fetch(FetchMode.SUBSELECT)
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<PostLike> postLikes;
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @Fetch(FetchMode.SUBSELECT)
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<PostHistory> postHistory;
+
   /**
    * Attributes.
    */
@@ -175,5 +189,11 @@ public class Post {
   public boolean isRemoved() {
 
     return this.removedState != RemovedState.NOT_REMOVED;
+  }
+
+  @Override
+  public AuthorizedEntityType entityType() {
+
+    return AuthorizedEntityType.post;
   }
 }

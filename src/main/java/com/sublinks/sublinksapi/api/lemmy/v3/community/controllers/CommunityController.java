@@ -18,8 +18,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.lemmy.v3.errorhandler.ApiError;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Site;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -61,7 +61,7 @@ public class CommunityController extends AbstractLemmyApiController {
   private final LemmyCommunityService lemmyCommunityService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final ConversionService conversionService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Get / fetch a community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -74,8 +74,8 @@ public class CommunityController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_COMMUNITY,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionCommunityTypes.READ_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = Optional.ofNullable(
@@ -110,29 +110,29 @@ public class CommunityController extends AbstractLemmyApiController {
     final Collection<CommunityView> communityViews = new LinkedHashSet<>();
     final Optional<Person> person = getOptionalPerson(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person.orElse(null),
-        RolePermission.READ_COMMUNITIES,
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionCommunityTypes.READ_COMMUNITIES,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final int page = PaginationControllerUtils.getAbsoluteMinNumber(listCommunitiesForm.page(), 1);
     final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(listCommunitiesForm.limit(),
         20);
 
-    final Collection<Community> communities = communityRepository.allCommunitiesBySearchCriteria(
-        CommunitySearchCriteria.builder()
-            .page(page)
-            .perPage(perPage)
-            .person(person.orElse(null))
-            .listingType(listCommunitiesForm.type_() != null ? listCommunitiesForm.type_()
-                : (localInstanceContext.instance().getInstanceConfig() != null
-                    ? localInstanceContext.instance()
-                    .getInstanceConfig()
-                    .getDefaultPostListingType() : ListingType.Local))
-            .sortType(
-                listCommunitiesForm.sort() != null ? listCommunitiesForm.sort() : SortType.New)
-            .showNsfw(
-                listCommunitiesForm.show_nsfw() != null ? listCommunitiesForm.show_nsfw() : false)
-            .build());
+    CommunitySearchCriteria searchCriteria = CommunitySearchCriteria.builder()
+        .page(page)
+        .perPage(perPage)
+        .person(person.orElse(null))
+        .listingType(listCommunitiesForm.type_() != null ? listCommunitiesForm.type_()
+            : (localInstanceContext.instance().getInstanceConfig() != null
+                ? localInstanceContext.instance()
+                .getInstanceConfig()
+                .getDefaultPostListingType() : ListingType.Local))
+        .sortType(listCommunitiesForm.sort() != null ? listCommunitiesForm.sort() : SortType.New)
+        .showNsfw(listCommunitiesForm.show_nsfw() != null ? listCommunitiesForm.show_nsfw() : true)
+        .build();
+
+    final Collection<Community> communities = communityRepository
+        .allCommunitiesBySearchCriteria(searchCriteria);
     for (Community community : communities) {
       CommunityView communityView;
       if (person.isPresent()) {
@@ -156,7 +156,7 @@ public class CommunityController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.COMMUNITY_FOLLOW,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_FOLLOW,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Community> community = communityRepository.findById(
@@ -191,7 +191,7 @@ public class CommunityController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     Person person = getPersonOrThrowUnauthorized(principal);
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.COMMUNITY_BLOCK,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.COMMUNITY_BLOCK,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Community community = communityRepository.findById(blockCommunityForm.community_id())

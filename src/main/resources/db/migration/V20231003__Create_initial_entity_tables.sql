@@ -468,7 +468,7 @@ CREATE INDEX IDX_POST_CROSS_POST_MD5_HASH ON post_cross_posts (md5_hash);
 
  Post Mention table
  */
-CREATE TABLE people_mentions
+CREATE TABLE person_mentions
 (
   id           BIGSERIAL PRIMARY KEY,
   recipient_id BIGINT                                    NOT NULL,
@@ -477,7 +477,7 @@ CREATE TABLE people_mentions
   created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
-CREATE UNIQUE INDEX IDX_PEOPLE_MENTIONS_RECIPIENT_ID ON people_mentions (recipient_id);
+CREATE UNIQUE INDEX IDX_PEOPLE_MENTIONS_RECIPIENT_ID ON person_mentions (recipient_id);
 
 /**
  Private Message
@@ -686,11 +686,10 @@ CREATE TABLE custom_emoji_keywords
 
 CREATE INDEX IDX_CUSTOM_EMOJI_KEYWORD_CUSTOM_EMOJI_ID ON custom_emoji_keywords (custom_emoji_id);
 
-
 /**
   Roles table
  */
-CREATE TABLE roles
+CREATE TABLE acl_roles
 (
   id          BIGSERIAL PRIMARY KEY,
   name        VARCHAR(255)                              NOT NULL,
@@ -702,22 +701,22 @@ CREATE TABLE roles
 );
 
 /**
-  Rolepermissions table
+  Role permissions table
  */
-CREATE TABLE role_permissions
+CREATE TABLE acl_role_permissions
 (
   id         BIGSERIAL PRIMARY KEY,
   role_id    BIGINT NOT NULL,
   permission TEXT   NOT NULL
 );
 
-CREATE INDEX IDX_ROLE_PERMISSIONS_ROLE_ID ON role_permissions (role_id);
-CREATE UNIQUE INDEX IDX_ROLE_PERMISSIONS_ROLE_ID_PERMISSION ON role_permissions (role_id, permission);
+CREATE INDEX IDX_ACL_ROLE_PERMISSIONS_ROLE_ID ON acl_role_permissions (role_id);
+CREATE UNIQUE INDEX IDX_ACL_ROLE_PERMISSIONS_ROLE_ID_PERMISSION ON acl_role_permissions (role_id, permission);
 
 /**
-  User Data table
+  Person Meta Data table
  */
-CREATE TABLE user_data
+CREATE TABLE person_meta_data
 (
   id           BIGSERIAL PRIMARY KEY,
   person_id    BIGINT                                    NOT NULL,

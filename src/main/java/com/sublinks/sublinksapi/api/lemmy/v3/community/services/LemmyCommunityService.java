@@ -101,11 +101,14 @@ public class LemmyCommunityService {
     final List<CommunityModeratorView> moderatorViews = new ArrayList<>();
     for (LinkPersonCommunity linkPerson : community.getLinkPersonCommunity()) {
       final CommunityModeratorView communityModeratorView = CommunityModeratorView.builder()
-          .community(conversionService.convert(community,
-              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
-          .moderator(conversionService.convert(linkPerson.getPerson(),
-              com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
-          .build();
+          .community(conversionService.convert(
+              community,
+              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class)
+          )
+          .moderator(conversionService.convert(
+              linkPerson.getPerson(),
+              com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class)
+          ).build();
       if (linkPerson.getLinkType() == LinkPersonCommunityType.owner) {
         moderatorViews.add(0, communityModeratorView);
       }
