@@ -118,21 +118,21 @@ public class CommunityController extends AbstractLemmyApiController {
     final int perPage = PaginationControllerUtils.getAbsoluteMinNumber(listCommunitiesForm.limit(),
         20);
 
-    final Collection<Community> communities = communityRepository.allCommunitiesBySearchCriteria(
-        CommunitySearchCriteria.builder()
-            .page(page)
-            .perPage(perPage)
-            .person(person.orElse(null))
-            .listingType(listCommunitiesForm.type_() != null ? listCommunitiesForm.type_()
-                : (localInstanceContext.instance().getInstanceConfig() != null
-                    ? localInstanceContext.instance()
-                    .getInstanceConfig()
-                    .getDefaultPostListingType() : ListingType.Local))
-            .sortType(
-                listCommunitiesForm.sort() != null ? listCommunitiesForm.sort() : SortType.New)
-            .showNsfw(
-                listCommunitiesForm.show_nsfw() != null ? listCommunitiesForm.show_nsfw() : false)
-            .build());
+    CommunitySearchCriteria searchCriteria = CommunitySearchCriteria.builder()
+        .page(page)
+        .perPage(perPage)
+        .person(person.orElse(null))
+        .listingType(listCommunitiesForm.type_() != null ? listCommunitiesForm.type_()
+            : (localInstanceContext.instance().getInstanceConfig() != null
+                ? localInstanceContext.instance()
+                .getInstanceConfig()
+                .getDefaultPostListingType() : ListingType.Local))
+        .sortType(listCommunitiesForm.sort() != null ? listCommunitiesForm.sort() : SortType.New)
+        .showNsfw(listCommunitiesForm.show_nsfw() != null ? listCommunitiesForm.show_nsfw() : true)
+        .build();
+
+    final Collection<Community> communities = communityRepository
+        .allCommunitiesBySearchCriteria(searchCriteria);
     for (Community community : communities) {
       CommunityView communityView;
       if (person.isPresent()) {
