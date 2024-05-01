@@ -55,7 +55,7 @@ public class Post implements AclEntityInterface {
   /**
    * Relationships.
    */
-  @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "post", fetch = FetchType.LAZY)
   @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
 
