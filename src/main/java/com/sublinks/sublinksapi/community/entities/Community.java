@@ -30,8 +30,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -44,18 +42,17 @@ import org.hibernate.proxy.HibernateProxy;
 @Table(name = "communities")
 public class Community implements Serializable {
 
-  @OneToMany(mappedBy = "community", fetch = FetchType.LAZY)
-  @Fetch(FetchMode.SUBSELECT)
-  Set<LinkPersonCommunity> linkPersonCommunity;
   /**
    * Relationships.
    */
+  @OneToMany(mappedBy = "community", fetch = FetchType.LAZY)
+  Set<LinkPersonCommunity> linkPersonCommunity;
+
   @ManyToOne
   @JoinColumn(name = "instance_id")
   private Instance instance;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "community")
-  @Fetch(FetchMode.SUBSELECT)
   @PrimaryKeyJoinColumn
   private List<Comment> comments;
 
@@ -64,7 +61,6 @@ public class Community implements Serializable {
   private CommunityAggregate communityAggregate;
 
   @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @Fetch(FetchMode.SUBSELECT)
   @JoinTable(name = "community_languages", joinColumns = @JoinColumn(name = "community_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
