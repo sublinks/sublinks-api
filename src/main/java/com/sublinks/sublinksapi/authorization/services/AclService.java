@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 public class AclService {
 
   private final AclRepository aclRepository;
+  private final RolePermissionService rolePermissionService;
 
   /**
    * Determines if a person is allowed to perform an action according to the ACL rules.
@@ -30,9 +31,9 @@ public class AclService {
   public EntityPolicy canPerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(ActionType.check, aclRepository);
+      return new EntityPolicy(ActionType.check, aclRepository, rolePermissionService);
     }
-    return new EntityPolicy(person, ActionType.check, aclRepository);
+    return new EntityPolicy(person, ActionType.check, aclRepository, rolePermissionService);
   }
 
   /**
@@ -44,9 +45,9 @@ public class AclService {
   public EntityPolicy allowPerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(ActionType.allow, aclRepository);
+      return new EntityPolicy(ActionType.allow, aclRepository, rolePermissionService);
     }
-    return new EntityPolicy(person, ActionType.allow, aclRepository);
+    return new EntityPolicy(person, ActionType.allow, aclRepository, rolePermissionService);
   }
 
   /**
@@ -59,9 +60,9 @@ public class AclService {
   public EntityPolicy revokePerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(ActionType.revoke, aclRepository);
+      return new EntityPolicy(ActionType.revoke, aclRepository, rolePermissionService);
     }
-    return new EntityPolicy(person, ActionType.revoke, aclRepository);
+    return new EntityPolicy(person, ActionType.revoke, aclRepository, rolePermissionService);
   }
 
   /**
@@ -83,6 +84,7 @@ public class AclService {
     private final Person person;
     private final ActionType actionType;
     private final AclRepository aclRepository;
+    private final RolePermissionService rolePermissionService;
     private final List<String> authorizedActions = new ArrayList<>();
     private boolean isPermitted = true;
     private AuthorizedEntityType entityType;
@@ -95,11 +97,16 @@ public class AclService {
      * @param actionType    the type of action to be performed
      * @param aclRepository the repository for accessing and manipulating ACL entities
      */
-    public EntityPolicy(final ActionType actionType, final AclRepository aclRepository) {
+    public EntityPolicy(
+        final ActionType actionType,
+        final AclRepository aclRepository,
+        final RolePermissionService rolePermissionService
+    ) {
 
       this.person = Person.builder().build();
       this.actionType = actionType;
       this.aclRepository = aclRepository;
+      this.rolePermissionService = rolePermissionService;
     }
 
     /**
@@ -110,12 +117,17 @@ public class AclService {
      * @param actionType    the type of action to be performed
      * @param aclRepository the repository for accessing and manipulating ACL entities
      */
-    public EntityPolicy(final Person person, final ActionType actionType,
-        final AclRepository aclRepository) {
+    public EntityPolicy(
+        final Person person,
+        final ActionType actionType,
+        final AclRepository aclRepository,
+        RolePermissionService rolePermissionService
+    ) {
 
       this.person = person;
       this.actionType = actionType;
       this.aclRepository = aclRepository;
+      this.rolePermissionService = rolePermissionService;
     }
 
     /**
@@ -171,15 +183,36 @@ public class AclService {
     }
 
     /**
-     * Executes the specified action based on the current ActionType.
+     * Executes the specified action based on the provided parameters.
      */
     private void execute() {
 
+      if (person != null && entityType == null && entityId == null) {
+        switch (actionType) {
+          case allow -> throw new RuntimeException("Permissions cannot be granted to roles.");
+          case revoke -> throw new RuntimeException("Permissions cannot be revoked from roles.");
+          default -> checkRolePermission();
+        }
+        return;
+      }
       switch (actionType) {
         case allow -> createAclRules();
         case revoke -> revokeAclRules();
         default -> checkAclRules();
       }
+    }
+
+    /**
+     * Checks the role permission for the current policy. It calls the
+     * {@link RolePermissionService#isPermitted(Person, RolePermissionInterface)} method and assigns
+     * the result to the {@code isPermitted} field.
+     */
+    private void checkRolePermission() {
+
+      this.isPermitted = rolePermissionService.isPermitted(
+          this.person,
+          (RolePermissionInterface) this.authorizedActions
+      );
     }
 
     /**

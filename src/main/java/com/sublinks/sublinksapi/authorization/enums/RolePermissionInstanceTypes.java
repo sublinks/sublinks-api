@@ -1,5 +1,9 @@
 package com.sublinks.sublinksapi.authorization.enums;
 
+/**
+ * The RolePermissionInstanceTypes enum represents the types of role permissions for specific
+ * instances. Each RolePermissionInstanceTypes contains an Entity and an Action.
+ */
 public enum RolePermissionInstanceTypes implements RolePermissionInterface {
 
   // Person permissions
@@ -17,18 +21,18 @@ public enum RolePermissionInstanceTypes implements RolePermissionInterface {
   REPORT_INSTANCE_READ("report-instance", AuthorizeAction.READ),
   REPORT_INSTANCE_RESOLVE("report-instance", AuthorizeAction.UPDATE);
 
-  public final String Entity;
-  public final AuthorizeAction Action;
+  public final String entity;
+  public final AuthorizeAction action;
 
-  RolePermissionInstanceTypes(String Entity, AuthorizeAction Action) {
+  RolePermissionInstanceTypes(String entity, AuthorizeAction action) {
 
-    this.Entity = Entity;
-    this.Action = Action;
+    this.entity = entity;
+    this.action = action;
   }
 
   @Override
   public String toString() {
 
-    return this.Entity + ":" + this.Action;
+    return this.entity + ":" + this.action;
   }
 }

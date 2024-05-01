@@ -58,27 +58,34 @@ public class Post implements AclEntityInterface {
   @OneToMany(mappedBy = "post", fetch = FetchType.EAGER)
   @Fetch(FetchMode.SUBSELECT)
   Set<LinkPersonPost> linkPersonPost;
+
   @ManyToOne
   @JoinTable(name = "post_post_cross_post", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "cross_post_id"))
   CrossPost crossPost;
+
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "community_id")
   private Community community;
+
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "post", fetch = FetchType.EAGER)
   private List<Comment> comments;
+
   @ManyToOne
   private Instance instance;
+
   @ManyToOne
   @JoinColumn(name = "language_id")
   private Language language;
+
   @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "post")
   private PostAggregate postAggregate;
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @Fetch(FetchMode.SUBSELECT)
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<PostLike> postLikes;
-  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  @Fetch(FetchMode.SUBSELECT)
+
+  @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<PostHistory> postHistory;
+
   /**
    * Attributes.
    */
