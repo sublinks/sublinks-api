@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentReport
 import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentService;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
+import com.sublinks.sublinksapi.authorization.services.AclService;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
@@ -99,6 +100,7 @@ public class CommentController extends AbstractLemmyApiController {
   private final RolePermissionService rolePermissionService;
   private final CommentSaveService commentSaveForLaterService;
   private final ComentSaveRepository commentSaveForLaterRepository;
+  private final AclService aclService;
 
   /**
    * Creates a comment.
@@ -115,11 +117,11 @@ public class CommentController extends AbstractLemmyApiController {
   public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm,
       final JwtPerson principal) {
 
-    // @todo auth service
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.CREATE_COMMENT)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) createCommentForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -210,10 +212,14 @@ public class CommentController extends AbstractLemmyApiController {
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
     Comment comment = commentRepository.findById((long) editCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.UPDATE_COMMENT)
+        .onEntity(comment)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Optional<Language> language;
     if (editCommentForm.language_id() != null) {
@@ -274,15 +280,16 @@ public class CommentController extends AbstractLemmyApiController {
     // @todo Implement delete comment
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-
     final Optional<Comment> comment = commentRepository.findById(
         (long) deleteCommentForm.comment_id());
-
     if (comment.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found");
     }
+
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.DELETE_COMMENT)
+        .onEntity(comment.get())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment commentEntity = comment.get();
     if (commentEntity.getPerson() != person) {
@@ -318,13 +325,14 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MARK_COMMENT_AS_READ,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-
     final Comment comment = commentRepository.findById(
             (long) markCommentReplyAsRead.comment_reply_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
     commentReadService.markCommentReadByPerson(comment, person);
+
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.MARK_COMMENT_AS_READ)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<CommentReply> commentReply = commentReplyRepository.findById(
         (long) markCommentReplyAsRead.comment_reply_id());
@@ -358,14 +366,14 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person,
-        switch (createCommentLikeForm.score()) {
-          case 1 -> RolePermissionCommentTypes.COMMENT_UPVOTE;
-          case -1 -> RolePermissionCommentTypes.COMMENT_DOWNVOTE;
-          default -> RolePermissionCommentTypes.COMMENT_NEUTRALVOTE;
-        },
-
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    RolePermissionCommentTypes roleType = switch (createCommentLikeForm.score()) {
+      case 1 -> RolePermissionCommentTypes.COMMENT_UPVOTE;
+      case -1 -> RolePermissionCommentTypes.COMMENT_DOWNVOTE;
+      default -> RolePermissionCommentTypes.COMMENT_NEUTRALVOTE;
+    };
+    aclService.canPerson(person)
+        .performTheAction(roleType)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById(createCommentLikeForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -399,8 +407,9 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.COMMENT_LIST_VOTES,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.COMMENT_LIST_VOTES)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById((long) listCommentLikesForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -431,8 +440,9 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.FAVORITE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.FAVORITE_COMMENT)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Comment comment = commentRepository.findById((long) saveCommentForm.comment_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -483,9 +493,9 @@ public class CommentController extends AbstractLemmyApiController {
   GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
     Optional<Person> person = getOptionalPerson(principal);
-    rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionCommentTypes.READ_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    aclService.canPerson(person.orElse(null))
+        .performTheAction(RolePermissionCommentTypes.READ_COMMENT)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
     final Optional<Integer> page = Optional.ofNullable(getCommentsForm.page());
@@ -557,8 +567,9 @@ public class CommentController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.REPORT_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionCommentTypes.REPORT_COMMENT)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Comment comment = commentRepository.findById((long) createCommentReportForm.comment_id())
         .orElseThrow(
