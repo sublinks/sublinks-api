@@ -37,8 +37,7 @@ public class UserDataService {
       @Nullable String userAgent) {
 
     boolean saveUserIps = userDataConfig.isSaveUserData();
-    Optional<UserData> foundData = getActiveUserDataByPersonAndIpAddress(person, token, ipAddress,
-        userAgent);
+    Optional<UserData> foundData = getActiveUserDataByPersonAndIpAddress(person, token);
 
     if (foundData.isPresent()) {
 
@@ -94,15 +93,9 @@ public class UserDataService {
     return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, token);
   }
 
-  private Optional<UserData> getActiveUserDataByPersonAndIpAddress(Person person, String token,
-      String ipAddress, String userAgent) {
+  private Optional<UserData> getActiveUserDataByPersonAndIpAddress(Person person, String token) {
 
-    if (userDataConfig.isSaveUserData()) {
-      return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, ipAddress);
-    }
-
-    return userDataRepository.findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(
-        person, token, ipAddress, userAgent);
+    return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, token);
   }
 
   @Transactional
