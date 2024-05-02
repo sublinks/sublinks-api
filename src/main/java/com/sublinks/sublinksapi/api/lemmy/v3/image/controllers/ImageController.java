@@ -27,6 +27,9 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+/**
+ * This class is a controller for handling image-related operations in the Pictrs application.
+ */
 @RestController
 @RequiredArgsConstructor
 @Transactional
@@ -36,6 +39,13 @@ public class ImageController extends AbstractLemmyApiController {
   @Value("${sublinks.pictrs.url}")
   private String pictrsUri;
 
+  /**
+   * Uploads an image.
+   *
+   * @param image The image file to upload.
+   * @return A Mono with ResponseEntity&lt;String&gt; representing the response from the server.
+   * @throws IOException If an I/O error occurs while reading the image file.
+   */
   @Operation(summary = "Uploads an image.", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK")}
@@ -43,8 +53,6 @@ public class ImageController extends AbstractLemmyApiController {
   @PostMapping
   Mono<ResponseEntity<String>> upload(@RequestParam("images[]") MultipartFile image)
       throws IOException {
-
-    // @todo log who is uploading and what they uploaded
 
     Resource resource = new ByteArrayResource(image.getBytes()) {
       @Override
@@ -63,6 +71,14 @@ public class ImageController extends AbstractLemmyApiController {
         .toEntity(String.class);
   }
 
+  /**
+   * Gets the full resolution image.
+   *
+   * @param pictrsParams The parameters for processing the image.
+   * @param filename     The name of the image file.
+   * @return A Mono with ResponseEntity<ByteArrayResource> representing the response from the
+   * server.
+   */
   @Operation(summary = "Gets the full resolution image.", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK")}
@@ -95,6 +111,13 @@ public class ImageController extends AbstractLemmyApiController {
 
   }
 
+  /**
+   * Deletes an image.
+   *
+   * @param token    The token used for authentication.
+   * @param filename The name of the image file to be deleted.
+   * @return A Mono with ResponseEntity&lt;String&gt; representing the response from the server.
+   */
   @Operation(summary = "Deletes an image.", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK")}
