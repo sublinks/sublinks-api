@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface PersonRepository extends JpaRepository<Person, Long> {
 
-  Optional<Person> findOneByName(String name);
+  Optional<Person> findOneByNameIgnoreCase(String name);
 
   Optional<Person> findOneByEmail(String email);
 
