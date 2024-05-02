@@ -29,7 +29,7 @@ public abstract class RoleMapper implements
       @Nullable Role role);
 
   @Named("is_expired")
-  boolean mapIsExpired(Role role) {
+  Boolean mapIsExpired(Role role) {
 
     return new Date().after(role.getExpiresAt());
   }

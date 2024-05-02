@@ -44,7 +44,7 @@ public class PersonController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<PersonResponse> index(@RequestBody @Valid IndexPerson indexPerson) {
+  public List<PersonResponse> index(@Valid final IndexPerson indexPerson) {
 
     return personRepository.findAllByNameAndBiography(indexPerson.search(),
         PageRequest.of(indexPerson.page(), indexPerson.limit())).stream().map(
@@ -55,9 +55,9 @@ public class PersonController extends AbstractSublinksApiController {
   @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public PersonResponse show(@PathVariable String id) {
+  public PersonResponse show(@PathVariable String key) {
 
-    Optional<PersonResponse> personResponse = personRepository.findById(Long.parseLong(id)).map(
+    Optional<PersonResponse> personResponse = personRepository.findOneByName(key).map(
         person -> conversionService.convert(person, PersonResponse.class));
 
     return personResponse.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));

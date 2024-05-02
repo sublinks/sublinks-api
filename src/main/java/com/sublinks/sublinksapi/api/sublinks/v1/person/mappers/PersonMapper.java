@@ -31,7 +31,7 @@ public abstract class PersonMapper implements Converter<Person, PersonResponse> 
   public abstract PersonResponse convert(@Nullable Person person);
 
   @Named("is_banned")
-  boolean mapIsBanned(Person person) {
+  Boolean mapIsBanned(Person person) {
 
     return RoleAuthorizingService.isBanned(person);
   }

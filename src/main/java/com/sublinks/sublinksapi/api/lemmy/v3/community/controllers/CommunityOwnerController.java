@@ -71,28 +71,27 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.CREATE_COMMUNITY,
+    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.CREATE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final List<Language> languages = new ArrayList<>();
     if (createCommunityForm.discussion_languages() != null) {
       for (String languageCode : createCommunityForm.discussion_languages()) {
-        final Optional<Language> language = localInstanceContext.languageRepository()
-            .findById(Long.valueOf(languageCode));
+        final Optional<Language> language = localInstanceContext.languageRepository().findById(
+            Long.valueOf(languageCode));
         language.ifPresent(languages::add);
       }
     }
 
-    Community.CommunityBuilder communityBuilder = Community.builder()
-        .instance(localInstanceContext.instance()).title(createCommunityForm.title())
-        .titleSlug(slugUtil.stringToSlug(createCommunityForm.name()))
-        .description(createCommunityForm.description()).isPostingRestrictedToMods(
-            createCommunityForm.posting_restricted_to_mods() != null
-                && createCommunityForm.posting_restricted_to_mods())
-        .isNsfw(createCommunityForm.nsfw() != null && createCommunityForm.nsfw())
-        .iconImageUrl(createCommunityForm.icon()).bannerImageUrl(createCommunityForm.banner())
-        .languages(languages);
+    Community.CommunityBuilder communityBuilder = Community.builder().instance(
+        localInstanceContext.instance()).title(createCommunityForm.title()).titleSlug(
+        slugUtil.stringToSlug(createCommunityForm.name())).description(
+        createCommunityForm.description()).isPostingRestrictedToMods(
+        createCommunityForm.posting_restricted_to_mods() != null
+            && createCommunityForm.posting_restricted_to_mods()).isNsfw(
+        createCommunityForm.nsfw() != null && createCommunityForm.nsfw()).iconImageUrl(
+        createCommunityForm.icon()).bannerImageUrl(createCommunityForm.banner()).languages(
+        languages);
 
     try {
       communityBuilder.title(slurFilterService.censorText(createCommunityForm.title()));
@@ -135,10 +134,16 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     Community community = communityBuilder.build();
 
     final Set<LinkPersonCommunity> linkPersonCommunities = new LinkedHashSet<>();
-    linkPersonCommunities.add(LinkPersonCommunity.builder().community(community).person(person)
-        .linkType(LinkPersonCommunityType.owner).build());
-    linkPersonCommunities.add(LinkPersonCommunity.builder().community(community).person(person)
-        .linkType(LinkPersonCommunityType.follower).build());
+    linkPersonCommunities.add(LinkPersonCommunity.builder()
+        .community(community)
+        .person(person)
+        .linkType(LinkPersonCommunityType.owner)
+        .build());
+    linkPersonCommunities.add(LinkPersonCommunity.builder()
+        .community(community)
+        .person(person)
+        .linkType(LinkPersonCommunityType.follower)
+        .build());
 
     communityService.createCommunity(community);
 
@@ -189,8 +194,8 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     final List<Language> languages = new ArrayList<>();
     for (String languageCode : editCommunityForm.discussion_languages()) {
-      final Optional<Language> language = localInstanceContext.languageRepository()
-          .findById(Long.valueOf(languageCode));
+      final Optional<Language> language = localInstanceContext.languageRepository().findById(
+          Long.valueOf(languageCode));
       language.ifPresent(languages::add);
     }
 

@@ -6,8 +6,8 @@ import lombok.Builder;
 public record Role(String key,
                    String name,
                    String description,
-                   boolean isActive,
-                   boolean isExpired,
+                   Boolean isActive,
+                   Boolean isExpired,
                    String expiresAt,
                    String createdAt,
                    String updatedAt) {
