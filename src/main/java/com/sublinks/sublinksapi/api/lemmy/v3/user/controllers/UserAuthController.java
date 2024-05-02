@@ -126,7 +126,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       }
     }
 
-    if (personRepository.findOneByName(registerForm.username()).isPresent()) {
+    if (personRepository.findOneByNameIgnoreCase(registerForm.username()).isPresent()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "username_taken");
     }
     try {
@@ -254,7 +254,7 @@ public class UserAuthController extends AbstractLemmyApiController {
   LoginResponse login(final HttpServletRequest request, @Valid @RequestBody final Login loginForm)
       throws LemmyException {
 
-    final Person person = personRepository.findOneByName(loginForm.username_or_email())
+    final Person person = personRepository.findOneByNameIgnoreCase(loginForm.username_or_email())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
     // @todo verify password
 
