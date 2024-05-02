@@ -33,7 +33,7 @@ public class PersonMentionCommentCreationListener implements
     final List<Mention> mentions = mentionUtils.getPersonMentions(comment.getCommentBody());
     if (mentions != null) {
       for (Mention mention : mentions) {
-        Optional<Person> recipient = personRepository.findOneByName(mention.name());
+        Optional<Person> recipient = personRepository.findOneByNameIgnoreCase(mention.name());
 
         if (recipient.isEmpty() || Objects.equals(recipient.get(), comment.getPerson())) {
           continue;
