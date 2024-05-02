@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInterface;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionMediaTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionModLogTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
@@ -135,6 +136,8 @@ public class InitialRoleSetupService {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
     applyCommonPermissions(rolePermissions);
+
+    rolePermissions.add(RolePermissionMediaTypes.CREATE_MEDIA);
 
     rolePermissions.add(RolePermissionPostTypes.POST_UPVOTE);
     rolePermissions.add(RolePermissionPostTypes.POST_DOWNVOTE);
