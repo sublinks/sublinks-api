@@ -83,7 +83,7 @@ public class JwtFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected Boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
     return !request.getServletPath().startsWith("/api/v3");
   }
