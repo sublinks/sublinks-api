@@ -70,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      final Optional<Person> person = personRepository.findOneByName(userName);
+      final Optional<Person> person = personRepository.findOneByNameIgnoreCase(userName);
       if (person.isEmpty()) {
         throw new UsernameNotFoundException("Invalid name");
       }
