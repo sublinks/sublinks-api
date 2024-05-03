@@ -1,4 +1,10 @@
 /**
+  Media
+ */
+ALTER TABLE media
+    ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE;
+
+/**
   Comments table
  */
 ALTER TABLE comments
