@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(final HttpServletRequest request,
-      final HttpServletResponse response, final FilterChain filterChain)
+      @NonNull final HttpServletResponse response, @NonNull final FilterChain filterChain)
       throws ServletException, IOException {
 
     String authorizingToken = request.getHeader("Authorization");
@@ -91,6 +92,7 @@ public class JwtFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
-    return !request.getServletPath().startsWith("/api/v3");
+    String servletPath = request.getServletPath();
+    return !servletPath.startsWith("/api/v3") && !servletPath.startsWith("/pictrs");
   }
 }
