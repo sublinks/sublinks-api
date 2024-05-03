@@ -500,6 +500,20 @@ CREATE TABLE `private_messages_reports`
   DEFAULT CHARSET `utf8mb4`
   COLLATE = 'utf8mb4_unicode_ci';
 
+/**
+  Create Media Table
+ */
+CREATE TABLE media
+(
+  id           BIGSERIAL PRIMARY KEY,
+  person_id    BIGSERIAL    NOT NULL,
+  delete_token VARCHAR(255) NOT NULL,
+  file         VARCHAR(255) NOT NULL,
+  created_at   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+CREATE INDEX IDX_MEDIA_PERSON_ID ON media (person_id);
+CREATE INDEX IDX_MEDIA_FILE ON media (file);
 
 CREATE INDEX `IDX_PRIVATE_MESSAGES_REPORT_CREATOR_ID` ON `private_messages_reports` (`creator_id`);
 CREATE INDEX `IDX_PRIVATE_MESSAGES_PRIVATE_MESSAGE_ID` ON `private_messages_reports` (`private_message_id`);
