@@ -813,6 +813,20 @@ CREATE TABLE email_data
   email_id  BIGINT       NOT NULL
 );
 
+/**
+  Create Media Table
+ */
+CREATE TABLE media
+(
+  id           BIGSERIAL PRIMARY KEY,
+  person_id    BIGSERIAL    NOT NULL,
+  delete_token VARCHAR(255) NOT NULL,
+  file         VARCHAR(255) NOT NULL,
+  created_at   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+CREATE INDEX IDX_MEDIA_PERSON_ID ON media (person_id);
+CREATE INDEX IDX_MEDIA_FILE ON media (file);
 
 /**
   Email Person Table
