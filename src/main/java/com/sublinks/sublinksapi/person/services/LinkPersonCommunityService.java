@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.person.services;
 
+import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -24,6 +25,17 @@ public class LinkPersonCommunityService {
   private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
   private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
 
+  public boolean hasLinkOrAdmin(Person person, Community community, LinkPersonCommunityType type) {
+
+    return RoleAuthorizingService.isAdmin(person) || hasLink(person, community, type);
+  }
+
+  public boolean hasAnyLinkOrAdmin(Person person, Community community,
+      List<LinkPersonCommunityType> types) {
+
+    return RoleAuthorizingService.isAdmin(person) || hasAnyLink(person, community, types);
+  }
+
   public boolean hasLink(Person person, Community community, LinkPersonCommunityType type) {
 
     final Optional<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
@@ -42,8 +54,8 @@ public class LinkPersonCommunityService {
   @Transactional
   public void addLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    final LinkPersonCommunity newLink = LinkPersonCommunity.builder().community(community)
-        .person(person).linkType(type).build();
+    final LinkPersonCommunity newLink = LinkPersonCommunity.builder().community(community).person(
+        person).linkType(type).build();
     person.getLinkPersonCommunity().add(newLink);
     community.getLinkPersonCommunity().add(newLink);
     linkPersonCommunityRepository.save(newLink);
@@ -58,10 +70,10 @@ public class LinkPersonCommunityService {
     if (linkPersonCommunity.isEmpty()) {
       return;
     }
-    person.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
-    community.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
+    person.getLinkPersonCommunity().removeIf(
+        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
+    community.getLinkPersonCommunity().removeIf(
+        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
     linkPersonCommunityRepository.delete(linkPersonCommunity.get());
     linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
   }

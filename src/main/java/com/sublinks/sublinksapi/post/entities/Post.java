@@ -87,7 +87,6 @@ public class Post {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
-
   private RemovedState removedState;
 
   @Column(nullable = false, name = "is_local")

@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class SublinksCommunityService {
   private final LocalInstanceContext localInstanceContext;
   private final RoleAuthorizingService roleAuthorizingService;
   private final InstanceRepository instanceRepository;
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   public CommunityResponse createCommunity(CreateCommunity createCommunity, Person person) {
 
@@ -52,6 +54,8 @@ public class SublinksCommunityService {
   public CommunityResponse updateCommunity(String key, UpdateCommunity updateCommunityForm,
       Person person) {
 
+
+
     Community community;
     try {
       String domain = ActorIdUtils.getActorDomain(key);
@@ -63,23 +67,38 @@ public class SublinksCommunityService {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found");
     }
 
-    if (updateCommunityForm.deleted().orElse(null) != null
-        && updateCommunityForm.deleted().get() != community.isDeleted()) {
+    if(!roleAuthorizingService.isModeratorOrAdmin(person, community)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_community");
+    }
+
+
+    final Boolean isDeleted = updateCommunityForm.deleted().orElse(null);
+
+    if (isDeleted != null && isDeleted != community.isDeleted()) {
+
       community.setDeleted(updateCommunityForm.deleted().orElse(community.isDeleted()));
       //@todo: do modlog
     }
-    if (updateCommunityForm.removed().orElse(null) != null
-        && updateCommunityForm.removed().get() != community.isRemoved()) {
+
+    final Boolean isRemoved = updateCommunityForm.removed().orElse(null);
+
+    if (isRemoved != null && isRemoved != community.isRemoved()) {
+
+      if (!roleAuthorizingService.isModeratorOrAdmin(person, community)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "not_authorized_to_remove_community");
+      }
       community.setRemoved(updateCommunityForm.removed().orElse(community.isRemoved()));
       //@todo: do modlog
     }
 
-    community.setTitle(updateCommunityForm.title());
-    community.setDescription(updateCommunityForm.description());
-    community.setBannerImageUrl(updateCommunityForm.bannerImageUrl().orElse(null));
-    community.setIconImageUrl(updateCommunityForm.iconImageUrl().orElse(null));
-    community.setNsfw(updateCommunityForm.isNsfw());
-    community.setPostingRestrictedToMods(updateCommunityForm.isPostingRestrictedToMods());
+    updateCommunityForm.title().ifPresent(community::setTitle);
+    updateCommunityForm.description().ifPresent(community::setDescription);
+    updateCommunityForm.isNsfw().ifPresent(community::setNsfw);
+    updateCommunityForm.iconImageUrl().ifPresent(community::setIconImageUrl);
+    updateCommunityForm.bannerImageUrl().ifPresent(community::setBannerImageUrl);
+    updateCommunityForm.isPostingRestrictedToMods().ifPresent(
+        community::setPostingRestrictedToMods);
     communityRepository.save(community);
 
     return conversionService.convert(community, CommunityResponse.class);

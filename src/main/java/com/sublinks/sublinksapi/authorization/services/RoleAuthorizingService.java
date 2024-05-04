@@ -3,9 +3,13 @@ package com.sublinks.sublinksapi.authorization.services;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 import lombok.NonNull;
@@ -17,12 +21,12 @@ import org.springframework.stereotype.Service;
 public class RoleAuthorizingService {
 
   private final RoleRepository roleRepository;
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   public static boolean isBanned(final Role role) {
 
-    return role.getRolePermissions()
-        .stream()
-        .anyMatch(x -> x.getPermission().equals(RolePermission.BANNED));
+    return role.getRolePermissions().stream().anyMatch(
+        x -> x.getPermission().equals(RolePermission.BANNED));
   }
 
   public static boolean isBanned(final Person person) {
@@ -45,9 +49,8 @@ public class RoleAuthorizingService {
 
   public static boolean isAdmin(@NonNull final Role role) {
 
-    return role.getRolePermissions()
-        .stream()
-        .anyMatch(x -> x.getPermission().equals(RolePermission.ADMIN));
+    return role.getRolePermissions().stream().anyMatch(
+        x -> x.getPermission().equals(RolePermission.ADMIN));
   }
 
   public static <X extends Throwable> void isAdminElseThrow(Person person,
@@ -61,55 +64,43 @@ public class RoleAuthorizingService {
   public Set<Person> getAdmins() {
 
     // i didnt used hashset here because it is not safe to use as it could duplicate.
-    return roleRepository.findAllByRolePermissionContains(RolePermission.ADMIN)
-        .stream()
-        .map(role -> role.getPersons().stream().toList())
-        .reduce(new ArrayList<>(), (arr, ele) -> {
-          ele.forEach(x -> {
-            if (!arr.contains(x)) {
-              arr.add(x);
-            }
-          });
-          return arr;
-        })
-        .stream()
-        .collect(HashSet::new, HashSet::add, HashSet::addAll);
+    return roleRepository.findAllByRolePermissionContains(RolePermission.ADMIN).stream().map(
+        role -> role.getPersons().stream().toList()).reduce(new ArrayList<>(), (arr, ele) -> {
+      ele.forEach(x -> {
+        if (!arr.contains(x)) {
+          arr.add(x);
+        }
+      });
+      return arr;
+    }).stream().collect(HashSet::new, HashSet::add, HashSet::addAll);
   }
 
   public Set<Person> getUsers() {
 
     // i didnt used hashset here because it is not safe to use as it could duplicate.
-    return roleRepository.findAllByRolePermissionContains(RolePermission.DEFAULT)
-        .stream()
-        .map(role -> role.getPersons().stream().toList())
-        .reduce(new ArrayList<>(), (arr, ele) -> {
-          ele.forEach(x -> {
-            if (!arr.contains(x)) {
-              arr.add(x);
-            }
-          });
-          return arr;
-        })
-        .stream()
-        .collect(HashSet::new, HashSet::add, HashSet::addAll);
+    return roleRepository.findAllByRolePermissionContains(RolePermission.DEFAULT).stream().map(
+        role -> role.getPersons().stream().toList()).reduce(new ArrayList<>(), (arr, ele) -> {
+      ele.forEach(x -> {
+        if (!arr.contains(x)) {
+          arr.add(x);
+        }
+      });
+      return arr;
+    }).stream().collect(HashSet::new, HashSet::add, HashSet::addAll);
   }
 
   public Set<Person> getBannedUsers() {
 
     // i didnt used hashset here because it is not safe to use as it could duplicate.
-    return roleRepository.findAllByRolePermissionContains(RolePermission.BANNED)
-        .stream()
-        .map(role -> role.getPersons().stream().toList())
-        .reduce(new ArrayList<>(), (arr, ele) -> {
-          ele.forEach(x -> {
-            if (!arr.contains(x)) {
-              arr.add(x);
-            }
-          });
-          return arr;
-        })
-        .stream()
-        .collect(HashSet::new, HashSet::add, HashSet::addAll);
+    return roleRepository.findAllByRolePermissionContains(RolePermission.BANNED).stream().map(
+        role -> role.getPersons().stream().toList()).reduce(new ArrayList<>(), (arr, ele) -> {
+      ele.forEach(x -> {
+        if (!arr.contains(x)) {
+          arr.add(x);
+        }
+      });
+      return arr;
+    }).stream().collect(HashSet::new, HashSet::add, HashSet::addAll);
   }
 
   public Role getAdminRole() {
@@ -242,9 +233,8 @@ public class RoleAuthorizingService {
       return true;
     }
 
-    return role.getRolePermissions()
-        .stream()
-        .anyMatch(x -> x.getPermission().equals(rolePermission));
+    return role.getRolePermissions().stream().anyMatch(
+        x -> x.getPermission().equals(rolePermission));
   }
 
   public boolean hasPermission(final Person person, final RolePermission rolePermission) {
@@ -326,5 +316,24 @@ public class RoleAuthorizingService {
     final Role role = person == null ? getDefaultRole() : person.getRole();
 
     hasAnyPermissionOrThrow(role, rolePermissions, exceptionSupplier);
+  }
+
+  public boolean isModerator(final Person person, final Community community) {
+
+    if (person == null || person.getRole() == null) {
+      return false;
+    }
+
+    return linkPersonCommunityService.hasAnyLink(person, community,
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner));
+  }
+
+  public boolean isModeratorOrAdmin(final Person person, final Community community) {
+
+    if (person == null || person.getRole() == null) {
+      return false;
+    }
+
+    return isAdmin(person) || isModerator(person, community);
   }
 }
