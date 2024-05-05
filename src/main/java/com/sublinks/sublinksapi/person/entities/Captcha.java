@@ -42,7 +42,7 @@ public class Captcha {
   @Column(nullable = false)
   private boolean locked;
 
-  @UpdateTimestamp
+  
   @Column(updatable = false, nullable = true, name = "updated_at")
   private Date updatedAt;
 }

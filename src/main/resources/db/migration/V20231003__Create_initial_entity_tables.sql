@@ -29,8 +29,8 @@ CREATE TABLE comments
   comment_body    TEXT         NULL,
   search_vector   TSVECTOR GENERATED ALWAYS AS (to_tsvector('english', comment_body)) STORED,
   path            VARCHAR(512),
-  created_at      TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at      TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at      TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at      TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 
@@ -54,8 +54,8 @@ CREATE TABLE comment_likes
   is_up_vote   BOOL     NULL DEFAULT false,
   is_down_vote BOOL     NULL DEFAULT false,
   score        SMALLINT NULL DEFAULT 0,
-  created_at   TIMESTAMP(3)  DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at   TIMESTAMP(3)  DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at   TIMESTAMP(3)  DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at   TIMESTAMP(3)  DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_COMMENT_ID ON comment_likes (comment_id);
@@ -70,8 +70,8 @@ CREATE TABLE comment_saves
   id         BIGSERIAL PRIMARY KEY,
   person_id  BIGINT                                    NOT NULL,
   comment_id BIGINT                                    NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_COMMENT_SAVES_PERSON_ID ON comment_saves (person_id);
@@ -103,8 +103,8 @@ CREATE TABLE communities
                                                                           coalesce(title_slug, '') ||
                                                                           ' ' ||
                                                                           coalesce(description, ''))) STORED,
-  created_at                    TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at                    TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at                    TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at                    TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_COMMUNITIES_INSTANCE_ID ON communities (instance_id);
@@ -144,8 +144,8 @@ CREATE TABLE instances
   banner_url      TEXT                                      NULL,
   public_key      TEXT                                      NOT NULL,
   private_key     TEXT                                      NULL,
-  created_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**
@@ -156,7 +156,7 @@ CREATE TABLE link_person_instances
   id          BIGSERIAL PRIMARY KEY,
   person_id   BIGINT                                    NOT NULL,
   instance_id BIGINT                                    NOT NULL,
-  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE UNIQUE INDEX IDX_LINK_PERSON_INSTANCE_PERSON_ID_INSTANCE_ID ON link_person_instances (person_id, instance_id);
@@ -178,7 +178,7 @@ CREATE TABLE instance_blocks
 (
   id          BIGSERIAL PRIMARY KEY,
   instance_id BIGINT                                    NOT NULL,
-  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**
@@ -240,8 +240,8 @@ CREATE TABLE people
   private_key                    TEXT         NULL,
   totp_secret                    TEXT         NULL,
   totp_verified_secret           TEXT         NULL,
-  created_at                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_PEOPLE_NAME ON people (name);
@@ -267,7 +267,7 @@ CREATE TABLE link_person_communities
   person_id    BIGINT                                    NOT NULL,
   community_id BIGINT                                    NOT NULL,
   link_type    TEXT                                      NOT NULL,
-  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_LINK_PERSON_COMMUNITIES_PERSON_ID_COMMUNITY_ID ON link_person_communities (person_id, community_id);
@@ -307,8 +307,8 @@ CREATE TABLE posts
                                                                      coalesce(title_slug, '') ||
                                                                      ' ' ||
                                                                      coalesce(post_body, ''))) STORED,
-  created_at               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  created_at               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at               TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NULL,
 
   CONSTRAINT UC_TITLE_SLUG UNIQUE (title_slug)
 );
@@ -333,8 +333,8 @@ CREATE TABLE post_likes
   is_up_vote   BOOL     NOT NULL DEFAULT false,
   is_down_vote BOOL     NOT NULL DEFAULT false,
   score        SMALLINT NOT NULL DEFAULT 0,
-  created_at   TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at   TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at   TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at   TIMESTAMP(3)      DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_POST_LIKES_POST_ID ON post_likes (post_id);
@@ -348,8 +348,8 @@ CREATE TABLE post_saves
   id         BIGSERIAL PRIMARY KEY,
   person_id  BIGINT                                    NOT NULL,
   post_id    BIGINT                                    NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_POST_SAVES_PERSON_ID ON post_saves (person_id);
@@ -365,7 +365,7 @@ CREATE TABLE link_person_posts
   person_id  BIGINT                                    NOT NULL,
   post_id    BIGINT                                    NOT NULL,
   link_type  VARCHAR(255)                              NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**
@@ -379,8 +379,8 @@ CREATE TABLE acl
   entity_id         BIGINT                                    NULL,
   authorized_action VARCHAR(255)                              NOT NULL,
   is_permitted      BOOL                                      NULL DEFAULT false,
-  created_at        TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at        TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at        TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at        TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_ACL_PERSON_ID_ENTITY_TYPE_ENTITY_ID ON acl (person_id, entity_type, entity_id);
@@ -397,7 +397,7 @@ CREATE TABLE post_reads
   id         BIGSERIAL PRIMARY KEY,
   post_id    BIGINT                                    NOT NULL,
   person_id  BIGINT                                    NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE UNIQUE INDEX IDX_POST_READ_POST_ID_PERSON_ID ON post_reads (post_id, person_id);
@@ -410,7 +410,7 @@ CREATE TABLE comment_reads
   id         BIGSERIAL PRIMARY KEY,
   comment_id BIGINT                                    NOT NULL,
   person_id  BIGINT                                    NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE UNIQUE INDEX IDX_COMMENT_READ_COMMENT_ID_PERSON_ID ON comment_reads (comment_id, person_id);
@@ -438,7 +438,7 @@ CREATE TABLE moderation_logs
   featured             BOOL                                      NULL,
   featured_community   BOOL                                      NULL,
   expires              TIMESTAMP(3)                              NULL,
-  created_at           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at           TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_MODERATION_LOGS_ACTION_TYPE ON moderation_logs (action_type);
@@ -474,7 +474,7 @@ CREATE TABLE person_mentions
   recipient_id BIGINT                                    NOT NULL,
   comment_id   BIGINT                                    NOT NULL,
   is_read      BOOL         DEFAULT false                NOT NULL,
-  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE UNIQUE INDEX IDX_PEOPLE_MENTIONS_RECIPIENT_ID ON person_mentions (recipient_id);
@@ -492,8 +492,8 @@ CREATE TABLE private_messages
   is_local        BOOL         DEFAULT false                NOT NULL,
   is_deleted      BOOL         DEFAULT false                NOT NULL,
   is_read         BOOL         DEFAULT false                NOT NULL,
-  created_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at      TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_PRIVATE_MESSAGES_SENDER_ID ON private_messages (sender_id);
@@ -511,8 +511,8 @@ CREATE TABLE private_messages_reports
   original_content   TEXT                                      NOT NULL,
   reason             TEXT                                      NOT NULL,
   resolved           BOOL         DEFAULT false                NOT NULL,
-  created_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_PRIVATE_MESSAGES_REPORT_CREATOR_ID ON private_messages_reports (creator_id);
@@ -530,8 +530,8 @@ CREATE TABLE comment_reports
   original_content TEXT                                      NOT NULL,
   reason           TEXT                                      NOT NULL,
   resolved         BOOL         DEFAULT false                NOT NULL,
-  created_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_COMMENT_REPORTS_CREATOR_ID ON comment_reports (creator_id);
@@ -545,8 +545,8 @@ CREATE TABLE comment_replies
   recipient_id BIGINT                                    NOT NULL,
   comment_id   BIGINT                                    NOT NULL,
   is_read      BOOL         DEFAULT false                NOT NULL,
-  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 
@@ -566,8 +566,8 @@ CREATE TABLE post_reports
   original_url   TEXT                                      NOT NULL,
   reason         TEXT                                      NOT NULL,
   resolved       BOOL         DEFAULT false                NOT NULL,
-  created_at     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at     TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_POST_REPORTS_CREATOR_ID ON post_reports (creator_id);
@@ -584,8 +584,8 @@ CREATE TABLE person_applications
   question           TEXT                                      NULL,
   answer             TEXT                                      NULL,
   application_status VARCHAR(255)                              NOT NULL,
-  created_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at         TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 CREATE INDEX IDX_PEOPLE_APPLICATIONS_PERSON_ID ON person_applications (person_id);
@@ -627,8 +627,8 @@ CREATE TABLE slur_filters
   id               BIGSERIAL PRIMARY KEY,
   slur_action_type VARCHAR(255)                              NOT NULL,
   slur_regex       TEXT                                      NOT NULL,
-  created_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at       TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**
@@ -639,8 +639,8 @@ CREATE TABLE announcements
   id            BIGSERIAL PRIMARY KEY,
   content       TEXT                                      NOT NULL,
   local_site_id BIGINT                                    NOT NULL,
-  created_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /*
@@ -670,8 +670,8 @@ CREATE TABLE custom_emojis
   image_url     TEXT                                      NOT NULL,
   category      TEXT                                      NOT NULL,
   shortcode     VARCHAR(128)                              NOT NULL,
-  created_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**
@@ -696,8 +696,8 @@ CREATE TABLE acl_roles
   description TEXT                                      NOT NULL,
   is_active   BOOL                                      NOT NULL DEFAULT true,
   expires_at  TIMESTAMP(3)                              NULL,
-  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  updated_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**
@@ -724,8 +724,8 @@ CREATE TABLE person_meta_data
   ip_address   VARCHAR(255)                              NULL,
   user_agent   TEXT                                      NULL,
   active       BOOL                                      NULL DEFAULT true,
-  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  last_used_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL,
+  last_used_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NULL
 );
 
 /**

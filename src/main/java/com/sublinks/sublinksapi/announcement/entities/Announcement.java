@@ -45,7 +45,7 @@ public class Announcement {
   @Column(name = "created_at")
   private String createdAt;
 
-  @UpdateTimestamp
+  
   @Column(name = "updated_at")
   private String updatedAt;
 
