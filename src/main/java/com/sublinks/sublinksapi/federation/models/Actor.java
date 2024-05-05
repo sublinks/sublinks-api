@@ -2,6 +2,10 @@ package com.sublinks.sublinksapi.federation.models;
 
 import lombok.Builder;
 
+/**
+ * Represents an actor in the system.
+ */
+@SuppressWarnings("checkstyle:RecordComponentName")
 @Builder
 public record Actor(
     String id,

@@ -1,12 +1,22 @@
 package com.sublinks.sublinksapi.api.lemmy.v3.image.controllers;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
+import com.sublinks.sublinksapi.api.lemmy.v3.image.models.Image;
+import com.sublinks.sublinksapi.api.lemmy.v3.image.models.ImagesResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.image.models.PictrsParams;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionMediaTypes;
+import com.sublinks.sublinksapi.authorization.services.AclService;
+import com.sublinks.sublinksapi.media.entities.Media;
+import com.sublinks.sublinksapi.media.respositories.MediaRepository;
+import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.io.IOException;
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -25,44 +35,72 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
+/**
+ * This class is a controller for handling image-related operations in the Pictrs application.
+ */
 @RestController
 @RequiredArgsConstructor
 @Transactional
 @RequestMapping(path = "/pictrs/image")
+@Tag(name = "Media")
 public class ImageController extends AbstractLemmyApiController {
 
   @Value("${sublinks.pictrs.url}")
   private String pictrsUri;
+  private final MediaRepository mediaRepository;
+  private final AclService aclService;
 
   @Operation(summary = "Uploads an image.", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK")}
   )
   @PostMapping
-  Mono<ResponseEntity<String>> upload(@RequestParam("images[]") MultipartFile image)
+  ImagesResponse upload(@RequestParam("images[]") final MultipartFile images, final JwtPerson principal)
       throws IOException {
 
-    // @todo log who is uploading and what they uploaded
+    final Person person = getPersonOrThrowUnauthorized(principal);
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionMediaTypes.CREATE_MEDIA)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    Resource resource = new ByteArrayResource(image.getBytes()) {
+    Resource resource = new ByteArrayResource(images.getBytes()) {
       @Override
       public String getFilename() {
 
-        return image.getOriginalFilename();
+        return images.getOriginalFilename();
       }
     };
 
-    WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
-
-    return webClient.post().uri("/image")
+    final WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
+    Mono<ResponseEntity<ImagesResponse>> response = webClient.post().uri("/image")
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .body(BodyInserters.fromMultipartData("images[]", resource))
         .retrieve()
-        .toEntity(String.class);
+        .toEntity(ImagesResponse.class);
+
+    final ImagesResponse imagesResponse = Objects.requireNonNull(response.block()).getBody();
+    assert imagesResponse != null;
+    for (Image image : imagesResponse.files()) {
+      mediaRepository.save(Media.builder()
+          .person(person)
+          .file(image.file())
+          .deleteToken(image.delete_token())
+          .build());
+    }
+    return imagesResponse;
   }
 
+  /**
+   * Gets the full resolution image.
+   *
+   * @param pictrsParams The parameters for processing the image.
+   * @param filename     The name of the image file.
+   * @return A Mono with ResponseEntity<ByteArrayResource> representing the response from the
+   * server.
+   */
   @Operation(summary = "Gets the full resolution image.", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK")}
@@ -89,12 +127,18 @@ public class ImageController extends AbstractLemmyApiController {
         .retrieve()
         .bodyToMono(byte[].class)
         .map(bytes -> ResponseEntity.ok()
-            .contentType(MediaType.IMAGE_JPEG)
             .header(HttpHeaders.CONTENT_DISPOSITION, "inline;")
             .body(new ByteArrayResource(bytes)));
 
   }
 
+  /**
+   * Deletes an image.
+   *
+   * @param token    The token used for authentication.
+   * @param filename The name of the image file to be deleted.
+   * @return A Mono with ResponseEntity&lt;String&gt; representing the response from the server.
+   */
   @Operation(summary = "Deletes an image.", hidden = true)
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK")}

@@ -11,6 +11,9 @@ import com.sublinks.sublinksapi.utils.KeyStore;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * This class provides methods for creating and updating communities.
+ */
 @Service
 @RequiredArgsConstructor
 public class CommunityService {
@@ -21,6 +24,12 @@ public class CommunityService {
   private final KeyGeneratorUtil keyGeneratorUtil;
   private final LocalInstanceContext localInstanceContext;
 
+  /**
+   * Creates a new community by generating keys, setting activityPubId,
+   * and saving it to the repository.
+   *
+   * @param community The {@link Community} object representing the community to create.
+   */
   public void createCommunity(Community community) {
 
     KeyStore keys = keyGeneratorUtil.generate();
@@ -40,6 +49,11 @@ public class CommunityService {
     communityCreatedPublisher.publish(community);
   }
 
+  /**
+   * Updates a community by saving the changes to the repository.
+   *
+   * @param community The {@link Community} object representing the community to update.
+   */
   public void updateCommunity(Community community) {
 
     communityRepository.save(community);

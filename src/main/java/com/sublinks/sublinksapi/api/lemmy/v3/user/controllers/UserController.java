@@ -26,8 +26,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.UserExportSettings;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonMentionService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessageTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -93,9 +96,10 @@ public class UserController extends AbstractLemmyApiController {
   private final LemmyCommentReplyService lemmyCommentReplyService;
   private final PrivateMessageRepository privateMessageRepository;
   private final SlurFilterService slurFilterService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PrivateMessageService privateMessageService;
+  private final RoleService roleService;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -110,16 +114,16 @@ public class UserController extends AbstractLemmyApiController {
       userId = (long) getPersonDetailsForm.person_id();
       person = personRepository.findById(userId)
           .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_id_given"));
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
     } else if (getPersonDetailsForm.username() != null) {
-      person = personRepository.findOneByName(getPersonDetailsForm.username())
+      person = personRepository.findOneByNameIgnoreCase(getPersonDetailsForm.username())
           .orElseThrow(
               () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_username_given"));
     } else {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "no_id_given");
     }
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_USER,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_USER,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     return GetPersonDetailsResponse.builder()
@@ -139,7 +143,7 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_MENTION_USER,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_MENTION_USER,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final int page = PaginationControllerUtils.getAbsoluteMinNumber(getPersonMentionsForm.page(),
@@ -174,7 +178,7 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.MARK_MENTION_AS_READ,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.MARK_MENTION_AS_READ,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final PersonMention personMention = personMentionRepository.findById(
@@ -200,7 +204,7 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_REPLIES,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_REPLIES,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final int page = PaginationControllerUtils.getAbsoluteMinNumber(getReplies.page(), 1);
@@ -230,10 +234,10 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.INSTANCE_BAN_READ,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_READ,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
-    final Collection<PersonView> bannedPersons = roleAuthorizingService.getBannedUsers()
+    final Collection<PersonView> bannedPersons = roleService.getBannedUsers()
         .stream()
         .map(lemmyPersonService::getPersonView)
         .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -251,7 +255,7 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.READ_REPLIES,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_REPLIES,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final MarkAllAsReadResponse readReplies = privateMessageService.markAllAsRead(person);
@@ -274,7 +278,7 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.UPDATE_USER_SETTINGS,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.UPDATE_USER_SETTINGS,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     // @todo expand form validation to check for email formatting, etc.
@@ -367,24 +371,25 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrAnyPermissionOrThrow(person,
-        Set.of(RolePermission.READ_MENTION_USER, RolePermission.READ_REPLIES,
-            RolePermission.READ_PRIVATE_MESSAGES),
+    rolePermissionService.isPermitted(person,
+        Set.of(RolePermissionPersonTypes.READ_MENTION_USER, RolePermissionPersonTypes.READ_REPLIES,
+            RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES),
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     GetUnreadCountResponse.GetUnreadCountResponseBuilder builder = GetUnreadCountResponse.builder();
 
-    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_MENTION_USER)) {
+    if (rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_MENTION_USER)) {
       builder.mentions((int) personMentionRepository.countByRecipientAndIsReadIsFalse(person));
     } else {
       builder.mentions(0);
     }
-    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_REPLIES)) {
+    if (rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_REPLIES)) {
       builder.replies((int) commentReplyRepository.countByRecipientAndReadIsFalse(person));
     } else {
       builder.replies(0);
     }
-    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.READ_PRIVATE_MESSAGES)) {
+    if (rolePermissionService.isPermitted(person,
+        RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES)) {
       builder.private_messages(
           (int) privateMessageRepository.countByRecipientAndReadIsFalse(person));
     } else {

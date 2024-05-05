@@ -94,7 +94,7 @@ experience, content authenticity, and networked social interaction
 
 ## Contributing
 
-- [Contributing instructions](https://sublinks.org/docs/contributors/01-overview)
+- [Contributing instructions](https://sublinks.org/docs/contributing.html)
 
 ### Docker Setup (for dependencies)
 

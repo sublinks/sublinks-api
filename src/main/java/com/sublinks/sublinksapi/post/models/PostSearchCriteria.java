@@ -12,6 +12,7 @@ public record PostSearchCriteria(
     ListingType listingType,
     int perPage,
     int page,
+    String cursorBasedPageable,
     List<Long> communityIds,
     Person person,
     boolean isSavedOnly,

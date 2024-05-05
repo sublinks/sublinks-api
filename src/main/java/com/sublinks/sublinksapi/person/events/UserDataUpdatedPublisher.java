@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.events;
 
-import com.sublinks.sublinksapi.person.entities.UserData;
+import com.sublinks.sublinksapi.person.entities.PersonMetaData;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +14,9 @@ public class UserDataUpdatedPublisher {
     this.applicationEventPublisher = applicationEventPublisher;
   }
 
-  public void publish(final UserData userData) {
+  public void publish(final PersonMetaData personMetaData) {
 
-    UserDataUpdateEvent userDataUpdateEvent = new UserDataUpdateEvent(this, userData);
+    UserDataUpdateEvent userDataUpdateEvent = new UserDataUpdateEvent(this, personMetaData);
     applicationEventPublisher.publishEvent(userDataUpdateEvent);
   }
 }

@@ -17,7 +17,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
- * Announcement entity.
+ * Announcement class represents an announcement entity.
  */
 @Getter
 @Setter

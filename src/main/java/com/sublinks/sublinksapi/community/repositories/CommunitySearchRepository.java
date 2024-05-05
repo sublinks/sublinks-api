@@ -7,5 +7,4 @@ import java.util.List;
 public interface CommunitySearchRepository {
 
   List<Community> allCommunitiesBySearchCriteria(CommunitySearchCriteria communitySearchCriteria);
-
 }

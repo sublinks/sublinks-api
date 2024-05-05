@@ -1,11 +1,7 @@
 package com.sublinks.sublinksapi.person.services;
 
 import com.sublinks.sublinksapi.authorization.entities.Role;
-import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsRepository;
-import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.comment.repositories.CommentHistoryRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -27,19 +23,17 @@ import com.sublinks.sublinksapi.utils.BaseUrlUtil;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-
+/**
+ * This class provides operations related to managing person entities.
+ */
 @Component
 @RequiredArgsConstructor
 public class PersonService {
@@ -56,12 +50,8 @@ public class PersonService {
   private final CommentService commentService;
   private final CommentHistoryRepository commentHistoryRepository;
   private final PrivateMessageService privateMessageService;
-
-
-  private final RoleRepository roleRepository;
-  private final RolePermissionsRepository rolePermissionsRepository;
-  private final RoleAuthorizingService roleAuthorizingService;
   private final PersonDeletedPublisher personDeletedPublisher;
+  private final RoleService roleService;
 
   public Set<Role> generateInitialRoles() {
 
@@ -170,10 +160,14 @@ public class PersonService {
             registeredUserRole).permission(rolePermission).build()))
         .collect(Collectors.toSet()));
 
-    return new HashSet<>(roleRepository.findAll());
-  }
-
-
+  /**
+   * Retrieves the default language for posting for a given person and community.
+   *
+   * @param person    The person for whom to retrieve the default post language.
+   * @param community The community for which the default post language is being retrieved.
+   * @return An Optional containing the default Language for posting if found, or an empty Optional
+   * otherwise.
+   */
   @Transactional
   public Optional<Language> getPersonDefaultPostLanguage(final Person person,
       final Community community) {
@@ -186,12 +180,24 @@ public class PersonService {
     return Optional.empty();
   }
 
-  public boolean isPasswordEqual(final Person person, final String password) {
+  /**
+   * Checks if the provided password matches the hashed password of the given person.
+   *
+   * @param person   The person for whom to check the password.
+   * @param password The password to be checked.
+   * @return True if the password matches, false otherwise.
+   */
+  public boolean isValidPersonPassword(final Person person, final String password) {
 
     PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     return passwordEncoder.matches(password, person.getPassword());
   }
 
+  /**
+   * Creates a new person.
+   *
+   * @param person The person object to be created.
+   */
   @Transactional
   public void createPerson(final Person person) {
 
@@ -208,18 +214,12 @@ public class PersonService {
     person.setEmailVerified(localInstanceContext.instance().getInstanceConfig() == null
         || !localInstanceContext.instance().getInstanceConfig().isRequireEmailVerification());
 
-    boolean isInitialAdmin = localInstanceContext.instance().getDomain().isEmpty();
-    if (isInitialAdmin) {
-      Set<Role> roles = generateInitialRoles();
-      person.setRole(roles.stream()
-          .filter(x -> x.getRolePermissions()
-              .stream()
-              .anyMatch(y -> y.getPermission().equals(RolePermission.ADMIN)))
-          .findFirst()
-          .orElseThrow(() -> new RuntimeException("Admin role not found!")));
-    } else {
-      person.setRole(roleAuthorizingService.getUserRole());
-    }
+    Role role = localInstanceContext.instance().getDomain().isEmpty() ? roleService.getAdminRole(
+        () -> new RuntimeException("No Admin role found.")
+    ) : roleService.getDefaultRegisteredRole(
+        () -> new RuntimeException("No Registered role found.")
+    );
+    person.setRole(role);
 
     final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
     person.setActorId(userActorId);
@@ -239,6 +239,12 @@ public class PersonService {
     personCreatedPublisher.publish(person);
   }
 
+  /**
+   * Updates a Person object by saving it to the person repository and publishing a personUpdated
+   * event.
+   *
+   * @param person The Person object to be updated.
+   */
   @Transactional
   public void updatePerson(final Person person) {
 
@@ -246,12 +252,24 @@ public class PersonService {
     personUpdatedPublisher.publish(person);
   }
 
+  /**
+   * Encodes the given password using a password encoder.
+   *
+   * @param password The password to be encoded.
+   * @return The encoded password.
+   */
   public String encodePassword(final String password) {
 
     PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
     return passwordEncoder.encode(password);
   }
 
+  /**
+   * Creates a new instance of a Person object with default values.
+   *
+   * @param name The name of the new user.
+   * @return A new Person object with default values.
+   */
   public Person getDefaultNewUser(final String name) {
 
     return Person.builder()
@@ -272,6 +290,13 @@ public class PersonService {
         .build();
   }
 
+  /**
+   * Deletes a user account.
+   *
+   * @param person        The Person object representing the user account to be deleted.
+   * @param deleteContent A boolean value indicating whether to delete the user's content (posts,
+   *                      comments, messages, etc.).
+   */
   @Transactional
   public void deleteUserAccount(final Person person, final boolean deleteContent) {
 

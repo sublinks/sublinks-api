@@ -23,6 +23,19 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+/**
+ * The Email class represents an email object.
+ *
+ * <p>It has the following attributes:
+ * - personRecipients: a list of Person objects representing the recipients of the email
+ * - emailData: a list of EmailData objects representing the data of the email
+ * - id: a unique identifier for the email
+ * - subject: a string representing the subject of the email
+ * - htmlContent: a string representing the HTML content of the email
+ * - textContent: a string representing the text content of the email
+ * - lastTryAt: a Date object representing the last attempted sending time of the email
+ * - createdAt: a Date object representing the creation time of the email
+ */
 @Getter
 @Setter
 @AllArgsConstructor

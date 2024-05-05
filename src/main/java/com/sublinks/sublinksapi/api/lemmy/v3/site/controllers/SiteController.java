@@ -14,8 +14,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.MyUserInfoService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
-import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.instance.entities.InstanceBlock;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
@@ -49,6 +50,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * This class represents a controller for managing site-related operations.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/v3/site")
@@ -62,14 +66,20 @@ public class SiteController extends AbstractLemmyApiController {
   private final InstanceRepository instanceRepository;
   private final InstanceBlockRepository instanceBlockRepository;
   private final MyUserInfoService myUserInfoService;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService rolePermissionService;
   private final InstanceConfigService instanceConfigService;
   private final SlurFilterService slurFilterService;
   private final AnnouncementRepository announcementRepository;
   private final ConversionService conversionService;
   private final LemmyPersonService lemmyPersonService;
+  private final RoleService roleService;
 
-
+  /**
+   * Retrieves the site data along with the user's data.
+   *
+   * @param principal The authenticated user token.
+   * @return The GetSiteResponse containing the site data and user data.
+   */
   @Operation(summary = "Gets the site, and your user data.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetSiteResponse.class))})})
@@ -77,19 +87,15 @@ public class SiteController extends AbstractLemmyApiController {
   public GetSiteResponse getSite(final JwtPerson principal) {
 
     GetSiteResponse.GetSiteResponseBuilder builder = GetSiteResponse.builder()
-        .version("0.19.0") // @todo grab this from config?
-        .taglines(announcementRepository.findAll()
-            .stream()
-            .map(tagline -> conversionService.convert(tagline, Tagline.class))
-            .toList())
+        .version("0.19.3") // @todo grab this from config?
+        .taglines(announcementRepository.findAll().stream()
+            .map(tagline -> conversionService.convert(tagline, Tagline.class)).toList())
         .site_view(lemmySiteService.getSiteView())
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
-        .custom_emojis(lemmySiteService.customEmojis())
-        .admins(roleAuthorizingService.getAdmins()
-            .stream()
-            .map(lemmyPersonService::getPersonView)
-            .toList());
+        .custom_emojis(lemmySiteService.customEmojis()).admins(
+            roleService.getAdmins().stream().map(lemmyPersonService::getPersonView)
+                .toList());
 
     getOptionalPerson(principal).ifPresent(
         (person -> builder.my_user(myUserInfoService.getMyUserInfo(person))));
@@ -97,6 +103,13 @@ public class SiteController extends AbstractLemmyApiController {
     return builder.build();
   }
 
+  /**
+   * Creates a site with the given parameters.
+   *
+   * @param createSiteForm The form containing the data for creating the site.
+   * @param principal The authenticated user token.
+   * @return The SiteResponse containing the created site data.
+   */
   @Operation(summary = "Create your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SiteResponse.class))})})
@@ -109,7 +122,7 @@ public class SiteController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
     final Person person = getPersonOrThrowUnauthorized(principal);
-    RoleAuthorizingService.isAdminElseThrow(person,
+    RolePermissionService.isAdminElseThrow(person,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
     final Instance instance = localInstanceContext.instance();
@@ -163,6 +176,13 @@ public class SiteController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Updates the site settings with the given form data.
+   *
+   * @param editSiteForm The form containing the updated site settings.
+   * @param principal The authenticated user token.
+   * @return The SiteResponse containing the updated site data.
+   */
   @Operation(summary = "Edit your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SiteResponse.class))})})
@@ -175,8 +195,8 @@ public class SiteController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.INSTANCE_UPDATE_SETTINGS,
+    rolePermissionService.isPermitted(person,
+        RolePermissionInstanceTypes.INSTANCE_UPDATE_SETTINGS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     if (editSiteForm.taglines().isPresent()) {
@@ -237,6 +257,13 @@ public class SiteController extends AbstractLemmyApiController {
         .build();
   }
 
+  /**
+   * Blocks an instance.
+   *
+   * @param blockInstanceForm The form containing the instance ID and block flag.
+   * @param principal The authenticated user token.
+   * @return The BlockInstanceResponse indicating if the instance was successfully blocked.
+   */
   @Operation(summary = "Block an instance.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockInstanceResponse.class))})})
@@ -247,8 +274,8 @@ public class SiteController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    roleAuthorizingService.hasAdminOrPermissionOrThrow(person,
-        RolePermission.INSTANCE_DEFEDERATE_INSTANCE,
+    rolePermissionService.isPermitted(person,
+        RolePermissionInstanceTypes.INSTANCE_DEFEDERATE_INSTANCE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Instance> instance = instanceRepository.findById(

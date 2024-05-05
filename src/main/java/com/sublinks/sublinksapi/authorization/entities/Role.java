@@ -17,8 +17,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
@@ -27,15 +25,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "roles")
+@Table(name = "acl_roles")
 public class Role {
 
   @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
-  @Fetch(FetchMode.SUBSELECT)
   Set<RolePermissions> rolePermissions;
 
   @OneToMany(mappedBy = "role")
-  @Fetch(FetchMode.SUBSELECT)
   private Set<Person> persons;
 
 

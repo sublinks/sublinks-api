@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +21,12 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+/**
+ * JwtFilter is a filter that performs authentication and authorization based on JWT (JSON Web
+ * Token). It extracts the JWT from the request header or cookie, validates it, and sets the
+ * authentication in the Spring Security context if it is valid. It also provides a method for
+ * deciding whether to filter a request based on the servlet path.
+ */
 @Component
 @RequiredArgsConstructor
 @Order(1)
@@ -31,7 +38,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
   @Override
   protected void doFilterInternal(final HttpServletRequest request,
-      final HttpServletResponse response, final FilterChain filterChain)
+      @NonNull final HttpServletResponse response, @NonNull final FilterChain filterChain)
       throws ServletException, IOException {
 
     String authorizingToken = request.getHeader("Authorization");
@@ -63,7 +70,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      final Optional<Person> person = personRepository.findOneByName(userName);
+      final Optional<Person> person = personRepository.findOneByNameIgnoreCase(userName);
       if (person.isEmpty()) {
         throw new UsernameNotFoundException("Invalid name");
       }
@@ -85,6 +92,7 @@ public class JwtFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
-    return !request.getServletPath().startsWith("/api/v3");
+    String servletPath = request.getServletPath();
+    return !servletPath.startsWith("/api/v3") && !servletPath.startsWith("/pictrs");
   }
 }
