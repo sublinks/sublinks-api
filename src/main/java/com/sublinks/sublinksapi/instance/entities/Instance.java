@@ -110,7 +110,7 @@ public class Instance {
   @Column(nullable = false, name = "created_at")
   private Date createdAt;
 
-  @UpdateTimestamp
+  
   @Column(nullable = false, name = "updated_at")
   private Date updatedAt;
 }
