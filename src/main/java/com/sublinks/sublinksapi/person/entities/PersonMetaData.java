@@ -56,7 +56,7 @@ public class PersonMetaData {
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  @UpdateTimestamp
+  
   @Column(updatable = true, nullable = false, name = "last_used_at")
   private Date lastUsedAt;
 }
