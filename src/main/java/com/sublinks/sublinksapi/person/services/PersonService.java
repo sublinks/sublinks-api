@@ -53,113 +53,6 @@ public class PersonService {
   private final PersonDeletedPublisher personDeletedPublisher;
   private final RoleService roleService;
 
-  public Set<Role> generateInitialRoles() {
-
-    Role adminRole = roleRepository.save(Role.builder().description("Admin role for admins").name(
-        "Admin").isActive(true).build());
-
-    adminRole.setRolePermissions(Collections.singleton(rolePermissionsRepository.save(
-        com.sublinks.sublinksapi.authorization.entities.RolePermissions.builder()
-            .role(adminRole)
-            .permission(RolePermission.ADMIN)
-            .build())));
-
-    Set<RolePermission> rolePermissions = new HashSet<>();
-    rolePermissions.add(RolePermission.BANNED);
-    rolePermissions.add(RolePermission.READ_PRIVATE_MESSAGES);
-    rolePermissions.add(RolePermission.READ_POST);
-    rolePermissions.add(RolePermission.READ_POSTS);
-    rolePermissions.add(RolePermission.READ_COMMENT);
-    rolePermissions.add(RolePermission.READ_COMMUNITY);
-    rolePermissions.add(RolePermission.READ_COMMUNITIES);
-    rolePermissions.add(RolePermission.READ_USER);
-    rolePermissions.add(RolePermission.READ_MODLOG);
-    Role bannedRole = roleRepository.save(Role.builder()
-        .description("Banned role for banned users")
-        .name("Banned")
-        .isActive(true)
-        .build());
-
-    bannedRole.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder().role(
-            bannedRole).permission(rolePermission).build()))
-        .collect(Collectors.toSet()));
-
-    rolePermissions.remove(RolePermission.BANNED);
-    rolePermissions.add(RolePermission.DEFAULT);
-
-    Role defaultUserRole = roleRepository.save(Role.builder().description(
-        "Default role for all users").name("User").isActive(true).build());
-
-    defaultUserRole.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder().role(
-            defaultUserRole).permission(rolePermission).build()))
-        .collect(Collectors.toSet()));
-
-    rolePermissions.remove(RolePermission.DEFAULT);
-    rolePermissions.add(RolePermission.REGISTERED);
-
-    rolePermissions.add(RolePermission.POST_UPVOTE);
-    rolePermissions.add(RolePermission.POST_DOWNVOTE);
-    rolePermissions.add(RolePermission.POST_NEUTRALVOTE);
-    rolePermissions.add(RolePermission.COMMENT_UPVOTE);
-    rolePermissions.add(RolePermission.COMMENT_DOWNVOTE);
-    rolePermissions.add(RolePermission.COMMENT_NEUTRALVOTE);
-
-    rolePermissions.add(RolePermission.CREATE_PRIVATE_MESSAGE);
-    rolePermissions.add(RolePermission.UPDATE_PRIVATE_MESSAGE);
-    rolePermissions.add(RolePermission.DELETE_PRIVATE_MESSAGE);
-
-    rolePermissions.add(RolePermission.CREATE_COMMUNITY);
-    rolePermissions.add(RolePermission.UPDATE_COMMUNITY);
-    rolePermissions.add(RolePermission.DELETE_COMMUNITY);
-
-    rolePermissions.add(RolePermission.CREATE_POST);
-    rolePermissions.add(RolePermission.UPDATE_POST);
-    rolePermissions.add(RolePermission.DELETE_POST);
-
-    rolePermissions.add(RolePermission.CREATE_COMMENT);
-    rolePermissions.add(RolePermission.UPDATE_COMMENT);
-    rolePermissions.add(RolePermission.DELETE_COMMENT);
-
-    rolePermissions.add(RolePermission.UPDATE_USER_SETTINGS);
-    rolePermissions.add(RolePermission.RESET_PASSWORD);
-
-    rolePermissions.add(RolePermission.MODERATOR_REMOVE_POST);
-    rolePermissions.add(RolePermission.MODERATOR_REMOVE_COMMENT);
-    rolePermissions.add(RolePermission.MODERATOR_REMOVE_COMMUNITY);
-    rolePermissions.add(RolePermission.MODERATOR_BAN_USER);
-    rolePermissions.add(RolePermission.MODERATOR_SPEAK);
-    rolePermissions.add(RolePermission.MODERATOR_SHOW_DELETED_COMMENT);
-    rolePermissions.add(RolePermission.MODERATOR_SHOW_DELETED_POST);
-    rolePermissions.add(RolePermission.MODERATOR_ADD_MODERATOR);
-    rolePermissions.add(RolePermission.MODERATOR_REMOVE_MODERATOR);
-    rolePermissions.add(RolePermission.MODERATOR_PIN_POST);
-    rolePermissions.add(RolePermission.MODERATOR_TRANSFER_COMMUNITY);
-
-    rolePermissions.add(RolePermission.COMMUNITY_FOLLOW);
-    rolePermissions.add(RolePermission.COMMUNITY_BLOCK);
-
-    rolePermissions.add(RolePermission.USER_BLOCK);
-    rolePermissions.add(RolePermission.DELETE_USER);
-
-    rolePermissions.add(RolePermission.REPORT_COMMENT);
-    rolePermissions.add(RolePermission.REPORT_POST);
-    rolePermissions.add(RolePermission.REPORT_USER);
-    rolePermissions.add(RolePermission.REPORT_COMMUNITY);
-    rolePermissions.add(RolePermission.REPORT_PRIVATE_MESSAGE);
-
-    rolePermissions.add(RolePermission.REPORT_COMMUNITY_RESOLVE);
-    rolePermissions.add(RolePermission.REPORT_COMMUNITY_READ);
-
-    Role registeredUserRole = roleRepository.save(Role.builder().description(
-        "Default Role for all registered users").name("Registered").isActive(true).build());
-
-    registeredUserRole.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder().role(
-            registeredUserRole).permission(rolePermission).build()))
-        .collect(Collectors.toSet()));
-
   /**
    * Retrieves the default language for posting for a given person and community.
    *
@@ -170,10 +63,12 @@ public class PersonService {
    */
   @Transactional
   public Optional<Language> getPersonDefaultPostLanguage(final Person person,
-      final Community community) {
+      final Community community)
+  {
 
     for (Language language : person.getLanguages()) {
-      if (community.getLanguages().contains(language)) {
+      if (community.getLanguages()
+          .contains(language)) {
         return Optional.of(language);
       }
     }
@@ -211,28 +106,34 @@ public class PersonService {
     person.setLocal(true);
     person.setEmail(person.getEmail());
     // @todo: add email verification and send verification email on registration
-    person.setEmailVerified(localInstanceContext.instance().getInstanceConfig() == null
-        || !localInstanceContext.instance().getInstanceConfig().isRequireEmailVerification());
+    person.setEmailVerified(localInstanceContext.instance()
+        .getInstanceConfig() == null || !localInstanceContext.instance()
+        .getInstanceConfig()
+        .isRequireEmailVerification());
 
-    Role role = localInstanceContext.instance().getDomain().isEmpty() ? roleService.getAdminRole(
-        () -> new RuntimeException("No Admin role found.")
-    ) : roleService.getDefaultRegisteredRole(
-        () -> new RuntimeException("No Registered role found.")
-    );
+    Role role = localInstanceContext.instance()
+        .getDomain()
+        .isEmpty() ? roleService.getAdminRole(() -> new RuntimeException("No Admin role found."))
+        : roleService.getDefaultRegisteredRole(
+            () -> new RuntimeException("No Registered role found."));
     person.setRole(role);
 
     final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
     person.setActorId(userActorId);
 
-    person.setLinkPersonInstance(LinkPersonInstance.builder().instance(
-        localInstanceContext.instance()).person(person).build());
+    person.setLinkPersonInstance(LinkPersonInstance.builder()
+        .instance(localInstanceContext.instance())
+        .person(person)
+        .build());
 
-    final List<Language> languages = new ArrayList<>(
-        localInstanceContext.instance().getLanguages());
+    final List<Language> languages = new ArrayList<>(localInstanceContext.instance()
+        .getLanguages());
     person.setLanguages(languages);
     personRepository.save(person);
 
-    final PersonAggregate personAggregate = PersonAggregate.builder().person(person).build();
+    final PersonAggregate personAggregate = PersonAggregate.builder()
+        .person(person)
+        .build();
     personAggregateRepository.save(personAggregate);
     person.setPersonAggregate(personAggregate);
 

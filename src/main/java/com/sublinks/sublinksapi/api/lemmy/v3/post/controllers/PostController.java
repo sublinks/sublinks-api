@@ -117,8 +117,7 @@ public class PostController extends AbstractLemmyApiController {
 
     Optional<Person> person = getOptionalPerson(principal);
 
-    rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionPostTypes.READ_POST,
+    rolePermissionService.isPermitted(person.orElse(null), RolePermissionPostTypes.READ_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     PostView postView;
@@ -134,8 +133,10 @@ public class PostController extends AbstractLemmyApiController {
     final List<CommunityModeratorView> moderators = lemmyCommunityService.communityModeratorViewList(
         community);
     Set<PostView> crossPosts = new LinkedHashSet<>();
-    if (post.getCrossPost() != null && post.getCrossPost().getPosts() != null) {
-      for (Post crossPostPost : post.getCrossPost().getPosts()) {
+    if (post.getCrossPost() != null && post.getCrossPost()
+        .getPosts() != null) {
+      for (Post crossPostPost : post.getCrossPost()
+          .getPosts()) {
         if (post.equals(crossPostPost)) {
           continue;
         }
@@ -162,7 +163,8 @@ public class PostController extends AbstractLemmyApiController {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("mark_as_read")
   PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowBadRequest(principal);
 
@@ -187,8 +189,7 @@ public class PostController extends AbstractLemmyApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionPostTypes.READ_POSTS,
+    rolePermissionService.isPermitted(person.orElse(null), RolePermissionPostTypes.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     List<Long> communityIds = null;
@@ -205,12 +206,14 @@ public class PostController extends AbstractLemmyApiController {
     if (person.isPresent() && getPostsForm.type_() != null) {
       switch (getPostsForm.type_()) {
         case Subscribed -> {
-          final Set<LinkPersonCommunity> personCommunities = person.get().getLinkPersonCommunity();
+          final Set<LinkPersonCommunity> personCommunities = person.get()
+              .getLinkPersonCommunity();
           if (!personCommunities.isEmpty()) {
             communityIds = new ArrayList<>();
             for (LinkPersonCommunity l : personCommunities) {
               if (l.getLinkType() == LinkPersonCommunityType.follower) {
-                communityIds.add(l.getCommunity().getId());
+                communityIds.add(l.getCommunity()
+                    .getId());
               }
             }
           }
@@ -228,7 +231,8 @@ public class PostController extends AbstractLemmyApiController {
       }
     }
 
-    InstanceConfig config = localInstanceContext.instance().getInstanceConfig();
+    InstanceConfig config = localInstanceContext.instance()
+        .getInstanceConfig();
 
     SortType sortType = null; // @todo set to site default
     if (getPostsForm.sort() != null) {
@@ -251,10 +255,8 @@ public class PostController extends AbstractLemmyApiController {
 
     final PostSearchCriteria postSearchCriteria = PostSearchCriteria.builder()
         .page(page)
-        .listingType(conversionService.convert(
-            listingType,
-            com.sublinks.sublinksapi.person.enums.ListingType.class)
-        )
+        .listingType(conversionService.convert(listingType,
+            com.sublinks.sublinksapi.person.enums.ListingType.class))
         .perPage(perPage + 1)
         .isSavedOnly(getPostsForm.saved_only() != null && getPostsForm.saved_only())
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
@@ -345,7 +347,9 @@ public class PostController extends AbstractLemmyApiController {
       voteViews.add(conversionService.convert(like, VoteView.class));
     }
 
-    return ListPostLikesResponse.builder().post_likes(voteViews).build();
+    return ListPostLikesResponse.builder()
+        .post_likes(voteViews)
+        .build();
   }
 
   @Operation(summary = "Save a post.")
@@ -354,10 +358,11 @@ public class PostController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PutMapping("save")
-  public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson JwtPerson) {
+  public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson principal) {
 
-    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+    final Person person = getPersonOrThrowUnauthorized(principal);
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.FAVORITE_POST,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Post post = postRepository.findById((long) savePostForm.post_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -379,7 +384,8 @@ public class PostController extends AbstractLemmyApiController {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class))})})
   @PostMapping("report")
   PostReportResponse report(@Valid @RequestBody final CreatePostReport createPostReportForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
