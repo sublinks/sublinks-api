@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.common.controllers;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.person.entities.Person;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -16,7 +16,7 @@ public abstract class AbstractSublinksApiController {
    * @return Person
    * @throws ResponseStatusException Exception thrown when Person not present
    */
-  public Person getPersonOrThrowBadRequest(JwtPerson principal) throws ResponseStatusException {
+  public Person getPersonOrThrowBadRequest(SublinksJwtPerson principal) throws ResponseStatusException {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
         () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
@@ -29,8 +29,8 @@ public abstract class AbstractSublinksApiController {
    * @return Person
    * @throws ResponseStatusException Exception thrown when Person not present
    */
-  public <X extends Throwable> Person getPersonOrThrow(JwtPerson principal,
-      Supplier<? extends X> exceptionSupplier) throws X {
+  public <X extends Throwable> Person getPersonOrThrow(SublinksJwtPerson principal,
+                                                       Supplier<? extends X> exceptionSupplier) throws X {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
         exceptionSupplier);
@@ -44,18 +44,18 @@ public abstract class AbstractSublinksApiController {
    * @return Person
    * @throws ResponseStatusException Exception thrown when Person not present
    */
-  public Person getPersonOrThrowUnauthorized(JwtPerson principal) throws ResponseStatusException {
+  public Person getPersonOrThrowUnauthorized(SublinksJwtPerson principal) throws ResponseStatusException {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
   }
 
-  public Person getPerson(JwtPerson principal) {
+  public Person getPerson(SublinksJwtPerson principal) {
 
     return getOptionalPerson(principal).orElse(null);
   }
 
-  public Optional<Person> getOptionalPerson(JwtPerson principal) {
+  public Optional<Person> getOptionalPerson(SublinksJwtPerson principal) {
 
     return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal());
   }

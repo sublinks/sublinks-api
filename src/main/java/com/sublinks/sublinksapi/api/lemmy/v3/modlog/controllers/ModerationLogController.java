@@ -54,11 +54,8 @@ public class ModerationLogController extends AbstractLemmyApiController {
   private final RoleAuthorizingService roleAuthorizingService;
 
   @Operation(summary = "Get the modlog.")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = GetModlogResponse.class))})
-  })
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
+      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetModlogResponse.class))})})
   @GetMapping
   GetModlogResponse index(@Valid final GetModLog getModLogForm, final JwtPerson principal) {
 
@@ -88,12 +85,8 @@ public class ModerationLogController extends AbstractLemmyApiController {
     final List<ModHideCommunityView> hidden_communities = new ArrayList<>();
 
     final Page<ModerationLog> moderationLogs = moderationLogService.searchModerationLogs(
-        getModLogForm.type_(),
-        getModLogForm.community_id(),
-        getModLogForm.mod_person_id(),
-        getModLogForm.other_person_id(),
-        getModLogForm.page(),
-        limit,
+        getModLogForm.type_(), getModLogForm.community_id(), getModLogForm.mod_person_id(),
+        getModLogForm.other_person_id(), getModLogForm.page(), limit,
         Sort.by("createdAt").descending());
 
     for (ModerationLog moderationLog : moderationLogs.getContent()) {

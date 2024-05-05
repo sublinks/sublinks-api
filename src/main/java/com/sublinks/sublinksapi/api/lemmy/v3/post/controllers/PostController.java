@@ -324,9 +324,9 @@ public class PostController extends AbstractLemmyApiController {
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PutMapping("save")
-  public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson jwtPerson) {
+  public PostResponse saveForLater(@Valid @RequestBody SavePost savePostForm, JwtPerson JwtPerson) {
 
-    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+    final Person person = getPersonOrThrowUnauthorized(JwtPerson);
     roleAuthorizingService.hasAdminOrPermissionOrThrow(person, RolePermission.FAVORITE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 

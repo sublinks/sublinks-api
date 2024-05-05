@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.community.controllers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
-import com.sublinks.sublinksapi.api.sublinks.v1.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
@@ -44,9 +44,9 @@ public class CommunityController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public List<CommunityResponse> index(@Valid final IndexCommunity indexCommunityForm,
-      final JwtPerson jwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson) {
 
-    final Optional<Person> person = getOptionalPerson(jwtPerson);
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
     return communityRepository.allCommunitiesBySearchCriteria(
         CommunitySearchCriteria.builder()
@@ -81,9 +81,9 @@ public class CommunityController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse create(@RequestBody @Valid final CreateCommunity createCommunity,
-      final JwtPerson jwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson) {
 
-    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
     return sublinksCommunityService.createCommunity(createCommunity, person);
   }
@@ -93,7 +93,7 @@ public class CommunityController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse update(@PathVariable String key,
-      @RequestBody @Valid UpdateCommunity updateCommunityForm, final JwtPerson principal) {
+      @RequestBody @Valid UpdateCommunity updateCommunityForm, final SublinksJwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

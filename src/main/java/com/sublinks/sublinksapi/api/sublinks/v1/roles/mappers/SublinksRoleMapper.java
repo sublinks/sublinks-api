@@ -13,18 +13,18 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {
     RoleAuthorizingService.class})
-public abstract class RoleMapper implements
+public abstract class SublinksRoleMapper implements
     Converter<Role, com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role> {
 
   @Override
   @Mapping(target = "key", source = "role.name")
   @Mapping(target = "name", source = "role.name")
   @Mapping(target = "description", source = "role.description")
-  @Mapping(target = "isActive", source = "role.isActive")
+  @Mapping(target = "isActive", source = "role.active")
   @Mapping(target = "isExpired", source = "role", qualifiedByName = "is_expired")
   @Mapping(target = "expiresAt", source = "role.expiresAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "createdAt", source = "role.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "updatedAt", source = "role.updaetedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "updatedAt", source = "role.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role convert(
       @Nullable Role role);
 

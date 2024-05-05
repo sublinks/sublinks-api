@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.controllers;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.authentication.JwtPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
@@ -90,7 +90,7 @@ public class PersonController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse update(@PathVariable String key,
-      @RequestBody @Valid final UpdatePerson updatePersonForm, final JwtPerson principal) {
+      @RequestBody @Valid final UpdatePerson updatePersonForm, final SublinksJwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

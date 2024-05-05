@@ -23,9 +23,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @Component
 @RequiredArgsConstructor
 @Order(1)
-public class JwtFilter extends OncePerRequestFilter {
+public class SublinksJwtFilter extends OncePerRequestFilter {
 
-  private final JwtUtil jwtUtil;
+  private final SublinksJwtUtil sublinksJwtUtil;
   private final PersonRepository personRepository;
   private final UserDataService userDataService;
 
@@ -56,7 +56,7 @@ public class JwtFilter extends OncePerRequestFilter {
         } else {
           token = authorizingToken;
         }
-        userName = jwtUtil.extractUsername(token);
+        userName = sublinksJwtUtil.extractUsername(token);
       }
     } catch (ExpiredJwtException | SignatureException ex) {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid_token");
@@ -68,12 +68,12 @@ public class JwtFilter extends OncePerRequestFilter {
         throw new UsernameNotFoundException("Invalid name");
       }
 
-      if (jwtUtil.validateToken(token, person.get())) {
+      if (sublinksJwtUtil.validateToken(token, person.get())) {
 
         // Add a check if token and ip was changed? To give like a "warning" to the user that he has a new ip logged into his account
         userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(), token,
             request.getHeader("User-Agent"));
-        final JwtPerson authenticationToken = new JwtPerson(person.get(),
+        final SublinksJwtPerson authenticationToken = new SublinksJwtPerson(person.get(),
             person.get().getAuthorities());
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);

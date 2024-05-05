@@ -7,7 +7,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public class LemmySortTypeMapper implements
+public class SublinksSortTypeMapper implements
     Converter<com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType, SortType> {
 
   @Nullable

@@ -17,14 +17,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JwtUtil implements Serializable {
+public class SublinksJwtUtil implements Serializable {
 
   public static final long JWT_TOKEN_VALIDITY = 24 * 60 * 60;
   @Serial
   private static final long serialVersionUID = -2550185165626007488L;
   private final String secret;
 
-  public JwtUtil(@Value("${jwt.secret}") final String secret) {
+  public SublinksJwtUtil(@Value("${jwt.secret}") final String secret) {
 
     this.secret = secret;
   }

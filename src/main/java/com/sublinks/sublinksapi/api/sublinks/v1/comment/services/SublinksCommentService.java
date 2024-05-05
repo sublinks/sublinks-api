@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.post.entities.Post;
@@ -29,18 +30,26 @@ public class SublinksCommentService {
   public CommentResponse createComment(CreateComment createComment, Person person) {
 
     final Post parentPost = postRepository.findByTitleSlugAndRemovedStateIs(createComment.postKey(),
-        RemovedState.NOT_REMOVED).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found"));
+            RemovedState.NOT_REMOVED)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_not_found"));
 
     final Comment parentComment = commentRepository.findByPath(createComment.parentKey())
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
 
+    Language language;
+    try {
+      language = languageRepository.findLanguageByCode(createComment.languageKey()
+          .orElse("und"));
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "language_not_found");
+    }
     Comment comment = Comment.builder()
         .commentBody(createComment.body())
         .person(person)
         .post(parentPost)
         .path(parentComment.getPath())
+        .language(language)
         .build();
 
     commentService.createComment(comment, parentComment);

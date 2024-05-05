@@ -5,11 +5,11 @@ import java.util.Collection;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
-public class JwtPerson extends AbstractAuthenticationToken {
+public class SublinksJwtPerson extends AbstractAuthenticationToken {
 
   private final Person person;
 
-  public JwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
+  public SublinksJwtPerson(final Person person, final Collection<? extends GrantedAuthority> authorities) {
 
     super(authorities);
     this.person = person;

@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
-import com.sublinks.sublinksapi.api.sublinks.v1.authentication.JwtUtil;
+import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtUtil;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
@@ -38,7 +38,7 @@ import org.thymeleaf.context.Context;
 public class SublinksPersonService {
 
   private final PersonService personService;
-  private final JwtUtil jwtUtil;
+  private final SublinksJwtUtil sublinksJwtUtil;
   private final PersonRepository personRepository;
   private final LocalInstanceContext localInstanceContext;
   private final EmailService emailService;
@@ -72,7 +72,7 @@ public class SublinksPersonService {
 
     personService.createPerson(person);
 
-    String token = jwtUtil.generateToken(person);
+    String token = sublinksJwtUtil.generateToken(person);
     RegistrationState status = RegistrationState.CREATED;
 
     if (instanceConfig != null && instanceConfig.isRequireEmailVerification()) {
@@ -178,7 +178,7 @@ public class SublinksPersonService {
           .build();
     }
 
-    final String token = jwtUtil.generateToken(person);
+    final String token = sublinksJwtUtil.generateToken(person);
 
     userDataService.checkAndAddIpRelation(person, ip, token, userAgent);
 
