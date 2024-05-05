@@ -15,6 +15,7 @@ import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.repositories.SlurFilterRepository;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -38,10 +39,10 @@ public class SlurFilterServiceUnitTests {
 
     String regex = "exampleRegex";
 
-    when(slurFilterRepository.findAll()).thenReturn(List.of());
+    when(slurFilterRepository.findById(1L)).thenReturn(Optional.empty());
     slurFilterService.updateOrCreateLemmySlur(regex);
 
-    verify(slurFilterRepository, times(1)).findAll();
+    verify(slurFilterRepository, times(1)).findById(1L);
     verify(slurFilterRepository, times(1)).save(any(SlurFilter.class));
     verify(slurFilterRepository).save(slurFilterArgumentCaptor.capture());
     assertEquals(regex, slurFilterArgumentCaptor.getValue().getSlurRegex(),
@@ -57,23 +58,22 @@ public class SlurFilterServiceUnitTests {
     SlurFilter existingFilter = new SlurFilter();
     existingFilter.setSlurRegex("oldRegex");
 
-    when(slurFilterRepository.findAll()).thenReturn(List.of(existingFilter));
+    when(slurFilterRepository.findById(1L)).thenReturn(Optional.of(existingFilter));
 
     slurFilterService.updateOrCreateLemmySlur(regex);
 
-    verify(slurFilterRepository, times(1)).findAll();
-    verify(slurFilterRepository, times(1)).save(existingFilter);
+    verify(slurFilterRepository, times(1)).findById(1L);
     assertEquals(regex, existingFilter.getSlurRegex(), "Saved slur regex was not updated");
   }
 
   @Test
   void givenFilterDoesNotExist_whenGetLemmySlurFilter_thenCreateSaveAndReturnFilter() {
 
-    when(slurFilterRepository.findAll()).thenReturn(Collections.emptyList());
+    when(slurFilterRepository.findById(1L)).thenReturn(Optional.empty());
 
     SlurFilter slurFilter = slurFilterService.getLemmySlurFilter();
 
-    verify(slurFilterRepository, times(1)).findAll();
+    verify(slurFilterRepository, times(1)).findById(1L);
     verify(slurFilterRepository, times(1)).save(any(SlurFilter.class));
     verify(slurFilterRepository).save(slurFilterArgumentCaptor.capture());
     assertEquals("", slurFilterArgumentCaptor.getValue().getSlurRegex(),
@@ -91,13 +91,11 @@ public class SlurFilterServiceUnitTests {
     SlurFilter existingFilter = new SlurFilter();
     existingFilter.setSlurRegex("oldRegex");
 
-    when(slurFilterRepository.findAll()).thenReturn(List.of(existingFilter));
+    when(slurFilterRepository.findById(1L)).thenReturn(Optional.of(existingFilter));
 
     SlurFilter slurFilter = slurFilterService.getLemmySlurFilter();
 
-    verify(slurFilterRepository, times(1)).findAll();
-    verify(slurFilterRepository, times(1)).save(existingFilter);
-    verify(slurFilterRepository).save(slurFilterArgumentCaptor.capture());
+    verify(slurFilterRepository, times(1)).findById(1L);
     assertEquals("oldRegex", slurFilter.getSlurRegex(),
         "Returned slur regex was not existing value");
   }
@@ -222,8 +220,8 @@ public class SlurFilterServiceUnitTests {
 
     when(slurFilterRepository.findAll()).thenReturn(List.of(blockFilter));
 
-    SlurFilterBlockedException exception = assertThrows(SlurFilterBlockedException.class, () ->
-        slurFilterService.censorText(unsafeText));
+    SlurFilterBlockedException exception = assertThrows(SlurFilterBlockedException.class,
+        () -> slurFilterService.censorText(unsafeText));
 
     verify(slurFilterRepository, times(1)).findAll();
     assertEquals("Text blocked by slur filter", exception.getMessage(), "Unexpected message");
@@ -240,8 +238,8 @@ public class SlurFilterServiceUnitTests {
 
     when(slurFilterRepository.findAll()).thenReturn(List.of(reportFilter));
 
-    SlurFilterReportException exception = assertThrows(SlurFilterReportException.class, () ->
-        slurFilterService.censorText(unsafeText));
+    SlurFilterReportException exception = assertThrows(SlurFilterReportException.class,
+        () -> slurFilterService.censorText(unsafeText));
 
     verify(slurFilterRepository, times(1)).findAll();
     assertEquals("Text should be reported", exception.getMessage(), "Unexpected message");
