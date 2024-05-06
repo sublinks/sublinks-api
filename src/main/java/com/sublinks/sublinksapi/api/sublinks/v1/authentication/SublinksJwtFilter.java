@@ -32,13 +32,15 @@ public class SublinksJwtFilter extends OncePerRequestFilter {
   @Override
   protected void doFilterInternal(final HttpServletRequest request,
       final HttpServletResponse response, final FilterChain filterChain)
-      throws ServletException, IOException {
+      throws ServletException, IOException
+  {
 
     String authorizingToken = request.getHeader("Authorization");
 
     if (authorizingToken == null && request.getCookies() != null) {
       for (Cookie cookie : request.getCookies()) {
-        if (cookie.getName().equals("jwt")) {
+        if (cookie.getName()
+            .equals("jwt")) {
           authorizingToken = cookie.getValue();
           break;
         }
@@ -62,8 +64,9 @@ public class SublinksJwtFilter extends OncePerRequestFilter {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "invalid_token");
     }
 
-    if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      final Optional<Person> person = personRepository.findOneByName(userName);
+    if (userName != null && SecurityContextHolder.getContext()
+        .getAuthentication() == null) {
+      final Optional<Person> person = personRepository.findOneByNameIgnoreCase(userName);
       if (person.isEmpty()) {
         throw new UsernameNotFoundException("Invalid name");
       }
@@ -74,9 +77,11 @@ public class SublinksJwtFilter extends OncePerRequestFilter {
         userDataService.checkAndAddIpRelation(person.get(), request.getRemoteAddr(), token,
             request.getHeader("User-Agent"));
         final SublinksJwtPerson authenticationToken = new SublinksJwtPerson(person.get(),
-            person.get().getAuthorities());
+            person.get()
+                .getAuthorities());
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        SecurityContextHolder.getContext()
+            .setAuthentication(authenticationToken);
       }
     }
     filterChain.doFilter(request, response);
@@ -85,6 +90,7 @@ public class SublinksJwtFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
-    return !request.getServletPath().startsWith("/api/v3");
+    return !request.getServletPath()
+        .startsWith("/api/v3");
   }
 }

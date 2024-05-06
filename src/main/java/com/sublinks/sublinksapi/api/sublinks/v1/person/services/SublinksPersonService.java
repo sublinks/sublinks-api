@@ -50,12 +50,15 @@ public class SublinksPersonService {
   private final LanguageRepository languageRepository;
 
   public LoginResponse registerPerson(final CreatePerson createPersonForm, final String ip,
-      final String userAgent) {
+      final String userAgent)
+  {
 
-    final InstanceConfig instanceConfig = localInstanceContext.instance().getInstanceConfig();
+    final InstanceConfig instanceConfig = localInstanceContext.instance()
+        .getInstanceConfig();
 
     if (instanceConfig != null && instanceConfig.isRequireEmailVerification()) {
-      if (createPersonForm.email().isEmpty()) {
+      if (createPersonForm.email()
+          .isEmpty()) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "email_required");
       }
     }
@@ -63,10 +66,14 @@ public class SublinksPersonService {
     final Person.PersonBuilder personBuilder = Person.builder()
         .name(createPersonForm.name())
         .displayName(createPersonForm.displayName())
-        .avatarImageUrl(createPersonForm.avatarImageUrl().orElse(null))
-        .bannerImageUrl(createPersonForm.bannerImageUrl().orElse(null))
-        .biography(createPersonForm.bio().orElse(null))
-        .matrixUserId(createPersonForm.matrixUserId().orElse(null));
+        .avatarImageUrl(createPersonForm.avatarImageUrl()
+            .orElse(null))
+        .bannerImageUrl(createPersonForm.bannerImageUrl()
+            .orElse(null))
+        .biography(createPersonForm.bio()
+            .orElse(null))
+        .matrixUserId(createPersonForm.matrixUserId()
+            .orElse(null));
 
     final Person person = personBuilder.build();
 
@@ -84,13 +91,15 @@ public class SublinksPersonService {
       Map<String, Object> params = emailService.getDefaultEmailParameters();
 
       params.put("person", person);
-      params.put("verificationUrl", localInstanceContext.instance().getDomain() + "/verify_email/"
-          + personEmailVerification.getToken());
+      params.put("verificationUrl", localInstanceContext.instance()
+          .getDomain() + "/verify_email/" + personEmailVerification.getToken());
       try {
         final String template_name = EmailTemplatesEnum.VERIFY_EMAIL.toString();
         emailService.saveToQueue(Email.builder()
             .personRecipients(List.of(person))
-            .subject(emailService.getSubjects().get(template_name).getAsString())
+            .subject(emailService.getSubjects()
+                .get(template_name)
+                .getAsString())
             .htmlContent(emailService.formatTextEmailTemplate(template_name,
                 new Context(Locale.getDefault(), params)))
             .textContent(emailService.formatEmailTemplate(template_name,
@@ -117,7 +126,8 @@ public class SublinksPersonService {
                   : PersonRegistrationApplicationStatus.pending)
               .person(person)
               .question(instanceConfig.getRegistrationQuestion())
-              .answer(createPersonForm.answer().orElse(null))
+              .answer(createPersonForm.answer()
+                  .orElse(null))
               .build());
       if (!instanceConfig.isRequireEmailVerification()) {
         status = RegistrationState.APPLICATION_CREATED;
@@ -128,13 +138,18 @@ public class SublinksPersonService {
       userDataService.checkAndAddIpRelation(person, ip, token, userAgent);
     }
 
-    return LoginResponse.builder().token(Optional.ofNullable(token)).status(status).build();
+    return LoginResponse.builder()
+        .token(Optional.ofNullable(token))
+        .status(status)
+        .build();
   }
 
   public LoginResponse login(final LoginPerson loginPersonForm, final String ip,
-      final String userAgent) {
+      final String userAgent)
+  {
 
-    final Optional<Person> foundPerson = personRepository.findOneByName(loginPersonForm.username());
+    final Optional<Person> foundPerson = personRepository.findOneByNameIgnoreCase(
+        loginPersonForm.username());
 
     if (foundPerson.isEmpty()) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found");
@@ -161,8 +176,8 @@ public class SublinksPersonService {
     Optional<PersonRegistrationApplication> application = personRegistrationApplicationRepository.findOneByPerson(
         person);
 
-    if (application.isPresent() && application.get().getApplicationStatus()
-        != PersonRegistrationApplicationStatus.approved) {
+    if (application.isPresent() && application.get()
+        .getApplicationStatus() != PersonRegistrationApplicationStatus.approved) {
       return LoginResponse.builder()
           .token(Optional.empty())
           .status(RegistrationState.UNCHANGED)
@@ -170,7 +185,7 @@ public class SublinksPersonService {
           .build();
     }
 
-    if (!personService.isPasswordEqual(person, loginPersonForm.password())) {
+    if (!personService.isValidPersonPassword(person, loginPersonForm.password())) {
       return LoginResponse.builder()
           .token(Optional.empty())
           .status(RegistrationState.UNCHANGED)
@@ -190,28 +205,41 @@ public class SublinksPersonService {
 
   public PersonResponse updatePerson(Person person, UpdatePerson updatePersonForm) {
 
-    if (updatePersonForm.languagesKeys().isPresent()) {
-      person.setLanguages(
-          languageRepository.findAllByCodeIsIn(updatePersonForm.languagesKeys().get()));
+    if (updatePersonForm.languagesKeys()
+        .isPresent()) {
+      person.setLanguages(languageRepository.findAllByCodeIsIn(updatePersonForm.languagesKeys()
+          .get()));
     }
 
-    updatePersonForm.displayName().ifPresent(person::setDisplayName);
-    updatePersonForm.email().ifPresent(person::setEmail);
-    updatePersonForm.avatarImageUrl().ifPresent(person::setAvatarImageUrl);
-    updatePersonForm.bannerImageUrl().ifPresent(person::setBannerImageUrl);
-    updatePersonForm.bio().ifPresent(person::setBiography);
-    updatePersonForm.matrixUserId().ifPresent(person::setMatrixUserId);
+    updatePersonForm.displayName()
+        .ifPresent(person::setDisplayName);
+    updatePersonForm.email()
+        .ifPresent(person::setEmail);
+    updatePersonForm.avatarImageUrl()
+        .ifPresent(person::setAvatarImageUrl);
+    updatePersonForm.bannerImageUrl()
+        .ifPresent(person::setBannerImageUrl);
+    updatePersonForm.bio()
+        .ifPresent(person::setBiography);
+    updatePersonForm.matrixUserId()
+        .ifPresent(person::setMatrixUserId);
 
-    if (updatePersonForm.oldPassword().isPresent() && updatePersonForm.password().isPresent()
-        && updatePersonForm.passwordConfirmation().isPresent()) {
-      if (!personService.isPasswordEqual(person, updatePersonForm.oldPassword().get())) {
+    if (updatePersonForm.oldPassword()
+        .isPresent() && updatePersonForm.password()
+        .isPresent() && updatePersonForm.passwordConfirmation()
+        .isPresent()) {
+      if (!personService.isValidPersonPassword(person, updatePersonForm.oldPassword()
+          .get())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
       }
-      if (!updatePersonForm.password().get().equals(
-          updatePersonForm.passwordConfirmation().get())) {
+      if (!updatePersonForm.password()
+          .get()
+          .equals(updatePersonForm.passwordConfirmation()
+              .get())) {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_mismatch");
       }
-      personService.updatePassword(person, updatePersonForm.password().get());
+      personService.updatePassword(person, updatePersonForm.password()
+          .get());
     }
 
     personRepository.save(person);

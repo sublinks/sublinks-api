@@ -47,8 +47,10 @@ public class PersonController extends AbstractSublinksApiController {
   public List<PersonResponse> index(@Valid final IndexPerson indexPerson) {
 
     return personRepository.findAllByNameAndBiography(indexPerson.search(),
-        PageRequest.of(indexPerson.page(), indexPerson.limit())).stream().map(
-        person -> conversionService.convert(person, PersonResponse.class)).toList();
+            PageRequest.of(indexPerson.page(), indexPerson.limit()))
+        .stream()
+        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .toList();
   }
 
   @Operation(summary = "Get a specific person")
@@ -57,8 +59,8 @@ public class PersonController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse show(@PathVariable String key) {
 
-    Optional<PersonResponse> personResponse = personRepository.findOneByName(key).map(
-        person -> conversionService.convert(person, PersonResponse.class));
+    Optional<PersonResponse> personResponse = personRepository.findOneByNameIgnoreCase(key)
+        .map(person -> conversionService.convert(person, PersonResponse.class));
 
     return personResponse.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
   }
@@ -68,7 +70,8 @@ public class PersonController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public LoginResponse create(final HttpServletRequest request,
-      @RequestBody @Valid final CreatePerson createPerson) {
+      @RequestBody @Valid final CreatePerson createPerson)
+  {
 
     return sublinksPersonService.registerPerson(createPerson, request.getRemoteAddr(),
         request.getHeader("User-Agent"));
@@ -79,7 +82,8 @@ public class PersonController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public LoginResponse login(final HttpServletRequest request,
-      @RequestBody @Valid final LoginPerson loginPerson) {
+      @RequestBody @Valid final LoginPerson loginPerson)
+  {
 
     return sublinksPersonService.login(loginPerson, request.getRemoteAddr(),
         request.getHeader("User-Agent"));
@@ -90,7 +94,8 @@ public class PersonController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse update(@PathVariable String key,
-      @RequestBody @Valid final UpdatePerson updatePersonForm, final SublinksJwtPerson principal) {
+      @RequestBody @Valid final UpdatePerson updatePersonForm, final SublinksJwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

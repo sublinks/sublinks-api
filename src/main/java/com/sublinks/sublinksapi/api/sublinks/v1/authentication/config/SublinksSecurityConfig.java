@@ -1,6 +1,5 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.authentication.config;
 
-import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtFilter;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,10 +18,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SublinksSecurityConfig {
 
   private final SublinksJwtFilter sublinksJwtFilter;
-  private final JwtFilter lemmyJwtFilter;
 
   /**
    * Returns a configured SecurityFilterChain object for the application's security.
@@ -32,14 +30,17 @@ public class SecurityConfig {
    * @throws Exception If an error occurs during the configuration process.
    */
   @Bean
-  public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
+  public SecurityFilterChain sublinksFilterChain(final HttpSecurity http) throws Exception {
 
-    http.csrf(AbstractHttpConfigurer::disable).authorizeHttpRequests(
-        (requests) -> requests.anyRequest().permitAll()).sessionManagement(
-        (sessionManagement) -> sessionManagement.sessionCreationPolicy(
-            SessionCreationPolicy.STATELESS)).addFilterBefore(sublinksJwtFilter,
-        UsernamePasswordAuthenticationFilter.class).addFilterBefore(lemmyJwtFilter,
-        UsernamePasswordAuthenticationFilter.class);
+    http.csrf(AbstractHttpConfigurer::disable)
+        .securityMatcher("/api/v1/**")
+        .authorizeHttpRequests((requests) -> requests.anyRequest()
+            .permitAll())
+        .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
+            SessionCreationPolicy.STATELESS));
+
+    http.addFilterBefore(sublinksJwtFilter, UsernamePasswordAuthenticationFilter.class);
+
     return http.build();
   }
 }
