@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.authorization.entities.Role;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import java.util.Date;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,7 +12,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {
-    RoleAuthorizingService.class})
+    RolePermissionService.class})
 public abstract class SublinksRoleMapper implements
     Converter<Role, com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role> {
 

@@ -5,7 +5,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.ActorIdUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermission;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
@@ -26,7 +26,7 @@ public class SublinksCommunityService {
   private final ConversionService conversionService;
   private final CommunityService communityService;
   private final LocalInstanceContext localInstanceContext;
-  private final RoleAuthorizingService roleAuthorizingService;
+  private final RolePermissionService RolePermissionService;
   private final InstanceRepository instanceRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
 
@@ -38,7 +38,7 @@ public class SublinksCommunityService {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_slug_already_exist");
     }
 
-    if (roleAuthorizingService.hasAdminOrPermission(person, RolePermission.CREATE_COMMUNITY)) {
+    if (RolePermissionService.hasAdminOrPermission(person, RolePermission.CREATE_COMMUNITY)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_create_community");
     }
 
@@ -71,7 +71,7 @@ public class SublinksCommunityService {
     }
 
     Community community = foundCommunity.get();
-    if (!roleAuthorizingService.isModeratorOrAdmin(person, community)) {
+    if (!RolePermissionService.isModeratorOrAdmin(person, community)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_community");
     }
 
@@ -87,7 +87,7 @@ public class SublinksCommunityService {
 
     if (isRemoved != null && isRemoved != community.isRemoved()) {
 
-      if (!roleAuthorizingService.isModeratorOrAdmin(person, community)) {
+      if (!RolePermissionService.isModeratorOrAdmin(person, community)) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
             "not_authorized_to_remove_community");
       }

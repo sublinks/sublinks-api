@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.person.services;
 
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -27,13 +27,13 @@ public class LinkPersonCommunityService {
 
   public boolean hasLinkOrAdmin(Person person, Community community, LinkPersonCommunityType type) {
 
-    return RoleAuthorizingService.isAdmin(person) || hasLink(person, community, type);
+    return RolePermissionService.isAdmin(person) || hasLink(person, community, type);
   }
 
   public boolean hasAnyLinkOrAdmin(Person person, Community community,
       List<LinkPersonCommunityType> types) {
 
-    return RoleAuthorizingService.isAdmin(person) || hasAnyLink(person, community, types);
+    return RolePermissionService.isAdmin(person) || hasAnyLink(person, community, types);
   }
 
   public boolean hasLink(Person person, Community community, LinkPersonCommunityType type) {

@@ -3,7 +3,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksRoleMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
-import com.sublinks.sublinksapi.authorization.services.RoleAuthorizingService;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import java.text.SimpleDateFormat;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Named("is_banned")
   Boolean mapIsBanned(Person person) {
 
-    return RoleAuthorizingService.isBanned(person);
+    return RolePermissionService.isBanned(person);
   }
 
   @Named("display_name")
