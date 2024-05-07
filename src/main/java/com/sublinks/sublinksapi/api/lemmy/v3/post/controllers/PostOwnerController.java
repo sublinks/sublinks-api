@@ -102,12 +102,12 @@ public class PostOwnerController extends AbstractLemmyApiController {
       language = Optional.ofNullable(languageRepository.findLanguageByCode("und"));
     }
 
-    String url = createPostForm.url();
+    String url = createPostForm.url().orElse(null);
     SiteMetadataUtil.SiteMetadata metadata = null;
-    if (createPostForm.url() != null) {
-      url = urlUtil.normalizeUrl(createPostForm.url());
-      urlUtil.checkUrlProtocol(url);
-      metadata = siteMetadataUtil.fetchSiteMetadata(url);
+    if (url != null) {
+      String metadataUrl = urlUtil.normalizeUrl(url);
+      urlUtil.checkUrlProtocol(metadataUrl);
+      metadata = siteMetadataUtil.fetchSiteMetadata(metadataUrl);
     }
 
     final Post.PostBuilder postBuilder = Post.builder()
@@ -179,8 +179,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
   @PutMapping
   PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
-    final Post post = postRepository.findById((long) editPostForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Post post = postRepository.findById((long) editPostForm.post_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -258,8 +258,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    final Post post = postRepository.findById((long) deletePostForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Post post = postRepository.findById((long) deletePostForm.post_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     post.setDeleted(deletePostForm.deleted());
 
