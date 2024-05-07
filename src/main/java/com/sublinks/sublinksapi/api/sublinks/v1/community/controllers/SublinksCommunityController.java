@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
@@ -71,33 +72,32 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
       }
     }
 
-    com.sublinks.sublinksapi.api.sublinks.v1.common.enums.ListingType listingType = indexCommunityForm.listingType();
+    SublinksListingType sublinksListingType = indexCommunityForm.sublinksListingType();
 
-    if (listingType == null) {
+    if (sublinksListingType == null) {
       if (person.isPresent() && person.get()
           .getDefaultListingType() != null) {
-        listingType = conversionService.convert(person.get()
-                .getDefaultListingType(),
-            com.sublinks.sublinksapi.api.sublinks.v1.common.enums.ListingType.class);
+        sublinksListingType = conversionService.convert(person.get()
+            .getDefaultListingType(), SublinksListingType.class);
       } else if (localInstanceContext.instance()
           .getInstanceConfig()
           .getDefaultPostListingType() != null) {
-        listingType = conversionService.convert(localInstanceContext.instance()
-                .getInstanceConfig()
-                .getDefaultPostListingType(),
-            com.sublinks.sublinksapi.api.sublinks.v1.common.enums.ListingType.class);
+        sublinksListingType = conversionService.convert(localInstanceContext.instance()
+            .getInstanceConfig()
+            .getDefaultPostListingType(), SublinksListingType.class);
       } else {
-        listingType = com.sublinks.sublinksapi.api.sublinks.v1.common.enums.ListingType.Local;
+        sublinksListingType = SublinksListingType.Local;
       }
     }
+
+    boolean showNsfw = indexCommunityForm.showNsfw() != null && indexCommunityForm.showNsfw();
 
     return communityRepository.allCommunitiesBySearchCriteria(CommunitySearchCriteria.builder()
             .page(indexCommunityForm.page())
             .perPage(indexCommunityForm.limit())
             .sortType(conversionService.convert(sortType, SortType.class))
-            .listingType(conversionService.convert(listingType, ListingType.class))
-            .showNsfw(indexCommunityForm.showNsfw()
-                .orElse(false))
+            .listingType(conversionService.convert(sublinksListingType, ListingType.class))
+            .showNsfw(showNsfw)
             .person(person.orElse(null))
             .build())
         .stream()

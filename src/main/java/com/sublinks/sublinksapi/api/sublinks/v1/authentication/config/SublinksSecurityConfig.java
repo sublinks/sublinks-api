@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtFilter
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Order(1)
 public class SublinksSecurityConfig {
 
   private final SublinksJwtFilter sublinksJwtFilter;
@@ -32,6 +34,7 @@ public class SublinksSecurityConfig {
   @Bean
   public SecurityFilterChain sublinksFilterChain(final HttpSecurity http) throws Exception {
 
+    http.addFilterBefore(sublinksJwtFilter, UsernamePasswordAuthenticationFilter.class);
     http.csrf(AbstractHttpConfigurer::disable)
         .securityMatcher("/api/v1/**")
         .authorizeHttpRequests((requests) -> requests.anyRequest()
@@ -39,7 +42,6 @@ public class SublinksSecurityConfig {
         .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS));
 
-    http.addFilterBefore(sublinksJwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }

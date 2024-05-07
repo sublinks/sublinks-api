@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.authentication.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -18,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@Order(2)
 public class SecurityConfig {
 
   private final JwtFilter lemmyJwtFilter;
@@ -32,6 +34,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 
+    http.addFilterBefore(lemmyJwtFilter, UsernamePasswordAuthenticationFilter.class);
     http.csrf(AbstractHttpConfigurer::disable)
         .securityMatcher("/api/v3/**")
         .authorizeHttpRequests((requests) -> requests.anyRequest()
@@ -39,9 +42,7 @@ public class SecurityConfig {
         .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS));
 
-    http.addFilterBefore(lemmyJwtFilter, UsernamePasswordAuthenticationFilter.class);
-
     return http.build();
   }
-  
+
 }
