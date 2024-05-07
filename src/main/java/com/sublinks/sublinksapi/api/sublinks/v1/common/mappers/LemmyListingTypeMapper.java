@@ -17,4 +17,6 @@ public class LemmyListingTypeMapper implements
 
     return ListingType.valueOf(listingType.name());
   }
+
+
 }

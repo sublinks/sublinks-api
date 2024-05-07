@@ -90,7 +90,7 @@ public class SublinksJwtFilter extends OncePerRequestFilter {
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
 
-    return !request.getServletPath()
-        .startsWith("/api/v3");
+    String servletPath = request.getServletPath();
+    return !servletPath.startsWith("/api/v1") && !servletPath.startsWith("/pictrs");
   }
 }

@@ -29,12 +29,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+@RestController
 @RequestMapping("api/v1/person")
 @Tag(name = "Person", description = "Person API")
 @AllArgsConstructor
-public class PersonController extends AbstractSublinksApiController {
+public class SublinksPersonController extends AbstractSublinksApiController {
 
   private final PersonRepository personRepository;
   private final SublinksPersonService sublinksPersonService;
@@ -44,7 +46,7 @@ public class PersonController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<PersonResponse> index(@Valid final IndexPerson indexPerson) {
+  public List<PersonResponse> index(final IndexPerson indexPerson) {
 
     return personRepository.findAllByNameAndBiography(indexPerson.search(),
             PageRequest.of(indexPerson.page(), indexPerson.limit()))
