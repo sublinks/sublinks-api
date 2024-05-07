@@ -15,8 +15,6 @@ import org.springframework.lang.Nullable;
     SublinksLanguageMapper.class, OptionalStringMapper.class})
 public abstract class SublinksCommunityMapper implements Converter<Community, CommunityResponse> {
 
-  SublinksLanguageMapper languageMapper;
-
   @Override
   @Mapping(target = "key", source = "community.titleSlug")
   @Mapping(target = "title", source = "community.title")
@@ -25,7 +23,7 @@ public abstract class SublinksCommunityMapper implements Converter<Community, Co
   @Mapping(target = "iconImageUrl", source = "community.iconImageUrl")
   @Mapping(target = "bannerImageUrl", source = "community.bannerImageUrl")
   @Mapping(target = "activityPubId", source = "community.activityPubId")
-  @Mapping(target = "languages", expression = "java(community.getLanguages().stream().map(languageMapper::convert).toList())")
+  @Mapping(target = "languages", source = "community.languages")
   @Mapping(target = "isLocal", source = "community.local")
   @Mapping(target = "isDeleted", source = "community.deleted")
   @Mapping(target = "isRemoved", source = "community.removed")

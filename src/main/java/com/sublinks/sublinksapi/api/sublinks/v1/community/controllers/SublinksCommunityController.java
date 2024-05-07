@@ -92,14 +92,24 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
     boolean showNsfw = indexCommunityForm.showNsfw() != null && indexCommunityForm.showNsfw();
 
-    return communityRepository.allCommunitiesBySearchCriteria(CommunitySearchCriteria.builder()
-            .page(indexCommunityForm.page())
-            .perPage(indexCommunityForm.limit())
-            .sortType(conversionService.convert(sortType, SortType.class))
-            .listingType(conversionService.convert(sublinksListingType, ListingType.class))
-            .showNsfw(showNsfw)
-            .person(person.orElse(null))
-            .build())
+    final CommunitySearchCriteria.CommunitySearchCriteriaBuilder criteria = CommunitySearchCriteria.builder()
+        .perPage(indexCommunityForm.limit())
+        .page(indexCommunityForm.page())
+        .sortType(conversionService.convert(sortType, SortType.class))
+        .listingType(conversionService.convert(sublinksListingType, ListingType.class))
+        .showNsfw(showNsfw)
+        .person(person.orElse(null));
+
+    if (indexCommunityForm.limit() == 0) {
+      criteria.perPage(20);
+    }
+    if (indexCommunityForm.page() == 0) {
+      criteria.page(1);
+    }
+
+    final CommunitySearchCriteria communitySearchCriteria = criteria.build();
+
+    return communityRepository.allCommunitiesBySearchCriteria(communitySearchCriteria)
         .stream()
         .map(community -> conversionService.convert(community, CommunityResponse.class))
         .toList();
@@ -113,8 +123,10 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   public CommunityResponse show(@PathVariable final String key) {
 
     try {
-      return conversionService.convert(communityRepository.findCommunityByTitleSlug(key),
-          CommunityResponse.class);
+      return communityRepository.findCommunityByTitleSlug(key)
+          .map(comm -> conversionService.convert(comm, CommunityResponse.class))
+          .orElseThrow(
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found"));
     } catch (Exception e) {
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found");
     }
