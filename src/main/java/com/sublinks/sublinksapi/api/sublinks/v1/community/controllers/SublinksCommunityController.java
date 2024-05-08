@@ -120,7 +120,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
     communityRepository.allCommunitiesBySearchCriteria(communitySearchCriteria)
         .forEach(community -> communities.add(CommunityView.builder()
-            .communityResponse(conversionService.convert(community, CommunityResponse.class))
+            .community(conversionService.convert(community, CommunityResponse.class))
             .communityAggregates(conversionService.convert(community.getCommunityAggregate(),
                 CommunityAggregatesResponse.class))
             .moderators(linkPersonCommunityService.getPersonsFromCommunityAndListTypes(community,
@@ -142,7 +142,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
     try {
       return communityRepository.findCommunityByTitleSlug(key)
           .map(comm -> CommunityView.builder()
-              .communityResponse(conversionService.convert(comm, CommunityResponse.class))
+              .community(conversionService.convert(comm, CommunityResponse.class))
               .communityAggregates(conversionService.convert(comm.getCommunityAggregate(),
                   CommunityAggregatesResponse.class))
               .moderators(linkPersonCommunityService.getPersonsFromCommunityAndListTypes(comm,
