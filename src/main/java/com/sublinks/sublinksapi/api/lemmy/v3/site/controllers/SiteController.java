@@ -68,8 +68,7 @@ public class SiteController extends AbstractLemmyApiController {
   private final MyUserInfoService myUserInfoService;
   private final RolePermissionService rolePermissionService;
   private final InstanceConfigService instanceConfigService;
-  private final SlurFil                            List<LanguageResponse> languages
-terService slurFilterService;
+  private final SlurFilterService slurFilterService;
   private final AnnouncementRepository announcementRepository;
   private final ConversionService conversionService;
   private final LemmyPersonService lemmyPersonService;
