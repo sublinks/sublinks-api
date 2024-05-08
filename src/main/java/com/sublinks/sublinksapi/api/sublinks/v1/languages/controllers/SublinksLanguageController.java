@@ -35,10 +35,12 @@ public class SublinksLanguageController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "200", description = "List of languagesKeys", useReturnTypeSchema = true)})
   public List<LanguageResponse> index() {
 
-    List<Language> languages = languageService.instanceLanguages(localInstanceContext.instance());
+    List<Language> languages = localInstanceContext.instance()
+        .getLanguages();
 
-    return languages.stream().map(
-        language -> conversionService.convert(language, LanguageResponse.class)).toList();
+    return languages.stream()
+        .map(language -> conversionService.convert(language, LanguageResponse.class))
+        .toList();
 
   }
 
@@ -49,11 +51,14 @@ public class SublinksLanguageController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "404", description = "Language not found")})
   public LanguageResponse show(@PathVariable String id) {
 
-    List<Language> languages = languageService.instanceLanguages(localInstanceContext.instance());
+    List<Language> languages = localInstanceContext.instance()
+        .getLanguages();
 
-    Language foundLanguage = languages.stream().filter(
-        language -> language.getId().equals(Long.valueOf(id))).findFirst().orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "language_not_found"));
+    Language foundLanguage = languages.stream()
+        .filter(language -> language.getId()
+            .equals(Long.valueOf(id)))
+        .findFirst()
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "language_not_found"));
 
     return conversionService.convert(foundLanguage, LanguageResponse.class);
   }

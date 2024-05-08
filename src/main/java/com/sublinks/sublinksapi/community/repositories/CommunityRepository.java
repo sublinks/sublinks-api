@@ -15,6 +15,8 @@ public interface CommunityRepository extends JpaRepository<Community, Long>,
 
   Optional<Community> findCommunityByTitleSlug(String titleSlug);
 
+  boolean existsByTitleSlug(String titleSlug);
+
   List<Community> findCommunitiesByInstance(Instance instance);
 
   Community findCommunityByPublicKey(String publicKey);
