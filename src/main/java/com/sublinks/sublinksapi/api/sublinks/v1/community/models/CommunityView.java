@@ -5,8 +5,8 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record CommunityView(CommunityResponse community,
-                            CommunityAggregatesResponse communityAggregates,
+public record CommunityView(CommunityResponse communityResponse,
+                            CommunityAggregates communityAggregates,
                             List<PersonResponse> moderators) {
 
 }

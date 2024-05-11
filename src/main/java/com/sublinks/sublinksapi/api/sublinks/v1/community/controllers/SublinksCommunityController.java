@@ -5,7 +5,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregatesResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregates;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
@@ -122,7 +122,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
         .forEach(community -> communities.add(CommunityView.builder()
             .communityResponse(conversionService.convert(community, CommunityResponse.class))
             .communityAggregates(conversionService.convert(community.getCommunityAggregate(),
-                CommunityAggregatesResponse.class))
+                CommunityAggregates.class))
             .moderators(linkPersonCommunityService.getPersonsFromCommunityAndListTypes(community,
                     List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
                 .stream()
@@ -144,7 +144,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
           .map(comm -> CommunityView.builder()
               .communityResponse(conversionService.convert(comm, CommunityResponse.class))
               .communityAggregates(conversionService.convert(comm.getCommunityAggregate(),
-                  CommunityAggregatesResponse.class))
+                  CommunityAggregates.class))
               .moderators(linkPersonCommunityService.getPersonsFromCommunityAndListTypes(comm,
                       List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
                   .stream()
