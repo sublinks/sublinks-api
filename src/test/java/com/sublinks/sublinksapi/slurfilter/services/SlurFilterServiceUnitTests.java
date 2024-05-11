@@ -15,7 +15,6 @@ import com.sublinks.sublinksapi.slurfilter.exceptions.SlurFilterReportException;
 import com.sublinks.sublinksapi.slurfilter.repositories.SlurFilterRepository;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,6 +22,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 @ExtendWith(MockitoExtension.class)
 public class SlurFilterServiceUnitTests {
@@ -39,10 +40,11 @@ public class SlurFilterServiceUnitTests {
 
     String regex = "exampleRegex";
 
-    when(slurFilterRepository.findById(1L)).thenReturn(Optional.empty());
+    when(slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))).thenReturn(
+        Collections.emptyList());
     slurFilterService.updateOrCreateLemmySlur(regex);
 
-    verify(slurFilterRepository, times(1)).findById(1L);
+    verify(slurFilterRepository, times(1)).findAll(Sort.by(Direction.ASC, "id"));
     verify(slurFilterRepository, times(1)).save(any(SlurFilter.class));
     verify(slurFilterRepository).save(slurFilterArgumentCaptor.capture());
     assertEquals(regex, slurFilterArgumentCaptor.getValue().getSlurRegex(),
@@ -58,22 +60,24 @@ public class SlurFilterServiceUnitTests {
     SlurFilter existingFilter = new SlurFilter();
     existingFilter.setSlurRegex("oldRegex");
 
-    when(slurFilterRepository.findById(1L)).thenReturn(Optional.of(existingFilter));
+    when(slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))).thenReturn(
+        List.of(existingFilter));
 
     slurFilterService.updateOrCreateLemmySlur(regex);
 
-    verify(slurFilterRepository, times(1)).findById(1L);
+    verify(slurFilterRepository, times(1)).findAll(Sort.by(Direction.ASC, "id"));
     assertEquals(regex, existingFilter.getSlurRegex(), "Saved slur regex was not updated");
   }
 
   @Test
   void givenFilterDoesNotExist_whenGetLemmySlurFilter_thenCreateSaveAndReturnFilter() {
 
-    when(slurFilterRepository.findById(1L)).thenReturn(Optional.empty());
+    when(slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))).thenReturn(
+        Collections.emptyList());
 
     SlurFilter slurFilter = slurFilterService.getLemmySlurFilter();
 
-    verify(slurFilterRepository, times(1)).findById(1L);
+    verify(slurFilterRepository, times(1)).findAll(Sort.by(Direction.ASC, "id"));
     verify(slurFilterRepository, times(1)).save(any(SlurFilter.class));
     verify(slurFilterRepository).save(slurFilterArgumentCaptor.capture());
     assertEquals("", slurFilterArgumentCaptor.getValue().getSlurRegex(),
@@ -91,11 +95,12 @@ public class SlurFilterServiceUnitTests {
     SlurFilter existingFilter = new SlurFilter();
     existingFilter.setSlurRegex("oldRegex");
 
-    when(slurFilterRepository.findById(1L)).thenReturn(Optional.of(existingFilter));
+    when(slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))).thenReturn(
+        List.of(existingFilter));
 
     SlurFilter slurFilter = slurFilterService.getLemmySlurFilter();
 
-    verify(slurFilterRepository, times(1)).findById(1L);
+    verify(slurFilterRepository, times(1)).findAll(Sort.by(Direction.ASC, "id"));
     assertEquals("oldRegex", slurFilter.getSlurRegex(),
         "Returned slur regex was not existing value");
   }
