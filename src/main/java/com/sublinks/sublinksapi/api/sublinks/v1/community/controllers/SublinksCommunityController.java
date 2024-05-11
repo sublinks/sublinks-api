@@ -5,26 +5,20 @@ import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregates;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityView;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
-import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.Person;
-import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
@@ -50,13 +44,12 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   private final SublinksCommunityService sublinksCommunityService;
   private final ConversionService conversionService;
   private final LocalInstanceContext localInstanceContext;
-  private final LinkPersonCommunityService linkPersonCommunityService;
 
   @Operation(summary = "Get a list of communities")
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<CommunityView> index(
+  public List<CommunityResponse> index(
       @RequestParam(required = false) final Optional<IndexCommunity> indexCommunityParam,
       final SublinksJwtPerson sublinksJwtPerson)
   {
@@ -116,45 +109,26 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
     final CommunitySearchCriteria communitySearchCriteria = criteria.build();
 
-    List<CommunityView> communities = new ArrayList<>();
+    return communityRepository.allCommunitiesBySearchCriteria(communitySearchCriteria)
+        .stream()
+        .map(community -> conversionService.convert(community, CommunityResponse.class))
+        .toList();
 
-    communityRepository.allCommunitiesBySearchCriteria(communitySearchCriteria)
-        .forEach(community -> communities.add(CommunityView.builder()
-            .communityResponse(conversionService.convert(community, CommunityResponse.class))
-            .communityAggregates(conversionService.convert(community.getCommunityAggregate(),
-                CommunityAggregates.class))
-            .moderators(linkPersonCommunityService.getPersonsFromCommunityAndListTypes(community,
-                    List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
-                .stream()
-                .map(pers -> conversionService.convert(pers, PersonResponse.class))
-                .toList())
-            .build()));
-
-    return communities;
   }
 
   @Operation(summary = "Get a specific community")
   @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityView show(@PathVariable final String key) {
+  public CommunityResponse show(@PathVariable final String key) {
 
     try {
       return communityRepository.findCommunityByTitleSlug(key)
-          .map(comm -> CommunityView.builder()
-              .communityResponse(conversionService.convert(comm, CommunityResponse.class))
-              .communityAggregates(conversionService.convert(comm.getCommunityAggregate(),
-                  CommunityAggregates.class))
-              .moderators(linkPersonCommunityService.getPersonsFromCommunityAndListTypes(comm,
-                      List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
-                  .stream()
-                  .map(pers -> conversionService.convert(pers, PersonResponse.class))
-                  .toList())
-              .build())
+          .map(comm -> conversionService.convert(comm, CommunityResponse.class))
           .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found"));
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "community_error");
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found");
     }
   }
 
