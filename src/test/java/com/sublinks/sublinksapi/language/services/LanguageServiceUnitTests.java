@@ -52,9 +52,8 @@ public class LanguageServiceUnitTests {
 
     List<Long> expectedList = Arrays.asList(1L, 2L);
 
-    assertTrue(expectedList.size() == discussionLanguages.size()
-            && expectedList.containsAll(discussionLanguages)
-            && discussionLanguages.containsAll(expectedList),
+    assertTrue(expectedList.size() == discussionLanguages.size() && expectedList.containsAll(
+            discussionLanguages) && discussionLanguages.containsAll(expectedList),
         "List of language ids returned did not match expected");
   }
 
@@ -65,14 +64,16 @@ public class LanguageServiceUnitTests {
     Optional<Language> optionalEnglish = Optional.of(english);
     Optional<Language> optionalAfrikaans = Optional.of(afrikaans);
 
-    Mockito.when(languageRepository.findById(1L)).thenReturn(optionalEnglish);
-    Mockito.when(languageRepository.findById(2L)).thenReturn(optionalAfrikaans);
+    Mockito.when(languageRepository.findById(1L))
+        .thenReturn(optionalEnglish);
+    Mockito.when(languageRepository.findById(2L))
+        .thenReturn(optionalAfrikaans);
 
     LanguageService languageService = new LanguageService(languageRepository);
 
     List<Language> languages = languageService.languageIdsToEntity(languageIds);
 
     assertEquals(2, languages.size(),
-        "Number of languagesKeys instances returned did not match expected");
+        "Number of languages instances returned did not match expected");
   }
 }
