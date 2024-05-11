@@ -19,26 +19,23 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/api/v1/community/{key}")
-@Tag(name = "Community", description = "Community API")
+@RequestMapping("/api/v1/community/{key}/aggregate")
+@Tag(name = "Community", description = "Community Aggregation API")
 public class SublinksCommunityAggregationController extends AbstractSublinksApiController {
 
-  private final CommunityAggregateRepository communityAggregateRepository;
-  private final ConversionService conversionService;
+    private final CommunityAggregateRepository communityAggregateRepository;
+    private final ConversionService conversionService;
 
-  @Operation(summary = "Get a community aggregate")
-  @GetMapping("/aggregate")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityAggregatesResponse show(@PathVariable final String key)
-  {
+    @Operation(summary = "Get a community aggregate")
+    @GetMapping
+    @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+    public CommunityAggregatesResponse show(@PathVariable final String key) {
 
-    final CommunityAggregate communityAggregate = communityAggregateRepository.findByCommunityKey(
-        key);
-    if (communityAggregate == null) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found");
+        final CommunityAggregate communityAggregate = communityAggregateRepository.findByCommunityKey(key);
+        if (communityAggregate == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found");
+        }
+
+        return conversionService.convert(communityAggregate, CommunityAggregatesResponse.class);
     }
-
-    return conversionService.convert(communityAggregate, CommunityAggregatesResponse.class);
-  }
 }

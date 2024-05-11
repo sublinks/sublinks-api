@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -124,6 +125,18 @@ public class SublinksCommunityService {
     communityRepository.save(community);
 
     return conversionService.convert(community, CommunityResponse.class);
+  }
 
+  public List<LinkPersonCommunity> getCommunityModerators(String key) {
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    return linkPersonCommunityService.getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
+            community,
+            List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
+        .stream()
+        .toList();
   }
 }

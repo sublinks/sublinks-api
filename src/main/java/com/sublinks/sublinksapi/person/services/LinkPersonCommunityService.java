@@ -31,7 +31,8 @@ public class LinkPersonCommunityService {
   }
 
   public boolean hasAnyLinkOrAdmin(Person person, Community community,
-      List<LinkPersonCommunityType> types) {
+      List<LinkPersonCommunityType> types)
+  {
 
     return RolePermissionService.isAdmin(person) || hasAnyLink(person, community, types);
   }
@@ -43,8 +44,8 @@ public class LinkPersonCommunityService {
     return linkPersonCommunity.isPresent();
   }
 
-  public boolean hasAnyLink(Person person, Community community,
-      List<LinkPersonCommunityType> types) {
+  public boolean hasAnyLink(Person person, Community community, List<LinkPersonCommunityType> types)
+  {
 
     final List<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkTypeIsIn(
         community, person, types);
@@ -54,10 +55,15 @@ public class LinkPersonCommunityService {
   @Transactional
   public void addLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    final LinkPersonCommunity newLink = LinkPersonCommunity.builder().community(community).person(
-        person).linkType(type).build();
-    person.getLinkPersonCommunity().add(newLink);
-    community.getLinkPersonCommunity().add(newLink);
+    final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
+        .community(community)
+        .person(person)
+        .linkType(type)
+        .build();
+    person.getLinkPersonCommunity()
+        .add(newLink);
+    community.getLinkPersonCommunity()
+        .add(newLink);
     linkPersonCommunityRepository.save(newLink);
     linkPersonCommunityCreatedPublisher.publish(newLink);
   }
@@ -70,10 +76,12 @@ public class LinkPersonCommunityService {
     if (linkPersonCommunity.isEmpty()) {
       return;
     }
-    person.getLinkPersonCommunity().removeIf(
-        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
-    community.getLinkPersonCommunity().removeIf(
-        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
+    person.getLinkPersonCommunity()
+        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
+            .getId()));
+    community.getLinkPersonCommunity()
+        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
+            .getId()));
     linkPersonCommunityRepository.delete(linkPersonCommunity.get());
     linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
   }
@@ -91,12 +99,22 @@ public class LinkPersonCommunityService {
   }
 
   public Collection<Person> getPersonsFromCommunityAndListTypes(Community community,
-      List<LinkPersonCommunityType> types) {
+      List<LinkPersonCommunityType> types)
+  {
 
     Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
         community, types);
 
-    return linkPersonCommunities.stream().map(LinkPersonCommunity::getPerson).toList();
+    return linkPersonCommunities.stream()
+        .map(LinkPersonCommunity::getPerson)
+        .toList();
   }
 
+  public Collection<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
+      Community community, List<LinkPersonCommunityType> types)
+  {
+
+    return linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
+        community, types);
+  }
 }
