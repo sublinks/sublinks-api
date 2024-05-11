@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +24,10 @@ public class SlurFilterService {
   @Transactional
   public void updateOrCreateLemmySlur(String regex) {
 
-    SlurFilter slurFilter = slurFilterRepository.findById(1L).orElse(null);
+    SlurFilter slurFilter = slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))
+        .stream()
+        .findFirst()
+        .orElse(null);
     if (slurFilter == null) {
       slurFilter = SlurFilter.builder()
           .slurRegex(regex)
@@ -36,7 +41,10 @@ public class SlurFilterService {
 
   public SlurFilter getLemmySlurFilter() {
 
-    SlurFilter slurFilter = slurFilterRepository.findById(1L).orElse(null);
+    SlurFilter slurFilter = slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))
+        .stream()
+        .findFirst()
+        .orElse(null);
     if (slurFilter == null) {
       slurFilter = SlurFilter.builder().slurRegex("").slurActionType(SlurActionType.BLOCK).build();
       slurFilterRepository.save(slurFilter);
