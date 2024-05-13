@@ -31,6 +31,7 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
@@ -86,6 +87,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PrivateMessageService privateMessageService;
   private final PrivateMessageReportService privateMessageReportService;
   private final RoleService roleService;
+  private final PersonService personService;
 
   @Operation(summary = "Ban a person from your site.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
@@ -106,6 +108,16 @@ public class UserModActionsController extends AbstractLemmyApiController {
     if (banPersonForm.ban()) {
       personToBan.setRole(
           roleService.getBannedRole(() -> new RuntimeException("No Banned role found.")));
+      if (banPersonForm.expires() != null) {
+//        if (banPersonForm.expires() < System.currentTimeMillis() / 1000) {
+//          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "expires_in_past");
+//        }
+        try {
+          personToBan.setRoleExpireAt(new Date(banPersonForm.expires() * 1000L));
+        } catch (Exception e) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "invalid_date");
+        }
+      }
       if (banPersonForm.remove_data()) {
         // Resolve all reports by content of the user
         postReportService.resolveAllReportsByPerson(personToBan, person);
@@ -120,11 +132,12 @@ public class UserModActionsController extends AbstractLemmyApiController {
       // Restore all posts and comments by the user previously removed
       postService.removeAllPostsFromUser(personToBan, false);
       commentService.removeAllCommentsFromUser(personToBan, false);
-      personToBan.setRole(
-          roleService.getDefaultRegisteredRole(
-              () -> new RuntimeException("No Registered role found."))
-      );
+      personToBan.setRole(roleService.getDefaultRegisteredRole(
+          () -> new RuntimeException("No Registered role found.")));
+      personToBan.setRoleExpireAt(null);
     }
+
+    personService.updatePerson(personToBan);
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
@@ -139,10 +152,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return BanPersonResponse.builder()
-        .banned(banPersonForm.ban())
-        .person_view(lemmyPersonService.getPersonView(personToBan))
-        .build();
+    return BanPersonResponse.builder().banned(banPersonForm.ban()).person_view(
+        lemmyPersonService.getPersonView(personToBan)).build();
   }
 
   @Operation(summary = "Block a person.")
@@ -183,10 +194,9 @@ public class UserModActionsController extends AbstractLemmyApiController {
           .orElseThrow(
               () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "coomunity_not_found"));
 
-      final boolean isModOfCommunity =
-          linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.moderator)
-              || linkPersonCommunityService.hasLink(person, community,
-              LinkPersonCommunityType.owner);
+      final boolean isModOfCommunity = linkPersonCommunityService.hasLink(person, community,
+          LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
+          community, LinkPersonCommunityType.owner);
 
       if (!isModOfCommunity) {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -246,10 +256,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_leave_last_admin");
     }
 
-    person.setRole(
-        roleService.getDefaultRegisteredRole(
-            () -> new RuntimeException("Now Registered role found."))
-    );
+    person.setRole(roleService.getDefaultRegisteredRole(
+        () -> new RuntimeException("Now Registered role found.")));
 
     // Create Moderation Log
     ModerationLog moderationLog = ModerationLog.builder()
@@ -272,10 +280,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
         .custom_emojis(lemmySiteService.customEmojis())
-        .admins(roleService.getAdmins()
-            .stream()
-            .map(lemmyPersonService::getPersonView)
-            .toList())
+        .admins(roleService.getAdmins().stream().map(lemmyPersonService::getPersonView).toList())
         .build();
   }
 }
