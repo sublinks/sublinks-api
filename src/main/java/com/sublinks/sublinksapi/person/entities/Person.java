@@ -65,11 +65,7 @@ public class Person implements UserDetails, Principal {
   Set<LinkPersonPost> linkPersonPost;
 
   @ManyToOne
-  @JoinTable(
-      name = "link_person_instances",
-      joinColumns = @JoinColumn(name = "person_id"),
-      inverseJoinColumns = @JoinColumn(name = "instance_id")
-  )
+  @JoinTable(name = "link_person_instances", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "instance_id"))
   private Instance instance;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -171,7 +167,6 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = false, name = "default_listing_type")
   @Enumerated(EnumType.STRING)
-
   private ListingType defaultListingType;
 
   @Column(nullable = false, name = "default_sort_type")
@@ -181,7 +176,6 @@ public class Person implements UserDetails, Principal {
 
   @Column(nullable = false, name = "post_listing_type")
   @Enumerated(EnumType.STRING)
-
   private PostListingMode postListingType;
 
   @Column(nullable = false, name = "is_infinite_scroll")
@@ -238,6 +232,9 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = true, name = "totp_verified_secret")
   private String totpVerifiedSecret;
 
+  @Column(nullable = true, name = "role_expire_at")
+  private Date roleExpireAt;
+
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
@@ -253,6 +250,11 @@ public class Person implements UserDetails, Principal {
     }
 
     return RolePermissionService.isBanned(getRole());
+  }
+
+  public boolean isRoleExpired() {
+
+    return roleExpireAt != null && roleExpireAt.before(new Date());
   }
 
   public boolean isAdmin() {
