@@ -14,6 +14,7 @@ import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +35,7 @@ public class SublinksCommunityService {
   private final RolePermissionService rolePermissionService;
   private final InstanceRepository instanceRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final PersonRepository personRepository;
 
   public CommunityResponse createCommunity(CreateCommunity createCommunity, Person person) {
 
@@ -134,9 +136,80 @@ public class SublinksCommunityService {
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
     return linkPersonCommunityService.getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
-            community,
-            List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
+            community, List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
         .stream()
         .toList();
+  }
+
+  /**
+   * Ban a person from a community.
+   *
+   * @param key       the community key
+   * @param personKey the person key
+   * @param person    the person making the request
+   * @return the banned person
+   * @throws ResponseStatusException if the community or person is not found, or if the person is
+   *                                 not authorized to ban (details in the exception message)
+   */
+  public Person banPerson(String key, String personKey, Person person) {
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    final Person personToBan = personRepository.findOneByNameIgnoreCase(personKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    if (linkPersonCommunityService.hasAnyLinkOrAdmin(personToBan, community,
+        List.of(LinkPersonCommunityType.banned))) {
+      return personToBan;
+    }
+
+    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_person");
+    }
+
+    linkPersonCommunityService.removeAnyLink(personToBan, community,
+        List.of(LinkPersonCommunityType.owner, LinkPersonCommunityType.moderator,
+            LinkPersonCommunityType.follower, LinkPersonCommunityType.pending_follow));
+
+    linkPersonCommunityService.addLink(personToBan, community, LinkPersonCommunityType.banned);
+
+    return personToBan;
+  }
+
+  /**
+   * Unban a person from a community.
+   *
+   * @param key       the community key
+   * @param personKey the person key
+   * @param person    the person making the request
+   * @return the unbanned person
+   * @throws ResponseStatusException if the community or person is not found, or if the person is
+   *                                 not authorized to unban (details in the exception message)
+   */
+  public Person unbanPerson(String key, String personKey, Person person) {
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    final Person personToUnban = personRepository.findOneByNameIgnoreCase(personKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(personToUnban, community,
+        List.of(LinkPersonCommunityType.banned))) {
+      return personToUnban;
+    }
+
+    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_unban_person");
+    }
+
+    linkPersonCommunityService.removeLink(personToUnban, community, LinkPersonCommunityType.banned);
+
+    return personToUnban;
   }
 }

@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -68,7 +69,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_add_moderator");
     }
 
-    final Person newModerator = personRepository.findOneByName(personKey)
+    final Person newModerator = personRepository.findOneByNameIgnoreCase(personKey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
     if (linkPersonCommunityService.hasAnyLinkOrAdmin(newModerator, community,
@@ -97,7 +98,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
-    final Person person = personRepository.findOneByName(personKey)
+    final Person person = personRepository.findOneByNameIgnoreCase(personKey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
     if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
@@ -118,5 +119,51 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   @GetMapping("/ban/{personKey}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PersonResponse ban(@PathVariable final String key, @PathVariable final String personKey,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_user");
+    }
+
+    final Person bannedPerson = sublinksCommunityService.banPerson(key, personKey, person);
+
+    // @todo: Modlog
+
+    return conversionService.convert(bannedPerson, PersonResponse.class);
+  }
+
+  @Operation(summary = "Unban a user from a community")
+  @GetMapping("/unban/{personKey}")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PersonResponse unban(@PathVariable final String key, @PathVariable final String personKey,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_unban_user");
+    }
+
+    final Person unbannedPerson = sublinksCommunityService.unbanPerson(key, personKey, person);
+
+    // @todo: Modlog
+
+    return conversionService.convert(unbannedPerson, PersonResponse.class);
+  }
 }

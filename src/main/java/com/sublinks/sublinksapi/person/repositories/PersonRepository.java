@@ -22,8 +22,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
   HashSet<Person> findAllByRole(Role role);
 
-  Optional<Person> findOneByName(String name);
-
   @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)", countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)", nativeQuery = true)
   List<Person> findAllByNameAndBiography(@Param("keyword") String keyword, Pageable pageable);
 }

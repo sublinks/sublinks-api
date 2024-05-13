@@ -86,6 +86,25 @@ public class LinkPersonCommunityService {
     linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
   }
 
+  public void removeAnyLink(Person person, Community community, List<LinkPersonCommunityType> types)
+  {
+
+    final List<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkTypeIsIn(
+        community, person, types);
+    if (linkPersonCommunity.isEmpty()) {
+      return;
+    }
+
+    linkPersonCommunity.forEach(l -> {
+      person.getLinkPersonCommunity()
+          .removeIf(link -> Objects.equals(link.getId(), l.getId()));
+      community.getLinkPersonCommunity()
+          .removeIf(link -> Objects.equals(link.getId(), l.getId()));
+      linkPersonCommunityRepository.delete(l);
+      linkPersonCommunityDeletedPublisher.publish(l);
+    });
+  }
+
   public Collection<Community> getPersonLinkByType(Person person, LinkPersonCommunityType type) {
 
     Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository.getLinkPersonCommunitiesByPersonAndLinkType(
