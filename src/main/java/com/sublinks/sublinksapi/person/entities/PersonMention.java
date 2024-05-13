@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 
 @Getter
 @Setter
@@ -47,7 +48,7 @@ public class PersonMention {
   @Column(name = "is_read")
   private boolean isRead;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "created_at")
   private Date createdAt;
 }

@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -56,12 +57,13 @@ public class PostLike {
   @Column(nullable = false)
   private int score;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
   
-  @Column(updatable = false, nullable = false, name = "updated_at")
+  @UpdateTimestamp(source = SourceType.DB)
+  @Column(updatable = false, name = "updated_at")
   private Date updatedAt;
 
   @Override
