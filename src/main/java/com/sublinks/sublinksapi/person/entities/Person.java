@@ -41,6 +41,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.security.core.GrantedAuthority;
@@ -238,12 +239,13 @@ public class Person implements UserDetails, Principal {
   @Column(nullable = true, name = "totp_verified_secret")
   private String totpVerifiedSecret;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
   
-  @Column(updatable = false, nullable = false, name = "updated_at")
+  @UpdateTimestamp(source = SourceType.DB)
+  @Column(updatable = false, name = "updated_at")
   private Date updatedAt;
 
   public boolean isBanned() {
