@@ -28,6 +28,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
@@ -106,11 +107,11 @@ public class Instance {
   @Column(nullable = true, name = "private_key")
   private String privateKey;
 
-  @CreationTimestamp
-  @Column(nullable = false, name = "created_at")
+  @CreationTimestamp(source = SourceType.DB)
+  @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
-  @Column(nullable = false, name = "updated_at")
+  @UpdateTimestamp(source = SourceType.DB)
+  @Column(updatable = false, name = "updated_at")
   private Date updatedAt;
 }

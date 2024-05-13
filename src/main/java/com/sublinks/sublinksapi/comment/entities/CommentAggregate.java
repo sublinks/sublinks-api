@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.comment.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.proxy.HibernateProxy;
 import java.util.Date;
 import java.util.Objects;
@@ -48,7 +49,7 @@ public class CommentAggregate {
   @Column(nullable = false, name = "controversy_rank")
   private int controversyRank;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
