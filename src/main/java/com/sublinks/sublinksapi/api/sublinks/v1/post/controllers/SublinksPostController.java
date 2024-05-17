@@ -15,13 +15,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/post")
 @Tag(name = "Post", description = "Post API")
 public class SublinksPostController extends AbstractSublinksApiController {
- @Operation(summary = "Get a list of posts")
+
+  @Operation(summary = "Get a list of posts")
   @GetMapping
   @ApiResponses(value = {
       // TODO: add responses
   })
   public void index() {
     // TODO: implement
+    // @todo: implement cursor based pagination
   }
 
   @Operation(summary = "Get a specific post")

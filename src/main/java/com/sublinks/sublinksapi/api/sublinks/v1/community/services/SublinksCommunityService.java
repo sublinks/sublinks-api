@@ -37,6 +37,15 @@ public class SublinksCommunityService {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PersonRepository personRepository;
 
+  /**
+   * Creates a new community based on the provided community data and person.
+   *
+   * @param createCommunity The data for the new community.
+   * @param person          The person creating the community.
+   * @return The response containing the newly created community.
+   * @throws ResponseStatusException If the community slug already exists or if the person is not
+   *                                 authorized to create a community.
+   */
   public CommunityResponse createCommunity(CreateCommunity createCommunity, Person person) {
 
     final Optional<Community> oldCommunity = communityRepository.findCommunityByTitleSlug(
@@ -66,6 +75,15 @@ public class SublinksCommunityService {
     return conversionService.convert(community, CommunityResponse.class);
   }
 
+  /**
+   * Updates a community based on the provided key, update form, and person.
+   *
+   * @param key                The key of the community to update.
+   * @param updateCommunityForm The update form containing the new community data.
+   * @param person             The person performing the update.
+   * @return The updated community response.
+   * @throws ResponseStatusException If the community is not found, or the person is not authorized to perform the update.
+   */
   public CommunityResponse updateCommunity(String key, UpdateCommunity updateCommunityForm,
       Person person)
   {
@@ -129,6 +147,13 @@ public class SublinksCommunityService {
     return conversionService.convert(community, CommunityResponse.class);
   }
 
+  /**
+   * Retrieves the moderators of a community.
+   *
+   * @param key The key of the community.
+   * @return The list of moderators in the community.
+   * @throws ResponseStatusException If the community is not found.
+   */
   public List<LinkPersonCommunity> getCommunityModerators(String key) {
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)

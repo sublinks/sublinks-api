@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.community.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
@@ -120,7 +121,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse ban(@PathVariable final String key, @PathVariable final String personKey,
-      final SublinksJwtPerson sublinksJwtPerson)
+      CommunityBanPerson communityBanPersonForm, final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
@@ -146,7 +147,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse unban(@PathVariable final String key, @PathVariable final String personKey,
-      final SublinksJwtPerson sublinksJwtPerson)
+      CommunityBanPerson communityBanPersonForm, final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);

@@ -47,8 +47,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
   @Operation(summary = "Get a list of communities")
   @GetMapping
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  @ApiResponses(
+      value = {@ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public List<CommunityResponse> index(
       @RequestParam(required = false) final Optional<IndexCommunity> indexCommunityParam,
       final SublinksJwtPerson sublinksJwtPerson)
@@ -90,7 +90,9 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
       }
     }
 
-    boolean showNsfw = indexCommunityForm.showNsfw() != null && indexCommunityForm.showNsfw();
+    boolean showNsfw = (indexCommunityForm.showNsfw() != null && indexCommunityForm.showNsfw()) || (
+        person.isPresent() && person.get()
+            .isShowNsfw());
 
     final CommunitySearchCriteria.CommunitySearchCriteriaBuilder criteria = CommunitySearchCriteria.builder()
         .perPage(indexCommunityForm.limit())
@@ -118,8 +120,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
   @Operation(summary = "Get a specific community")
   @GetMapping("/{key}")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  @ApiResponses(
+      value = {@ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse show(@PathVariable final String key) {
 
     try {
@@ -134,8 +136,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
   @Operation(summary = "Create a new community")
   @PostMapping
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  @ApiResponses(
+      value = {@ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse create(@RequestBody @Valid final CreateCommunity createCommunity,
       final SublinksJwtPerson sublinksJwtPerson)
   {
@@ -147,8 +149,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
   @Operation(summary = "Update an community")
   @PostMapping("/{key}")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  @ApiResponses(
+      value = {@ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse update(@PathVariable String key,
       @RequestBody @Valid UpdateCommunity updateCommunityForm, final SublinksJwtPerson principal)
   {
@@ -160,8 +162,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
 
   @Operation(summary = "Purge an community")
   @DeleteMapping("/{key}")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  @ApiResponses(
+      value = {@ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public void delete(@PathVariable String key) {
     // @TODO: implement
   }
