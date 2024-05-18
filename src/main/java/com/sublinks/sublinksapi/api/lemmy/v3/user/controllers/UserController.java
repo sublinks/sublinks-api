@@ -63,6 +63,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -111,8 +112,8 @@ public class UserController extends AbstractLemmyApiController {
 
     if (getPersonDetailsForm.person_id() != null) {
       userId = (long) getPersonDetailsForm.person_id();
-      person = personRepository.findById(userId)
-          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+      person = personRepository.findById(userId).orElseThrow(
+          () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
     } else if (getPersonDetailsForm.username() != null) {
       person = personRepository.findOneByNameIgnoreCase(getPersonDetailsForm.username())
           .orElseThrow(
@@ -151,8 +152,7 @@ public class UserController extends AbstractLemmyApiController {
 
     final PersonMentionSearchCriteria criteria = PersonMentionSearchCriteria.builder()
         .sort(getPersonMentionsForm.sort())
-        .unreadOnly(getPersonMentionsForm.unread_only()
-            .orElse(false))
+        .unreadOnly(getPersonMentionsForm.unread_only().orElse(false))
         .page(page)
         .perPage(perPage)
         .build();
@@ -165,9 +165,7 @@ public class UserController extends AbstractLemmyApiController {
     personMentions.forEach(personMention -> personMentionViews.add(
         lemmyPersonMentionService.getPersonMentionView(personMention)));
 
-    return GetPersonMentionsResponse.builder()
-        .mentions(personMentionViews)
-        .build();
+    return GetPersonMentionsResponse.builder().mentions(personMentionViews).build();
   }
 
   @Operation(summary = "Mark a person mention as read.")
@@ -183,9 +181,8 @@ public class UserController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final PersonMention personMention = personMentionRepository.findById(
-            (long) markPersonMentionAsReadForm.person_mention_id())
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
+        (long) markPersonMentionAsReadForm.person_mention_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
 
     personMention.setRead(markPersonMentionAsReadForm.read());
 
@@ -194,9 +191,7 @@ public class UserController extends AbstractLemmyApiController {
     final PersonMentionView personMentionView = conversionService.convert(personMention,
         PersonMentionView.class);
 
-    return PersonMentionResponse.builder()
-        .person_mention_view(personMentionView)
-        .build();
+    return PersonMentionResponse.builder().person_mention_view(personMentionView).build();
   }
 
   @Operation(summary = "Get comment replies.")
@@ -216,8 +211,7 @@ public class UserController extends AbstractLemmyApiController {
     final List<CommentReply> commentReplies = commentReplyRepository.allCommentReplysBySearchCriteria(
         com.sublinks.sublinksapi.comment.models.CommentReplySearchCriteria.builder()
             .sortType(getReplies.sort())
-            .unreadOnly(getReplies.unread_only()
-                .orElse(false))
+            .unreadOnly(getReplies.unread_only().orElse(false))
             .page(page)
             .perPage(perPage)
             .build());
@@ -227,9 +221,7 @@ public class UserController extends AbstractLemmyApiController {
     commentReplies.forEach(commentReply -> commentReplyViews.add(
         lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
 
-    return GetRepliesResponse.builder()
-        .replies(commentReplyViews)
-        .build();
+    return GetRepliesResponse.builder().replies(commentReplyViews).build();
   }
 
   @Operation(summary = "Get a list of banned users.")
@@ -243,14 +235,10 @@ public class UserController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_READ,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
-    final Collection<PersonView> bannedPersons = roleService.getBannedUsers()
-        .stream()
-        .map(lemmyPersonService::getPersonView)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    final Collection<PersonView> bannedPersons = roleService.getBannedUsers().stream().map(
+        lemmyPersonService::getPersonView).collect(Collectors.toCollection(LinkedHashSet::new));
 
-    return BannedPersonsResponse.builder()
-        .banned(bannedPersons)
-        .build();
+    return BannedPersonsResponse.builder().banned(bannedPersons).build();
   }
 
   @Operation(summary = "Mark all replies as read.")
@@ -269,13 +257,10 @@ public class UserController extends AbstractLemmyApiController {
     final MarkAllAsReadResponse readReplies = privateMessageService.markAllAsRead(person);
 
     final List<CommentReplyView> commentReplyViews = new ArrayList<>();
-    readReplies.commentReplies()
-        .forEach(commentReply -> commentReplyViews.add(
-            lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
+    readReplies.commentReplies().forEach(commentReply -> commentReplyViews.add(
+        lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
 
-    return GetRepliesResponse.builder()
-        .replies(commentReplyViews)
-        .build();
+    return GetRepliesResponse.builder().replies(commentReplyViews).build();
   }
 
   @Operation(summary = "Save your user settings.")
@@ -353,11 +338,12 @@ public class UserController extends AbstractLemmyApiController {
       person.setMatrixUserId(saveUserSettingsForm.matrix_user_id());
     }
     if (saveUserSettingsForm.discussion_languages() != null) {
-      final List<Language> languages = localInstanceContext.languageRepository()
-          .findAllById(saveUserSettingsForm.discussion_languages()
-              .stream()
-              .map(Long::parseLong)
-              .collect(Collectors.toList()));
+      final List<Language> languages = new ArrayList<>();
+      for (String languageCode : saveUserSettingsForm.discussion_languages()) {
+        final Optional<Language> language = localInstanceContext.languageRepository().findById(
+            Long.valueOf(languageCode));
+        language.ifPresent(languages::add);
+      }
       person.setLanguages(languages);
     }
     if (saveUserSettingsForm.banner() != null) {
@@ -552,9 +538,8 @@ public class UserController extends AbstractLemmyApiController {
     // @todo Add Blocklist for communities, User and Instnaces
 
     List<String> blocked_community = new ArrayList<>();
-    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked)
-        .forEach(
-            linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
+    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked).forEach(
+        linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
 
     builder.blocked_communities(blocked_community);
     // @todo Add Blocklist for User and Instances
