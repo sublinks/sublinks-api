@@ -47,8 +47,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public List<CommunityResponse> index(
       @RequestParam(required = false) final Optional<IndexCommunity> indexCommunityParam,
-      final SublinksJwtPerson sublinksJwtPerson)
-  {
+      final SublinksJwtPerson sublinksJwtPerson) {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
@@ -63,14 +62,10 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse show(@PathVariable final String key) {
 
-    try {
-      return communityRepository.findCommunityByTitleSlug(key)
-          .map(comm -> conversionService.convert(comm, CommunityResponse.class))
-          .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found"));
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found");
-    }
+    return communityRepository.findCommunityByTitleSlug(key)
+        .map(comm -> conversionService.convert(comm, CommunityResponse.class))
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found"));
   }
 
   @Operation(summary = "Create a new community")
@@ -78,8 +73,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse create(@RequestBody @Valid final CreateCommunity createCommunity,
-      final SublinksJwtPerson sublinksJwtPerson)
-  {
+      final SublinksJwtPerson sublinksJwtPerson) {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
@@ -90,9 +84,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @PostMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityResponse update(@PathVariable String key,
-      @RequestBody @Valid UpdateCommunity updateCommunityForm, final SublinksJwtPerson principal)
-  {
+  public CommunityResponse update(@PathVariable final String key,
+      @RequestBody @Valid UpdateCommunity updateCommunityForm, final SublinksJwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

@@ -25,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/community/{key}/aggregate")
-@Tag(name = "Community", description = "Community Aggregation API")
+@Tag(name = "Community Aggregation", description = "Community Aggregation API")
 public class SublinksCommunityAggregationController extends AbstractSublinksApiController {
 
   private final CommunityAggregateRepository communityAggregateRepository;
@@ -37,8 +37,7 @@ public class SublinksCommunityAggregationController extends AbstractSublinksApiC
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityAggregatesResponse show(@PathVariable final String key,
-      final SublinksJwtPerson sublinksJwtPerson)
-  {
+      final SublinksJwtPerson sublinksJwtPerson) {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 

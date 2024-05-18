@@ -7,6 +7,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityRespon
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityDelete;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityRemove;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.ActorIdUtils;
@@ -50,8 +51,7 @@ public class SublinksCommunityService {
    * @param person              The person requesting the community responses.
    * @return The list of CommunityResponse objects that match the search criteria.
    */
-  public List<CommunityResponse> index(IndexCommunity indexCommunityParam, Person person)
-  {
+  public List<CommunityResponse> index(IndexCommunity indexCommunityParam, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.READ_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -161,21 +161,17 @@ public class SublinksCommunityService {
    *                                 to perform the update.
    */
   public CommunityResponse updateCommunity(String key, UpdateCommunity updateCommunityForm,
-      Person person)
-  {
+      Person person) {
 
     String domain = ActorIdUtils.getActorDomain(key);
     if (domain != null && domain.equals(localInstanceContext.instance()
         .getDomain())) {
       key = ActorIdUtils.getActorId(key);
     }
-    Optional<Community> foundCommunity = communityRepository.findCommunityByTitleSlug(key);
+    Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
-    if (foundCommunity.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found");
-    }
-
-    Community community = foundCommunity.get();
     if (!(linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
         && rolePermissionService.isPermitted(person,
@@ -229,20 +225,18 @@ public class SublinksCommunityService {
   }
 
   /**
-   * Bans or unbans a person in a community.
+   * Bans a person from a community.
    *
-   * @param key       The key of the community.
-   * @param personKey The key of the person to ban or unban.
-   * @param person    The person performing the ban or unban.
-   * @param ban       Determines whether to ban or unban the person. True to ban, false to unban.
-   * @return The banned or unbanned person.
-   * @throws ResponseStatusException If the community is not found, the person is not found, the
-   *                                 person is not authorized to ban or unban, or the person is
-   *                                 already banned and attempting to ban again.
+   * @param key                    The key of the community.
+   * @param personKey              The key of the person to ban.
+   * @param person                 The person performing the ban action.
+   * @param communityBanPersonForm The form containing ban information.
+   * @return The banned person.
+   * @throws ResponseStatusException If the community or person is not found, or if the person is
+   *                                 not authorized to perform the ban action.
    */
   public Person banPerson(String key, String personKey, Person person,
-      CommunityBanPerson communityBanPersonForm)
-  {
+      CommunityBanPerson communityBanPersonForm) {
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)
         .orElseThrow(
@@ -252,8 +246,7 @@ public class SublinksCommunityService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
     if (communityBanPersonForm.ban() && linkPersonCommunityService.hasAnyLinkOrAdmin(personToBan,
-        community,
-        List.of(LinkPersonCommunityType.banned))) {
+        community, List.of(LinkPersonCommunityType.banned))) {
       return personToBan;
     }
 
@@ -296,19 +289,47 @@ public class SublinksCommunityService {
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
-    if (!(linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
-        List.of(LinkPersonCommunityType.owner)) && rolePermissionService.isPermitted(person,
-        RolePermissionCommunityTypes.MODERATOR_REMOVE_COMMUNITY))
-        && !rolePermissionService.isPermitted(person,
+    if (!rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.ADMIN_REMOVE_COMMUNITY)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_remove_community");
     }
 
     community.setRemoved(removeComment.remove() != null ? removeComment.remove() : true);
 
+    communityService.updateCommunity(community);
     // @todo: modlog
 
+    return conversionService.convert(community, CommunityResponse.class);
+  }
+
+  /**
+   * Deletes a community based on the provided key, delete form, and person.
+   *
+   * @param key                 The key of the community to delete.
+   * @param communityDeleteForm The delete form specifying the reason for deletion and whether to
+   *                            remove the community.
+   * @param person              The person performing the deletion.
+   * @return The response containing the deleted community.
+   * @throws ResponseStatusException If the community is not found, or the person is not authorized
+   *                                 to delete the community.
+   */
+  public CommunityResponse delete(String key, CommunityDelete communityDeleteForm, Person person) {
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    if (!(linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
+        List.of(LinkPersonCommunityType.owner)) && rolePermissionService.isPermitted(person,
+        RolePermissionCommunityTypes.MODERATOR_REMOVE_COMMUNITY))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_remove_community");
+    }
+
+    community.setDeleted(
+        communityDeleteForm.remove() != null ? communityDeleteForm.remove() : true);
+
     communityService.updateCommunity(community);
+    // @todo: modlog
 
     return conversionService.convert(community, CommunityResponse.class);
   }
