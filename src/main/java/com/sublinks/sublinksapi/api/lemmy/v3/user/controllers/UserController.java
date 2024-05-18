@@ -112,9 +112,8 @@ public class UserController extends AbstractLemmyApiController {
 
     if (getPersonDetailsForm.person_id() != null) {
       userId = (long) getPersonDetailsForm.person_id();
-      person = personRepository.findById(userId)
-          .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+      person = personRepository.findById(userId).orElseThrow(
+          () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
     } else if (getPersonDetailsForm.username() != null) {
       person = personRepository.findOneByNameIgnoreCase(getPersonDetailsForm.username())
           .orElseThrow(
@@ -182,9 +181,8 @@ public class UserController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     final PersonMention personMention = personMentionRepository.findById(
-            (long) markPersonMentionAsReadForm.person_mention_id())
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
+        (long) markPersonMentionAsReadForm.person_mention_id()).orElseThrow(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_mention_not_found"));
 
     personMention.setRead(markPersonMentionAsReadForm.read());
 
@@ -237,10 +235,8 @@ public class UserController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_READ,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
-    final Collection<PersonView> bannedPersons = roleService.getBannedUsers()
-        .stream()
-        .map(lemmyPersonService::getPersonView)
-        .collect(Collectors.toCollection(LinkedHashSet::new));
+    final Collection<PersonView> bannedPersons = roleService.getBannedUsers().stream().map(
+        lemmyPersonService::getPersonView).collect(Collectors.toCollection(LinkedHashSet::new));
 
     return BannedPersonsResponse.builder().banned(bannedPersons).build();
   }
@@ -261,9 +257,8 @@ public class UserController extends AbstractLemmyApiController {
     final MarkAllAsReadResponse readReplies = privateMessageService.markAllAsRead(person);
 
     final List<CommentReplyView> commentReplyViews = new ArrayList<>();
-    readReplies.commentReplies()
-        .forEach(commentReply -> commentReplyViews.add(
-            lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
+    readReplies.commentReplies().forEach(commentReply -> commentReplyViews.add(
+        lemmyCommentReplyService.createCommentReplyView(commentReply, person)));
 
     return GetRepliesResponse.builder().replies(commentReplyViews).build();
   }
@@ -282,40 +277,90 @@ public class UserController extends AbstractLemmyApiController {
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     // @todo expand form validation to check for email formatting, etc.
-    person.setShowNsfw(
-        saveUserSettingsForm.show_nsfw() != null && saveUserSettingsForm.show_nsfw());
-    person.setBlurNsfw(
-        saveUserSettingsForm.blur_nsfw() != null && saveUserSettingsForm.blur_nsfw());
-    person.setAutoExpanding(
-        saveUserSettingsForm.auto_expand() != null && saveUserSettingsForm.auto_expand());
-    person.setCollapseBotComments(saveUserSettingsForm.collapse_bot_comments() != null
-        && saveUserSettingsForm.collapse_bot_comments());
-    person.setKeyboardNavigation(saveUserSettingsForm.enable_keyboard_navigation() != null
-        && saveUserSettingsForm.enable_keyboard_navigation());
-    person.setAnimatedImages(saveUserSettingsForm.enable_animated_images() != null
-        && saveUserSettingsForm.enable_animated_images());
-    person.setShowBotAccounts(saveUserSettingsForm.show_bot_accounts() != null
-        && saveUserSettingsForm.show_bot_accounts());
-    person.setShowScores(
-        saveUserSettingsForm.show_scores() != null && saveUserSettingsForm.show_scores());
-    person.setDefaultTheme(
-        saveUserSettingsForm.theme() != null ? saveUserSettingsForm.theme() : "");
-    person.setDefaultSortType(
-        conversionService.convert(saveUserSettingsForm.default_sort_type(), SortType.class));
-    person.setDefaultListingType(
-        conversionService.convert(saveUserSettingsForm.default_listing_type(), ListingType.class));
-    person.setInterfaceLanguage(saveUserSettingsForm.interface_language() != null
-        ? saveUserSettingsForm.interface_language() : "");
-    person.setAvatarImageUrl(saveUserSettingsForm.avatar());
-    person.setBannerImageUrl(saveUserSettingsForm.banner());
+    if (saveUserSettingsForm.show_nsfw() != null) {
+      person.setShowNsfw(saveUserSettingsForm.show_nsfw());
+    }
+    if (saveUserSettingsForm.blur_nsfw() != null) {
+      person.setBlurNsfw(saveUserSettingsForm.blur_nsfw());
+    }
+    if (saveUserSettingsForm.auto_expand() != null) {
+      person.setAutoExpanding(saveUserSettingsForm.auto_expand());
+    }
+    if (saveUserSettingsForm.collapse_bot_comments() != null) {
+      person.setCollapseBotComments(saveUserSettingsForm.collapse_bot_comments());
+    }
+    if (saveUserSettingsForm.enable_keyboard_navigation() != null) {
+      person.setKeyboardNavigation(saveUserSettingsForm.enable_keyboard_navigation());
+    }
+    if (saveUserSettingsForm.enable_animated_images() != null) {
+      person.setAnimatedImages(saveUserSettingsForm.enable_animated_images());
+    }
+    if (saveUserSettingsForm.show_bot_accounts() != null) {
+      person.setShowBotAccounts(saveUserSettingsForm.show_bot_accounts());
+    }
+    if (saveUserSettingsForm.show_scores() != null) {
+      person.setShowScores(saveUserSettingsForm.show_scores());
+    }
+    if (saveUserSettingsForm.theme() != null) {
+      person.setDefaultTheme(saveUserSettingsForm.theme());
+    }
+    if (saveUserSettingsForm.default_sort_type() != null) {
+      person.setDefaultSortType(
+          conversionService.convert(saveUserSettingsForm.default_sort_type(), SortType.class));
+    }
+    if (saveUserSettingsForm.default_listing_type() != null) {
+      person.setDefaultListingType(
+          conversionService.convert(saveUserSettingsForm.default_listing_type(),
+              ListingType.class));
+    }
+    if (saveUserSettingsForm.interface_language() != null) {
+      person.setInterfaceLanguage(saveUserSettingsForm.interface_language());
+    }
+    if (saveUserSettingsForm.show_read_posts() != null) {
+      person.setShowReadPosts(saveUserSettingsForm.show_read_posts());
+    }
+    if (saveUserSettingsForm.email() != null) {
+      person.setEmail(saveUserSettingsForm.email());
+    }
+    if (saveUserSettingsForm.open_links_in_new_tab() != null) {
+      person.setOpenLinksInNewTab(saveUserSettingsForm.open_links_in_new_tab());
+    }
+    if (saveUserSettingsForm.show_avatars() != null) {
+      person.setShowAvatars(saveUserSettingsForm.show_avatars());
+    }
+    if (saveUserSettingsForm.send_notifications_to_email() != null) {
+      person.setSendNotificationsToEmail(saveUserSettingsForm.send_notifications_to_email());
+    }
+    if (saveUserSettingsForm.bot_account() != null) {
+      person.setBotAccount(saveUserSettingsForm.bot_account());
+    }
+    if (saveUserSettingsForm.matrix_user_id() != null) {
+      person.setMatrixUserId(saveUserSettingsForm.matrix_user_id());
+    }
+    if (saveUserSettingsForm.discussion_languages() != null) {
+      final List<Language> languages = new ArrayList<>();
+      for (String languageCode : saveUserSettingsForm.discussion_languages()) {
+        final Optional<Language> language = localInstanceContext.languageRepository().findById(
+            Long.valueOf(languageCode));
+        language.ifPresent(languages::add);
+      }
+      person.setLanguages(languages);
+    }
+    if (saveUserSettingsForm.banner() != null) {
+      person.setBannerImageUrl(saveUserSettingsForm.banner());
+    }
+    if (saveUserSettingsForm.avatar() != null) {
+      person.setAvatarImageUrl(saveUserSettingsForm.avatar());
+    }
 
-    person.setEmail(saveUserSettingsForm.email()); // @todo verify email again?
     try {
       String bioFiltered = saveUserSettingsForm.bio() != null ? slurFilterService.censorText(
           saveUserSettingsForm.bio()) : "";
+
       String displayNameFiltered =
           saveUserSettingsForm.display_name() != null ? slurFilterService.censorText(
               saveUserSettingsForm.display_name()) : "";
+
       if (!Objects.equals(bioFiltered,
           saveUserSettingsForm.bio() != null ? saveUserSettingsForm.bio() : "") || !Objects.equals(
           displayNameFiltered,
@@ -328,30 +373,10 @@ public class UserController extends AbstractLemmyApiController {
     } catch (SlurFilterReportException | SlurFilterBlockedException e) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_blocked_by_slur_filter");
     }
-    // @todo matrix user
-    person.setShowAvatars(
-        saveUserSettingsForm.show_avatars() != null && saveUserSettingsForm.show_avatars());
-    person.setSendNotificationsToEmail(saveUserSettingsForm.send_notifications_to_email() != null
-        && saveUserSettingsForm.send_notifications_to_email());
-    person.setBotAccount(
-        saveUserSettingsForm.bot_account() != null && saveUserSettingsForm.bot_account());
-    person.setShowReadPosts(
-        saveUserSettingsForm.show_read_posts() != null && saveUserSettingsForm.show_read_posts());
-    person.setMatrixUserId(saveUserSettingsForm.matrix_user_id());
     // Not used anymore??
     //person.setShowNewPostNotifications(saveUserSettingsForm.show_new_post_notifs() != null
     //    && saveUserSettingsForm.show_new_post_notifs());
     // @todo generate_totp_2fa
-    person.setOpenLinksInNewTab(saveUserSettingsForm.open_links_in_new_tab() != null
-        && saveUserSettingsForm.open_links_in_new_tab());
-
-    final List<Language> languages = new ArrayList<>();
-    for (String languageCode : saveUserSettingsForm.discussion_languages()) {
-      final Optional<Language> language = localInstanceContext.languageRepository()
-          .findById(Long.valueOf(languageCode));
-      language.ifPresent(languages::add);
-    }
-    person.setLanguages(languages);
 
     personService.updatePerson(person);
 
@@ -407,44 +432,66 @@ public class UserController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    SuccessResponse.SuccessResponseBuilder builder = SuccessResponse.builder();
+    final SuccessResponse.SuccessResponseBuilder builder = SuccessResponse.builder();
 
     UserExportSettings settings = importSettingsForm.settings();
     try {
-      person.setShowAvatars(settings.show_avatars() != null && settings.show_avatars());
-      person.setShowNsfw(settings.show_nsfw() != null && settings.show_nsfw());
-      person.setBlurNsfw(settings.blur_nsfw() != null && settings.blur_nsfw());
-      person.setAutoExpanding(settings.auto_expand() != null && settings.auto_expand());
-      person.setCollapseBotComments(
-          settings.collapse_bot_comments() != null && settings.collapse_bot_comments());
-      person.setKeyboardNavigation(
-          settings.enable_keyboard_navigation() != null && settings.enable_keyboard_navigation());
-      person.setAnimatedImages(
-          settings.enable_animated_images() != null && settings.enable_animated_images());
-      person.setShowBotAccounts(
-          settings.show_bot_accounts() != null && settings.show_bot_accounts());
-      person.setShowScores(settings.show_scores() != null && settings.show_scores());
-      person.setDefaultTheme(settings.theme() != null ? settings.theme() : "");
-      try {
+      if (settings.show_avatars() != null) {
+        person.setShowAvatars(settings.show_avatars());
+      }
+      if (settings.show_nsfw() != null) {
+        person.setShowNsfw(settings.show_nsfw());
+      }
+      if (settings.blur_nsfw() != null) {
+        person.setBlurNsfw(settings.blur_nsfw());
+      }
+      if (settings.auto_expand() != null) {
+        person.setAutoExpanding(settings.auto_expand());
+      }
+      if (settings.collapse_bot_comments() != null) {
+        person.setCollapseBotComments(settings.collapse_bot_comments());
+      }
+      if (settings.enable_keyboard_navigation() != null) {
+        person.setKeyboardNavigation(settings.enable_keyboard_navigation());
+      }
+      if (settings.enable_animated_images() != null) {
+        person.setAnimatedImages(settings.enable_animated_images());
+      }
+      if (settings.show_bot_accounts() != null) {
+        person.setShowBotAccounts(settings.show_bot_accounts());
+      }
+      if (settings.show_scores() != null) {
+        person.setShowScores(settings.show_scores());
+      }
+      if (settings.theme() != null) {
+        person.setDefaultTheme(settings.theme());
+      }
+      if (settings.default_sort_type() != null) {
         person.setDefaultSortType(
             conversionService.convert(settings.default_sort_type(), SortType.class));
-      } catch (Exception e) {
-        System.out.println("Error converting default_sort_type");
       }
-      try {
+      if (settings.default_listing_type() != null) {
         person.setDefaultListingType(
             conversionService.convert(settings.default_listing_type(), ListingType.class));
-      } catch (Exception e) {
-        System.out.println("Error converting default_listing_type");
       }
-      person.setInterfaceLanguage(
-          settings.interface_language() != null ? settings.interface_language() : "");
-      person.setAvatarImageUrl(importSettingsForm.avatar());
-      person.setBannerImageUrl(importSettingsForm.banner());
-      person.setDisplayName(importSettingsForm.display_name());
-      person.setMatrixUserId(importSettingsForm.matrix_id());
-      person.setBiography(importSettingsForm.bio());
-
+      if (settings.interface_language() != null) {
+        person.setInterfaceLanguage(settings.interface_language());
+      }
+      if (settings.show_read_posts() != null) {
+        person.setShowReadPosts(settings.show_read_posts());
+      }
+      if (settings.email() != null) {
+        person.setEmail(settings.email());
+      }
+      if (settings.open_links_in_new_tab() != null) {
+        person.setOpenLinksInNewTab(settings.open_links_in_new_tab());
+      }
+      if (settings.send_notifications_to_email() != null) {
+        person.setSendNotificationsToEmail(settings.send_notifications_to_email());
+      }
+      if (settings.bot_account() != null) {
+        person.setBotAccount(settings.bot_account());
+      }
       builder.success(true);
 
       // @todo Add Blocklist for communities, User and Instnaces
@@ -491,9 +538,8 @@ public class UserController extends AbstractLemmyApiController {
     // @todo Add Blocklist for communities, User and Instnaces
 
     List<String> blocked_community = new ArrayList<>();
-    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked)
-        .forEach(
-            linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
+    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked).forEach(
+        linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
 
     builder.blocked_communities(blocked_community);
     // @todo Add Blocklist for User and Instances
@@ -513,5 +559,5 @@ public class UserController extends AbstractLemmyApiController {
 
     return builder.build();
   }
-
 }
+
