@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -32,7 +33,7 @@ public class SublinksCommentController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommentResponse index(final IndexComment indexCommentForm,
+  public List<CommentResponse> index(final IndexComment indexCommentForm,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
