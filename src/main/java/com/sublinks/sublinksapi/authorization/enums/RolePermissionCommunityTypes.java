@@ -5,6 +5,8 @@ public enum RolePermissionCommunityTypes implements RolePermissionInterface {
   // Person permissions
   READ_COMMUNITY("community", AuthorizeAction.READ),
   READ_COMMUNITIES("communities", AuthorizeAction.READ),
+  READ_COMMUNITY_MODERATORS("communities-moderator", AuthorizeAction.READ),
+  READ_COMMUNITY_AGGREGATION("communities-aggregation", AuthorizeAction.READ),
   CREATE_COMMUNITY("community", AuthorizeAction.CREATE),
   UPDATE_COMMUNITY("community", AuthorizeAction.UPDATE),
   DELETE_COMMUNITY("community", AuthorizeAction.DELETE),

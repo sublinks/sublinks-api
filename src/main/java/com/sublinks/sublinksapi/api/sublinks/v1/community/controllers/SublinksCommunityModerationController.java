@@ -6,6 +6,8 @@ import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.Comm
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -17,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -37,12 +40,23 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   private final CommunityRepository communityRepository;
   private final PersonRepository personRepository;
   private final ConversionService conversionService;
+  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Get moderators of the community")
   @GetMapping("/moderators")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<CommunityModeratorResponse> show(@PathVariable final String key) {
+  public List<CommunityModeratorResponse> show(@PathVariable final String key,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS, () -> {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+              "not_authorized_to_read_moderators");
+        });
 
     return sublinksCommunityService.getCommunityModerators(key)
         .stream()
@@ -65,8 +79,12 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
-    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
-        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
+    if (!(linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
+        && rolePermissionService.isPermitted(person,
+        RolePermissionCommunityTypes.MODERATOR_ADD_MODERATOR))
+        && !rolePermissionService.isPermitted(person,
+        RolePermissionCommunityTypes.ADMIN_ADD_COMMUNITY_MODERATOR)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_add_moderator");
     }
 
@@ -166,5 +184,22 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
     // @todo: Modlog
 
     return conversionService.convert(unbannedPerson, PersonResponse.class);
+  }
+
+  @Operation(summary = "Get banned users from a community")
+  @GetMapping("/banned")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public List<PersonResponse> banned(@PathVariable final String key) {
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    return linkPersonCommunityService.getPersonsFromCommunityAndListTypes(community,
+            List.of(LinkPersonCommunityType.banned))
+        .stream()
+        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .toList();
   }
 }

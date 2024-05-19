@@ -1,12 +1,17 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.community.services;
 
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
+import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.ActorIdUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
@@ -34,6 +39,65 @@ public class SublinksCommunityService {
   private final RolePermissionService rolePermissionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PersonRepository personRepository;
+
+
+  public List<CommunityResponse> index(IndexCommunity indexCommunityParam, Person person)
+  {
+
+    com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType sortType = indexCommunityParam.sortType();
+
+    if (sortType == null) {
+      if (person != null && person.getDefaultSortType() != null) {
+        sortType = conversionService.convert(person.getDefaultSortType(),
+            com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType.class);
+      } else {
+        sortType = com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType.New;
+      }
+    }
+
+    SublinksListingType sublinksListingType = indexCommunityParam.sublinksListingType();
+
+    if (sublinksListingType == null) {
+      if (person != null && person.getDefaultListingType() != null) {
+        sublinksListingType = conversionService.convert(person.getDefaultListingType(),
+            SublinksListingType.class);
+      } else if (localInstanceContext.instance()
+          .getInstanceConfig()
+          .getDefaultPostListingType() != null) {
+        sublinksListingType = conversionService.convert(localInstanceContext.instance()
+            .getInstanceConfig()
+            .getDefaultPostListingType(), SublinksListingType.class);
+      } else {
+        sublinksListingType = SublinksListingType.Local;
+      }
+    }
+
+    boolean showNsfw =
+        (indexCommunityParam.showNsfw() != null && indexCommunityParam.showNsfw()) || (
+            person != null && person.isShowNsfw());
+
+    final CommunitySearchCriteria.CommunitySearchCriteriaBuilder criteria = CommunitySearchCriteria.builder()
+        .perPage(indexCommunityParam.limit())
+        .page(indexCommunityParam.page())
+        .sortType(conversionService.convert(sortType, SortType.class))
+        .listingType(conversionService.convert(sublinksListingType, ListingType.class))
+        .showNsfw(showNsfw)
+        .person(person);
+
+    if (indexCommunityParam.limit() == 0) {
+      criteria.perPage(20);
+    }
+    if (indexCommunityParam.page() == 0) {
+      criteria.page(1);
+    }
+
+    final CommunitySearchCriteria communitySearchCriteria = criteria.build();
+
+    return communityRepository.allCommunitiesBySearchCriteria(communitySearchCriteria)
+        .stream()
+        .map(community -> conversionService.convert(community, CommunityResponse.class))
+        .toList();
+  }
 
   /**
    * Creates a new community based on the provided community data and person.

@@ -4,6 +4,7 @@ public enum RolePermissionCommentTypes implements RolePermissionInterface {
 
   // Person permissions
   READ_COMMENT("comment", AuthorizeAction.READ),
+  READ_COMMENTS("comments", AuthorizeAction.READ),
   MARK_COMMENT_AS_READ("comment-read", AuthorizeAction.UPDATE),
   CREATE_COMMENT("comment", AuthorizeAction.CREATE),
   UPDATE_COMMENT("comment", AuthorizeAction.UPDATE),

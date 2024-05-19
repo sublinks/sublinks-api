@@ -6,6 +6,8 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
@@ -42,15 +44,22 @@ public class SublinksCommentService {
   private final CommentService commentService;
   private final PostRepository postRepository;
   private final LanguageService languageService;
+  private final RolePermissionService rolePermissionService;
 
   /**
-   * Performs a search for comments based on the provided criteria.
+   * Retrieves a list of CommentResponse objects based on the provided IndexComment and Person
+   * objects.
    *
-   * @param indexCommentForm The object representing the search criteria for comments.
-   * @param person           The person performing the search.
-   * @return A CommentResponse object representing the search results.
+   * @param indexCommentForm The IndexComment object representing the search criteria for retrieving
+   *                         comments.
+   * @param person           The Person object representing the user performing the operation.
+   * @return A list of CommentResponse objects representing the retrieved comments.
+   * @throws ResponseStatusException If the user does not have permission to read comments.
    */
   public List<CommentResponse> index(IndexComment indexCommentForm, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENTS,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_update_not_permitted"));
 
     Optional<Comment> parentComment = Optional.empty();
     if (indexCommentForm.postKey() != null) {
@@ -107,14 +116,39 @@ public class SublinksCommentService {
   }
 
   /**
-   * Creates a comment based on the provided information.
+   * Retrieves a comment based on the provided key.
    *
-   * @param createComment The object representing the data of the comment to be created.
-   * @param person        The person who is creating the comment.
+   * @param key    The key of the comment to retrieve.
+   * @param person The Person object representing the user performing the operation.
+   * @return A CommentResponse object representing the retrieved comment.
+   * @throws ResponseStatusException If the user does not have permission to read the comment or the
+   *                                 comment is not found.
+   */
+  public CommentResponse show(String key, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_view_not_permitted"));
+
+    return commentRepository.findByPath(key)
+        .map(comment -> conversionService.convert(comment, CommentResponse.class))
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
+  }
+
+  /**
+   * Creates a new comment based on the provided data.
+   *
+   * @param createComment The object representing the data for creating a comment.
+   * @param person        The person creating the comment.
    * @return A CommentResponse object representing the created comment.
-   * @throws ResponseStatusException If the post, comment, or language is not found.
+   * @throws ResponseStatusException If the user does not have permission to create a comment, the
+   *                                 post or parent comment is not found, or the language is not
+   *                                 found.
    */
   public CommentResponse createComment(CreateComment createComment, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_create_not_permitted"));
 
     final Post parentPost = postRepository.findByTitleSlugAndRemovedStateIs(createComment.postKey(),
             RemovedState.NOT_REMOVED)
@@ -145,7 +179,20 @@ public class SublinksCommentService {
     return conversionService.convert(comment, CommentResponse.class);
   }
 
+  /**
+   * Updates a comment based on the provided form and person.
+   *
+   * @param updateCommentForm The UpdateComment object representing the updated data for the
+   *                          comment.
+   * @param person            The Person object representing the person performing the update.
+   * @return A CommentResponse object representing the updated comment.
+   * @throws ResponseStatusException If the user does not have permission to update the comment, the
+   *                                 comment is not found, or the language is not found.
+   */
   public CommentResponse updateComment(UpdateComment updateCommentForm, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.UPDATE_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_update_not_permitted"));
 
     Comment comment = commentRepository.findByPath(updateCommentForm.commentKey())
         .orElseThrow(

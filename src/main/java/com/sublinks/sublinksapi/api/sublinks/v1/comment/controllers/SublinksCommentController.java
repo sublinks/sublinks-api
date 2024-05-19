@@ -2,7 +2,9 @@ package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -33,37 +36,54 @@ public class SublinksCommentController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<CommentResponse> index(final IndexComment indexCommentForm,
+  public List<CommentResponse> index(
+      @RequestParam(required = false) Optional<IndexComment> indexCommentParam,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    return sublinksCommentService.index(indexCommentForm, person.orElse(null));
+    return sublinksCommentService.index(indexCommentParam.orElse(IndexComment.builder()
+        .build()), person.orElse(null));
   }
 
   @Operation(summary = "Get a specific comment")
-  @GetMapping("/{id}")
+  @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void show(@PathVariable String id) {
-    // TODO: implement
+  public CommentResponse show(@PathVariable final String key,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    return sublinksCommentService.show(key, person.orElse(null));
   }
 
   @Operation(summary = "Create a new comment")
   @PostMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void create() {
-    // TODO: implement
+  public CommentResponse create(final CreateComment createCommentForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksCommentService.createComment(createCommentForm, person);
   }
 
   @Operation(summary = "Update an comment")
-  @PostMapping("/{id}")
+  @PostMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void update(@PathVariable String id) {
-    // TODO: implement
+  public CommentResponse update(@PathVariable String key, final UpdateComment createCommentForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksCommentService.updateComment(createCommentForm, person);
   }
 
   @Operation(summary = "Delete an comment")
