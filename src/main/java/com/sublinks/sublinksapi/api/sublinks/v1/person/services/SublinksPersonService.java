@@ -51,6 +51,15 @@ public class SublinksPersonService {
   private final ConversionService conversionService;
   private final LanguageRepository languageRepository;
 
+  /**
+   * Registers a person.
+   *
+   * @param createPersonForm The details of the person to be registered.
+   * @param ip               The IP address of the client making the registration request.
+   * @param userAgent        The user agent string of the client making the registration request.
+   * @return The login response containing the token, registration status, and error (if any).
+   * @throws ResponseStatusException if email is required but not provided.
+   */
   public LoginResponse registerPerson(final CreatePerson createPersonForm, final String ip,
       final String userAgent)
   {
@@ -146,6 +155,18 @@ public class SublinksPersonService {
         .build();
   }
 
+  /**
+   * Logs in a person with the given credentials.
+   *
+   * @param loginPersonForm The login details of the person.
+   * @param ip              The IP address of the client making the login request.
+   * @param userAgent       The user agent string of the client making the login request.
+   * @return The login response containing the token, registration status, and error (if any).
+   * @throws ResponseStatusException if the person is not found, or if the person is deleted, or if
+   *                                 the person's email is not verified, or if the person's
+   *                                 registration application is not approved, or if the password is
+   *                                 incorrect.
+   */
   public LoginResponse login(final LoginPerson loginPersonForm, final String ip,
       final String userAgent)
   {
@@ -205,6 +226,13 @@ public class SublinksPersonService {
         .build();
   }
 
+  /**
+   * Updates a person's information.
+   *
+   * @param person           The person object to be updated.
+   * @param updatePersonForm The form containing updated person information.
+   * @return The updated person response.
+   */
   public PersonResponse updatePerson(Person person, UpdatePerson updatePersonForm) {
 
     if (updatePersonForm.languagesKeys()

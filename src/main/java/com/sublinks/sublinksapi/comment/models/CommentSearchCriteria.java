@@ -9,16 +9,14 @@ import com.sublinks.sublinksapi.post.entities.Post;
 import lombok.Builder;
 
 @Builder
-public record CommentSearchCriteria(
-    ListingType listingType,
-    CommentSortType commentSortType,
-    int perPage,
-    int page,
-    Community community,
-    Post post,
-    Comment parent,
-    boolean savedOnly,
-    Person person
-) {
+public record CommentSearchCriteria(ListingType listingType,
+                                    CommentSortType commentSortType,
+                                    Integer perPage,
+                                    Integer page,
+                                    Community community,
+                                    Post post,
+                                    Comment parent,
+                                    Boolean savedOnly,
+                                    Person person) {
 
 }

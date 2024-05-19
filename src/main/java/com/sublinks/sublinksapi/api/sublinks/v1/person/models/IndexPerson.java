@@ -8,7 +8,7 @@ import lombok.Builder;
 public record IndexPerson(String search,
                           SublinksListingType sublinksListingType,
                           SortType sortType,
-                          int limit,
-                          int page) {
+                          Integer limit,
+                          Integer page) {
 
 }

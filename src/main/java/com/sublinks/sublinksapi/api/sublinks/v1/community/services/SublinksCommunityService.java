@@ -10,7 +10,6 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
@@ -33,7 +32,6 @@ public class SublinksCommunityService {
   private final CommunityService communityService;
   private final LocalInstanceContext localInstanceContext;
   private final RolePermissionService rolePermissionService;
-  private final InstanceRepository instanceRepository;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PersonRepository personRepository;
 
@@ -61,11 +59,11 @@ public class SublinksCommunityService {
     Community community = Community.builder()
         .title(createCommunity.title())
         .titleSlug(createCommunity.titleSlug())
-        .bannerImageUrl(createCommunity.bannerImageUrl()
-            .orElse(null))
-        .iconImageUrl(createCommunity.iconImageUrl()
-            .orElse(null))
-        .isNsfw(createCommunity.isNsfw())
+        .bannerImageUrl(
+            createCommunity.bannerImageUrl() != null ? createCommunity.bannerImageUrl() : null)
+        .iconImageUrl(
+            createCommunity.iconImageUrl() != null ? createCommunity.iconImageUrl() : null)
+        .isNsfw(createCommunity.isNsfw() != null ? createCommunity.isNsfw() : false)
         .isPostingRestrictedToMods(createCommunity.isPostingRestrictedToMods())
         .description(createCommunity.description())
         .instance(localInstanceContext.instance())
@@ -78,11 +76,12 @@ public class SublinksCommunityService {
   /**
    * Updates a community based on the provided key, update form, and person.
    *
-   * @param key                The key of the community to update.
+   * @param key                 The key of the community to update.
    * @param updateCommunityForm The update form containing the new community data.
-   * @param person             The person performing the update.
+   * @param person              The person performing the update.
    * @return The updated community response.
-   * @throws ResponseStatusException If the community is not found, or the person is not authorized to perform the update.
+   * @throws ResponseStatusException If the community is not found, or the person is not authorized
+   *                                 to perform the update.
    */
   public CommunityResponse updateCommunity(String key, UpdateCommunity updateCommunityForm,
       Person person)
@@ -105,44 +104,23 @@ public class SublinksCommunityService {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_community");
     }
 
-    final Boolean isDeleted = updateCommunityForm.deleted()
-        .orElse(null);
-
-    if (isDeleted != null && isDeleted != community.isDeleted()) {
-
-      community.setDeleted(updateCommunityForm.deleted()
-          .orElse(community.isDeleted()));
-      //@todo: do modlog
+    if (updateCommunityForm.description() != null) {
+      community.setDescription(updateCommunityForm.description());
+    }
+    if (updateCommunityForm.iconImageUrl() != null) {
+      community.setIconImageUrl(updateCommunityForm.iconImageUrl());
+    }
+    if (updateCommunityForm.bannerImageUrl() != null) {
+      community.setBannerImageUrl(updateCommunityForm.bannerImageUrl());
+    }
+    if (updateCommunityForm.isNsfw() != null) {
+      community.setNsfw(updateCommunityForm.isNsfw());
+    }
+    if (updateCommunityForm.isPostingRestrictedToMods() != null) {
+      community.setPostingRestrictedToMods(updateCommunityForm.isPostingRestrictedToMods());
     }
 
-    final Boolean isRemoved = updateCommunityForm.removed()
-        .orElse(null);
-
-    if (isRemoved != null && isRemoved != community.isRemoved()) {
-
-      if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
-          List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_remove_community");
-      }
-      community.setRemoved(updateCommunityForm.removed()
-          .orElse(community.isRemoved()));
-      //@todo: do modlog
-    }
-
-    updateCommunityForm.title()
-        .ifPresent(community::setTitle);
-    updateCommunityForm.description()
-        .ifPresent(community::setDescription);
-    updateCommunityForm.isNsfw()
-        .ifPresent(community::setNsfw);
-    updateCommunityForm.iconImageUrl()
-        .ifPresent(community::setIconImageUrl);
-    updateCommunityForm.bannerImageUrl()
-        .ifPresent(community::setBannerImageUrl);
-    updateCommunityForm.isPostingRestrictedToMods()
-        .ifPresent(community::setPostingRestrictedToMods);
-    communityRepository.save(community);
+    communityService.updateCommunity(community);
 
     return conversionService.convert(community, CommunityResponse.class);
   }

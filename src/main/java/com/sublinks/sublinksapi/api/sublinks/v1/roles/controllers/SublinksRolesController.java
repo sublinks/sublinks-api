@@ -13,7 +13,7 @@ public class SublinksRolesController extends AbstractSublinksApiController {
  @Operation(summary = "Get a list of roles")
   @GetMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void index() {
     // TODO: implement
@@ -22,7 +22,7 @@ public class SublinksRolesController extends AbstractSublinksApiController {
   @Operation(summary = "Get a specific role")
   @GetMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void show(@PathVariable String id) {
     // TODO: implement
@@ -31,7 +31,7 @@ public class SublinksRolesController extends AbstractSublinksApiController {
   @Operation(summary = "Create a new post")
   @PostMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void create() {
     // TODO: implement
@@ -40,7 +40,7 @@ public class SublinksRolesController extends AbstractSublinksApiController {
   @Operation(summary = "Update an post")
   @PostMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void update(@PathVariable String id) {
     // TODO: implement
@@ -49,7 +49,7 @@ public class SublinksRolesController extends AbstractSublinksApiController {
   @Operation(summary = "Delete an post")
   @DeleteMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void delete(@PathVariable String id) {
     // TODO: implement

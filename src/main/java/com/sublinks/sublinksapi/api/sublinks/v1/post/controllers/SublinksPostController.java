@@ -19,7 +19,7 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @Operation(summary = "Get a list of posts")
   @GetMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void index() {
     // TODO: implement
@@ -29,7 +29,7 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @Operation(summary = "Get a specific post")
   @GetMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void show(@PathVariable String id) {
     // TODO: implement
@@ -38,7 +38,7 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @Operation(summary = "Create a new post")
   @PostMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void create() {
     // TODO: implement
@@ -47,7 +47,7 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @Operation(summary = "Update an post")
   @PostMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void update(@PathVariable String id) {
     // TODO: implement
@@ -56,7 +56,7 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @Operation(summary = "Delete an post")
   @DeleteMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void delete(@PathVariable String id) {
     // TODO: implement

@@ -13,7 +13,7 @@ public class SublinksSearchController extends AbstractSublinksApiController {
  @Operation(summary = "Get a list of privatemessages")
   @GetMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void index() {
     // TODO: implement

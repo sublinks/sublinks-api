@@ -18,7 +18,7 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
  @Operation(summary = "Get a list of privatemessages")
   @GetMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void index() {
     // TODO: implement
@@ -27,7 +27,7 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
   @Operation(summary = "Get a specific privatemessage")
   @GetMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void show(@PathVariable String id) {
     // TODO: implement
@@ -36,7 +36,7 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
   @Operation(summary = "Create a new privatemessage")
   @PostMapping
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void create() {
     // TODO: implement
@@ -45,7 +45,7 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
   @Operation(summary = "Update an privatemessage")
   @PostMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void update(@PathVariable String id) {
     // TODO: implement
@@ -54,7 +54,7 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
   @Operation(summary = "Delete an privatemessage")
   @DeleteMapping("/{id}")
   @ApiResponses(value = {
-      // TODO: add responses
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
   })
   public void delete(@PathVariable String id) {
     // TODO: implement

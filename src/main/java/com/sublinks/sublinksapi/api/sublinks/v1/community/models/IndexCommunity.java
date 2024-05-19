@@ -11,7 +11,7 @@ public record IndexCommunity(String search,
                              @Schema(description = "Sort type", example = "Hot", requiredMode = RequiredMode.NOT_REQUIRED) SortType sortType,
                              @Schema(description = "Sublinks listing type", example = "All", requiredMode = RequiredMode.NOT_REQUIRED) SublinksListingType sublinksListingType,
                              @Schema(description = "Show NSFW", example = "false", requiredMode = RequiredMode.NOT_REQUIRED) Boolean showNsfw,
-                             int limit,
-                             int page) {
+                             Integer limit,
+                             Integer page) {
 
 }

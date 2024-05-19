@@ -31,7 +31,8 @@ public class LemmyPersonMentionService {
     final CommentAggregate commentAggregates = comment.getCommentAggregate();
 
     final CommentLike commentLike = commentLikeService.getCommentLike(comment,
-        personMention.getRecipient()).orElse(null);
+            personMention.getRecipient())
+        .orElse(null);
 
     //@todo: Check if person is blocked and comment is saved
     return PersonMentionView.builder()
@@ -42,9 +43,9 @@ public class LemmyPersonMentionService {
             com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
         .creator_blocked(false) // @todo check if user is blocked
         .comment(conversionService.convert(comment,
-            com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment.class)).post(
-            conversionService.convert(comment.getPost(),
-                com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.class))
+            com.sublinks.sublinksapi.api.lemmy.v3.comment.models.Comment.class))
+        .post(conversionService.convert(comment.getPost(),
+            com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.class))
         .saved(false) // @todo check if comment is saved
         .recipient(conversionService.convert(personMention.getRecipient(),
             com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
@@ -53,7 +54,8 @@ public class LemmyPersonMentionService {
         .my_vote(commentLike == null ? 0 : commentLike.getScore())
         .creator_banned_from_community(
             linkPersonCommunityService.hasLink(creator, comment.getCommunity(),
-                LinkPersonCommunityType.banned)).subscribed(
+                LinkPersonCommunityType.banned))
+        .subscribed(
             lemmyCommunityService.getPersonCommunitySubscribeType(creator, comment.getCommunity()))
         .creator_is_admin(false) // @todo check if user is admin
         .creator_is_moderator(false) // @todo check if user is moderator
