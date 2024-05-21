@@ -34,7 +34,8 @@ public class InitialRoleSetupService {
    */
   public void generateInitialRoles() {
 
-    if (roleRepository.findAll().isEmpty()) {
+    if (roleRepository.findAll()
+        .isEmpty()) {
       createAdminRole();
       createBannedRole();
       createGuestRole();
@@ -51,12 +52,11 @@ public class InitialRoleSetupService {
   private void savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
     role.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder()
-                .role(role)
-                .permission(rolePermission.toString())
-                .build())
-        ).collect(Collectors.toSet()));
+        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder()
+            .role(role)
+            .permission(rolePermission.toString())
+            .build()))
+        .collect(Collectors.toSet()));
   }
 
   /**
@@ -70,9 +70,11 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionPostTypes.READ_POST);
     rolePermissions.add(RolePermissionPostTypes.READ_POSTS);
     rolePermissions.add(RolePermissionCommentTypes.READ_COMMENT);
+    rolePermissions.add(RolePermissionCommentTypes.READ_COMMENTS);
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY);
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITIES);
     rolePermissions.add(RolePermissionPersonTypes.READ_USER);
+    rolePermissions.add(RolePermissionPersonTypes.READ_USERS);
     rolePermissions.add(RolePermissionModLogTypes.READ_MODLOG);
   }
 
@@ -82,13 +84,11 @@ public class InitialRoleSetupService {
   private void createAdminRole() {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
-    Role adminRole = roleRepository.save(
-        Role.builder()
-            .description("Admin role for admins")
-            .name(RoleTypes.ADMIN.toString())
-            .isActive(true)
-            .build()
-    );
+    Role adminRole = roleRepository.save(Role.builder()
+        .description("Admin role for admins")
+        .name(RoleTypes.ADMIN.toString())
+        .isActive(true)
+        .build());
 
     savePermissions(adminRole, rolePermissions);
   }
@@ -105,8 +105,7 @@ public class InitialRoleSetupService {
         .description("Default role for all users")
         .name(RoleTypes.GUEST.toString())
         .isActive(true)
-        .build()
-    );
+        .build());
 
     savePermissions(defaultUserRole, rolePermissions);
   }
@@ -123,8 +122,7 @@ public class InitialRoleSetupService {
         .description("Banned role for banned users")
         .name(RoleTypes.BANNED.toString())
         .isActive(true)
-        .build()
-    );
+        .build());
 
     savePermissions(bannedRole, rolePermissions);
   }
@@ -153,6 +151,8 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionCommunityTypes.CREATE_COMMUNITY);
     rolePermissions.add(RolePermissionCommunityTypes.UPDATE_COMMUNITY);
     rolePermissions.add(RolePermissionCommunityTypes.DELETE_COMMUNITY);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS);
 
     rolePermissions.add(RolePermissionPostTypes.CREATE_POST);
     rolePermissions.add(RolePermissionPostTypes.UPDATE_POST);
@@ -196,8 +196,7 @@ public class InitialRoleSetupService {
         .description("Default Role for all registered users")
         .name(RoleTypes.REGISTERED.toString())
         .isActive(true)
-        .build()
-    );
+        .build());
 
     savePermissions(registeredUserRole, rolePermissions);
   }

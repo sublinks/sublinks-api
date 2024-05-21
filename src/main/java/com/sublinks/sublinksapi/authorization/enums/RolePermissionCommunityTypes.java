@@ -21,6 +21,7 @@ public enum RolePermissionCommunityTypes implements RolePermissionInterface {
   MODERATOR_TRANSFER_COMMUNITY("community-moderator", AuthorizeAction.UPDATE),
   MODERATOR_ADD_MODERATOR("community-moderator", AuthorizeAction.CREATE),
   MODERATOR_REMOVE_MODERATOR("community-moderator-moderator", AuthorizeAction.DELETE),
+  MODERATOR_BAN_USER("community-moderator", AuthorizeAction.BAN),
 
   // Admin permissions
   ADMIN_SHOW_DELETED_COMMUNITY("community-admin", AuthorizeAction.READ),
@@ -31,6 +32,7 @@ public enum RolePermissionCommunityTypes implements RolePermissionInterface {
   ADMIN_REMOVE_COMMUNITY("community-admin", AuthorizeAction.REMOVE),
   ADMIN_ADD_COMMUNITY_MODERATOR("community-admin-moderator", AuthorizeAction.CREATE),
   ADMIN_REMOVE_COMMUNITY_MODERATOR("community-admin-moderator", AuthorizeAction.REMOVE),
+  ADMIN_BAN_USER("community-admin", AuthorizeAction.BAN),
 
   /**
    * Unused

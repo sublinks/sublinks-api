@@ -2,8 +2,10 @@ package com.sublinks.sublinksapi.api.sublinks.v1.community.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityRemove;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
@@ -42,6 +44,16 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   private final ConversionService conversionService;
   private final RolePermissionService rolePermissionService;
 
+  public CommunityResponse remove(@PathVariable final String key,
+      CommunityRemove communityRemoveForm, SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksCommunityService.remove(key, communityRemoveForm, person);
+  }
+
+
   @Operation(summary = "Get moderators of the community")
   @GetMapping("/moderators")
   @ApiResponses(value = {
@@ -58,7 +70,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
               "not_authorized_to_read_moderators");
         });
 
-    return sublinksCommunityService.getCommunityModerators(key)
+    return sublinksCommunityService.getCommunityModerators(key, person.orElse(null))
         .stream()
         .map(communityModerator -> conversionService.convert(communityModerator,
             CommunityModeratorResponse.class))
@@ -98,7 +110,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
 
     linkPersonCommunityService.addLink(newModerator, community, LinkPersonCommunityType.moderator);
 
-    return sublinksCommunityService.getCommunityModerators(key)
+    return sublinksCommunityService.getCommunityModerators(key, person)
         .stream()
         .map(communityModerator -> conversionService.convert(communityModerator,
             CommunityModeratorResponse.class))
@@ -127,14 +139,14 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
 
     linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.moderator);
 
-    return sublinksCommunityService.getCommunityModerators(key)
+    return sublinksCommunityService.getCommunityModerators(key, person)
         .stream()
         .map(communityModerator -> conversionService.convert(communityModerator,
             CommunityModeratorResponse.class))
         .toList();
   }
 
-  @Operation(summary = "Ban a user from a community")
+  @Operation(summary = "Ban/Unban a user from a community")
   @GetMapping("/ban/{personKey}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
@@ -153,38 +165,12 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_user");
     }
 
-    final Person bannedPerson = sublinksCommunityService.banPerson(key, personKey, person);
-
-    // @todo: Modlog
+    final Person bannedPerson = sublinksCommunityService.banPerson(key, personKey, person,
+        communityBanPersonForm);
 
     return conversionService.convert(bannedPerson, PersonResponse.class);
   }
 
-  @Operation(summary = "Unban a user from a community")
-  @GetMapping("/unban/{personKey}")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public PersonResponse unban(@PathVariable final String key, @PathVariable final String personKey,
-      CommunityBanPerson communityBanPersonForm, final SublinksJwtPerson sublinksJwtPerson)
-  {
-
-    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
-
-    final Community community = communityRepository.findCommunityByTitleSlug(key)
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
-
-    if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
-        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_unban_user");
-    }
-
-    final Person unbannedPerson = sublinksCommunityService.unbanPerson(key, personKey, person);
-
-    // @todo: Modlog
-
-    return conversionService.convert(unbannedPerson, PersonResponse.class);
-  }
 
   @Operation(summary = "Get banned users from a community")
   @GetMapping("/banned")
