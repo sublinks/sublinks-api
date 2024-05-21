@@ -53,6 +53,9 @@ public class LinkPersonCommunity {
   @Enumerated(EnumType.STRING)
   private LinkPersonCommunityType linkType;
 
+  @Column(nullable = true, name = "expire_at")
+  private Date expireAt;
+
   @CreationTimestamp
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
