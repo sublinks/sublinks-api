@@ -65,7 +65,9 @@ public class Person implements UserDetails, Principal {
   Set<LinkPersonPost> linkPersonPost;
 
   @ManyToOne
-  @JoinTable(name = "link_person_instances", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "instance_id"))
+  @JoinTable(name = "link_person_instances",
+      joinColumns = @JoinColumn(name = "person_id"),
+      inverseJoinColumns = @JoinColumn(name = "instance_id"))
   private Instance instance;
 
   @ManyToOne(fetch = FetchType.EAGER)
@@ -107,7 +109,9 @@ public class Person implements UserDetails, Principal {
   private PersonAggregate personAggregate;
 
   @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
-  @JoinTable(name = "person_languages", joinColumns = @JoinColumn(name = "person_id"), inverseJoinColumns = @JoinColumn(name = "language_id"))
+  @JoinTable(name = "person_languages",
+      joinColumns = @JoinColumn(name = "person_id"),
+      inverseJoinColumns = @JoinColumn(name = "language_id"))
   private List<Language> languages;
 
   @OneToOne(mappedBy = "person", cascade = CascadeType.ALL)
