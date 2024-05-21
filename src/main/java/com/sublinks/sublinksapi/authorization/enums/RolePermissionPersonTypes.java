@@ -4,6 +4,7 @@ public enum RolePermissionPersonTypes implements RolePermissionInterface {
 
   // Person permissions
   READ_USER("user", AuthorizeAction.READ),
+  READ_USERS("users", AuthorizeAction.READ),
   UPDATE_USER("user", AuthorizeAction.UPDATE),
   UPDATE_USER_SETTINGS("user-settings", AuthorizeAction.UPDATE),
   DELETE_USER("user", AuthorizeAction.DELETE),
