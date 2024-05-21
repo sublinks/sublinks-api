@@ -109,9 +109,9 @@ public class UserModActionsController extends AbstractLemmyApiController {
       personToBan.setRole(
           roleService.getBannedRole(() -> new RuntimeException("No Banned role found.")));
       if (banPersonForm.expires() != null) {
-//        if (banPersonForm.expires() < System.currentTimeMillis() / 1000) {
-//          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "expires_in_past");
-//        }
+        if (banPersonForm.expires() < System.currentTimeMillis() / 1000) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "expires_in_past");
+        }
         try {
           personToBan.setRoleExpireAt(new Date(banPersonForm.expires() * 1000L));
         } catch (Exception e) {
