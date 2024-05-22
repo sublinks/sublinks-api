@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,6 @@ public interface LinkPersonCommunityRepository extends JpaRepository<LinkPersonC
 
   Collection<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
       Community community, List<LinkPersonCommunityType> types);
+
+  Collection<LinkPersonCommunity> getLinkPersonCommunitiesByExpireAtBefore(Date expireAt);
 }

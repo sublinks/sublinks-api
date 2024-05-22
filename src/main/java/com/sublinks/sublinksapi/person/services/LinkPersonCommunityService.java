@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedPublishe
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -55,15 +56,17 @@ public class LinkPersonCommunityService {
   @Transactional
   public void addLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
-        .community(community)
-        .person(person)
-        .linkType(type)
-        .build();
-    person.getLinkPersonCommunity()
-        .add(newLink);
-    community.getLinkPersonCommunity()
-        .add(newLink);
+    addLink(person, community, type, null);
+  }
+
+  @Transactional
+  public void addLink(Person person, Community community, LinkPersonCommunityType type,
+      Date expireAt) {
+
+    final LinkPersonCommunity newLink = LinkPersonCommunity.builder().community(community).person(
+        person).linkType(type).expireAt(expireAt).build();
+    person.getLinkPersonCommunity().add(newLink);
+    community.getLinkPersonCommunity().add(newLink);
     linkPersonCommunityRepository.save(newLink);
     linkPersonCommunityCreatedPublisher.publish(newLink);
   }
@@ -76,12 +79,10 @@ public class LinkPersonCommunityService {
     if (linkPersonCommunity.isEmpty()) {
       return;
     }
-    person.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
-            .getId()));
-    community.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
-            .getId()));
+    person.getLinkPersonCommunity().removeIf(
+        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
+    community.getLinkPersonCommunity().removeIf(
+        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
     linkPersonCommunityRepository.delete(linkPersonCommunity.get());
     linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
   }

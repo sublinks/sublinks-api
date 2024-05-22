@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.person.repositories;
 
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.person.entities.Person;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -24,4 +25,6 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
   @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)", countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)", nativeQuery = true)
   List<Person> findAllByNameAndBiography(@Param("keyword") String keyword, Pageable pageable);
+
+  List<Person> findAllByRoleExpireAtBefore(Date expireAt);
 }

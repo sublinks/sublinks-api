@@ -240,6 +240,7 @@ CREATE TABLE people
   private_key                    TEXT         NULL,
   totp_secret                    TEXT         NULL,
   totp_verified_secret           TEXT         NULL,
+  role_expire_at                 TIMESTAMP(3) NULL,
   created_at                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   updated_at                     TIMESTAMP(3)          DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
@@ -267,6 +268,7 @@ CREATE TABLE link_person_communities
   person_id    BIGINT                                    NOT NULL,
   community_id BIGINT                                    NOT NULL,
   link_type    TEXT                                      NOT NULL,
+  expire_at    TIMESTAMP(3)                              NULL,
   created_at   TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
