@@ -20,6 +20,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.proxy.HibernateProxy;
 
 @Getter
@@ -56,8 +57,8 @@ public class LinkPersonCommunity {
   @Column(nullable = true, name = "expire_at")
   private Date expireAt;
 
-  @CreationTimestamp
-  @Column(updatable = false, nullable = false, name = "created_at")
+  @CreationTimestamp(source = SourceType.DB)
+  @Column(nullable = false, name = "created_at")
   private Date createdAt;
 
   @Override

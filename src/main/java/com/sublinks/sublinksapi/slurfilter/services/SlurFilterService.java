@@ -9,6 +9,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +24,10 @@ public class SlurFilterService {
   @Transactional
   public void updateOrCreateLemmySlur(String regex) {
 
-    SlurFilter slurFilter = slurFilterRepository.findAll().stream().findFirst().orElse(null);
+    SlurFilter slurFilter = slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))
+        .stream()
+        .findFirst()
+        .orElse(null);
     if (slurFilter == null) {
       slurFilter = SlurFilter.builder()
           .slurRegex(regex)
@@ -36,11 +41,14 @@ public class SlurFilterService {
 
   public SlurFilter getLemmySlurFilter() {
 
-    SlurFilter slurFilter = slurFilterRepository.findAll().stream().findFirst().orElse(null);
+    SlurFilter slurFilter = slurFilterRepository.findAll(Sort.by(Direction.ASC, "id"))
+        .stream()
+        .findFirst()
+        .orElse(null);
     if (slurFilter == null) {
       slurFilter = SlurFilter.builder().slurRegex("").slurActionType(SlurActionType.BLOCK).build();
+      slurFilterRepository.save(slurFilter);
     }
-    slurFilterRepository.save(slurFilter);
     return slurFilter;
   }
 
@@ -51,11 +59,10 @@ public class SlurFilterService {
       return null;
     }
 
-    return slurFilters.stream()
-        .filter(slurFilter -> !slurFilter.getSlurRegex().isBlank() && Pattern.compile(
-            slurFilter.getSlurRegex()).matcher(text).find())
-        .max(Comparator.comparing(SlurFilter::getSlurActionType))
-        .orElse(null);
+    return slurFilters.stream().filter(
+        slurFilter -> !slurFilter.getSlurRegex().isBlank() && Pattern.compile(
+            slurFilter.getSlurRegex()).matcher(text).find()).max(
+        Comparator.comparing(SlurFilter::getSlurActionType)).orElse(null);
   }
 
   public String censorText(final String text)
@@ -80,14 +87,13 @@ public class SlurFilterService {
       return censoredText;
     }
 
-    List<Pattern> patterns = slurFilters.stream()
-        .map((pattern) -> Pattern.compile(pattern.getSlurRegex(), Pattern.CASE_INSENSITIVE))
-        .toList();
+    List<Pattern> patterns = slurFilters.stream().map(
+        (pattern) -> Pattern.compile(pattern.getSlurRegex(), Pattern.CASE_INSENSITIVE)).toList();
 
     for (Pattern pattern : patterns) {
       // Censor all found text with the same word count of the found word with *
-      censoredText = pattern.matcher(censoredText)
-          .replaceAll(match -> "*".repeat(match.group().length()));
+      censoredText = pattern.matcher(censoredText).replaceAll(
+          match -> "*".repeat(match.group().length()));
     }
     return censoredText;
   }
