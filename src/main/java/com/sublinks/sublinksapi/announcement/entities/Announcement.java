@@ -46,7 +46,7 @@ public class Announcement {
   @Column(name = "created_at")
   private String createdAt;
 
-  
+  @UpdateTimestamp(source = SourceType.DB)
   @Column(name = "updated_at")
   private String updatedAt;
 
@@ -85,6 +85,7 @@ public class Announcement {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }
