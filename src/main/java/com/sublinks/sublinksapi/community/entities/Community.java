@@ -115,8 +115,8 @@ public class Community implements Serializable {
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
-  @UpdateTimestamp(source = SourceType .DB)
+
+  @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")
   private Date updatedAt;
 
