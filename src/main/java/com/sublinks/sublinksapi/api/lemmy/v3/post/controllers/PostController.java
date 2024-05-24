@@ -29,6 +29,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
@@ -52,6 +54,7 @@ import com.sublinks.sublinksapi.post.sorts.SortFactory;
 import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import com.sublinks.sublinksapi.utils.models.LemmyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -105,6 +108,7 @@ public class PostController extends AbstractLemmyApiController {
   private final RolePermissionService rolePermissionService;
   private final SortFactory sortFactory;
   private final LinkPersonPostService linkPersonPostService;
+  private final CommentRepository commentRepository;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200",
@@ -116,10 +120,20 @@ public class PostController extends AbstractLemmyApiController {
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @GetMapping
-  GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal) {
+  GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal)
+      throws LemmyException {
 
-    final Post post = postRepository.findById((long) getPostForm.id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    Post post = null;
+
+    if (getPostForm.id() != null) {
+      post = postRepository.findById((long) getPostForm.id())
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    } else {
+      post = commentRepository.findById((long) getPostForm.comment_id())
+          .map(Comment::getPost)
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
     final Community community = post.getCommunity();
 
     Optional<Person> person = getOptionalPerson(principal);
@@ -147,9 +161,9 @@ public class PostController extends AbstractLemmyApiController {
 
           if (!(post.isDeleted() && !post.isRemoved() && isCreator)) {
             if (post.isRemoved()) {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_removed_by_mod");
+              throw new LemmyException("post_removed_by_mod", HttpStatus.BAD_REQUEST);
             } else {
-              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_deleted");
+              throw new LemmyException("post_deleted", HttpStatus.BAD_REQUEST);
             }
           }
         }
@@ -157,9 +171,9 @@ public class PostController extends AbstractLemmyApiController {
         // fall through
       } else {
         if (post.isRemoved()) {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_removed_by_mod");
+          throw new LemmyException("post_removed_by_mod", HttpStatus.BAD_REQUEST);
         } else {
-          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_deleted");
+          throw new LemmyException("post_deleted", HttpStatus.BAD_REQUEST);
         }
       }
     }
