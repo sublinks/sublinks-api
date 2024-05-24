@@ -19,6 +19,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
@@ -99,11 +100,11 @@ public class InstanceConfig {
   @Column(name = "legal_information")
   private String legalInformation;
 
-  @CreationTimestamp
-  @Column(nullable = false, name = "created_at")
+  @CreationTimestamp(source = SourceType.DB)
+  @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  @UpdateTimestamp
-  @Column(nullable = false, name = "updated_at")
+  @UpdateTimestamp(source = SourceType.DB)
+  @Column(updatable = false, name = "updated_at")
   private Date updatedAt;
 }

@@ -22,6 +22,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.SourceType;
 
 /**
  * The Email class represents an email object.
@@ -70,7 +71,7 @@ public class Email {
   @Column(name = "last_try_at")
   private Date lastTryAt;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 }

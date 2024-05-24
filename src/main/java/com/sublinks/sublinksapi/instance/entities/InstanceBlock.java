@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 
 @Getter
 @Setter
@@ -39,7 +40,7 @@ public class InstanceBlock {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(nullable = false, name = "created_at")
   private Date createdAt;
 

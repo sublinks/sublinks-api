@@ -12,6 +12,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
@@ -42,7 +43,7 @@ public class Captcha {
   @Column(nullable = false)
   private boolean locked;
 
-  @UpdateTimestamp
-  @Column(updatable = false, nullable = true, name = "updated_at")
+  @UpdateTimestamp(source = SourceType.DB)
+  @Column(updatable = false, nullable = false, name = "updated_at")
   private Date updatedAt;
 }

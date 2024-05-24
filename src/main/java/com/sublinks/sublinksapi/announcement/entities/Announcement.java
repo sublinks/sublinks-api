@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
@@ -41,11 +42,11 @@ public class Announcement {
   @Column(name = "local_site_id")
   private Long localSiteId;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(name = "created_at")
   private String createdAt;
 
-  @UpdateTimestamp
+  @UpdateTimestamp(source = SourceType.DB)
   @Column(name = "updated_at")
   private String updatedAt;
 
@@ -84,6 +85,7 @@ public class Announcement {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }
