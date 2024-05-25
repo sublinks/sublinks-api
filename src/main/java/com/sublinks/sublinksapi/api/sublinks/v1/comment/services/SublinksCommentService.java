@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentDelete;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentPin;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentRemove;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType;
@@ -22,7 +23,9 @@ import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.shared.RemovedState;
@@ -48,6 +51,7 @@ public class SublinksCommentService {
   private final PostRepository postRepository;
   private final LanguageService languageService;
   private final RolePermissionService rolePermissionService;
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   /**
    * Retrieves a list of CommentResponse objects based on the provided IndexComment and Person
@@ -281,6 +285,27 @@ public class SublinksCommentService {
     comment.setDeleted(commentDeleteForm.remove());
     commentService.updateComment(comment);
     // @todo: modlog
+
+    return conversionService.convert(comment, CommentResponse.class);
+  }
+
+  public CommentResponse pin(String key, CommentPin commentPinForm, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted"));
+
+    Comment comment = commentRepository.findByPath(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
+    if (linkPersonCommunityService.hasAnyLinkOrAdmin(person, comment.getCommunity(),
+        List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted");
+    }
+
+    comment.setFeatured(
+        commentPinForm.pin() != null ? commentPinForm.pin() : !comment.isFeatured());
+
+    commentService.updateComment(comment);
 
     return conversionService.convert(comment, CommentResponse.class);
   }

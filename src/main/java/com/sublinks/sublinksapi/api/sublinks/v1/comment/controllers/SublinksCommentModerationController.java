@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentDelete;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentPin;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentRemove;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,7 +30,7 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
   private final SublinksCommentService sublinksCommentService;
 
   @Operation(summary = "Remove a comment")
-  @GetMapping("/remove")
+  @PostMapping("/remove")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse remove(@PathVariable final String key,
@@ -41,7 +43,7 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
   }
 
   @Operation(summary = "Delete a comment")
-  @GetMapping("/delete")
+  @PostMapping("/delete")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse delete(@PathVariable final String key,
@@ -51,5 +53,17 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
     return sublinksCommentService.delete(key, commentDeleteForm, person);
+  }
+
+  @Operation(summary = "Pin/Unpin a comment")
+  @GetMapping("/pin")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public CommentResponse highlight(@PathVariable final String key, final CommentPin commentPinForm,
+      final SublinksJwtPerson sublinksJwtPerson) {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksCommentService.pin(key, commentPinForm, person);
   }
 }
