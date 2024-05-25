@@ -656,7 +656,7 @@ CREATE TABLE captcha
   png        TEXT         NOT NULL,
   wav        TEXT         NULL,
   locked     BOOLEAN      NOT NULL DEFAULT false,
-  updated_at TIMESTAMP(3) NULL
+  updated_at TIMESTAMP(3) NOT NULL
 );
 
 CREATE UNIQUE INDEX IDX_CAPTCHA_UUID ON captcha (uuid);
@@ -801,7 +801,7 @@ CREATE TABLE email
   html_content TEXT         NOT NULL,
   text_content TEXT         NOT NULL,
   created_at   TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  last_try_at  TIMESTAMP(3) NULL     DEFAULT CURRENT_TIMESTAMP(3)
+  last_try_at  TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 );
 
 /**

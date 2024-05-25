@@ -15,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SourceType;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
@@ -52,11 +53,11 @@ public class PersonMetaData {
   @Column(nullable = false, name = "active")
   private boolean active;
 
-  @CreationTimestamp
+  @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  @UpdateTimestamp
-  @Column(updatable = true, nullable = false, name = "last_used_at")
+  @UpdateTimestamp(source = SourceType.DB)
+  @Column(updatable = false, name = "last_used_at")
   private Date lastUsedAt;
 }
