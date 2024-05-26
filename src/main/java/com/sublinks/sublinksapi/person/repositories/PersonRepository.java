@@ -19,12 +19,22 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
   Optional<Person> findOneByNameIgnoreCase(String name);
 
+  Optional<Person> findOneByNameAndInstance_Domain(String name, String instance_domain);
+
   Optional<Person> findOneByEmail(String email);
 
   HashSet<Person> findAllByRole(Role role);
 
-  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)", countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)", nativeQuery = true)
+  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)",
+      countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)",
+      nativeQuery = true)
   List<Person> findAllByNameAndBiography(@Param("keyword") String keyword, Pageable pageable);
+
+  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword) AND p.role_id = :role",
+      countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword) AND p.role_id = :role",
+      nativeQuery = true)
+  List<Person> findAllByNameAndBiographyAndRole(@Param("keyword") String keyword,
+      @Param("role") long roleId, Pageable pageable);
 
   List<Person> findAllByRoleExpireAtBefore(Date expireAt);
 }

@@ -2,12 +2,17 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.services;
 
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtUtil;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.moderation.IndexBannedPerson;
+import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.services.EmailService;
@@ -30,6 +35,8 @@ import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -50,15 +57,44 @@ public class SublinksPersonService {
   private final UserDataService userDataService;
   private final ConversionService conversionService;
   private final LanguageRepository languageRepository;
+  private final RoleService roleService;
 
   /**
-   * Registers a person.
+   * Retrieves the name and domain identifiers of a person from the given key.
    *
-   * @param createPersonForm The details of the person to be registered.
+   * @param key The key containing the person's information. If the key contains "@", it is split
+   *            into name and domain using "@" as the separator. Otherwise, the name is set as the
+   *            key and the domain is obtained from the local instance context.
+   * @return The PersonIdentity object containing the name and domain identifiers of the person.
+   */
+  public PersonIdentity getPersonIdentifiersFromKey(String key) {
+
+    String name, domain;
+    if (key.contains("@")) {
+      name = key.substring(0, key.indexOf('@'));
+      domain = key.substring(key.indexOf('@') + 1);
+    } else {
+      name = key;
+      domain = localInstanceContext.instance()
+          .getDomain();
+    }
+
+    return PersonIdentity.builder()
+        .name(name)
+        .domain(domain)
+        .build();
+  }
+
+  /**
+   * Registers a person with the given details.
+   *
+   * @param createPersonForm The form containing the details of the person to be registered.
    * @param ip               The IP address of the client making the registration request.
    * @param userAgent        The user agent string of the client making the registration request.
-   * @return The login response containing the token, registration status, and error (if any).
-   * @throws ResponseStatusException if email is required but not provided.
+   * @return The registration response containing the token, registration status, and error (if
+   * any).
+   * @throws ResponseStatusException if the email is required but not provided, or if the email send
+   *                                 failed.
    */
   public LoginResponse registerPerson(final CreatePerson createPersonForm, final String ip,
       final String userAgent)
@@ -77,14 +113,10 @@ public class SublinksPersonService {
     final Person.PersonBuilder personBuilder = Person.builder()
         .name(createPersonForm.name())
         .displayName(createPersonForm.displayName())
-        .avatarImageUrl(createPersonForm.avatarImageUrl()
-            .orElse(null))
-        .bannerImageUrl(createPersonForm.bannerImageUrl()
-            .orElse(null))
-        .biography(createPersonForm.bio()
-            .orElse(null))
-        .matrixUserId(createPersonForm.matrixUserId()
-            .orElse(null));
+        .avatarImageUrl(createPersonForm.avatarImageUrl())
+        .bannerImageUrl(createPersonForm.bannerImageUrl())
+        .biography(createPersonForm.bio())
+        .matrixUserId(createPersonForm.matrixUserId());
 
     final Person person = personBuilder.build();
 
@@ -120,9 +152,8 @@ public class SublinksPersonService {
       } catch (Exception e) {
         personRepository.delete(person);
         return LoginResponse.builder()
-            .token(Optional.empty())
             .status(RegistrationState.NOT_CREATED)
-            .error(Optional.of("email_send_failed"))
+            .error("email_send_failed")
             .build();
       }
     }
@@ -137,8 +168,7 @@ public class SublinksPersonService {
                   : PersonRegistrationApplicationStatus.pending)
               .person(person)
               .question(instanceConfig.getRegistrationQuestion())
-              .answer(createPersonForm.answer()
-                  .orElse(null))
+              .answer(createPersonForm.answer())
               .build());
       if (!instanceConfig.isRequireEmailVerification()) {
         status = RegistrationState.APPLICATION_CREATED;
@@ -150,7 +180,7 @@ public class SublinksPersonService {
     }
 
     return LoginResponse.builder()
-        .token(Optional.ofNullable(token))
+        .token(token)
         .status(status)
         .build();
   }
@@ -182,17 +212,15 @@ public class SublinksPersonService {
 
     if (person.isDeleted()) {
       return LoginResponse.builder()
-          .token(Optional.empty())
           .status(RegistrationState.UNCHANGED)
-          .error(Optional.of("person_deleted"))
+          .error("person_deleted")
           .build();
     }
 
     if (!person.isEmailVerified()) {
       return LoginResponse.builder()
-          .token(Optional.empty())
           .status(RegistrationState.UNCHANGED)
-          .error(Optional.of("email_not_verified"))
+          .error("email_not_verified")
           .build();
     }
 
@@ -202,17 +230,15 @@ public class SublinksPersonService {
     if (application.isPresent() && application.get()
         .getApplicationStatus() != PersonRegistrationApplicationStatus.approved) {
       return LoginResponse.builder()
-          .token(Optional.empty())
           .status(RegistrationState.UNCHANGED)
-          .error(Optional.of("application_not_approved"))
+          .error("application_not_approved")
           .build();
     }
 
     if (!personService.isValidPersonPassword(person, loginPersonForm.password())) {
       return LoginResponse.builder()
-          .token(Optional.empty())
           .status(RegistrationState.UNCHANGED)
-          .error(Optional.of("password_incorrect"))
+          .error("password_incorrect")
           .build();
     }
 
@@ -221,7 +247,7 @@ public class SublinksPersonService {
     userDataService.checkAndAddIpRelation(person, ip, token, userAgent);
 
     return LoginResponse.builder()
-        .token(Optional.of(token))
+        .token(token)
         .status(RegistrationState.UNCHANGED)
         .build();
   }
@@ -235,45 +261,57 @@ public class SublinksPersonService {
    */
   public PersonResponse updatePerson(Person person, UpdatePerson updatePersonForm) {
 
-    if (updatePersonForm.languagesKeys()
+    if (Optional.ofNullable(updatePersonForm.languagesKeys())
         .isPresent()) {
-      person.setLanguages(languageRepository.findAllByCodeIsIn(updatePersonForm.languagesKeys()
-          .get()));
+      person.setLanguages(languageRepository.findAllByCodeIsIn(updatePersonForm.languagesKeys()));
     }
 
-    updatePersonForm.displayName()
+    Optional.ofNullable(updatePersonForm.displayName())
         .ifPresent(person::setDisplayName);
-    updatePersonForm.email()
+    Optional.ofNullable(updatePersonForm.email())
         .ifPresent(person::setEmail);
-    updatePersonForm.avatarImageUrl()
+    Optional.ofNullable(updatePersonForm.avatarImageUrl())
         .ifPresent(person::setAvatarImageUrl);
-    updatePersonForm.bannerImageUrl()
+    Optional.ofNullable(updatePersonForm.bannerImageUrl())
         .ifPresent(person::setBannerImageUrl);
-    updatePersonForm.bio()
+    Optional.ofNullable(updatePersonForm.bio())
         .ifPresent(person::setBiography);
-    updatePersonForm.matrixUserId()
+    Optional.ofNullable(updatePersonForm.matrixUserId())
         .ifPresent(person::setMatrixUserId);
 
-    if (updatePersonForm.oldPassword()
-        .isPresent() && updatePersonForm.password()
-        .isPresent() && updatePersonForm.passwordConfirmation()
+    if (Optional.ofNullable(updatePersonForm.password())
         .isPresent()) {
-      if (!personService.isValidPersonPassword(person, updatePersonForm.oldPassword()
-          .get())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
-      }
+      Optional.ofNullable(updatePersonForm.oldPassword())
+          .ifPresent(oldPassword -> {
+            if (!personService.isValidPersonPassword(person, oldPassword)) {
+              throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_incorrect");
+            }
+          });
       if (!updatePersonForm.password()
-          .get()
-          .equals(updatePersonForm.passwordConfirmation()
-              .get())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "password_mismatch");
+          .equals(updatePersonForm.passwordConfirmation())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "passwords_do_not_match");
       }
-      personService.updatePassword(person, updatePersonForm.password()
-          .get());
+      personService.updatePassword(person, updatePersonForm.password());
     }
 
     personRepository.save(person);
 
     return conversionService.convert(person, PersonResponse.class);
+  }
+
+  public List<Person> indexBannedPersons(final IndexBannedPerson indexBannedPersonForm) {
+
+    Optional<Role> bannedRole = roleService.getBannedRole();
+
+    if (bannedRole.isEmpty()) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "banned_role_not_found");
+    }
+
+    return personRepository.findAllByNameAndBiographyAndRole(indexBannedPersonForm.search(),
+        bannedRole.get()
+            .getId(), PageRequest.of(indexBannedPersonForm.limit(), indexBannedPersonForm.page(),
+            indexBannedPersonForm.sortOrder() == SortOrder.Asc ? Sort.by("name")
+                .ascending() : Sort.by("name")
+                .descending()));
   }
 }

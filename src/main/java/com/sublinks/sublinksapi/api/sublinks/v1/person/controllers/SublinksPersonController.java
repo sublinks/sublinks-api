@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.services.SublinksPersonService;
@@ -18,7 +19,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.PageRequest;
@@ -61,10 +61,11 @@ public class SublinksPersonController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse show(@PathVariable String key) {
 
-    Optional<PersonResponse> personResponse = personRepository.findOneByNameIgnoreCase(key)
-        .map(person -> conversionService.convert(person, PersonResponse.class));
+    final PersonIdentity ids = sublinksPersonService.getPersonIdentifiersFromKey(key);
 
-    return personResponse.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    return personRepository.findOneByNameAndInstance_Domain(ids.name(), ids.domain())
+        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
   }
 
   @Operation(summary = "Register a new person")
@@ -72,20 +73,18 @@ public class SublinksPersonController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public LoginResponse create(final HttpServletRequest request,
-      @RequestBody @Valid final CreatePerson createPerson)
-  {
+      @RequestBody @Valid final CreatePerson createPerson) {
 
     return sublinksPersonService.registerPerson(createPerson, request.getRemoteAddr(),
         request.getHeader("User-Agent"));
   }
 
   @Operation(summary = "Log into a user")
-  @PostMapping("/{key}/login")
+  @PostMapping("/login")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public LoginResponse login(final HttpServletRequest request,
-      @RequestBody @Valid final LoginPerson loginPerson)
-  {
+      @RequestBody @Valid final LoginPerson loginPerson) {
 
     return sublinksPersonService.login(loginPerson, request.getRemoteAddr(),
         request.getHeader("User-Agent"));
@@ -96,8 +95,7 @@ public class SublinksPersonController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public PersonResponse update(@PathVariable String key,
-      @RequestBody @Valid final UpdatePerson updatePersonForm, final SublinksJwtPerson principal)
-  {
+      @RequestBody @Valid final UpdatePerson updatePersonForm, final SublinksJwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

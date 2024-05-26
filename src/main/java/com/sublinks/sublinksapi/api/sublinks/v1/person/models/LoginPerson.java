@@ -6,7 +6,7 @@ import lombok.Builder;
 @Builder
 public record LoginPerson(String username,
                           String password,
-                          Optional<String> captcha_token,
-                          Optional<String> captcha_answer) {
+                          String captcha_token,
+                          String captcha_answer) {
 
 }

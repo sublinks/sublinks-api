@@ -20,7 +20,7 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   SublinksRoleMapper roleMapper;
 
   @Override
-  @Mapping(target = "key", source = "person.name")
+  @Mapping(target = "key", source = "person", qualifiedByName = "personKey")
   @Mapping(target = "name", source = "person.name")
   @Mapping(target = "displayName", source = "person", qualifiedByName = "display_name")
   @Mapping(target = "isBanned", source = "person", qualifiedByName = "is_banned")
@@ -32,9 +32,20 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Mapping(target = "role", expression = "java(roleMapper.convert(person.getRole()))")
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "isLocal", source = "person.local")
-  @Mapping(target = "createdAt", source = "person.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "updatedAt", source = "person.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "createdAt",
+      source = "person.createdAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "updatedAt",
+      source = "person.updatedAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract PersonResponse convert(@Nullable Person person);
+
+  @Named("personKey")
+  String mapPersonKey(Person person) {
+
+    return person.getName() + "@" + person.getInstance()
+        .getDomain();
+  }
 
   @Named("is_banned")
   Boolean mapIsBanned(Person person) {
@@ -45,19 +56,22 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Named("display_name")
   String mapDisplayName(Person person) {
 
-    return !person.getDisplayName().isBlank() ? person.getDisplayName() : null;
+    return !person.getDisplayName()
+        .isBlank() ? person.getDisplayName() : null;
   }
 
   @Named("avatar")
   String mapAvatar(Person person) {
 
-    return !person.getAvatarImageUrl().isBlank() ? person.getAvatarImageUrl() : null;
+    return !person.getAvatarImageUrl()
+        .isBlank() ? person.getAvatarImageUrl() : null;
   }
 
   @Named("banner")
   String mapBanner(Person person) {
 
-    return !person.getBannerImageUrl().isBlank() ? person.getBannerImageUrl() : null;
+    return !person.getBannerImageUrl()
+        .isBlank() ? person.getBannerImageUrl() : null;
   }
 
   @Named("banExpiresAt")
@@ -67,7 +81,8 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
 
     simpleDateFormat.applyPattern(DateUtils.FRONT_END_DATE_FORMAT);
 
-    return Optional.ofNullable(person.getRole().getExpiresAt() != null ? simpleDateFormat.format(
-        person.getRole().getExpiresAt()) : null);
+    return Optional.ofNullable(person.getRole()
+        .getExpiresAt() != null ? simpleDateFormat.format(person.getRole()
+        .getExpiresAt()) : null);
   }
 }
