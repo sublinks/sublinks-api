@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInterface;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionMediaTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionModLogTypes;
@@ -34,7 +35,8 @@ public class InitialRoleSetupService {
    */
   public void generateInitialRoles() {
 
-    if (roleRepository.findAll().isEmpty()) {
+    if (roleRepository.findAll()
+        .isEmpty()) {
       createAdminRole();
       createBannedRole();
       createGuestRole();
@@ -51,12 +53,11 @@ public class InitialRoleSetupService {
   private void savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
     role.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(
-            RolePermissions.builder()
-                .role(role)
-                .permission(rolePermission.toString())
-                .build())
-        ).collect(Collectors.toSet()));
+        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder()
+            .role(role)
+            .permission(rolePermission.toString())
+            .build()))
+        .collect(Collectors.toSet()));
   }
 
   /**
@@ -74,6 +75,7 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITIES);
     rolePermissions.add(RolePermissionPersonTypes.READ_USER);
     rolePermissions.add(RolePermissionModLogTypes.READ_MODLOG);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_SEARCH);
   }
 
   /**
@@ -82,13 +84,11 @@ public class InitialRoleSetupService {
   private void createAdminRole() {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
-    Role adminRole = roleRepository.save(
-        Role.builder()
-            .description("Admin role for admins")
-            .name(RoleTypes.ADMIN.toString())
-            .isActive(true)
-            .build()
-    );
+    Role adminRole = roleRepository.save(Role.builder()
+        .description("Admin role for admins")
+        .name(RoleTypes.ADMIN.toString())
+        .isActive(true)
+        .build());
 
     savePermissions(adminRole, rolePermissions);
   }
@@ -105,8 +105,7 @@ public class InitialRoleSetupService {
         .description("Default role for all users")
         .name(RoleTypes.GUEST.toString())
         .isActive(true)
-        .build()
-    );
+        .build());
 
     savePermissions(defaultUserRole, rolePermissions);
   }
@@ -123,8 +122,7 @@ public class InitialRoleSetupService {
         .description("Banned role for banned users")
         .name(RoleTypes.BANNED.toString())
         .isActive(true)
-        .build()
-    );
+        .build());
 
     savePermissions(bannedRole, rolePermissions);
   }
@@ -196,8 +194,7 @@ public class InitialRoleSetupService {
         .description("Default Role for all registered users")
         .name(RoleTypes.REGISTERED.toString())
         .isActive(true)
-        .build()
-    );
+        .build());
 
     savePermissions(registeredUserRole, rolePermissions);
   }

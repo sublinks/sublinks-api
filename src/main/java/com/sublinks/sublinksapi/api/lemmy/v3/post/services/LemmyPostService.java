@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
+import jakarta.annotation.Nullable;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -28,7 +29,7 @@ public class LemmyPostService {
 
   public PostView postViewFromPost(final Post post) {
 
-    return postViewBuilder(post).saved(false)
+    return postViewBuilder(post, null).saved(false)
         .read(false)
         .creator_blocked(false)
         .my_vote(0)
@@ -42,10 +43,11 @@ public class LemmyPostService {
     Optional<PostLike> postLike = postLikeService.getPostLike(post, person);
     int vote = 0;
     if (postLike.isPresent()) {
-      vote = postLike.get().getScore();
+      vote = postLike.get()
+          .getScore();
     }
 
-    return postViewBuilder(post).saved(postSaveService.isPostSaved(post, person))
+    return postViewBuilder(post, person).saved(postSaveService.isPostSaved(post, person))
         .read(false)
         .creator_blocked(false)
         .my_vote(vote)
@@ -53,13 +55,34 @@ public class LemmyPostService {
         .build();
   }
 
-  private PostView.PostViewBuilder postViewBuilder(final Post post) {
+  private PostView.PostViewBuilder postViewBuilder(final Post post, @Nullable final Person person) {
 
-    final com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = conversionService.convert(
+    com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post lemmyPost = conversionService.convert(
         post, com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.class);
+
+    if (lemmyPost != null && (lemmyPost.deleted() || lemmyPost.removed())) {
+
+      com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post.PostBuilder lPostBuilder = lemmyPost.toBuilder();
+
+      final boolean isAdmin = person != null && person.isAdmin();
+
+      if (lemmyPost.deleted()) {
+        lPostBuilder.name("*Deleted by creator*");
+        lPostBuilder.body("*Deleted by creator*");
+      } else {
+        if (!isAdmin) {
+          lPostBuilder.name("*Removed by moderator*");
+          lPostBuilder.body("*Removed by moderator*");
+        }
+      }
+
+      lemmyPost = lPostBuilder.build();
+    }
+
     final Person creator = postService.getPostCreator(post);
     final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person lemmyCreator = conversionService.convert(
         creator, com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class);
+
     final Community community = conversionService.convert(post.getCommunity(), Community.class);
 
     final PostAggregates postAggregates = conversionService.convert(post.getPostAggregate(),

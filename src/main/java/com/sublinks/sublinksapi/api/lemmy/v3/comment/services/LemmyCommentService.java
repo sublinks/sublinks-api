@@ -13,10 +13,12 @@ import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,6 +30,7 @@ public class LemmyCommentService {
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommentSaveService commentSaveService;
+  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
 
   @NonNull
   public CommentView createCommentView(
@@ -51,11 +54,14 @@ public class LemmyCommentService {
 
     CommentView.CommentViewBuilder commentView = commentViewBuilder(comment);
 
+    commentView.comment(getComment(comment, person));
+
     final SubscribedType subscribedType = lemmyCommunityService.getPersonCommunitySubscribeType(
         person, comment.getCommunity());
     final int personVote = commentLikeService.getPersonCommentVote(person, comment);
 
-    commentView.subscribed(subscribedType).saved(false)// @todo check if saved
+    commentView.subscribed(subscribedType)
+        .saved(false)// @todo check if saved
         .my_vote(personVote);
 
     commentView.saved(commentSaveService.isCommentSavedByPerson(comment, person));
@@ -67,8 +73,6 @@ public class LemmyCommentService {
   private CommentView.CommentViewBuilder commentViewBuilder(
       final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
-    final Comment lemmyComment = conversionService.convert(comment, Comment.class);
-
     final com.sublinks.sublinksapi.person.entities.Person creator = comment.getPerson();
     final Person lemmyCreator = conversionService.convert(creator, Person.class);
 
@@ -78,7 +82,8 @@ public class LemmyCommentService {
 
     CommentAggregate commentAggregate = comment.getCommentAggregate();
     if (comment.getCommentAggregate() == null) {
-      commentAggregate = CommentAggregate.builder().build();
+      commentAggregate = CommentAggregate.builder()
+          .build();
     }
 
     final CommentAggregates lemmyCommentAggregates = conversionService.convert(commentAggregate,
@@ -93,7 +98,7 @@ public class LemmyCommentService {
         comment.getCommunity(), LinkPersonCommunityType.moderator);
 
     return CommentView.builder()
-        .comment(lemmyComment)
+        .comment(getComment(comment, null))
         .creator(lemmyCreator)
         .community(lemmyCommunity)
         .post(lemmyPost)
@@ -103,5 +108,28 @@ public class LemmyCommentService {
             false) // @todo check if creator is blocked by the viewer ( only for logged in users )
         .creator_is_moderator(creatorIsModerator)
         .creator_is_admin(createIsAdmin);
+  }
+
+  public Comment getComment(final com.sublinks.sublinksapi.comment.entities.Comment comment,
+      @Nullable final com.sublinks.sublinksapi.person.entities.Person person) {
+
+    Comment lemmyComment = conversionService.convert(comment, Comment.class);
+
+    if (lemmyComment != null && (lemmyComment.deleted() || lemmyComment.removed())) {
+      Comment.CommentBuilder lCommentBuilder = lemmyComment.toBuilder();
+
+      final boolean isAdmin = person != null && person.isAdmin();
+      if (!isAdmin) {
+        if (lemmyComment.deleted()) {
+          lCommentBuilder.content("*Deleted by creator*");
+        } else {
+          lCommentBuilder.content("*Removed by moderator*");
+        }
+      }
+
+      lemmyComment = lCommentBuilder.build();
+    }
+
+    return lemmyComment;
   }
 }
