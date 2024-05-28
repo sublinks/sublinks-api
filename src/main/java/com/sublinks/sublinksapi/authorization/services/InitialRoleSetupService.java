@@ -76,6 +76,8 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionPersonTypes.READ_USER);
     rolePermissions.add(RolePermissionPersonTypes.READ_USERS);
     rolePermissions.add(RolePermissionModLogTypes.READ_MODLOG);
+    rolePermissions.add(RolePermissionPersonTypes.READ_PERSON_AGGREGATION);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION);
   }
 
   /**

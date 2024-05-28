@@ -10,6 +10,7 @@ public enum RolePermissionPersonTypes implements RolePermissionInterface {
   DELETE_USER("user", AuthorizeAction.DELETE),
   PURGE_USER("user", AuthorizeAction.PURGE),
   READ_MENTION_USER("user-mention", AuthorizeAction.READ),
+  READ_PERSON_AGGREGATION("user-aggregation", AuthorizeAction.READ),
   MARK_MENTION_AS_READ("user-mention-read", AuthorizeAction.UPDATE),
   READ_REPLIES("user-reply-read", AuthorizeAction.READ),
   MARK_REPLIES_AS_READ("user-reply-read", AuthorizeAction.UPDATE),

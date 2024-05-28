@@ -347,6 +347,4 @@ public class SublinksPersonService {
 
     return conversionService.convert(person, PersonResponse.class);
   }
-
-  public
 }

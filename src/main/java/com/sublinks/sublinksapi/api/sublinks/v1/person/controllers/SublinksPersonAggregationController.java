@@ -2,18 +2,28 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
-import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonAggregateResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.services.SublinksPersonService;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonAggregate;
+import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api/v1/person/{key}/aggregation")
@@ -23,17 +33,33 @@ public class SublinksPersonAggregationController extends AbstractSublinksApiCont
 
   private final SublinksPersonService sublinksPersonService;
   private final ConversionService conversionService;
+  private final RolePermissionService rolePermissionService;
+  private final PersonAggregateRepository personAggregateRepository;
+  private final PersonRepository personRepository;
 
   @Operation(summary = "Get a person's aggregation")
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public PersonResponse show(@RequestBody @Valid BanPerson banPersonForm,
-      final SublinksJwtPerson jwtPerson)
+  public PersonAggregateResponse show(@RequestParam final String key,
+      final SublinksJwtPerson sublinksJwtPerson)
   {
 
-    final Person person = getPersonOrThrowUnauthorized(jwtPerson);
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    return sublinksPersonService.banPerson(banPersonForm, person);
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "not_authorized_to_read_community_aggregation"));
+
+    final PersonIdentity personIdentity = sublinksPersonService.getPersonIdentifiersFromKey(key);
+
+    final Person foundPerson = personRepository.findOneByNameAndInstance_Domain(
+            personIdentity.name(), personIdentity.domain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    final PersonAggregate personAggregate = personAggregateRepository.findByPerson(foundPerson);
+
+    return conversionService.convert(personAggregate, PersonAggregateResponse.class);
   }
 }
