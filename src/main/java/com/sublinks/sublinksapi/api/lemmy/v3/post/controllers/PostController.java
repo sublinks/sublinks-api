@@ -157,7 +157,6 @@ public class PostController extends AbstractLemmyApiController {
         .cross_posts(crossPosts)
         .build();
   }
-
   @Operation(summary = "Mark a post as read.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -196,24 +195,19 @@ public class PostController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person.orElse(null), RolePermissionPostTypes.READ_POSTS,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    List<Long> communityIds = null;
+    List<Long> communityIds = new ArrayList<>();
     Community community;
-    if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
-      Long communityId =
-          getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
-      community = communityRepository.findCommunityByIdOrTitleSlug(communityId,
-          getPostsForm.community_name());
-      communityIds = new ArrayList<>();
-      communityIds.add(community.getId());
-    }
 
-    if (person.isPresent() && getPostsForm.type_() != null) {
+    if (getPostsForm.type_() != null) {
       switch (getPostsForm.type_()) {
         case Subscribed -> {
+          if (person.isEmpty()) {
+            break;
+          }
+
           final Set<LinkPersonCommunity> personCommunities = person.get()
               .getLinkPersonCommunity();
           if (!personCommunities.isEmpty()) {
-            communityIds = new ArrayList<>();
             for (LinkPersonCommunity l : personCommunities) {
               if (l.getLinkType() == LinkPersonCommunityType.follower) {
                 communityIds.add(l.getCommunity()
@@ -223,7 +217,6 @@ public class PostController extends AbstractLemmyApiController {
           }
         }
         case Local -> {
-          communityIds = new ArrayList<>();
           for (Community c : communityRepository.findAll()) { // @todo find local
             communityIds.add(c.getId());
           }
@@ -234,7 +227,21 @@ public class PostController extends AbstractLemmyApiController {
         }
       }
     }
-
+    if (getPostsForm.type_() == null || getPostsForm.type_() != ListingType.Subscribed) {
+      if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
+        Long communityId =
+            getPostsForm.community_id() == null ? null : (long) getPostsForm.community_id();
+        community = communityRepository.findCommunityByIdOrTitleSlug(communityId,
+            getPostsForm.community_name());
+        if (community == null) {
+          throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "community_not_found");
+        }
+        if (!(getPostsForm.type_() != null && getPostsForm.type_() == ListingType.Local
+            && !community.isLocal())) {
+          communityIds.add(community.getId());
+        }
+      }
+    }
     InstanceConfig config = localInstanceContext.instance()
         .getInstanceConfig();
 
@@ -295,12 +302,46 @@ public class PostController extends AbstractLemmyApiController {
         .build();
   }
 
+  @Operation(summary = "Mark a post as read.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
+  @PostMapping("mark_as_read")
+  PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowBadRequest(principal);
+
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.MARK_POST_AS_READ,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
+    // @todo support multiple posts
+    final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    postReadService.markPostReadByPerson(post, person);
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
+        .build();
+  }
+
   @Operation(summary = "Like / vote on a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("like")
   PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
@@ -334,6 +375,13 @@ public class PostController extends AbstractLemmyApiController {
           schema = @Schema(implementation = PostResponse.class))}),
       @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @GetMapping("like/list")
   ListPostLikesResponse listLikes(@Valid ListPostLikes listPostLikesForm, JwtPerson principal) {
