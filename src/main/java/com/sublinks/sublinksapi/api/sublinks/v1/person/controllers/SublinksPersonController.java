@@ -101,12 +101,4 @@ public class SublinksPersonController extends AbstractSublinksApiController {
 
     return sublinksPersonService.updatePerson(person, updatePersonForm);
   }
-
-  @Operation(summary = "Delete/Purge an person ( as an admin )")
-  @DeleteMapping("/{key}")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void delete(@PathVariable String key) {
-    // TODO: implement
-  }
 }

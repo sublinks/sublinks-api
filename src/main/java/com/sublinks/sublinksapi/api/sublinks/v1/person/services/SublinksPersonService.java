@@ -3,14 +3,15 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtUtil;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
+import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.moderation.IndexBannedPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.enums.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.person.models.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.moderation.IndexBannedPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.email.entities.Email;
@@ -299,6 +300,13 @@ public class SublinksPersonService {
     return conversionService.convert(person, PersonResponse.class);
   }
 
+  /**
+   * Retrieves a list of banned persons based on the search criteria.
+   *
+   * @param indexBannedPersonForm The form containing the search criteria.
+   * @return A list of Person objects representing the banned persons.
+   * @throws ResponseStatusException if the banned role is not found.
+   */
   public List<Person> indexBannedPersons(final IndexBannedPerson indexBannedPersonForm) {
 
     Optional<Role> bannedRole = roleService.getBannedRole();
@@ -314,4 +322,31 @@ public class SublinksPersonService {
                 .ascending() : Sort.by("name")
                 .descending()));
   }
+
+  /**
+   * Bans a person based on the provided ban form and person details.
+   *
+   * @param banPersonForm The form containing the ban details.
+   * @param person        The person to be banned.
+   * @return The PersonResponse object representing the updated person information.
+   */
+  public PersonResponse banPerson(final BanPerson banPersonForm, final Person person) {
+
+    PersonIdentity ids = getPersonIdentifiersFromKey(banPersonForm.key());
+
+    Person bannedPerson = personRepository.findOneByNameAndInstance_Domain(ids.name(), ids.domain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    bannedPerson.setRole(banPersonForm.ban() ? roleService.getBannedRole(
+        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "banned_role_not_found"))
+        : roleService.getDefaultRegisteredRole(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                "default_registered_role_not_found")));
+    personService.updatePerson(person);
+    // @todo: modlog
+
+    return conversionService.convert(person, PersonResponse.class);
+  }
+
+  public
 }

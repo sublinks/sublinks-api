@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.models;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.person.enums.RegistrationState;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import lombok.Builder;

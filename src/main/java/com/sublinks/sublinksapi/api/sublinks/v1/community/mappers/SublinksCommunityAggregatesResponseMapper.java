@@ -9,18 +9,19 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-public abstract class SublinksCommunityAggregatesResponse implements
+public abstract class SublinksCommunityAggregatesResponseMapper implements
     Converter<CommunityAggregate, CommunityAggregatesResponse> {
 
   @Override
-  @Mapping(target = "key", source = "communityAggregate.id")
+  @Mapping(target = "communityKey", source = "communityAggregate.community.titleSlug")
   @Mapping(target = "subscriberCount", source = "communityAggregate.subscriberCount")
   @Mapping(target = "postCount", source = "communityAggregate.postCount")
   @Mapping(target = "commentCount", source = "communityAggregate.commentCount")
   @Mapping(target = "activeDailyUserCount", source = "communityAggregate.activeDailyUserCount")
   @Mapping(target = "activeWeeklyUserCount", source = "communityAggregate.activeWeeklyUserCount")
   @Mapping(target = "activeMonthlyUserCount", source = "communityAggregate.activeMonthlyUserCount")
-  @Mapping(target = "activeHalfYearUserCount", source = "communityAggregate.activeHalfYearUserCount")
+  @Mapping(target = "activeHalfYearUserCount",
+      source = "communityAggregate.activeHalfYearUserCount")
   public abstract CommunityAggregatesResponse convert(
       @Nullable CommunityAggregate communityAggregate);
 }

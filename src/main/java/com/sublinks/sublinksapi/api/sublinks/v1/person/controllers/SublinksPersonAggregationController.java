@@ -13,41 +13,27 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/v1/person/{key}/moderation")
-@Tag(name = "Person Moderation", description = "Person Moderation API")
+@RequestMapping("api/v1/person/{key}/aggregation")
+@Tag(name = "Person Aggegation", description = "Person Aggregation API")
 @AllArgsConstructor
-public class SublinksPersonModerationController extends AbstractSublinksApiController {
+public class SublinksPersonAggregationController extends AbstractSublinksApiController {
 
   private final SublinksPersonService sublinksPersonService;
   private final ConversionService conversionService;
 
-  @Operation(summary = "Ban a person")
-  @GetMapping("/ban")
+  @Operation(summary = "Get a person's aggregation")
+  @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public PersonResponse ban(@RequestBody @Valid BanPerson banPersonForm,
+  public PersonResponse show(@RequestBody @Valid BanPerson banPersonForm,
       final SublinksJwtPerson jwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(jwtPerson);
 
     return sublinksPersonService.banPerson(banPersonForm, person);
-  }
-
-
-  @Operation(summary = "Delete/Purge an person ( as an admin )")
-  @DeleteMapping("/purge")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void delete(@PathVariable String key) {
-    // TODO: implement
   }
 }

@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.api.sublinks.v1.person.models;
+package com.sublinks.sublinksapi.api.sublinks.v1.person.enums;
 
 public enum RegistrationState {
   UNCHANGED,
