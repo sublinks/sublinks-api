@@ -22,6 +22,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -104,25 +105,46 @@ public class SearchServiceTests {
   }
 
   @Test
-  public void testSearchPostByUrl() {
+  public void testSearchPostByUrlWithNoCrossPosts() {
     String url = "http://example.com";
     int page = 0;
     int pageSize = 2;
     Sort sort = Sort.by("id");
-
     String cleanUrl = "http://example.com/clean";
     String hash = "hashed-url";
+
+    when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
+    when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
+    when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.empty());
+
+    Page<Post> expectedPage = Page.empty();
+    Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
+
+    assertEquals(expectedPage, result);
+  }
+
+  @Test
+  public void testSearchPostByUrlWithCrossPosts() {
+    String url = "http://example.com";
+    int page = 0;
+    int pageSize = 2;
+    Sort sort = Sort.by("id");
+    String cleanUrl = "http://example.com/clean";
+    String hash = "hashed-url";
+
     Post post1 = new Post();
     Post post2 = new Post();
     Set<Post> posts = Set.of(post1,post2);
     CrossPost crossPost = new CrossPost();
     crossPost.setPosts(posts);
+
     when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
     when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
     when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
 
-    Page<Post> expectedPage = new PageImpl<>(posts.stream().toList(),
-        PageRequest.of(page, pageSize, sort), posts.size());
+    List<Post> postList = crossPost.getPosts().stream().toList();
+    Page<Post> expectedPage = new PageImpl<>(postList.subList(page * pageSize, (page + 1) * pageSize),
+        PageRequest.of(page, pageSize, sort),posts.size());
 
     Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
 
