@@ -105,7 +105,7 @@ public class SearchServiceTests {
   }
 
   @Test
-  public void testSearchPostByUrlWithNoCrossPosts() {
+  public void testSearchPostByUrlReturnsEmptyWhenNoCrossPostsFound() {
     String url = "http://example.com";
     int page = 0;
     int pageSize = 2;
@@ -124,7 +124,7 @@ public class SearchServiceTests {
   }
 
   @Test
-  public void testSearchPostByUrlWithCrossPosts() {
+  public void testSearchPostByUrlWithCrossPostsReturnsResults() {
     String url = "http://example.com";
     int page = 0;
     int pageSize = 2;
