@@ -285,6 +285,7 @@ public class PostController extends AbstractLemmyApiController {
           // fall through for now
         }
       }
+    }
     if (getPostsForm.type_() == null || getPostsForm.type_() != ListingType.Subscribed) {
       if (getPostsForm.community_name() != null || getPostsForm.community_id() != null) {
         Long communityId =
@@ -360,32 +361,6 @@ public class PostController extends AbstractLemmyApiController {
         .build();
   }
 
-  @Operation(summary = "Mark a post as read.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200",
-      description = "OK",
-      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-          schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
-          description = "Post Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})})
-  @PostMapping("mark_as_read")
-  PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
-      final JwtPerson principal) {
-
-    final Person person = getPersonOrThrowBadRequest(principal);
-
-    rolePermissionService.isPermitted(person, RolePermissionPostTypes.MARK_POST_AS_READ,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-
-    // @todo support multiple posts
-    final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    postReadService.markPostReadByPerson(post, person);
-    return PostResponse.builder()
-        .post_view(lemmyPostService.postViewFromPost(post, person))
-        .build();
-  }
 
   @Operation(summary = "Like / vote on a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200",
@@ -397,7 +372,8 @@ public class PostController extends AbstractLemmyApiController {
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("like")
-  PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm, JwtPerson principal) {
+  public PostResponse like(@Valid @RequestBody CreatePostLike createPostLikeForm,
+      JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -495,7 +471,7 @@ public class PostController extends AbstractLemmyApiController {
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ResponseStatusException.class))})})
   @PostMapping("report")
-  PostReportResponse report(@Valid @RequestBody final CreatePostReport createPostReportForm,
+  public PostReportResponse report(@Valid @RequestBody final CreatePostReport createPostReportForm,
       final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
