@@ -78,6 +78,8 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionModLogTypes.READ_MODLOG);
     rolePermissions.add(RolePermissionPersonTypes.READ_PERSON_AGGREGATION);
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS);
+    rolePermissions.add(RolePermissionPersonTypes.USER_LOGIN);
   }
 
   /**
@@ -166,11 +168,17 @@ public class InitialRoleSetupService {
 
     rolePermissions.add(RolePermissionPersonTypes.UPDATE_USER_SETTINGS);
     rolePermissions.add(RolePermissionPersonTypes.RESET_PASSWORD);
+    rolePermissions.add(RolePermissionPersonTypes.USER_EXPORT);
+    rolePermissions.add(RolePermissionPersonTypes.MARK_MENTION_AS_READ);
+    rolePermissions.add(RolePermissionPersonTypes.MARK_REPLIES_AS_READ);
+    rolePermissions.add(RolePermissionPersonTypes.READ_MENTION_USER);
+    rolePermissions.add(RolePermissionPersonTypes.READ_REPLIES);
 
     rolePermissions.add(RolePermissionPostTypes.MODERATOR_REMOVE_POST);
     rolePermissions.add(RolePermissionCommentTypes.MODERATOR_REMOVE_COMMENT);
     rolePermissions.add(RolePermissionCommunityTypes.MODERATOR_REMOVE_COMMUNITY);
-    rolePermissions.add(RolePermissionPersonTypes.MODERATOR_BAN_USER);
+    rolePermissions.add(RolePermissionCommunityTypes.MODERATOR_BAN_USER);
+
     rolePermissions.add(RolePermissionCommentTypes.MODERATOR_SPEAK);
     rolePermissions.add(RolePermissionCommentTypes.MODERATOR_SHOW_DELETED_COMMENT);
     rolePermissions.add(RolePermissionPostTypes.MODERATOR_SHOW_DELETED_POST);

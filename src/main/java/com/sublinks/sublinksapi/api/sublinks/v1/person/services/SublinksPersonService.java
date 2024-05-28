@@ -8,11 +8,15 @@ import com.sublinks.sublinksapi.api.sublinks.v1.person.enums.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;
 import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
@@ -21,9 +25,11 @@ import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.entities.PersonAggregate;
 import com.sublinks.sublinksapi.person.entities.PersonEmailVerification;
 import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
+import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
@@ -59,6 +65,8 @@ public class SublinksPersonService {
   private final ConversionService conversionService;
   private final LanguageRepository languageRepository;
   private final RoleService roleService;
+  private final RolePermissionService rolePermissionService;
+  private final PersonAggregateRepository personAggregateRepository;
 
   /**
    * Retrieves the name and domain identifiers of a person from the given key.
@@ -202,14 +210,12 @@ public class SublinksPersonService {
       final String userAgent)
   {
 
-    final Optional<Person> foundPerson = personRepository.findOneByNameIgnoreCase(
-        loginPersonForm.username());
+    final Person person = personRepository.findOneByNameIgnoreCase(loginPersonForm.username())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
-    if (foundPerson.isEmpty()) {
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found");
+    if (!rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_LOGIN)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_login");
     }
-
-    final Person person = foundPerson.get();
 
     if (person.isDeleted()) {
       return LoginResponse.builder()
@@ -262,6 +268,9 @@ public class SublinksPersonService {
    */
   public PersonResponse updatePerson(Person person, UpdatePerson updatePersonForm) {
 
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.UPDATE_USER_SETTINGS,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_person"));
+
     if (Optional.ofNullable(updatePersonForm.languagesKeys())
         .isPresent()) {
       person.setLanguages(languageRepository.findAllByCodeIsIn(updatePersonForm.languagesKeys()));
@@ -307,8 +316,12 @@ public class SublinksPersonService {
    * @return A list of Person objects representing the banned persons.
    * @throws ResponseStatusException if the banned role is not found.
    */
-  public List<Person> indexBannedPersons(final IndexBannedPerson indexBannedPersonForm) {
+  public List<Person> indexBannedPersons(final IndexBannedPerson indexBannedPersonForm,
+      final Person person)
+  {
 
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_READ,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_person"));
     Optional<Role> bannedRole = roleService.getBannedRole();
 
     if (bannedRole.isEmpty()) {
@@ -334,6 +347,9 @@ public class SublinksPersonService {
 
     PersonIdentity ids = getPersonIdentifiersFromKey(banPersonForm.key());
 
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_USER,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_person"));
+
     Person bannedPerson = personRepository.findOneByNameAndInstance_Domain(ids.name(), ids.domain())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
@@ -346,5 +362,23 @@ public class SublinksPersonService {
     // @todo: modlog
 
     return conversionService.convert(person, PersonResponse.class);
+  }
+
+  public PersonAggregateResponse showAggregate(final String key, final Optional<Person> person) {
+
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "not_authorized_to_read_community_aggregation"));
+
+    final PersonIdentity personIdentity = getPersonIdentifiersFromKey(key);
+
+    final Person foundPerson = personRepository.findOneByNameAndInstance_Domain(
+            personIdentity.name(), personIdentity.domain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    final PersonAggregate personAggregate = personAggregateRepository.findByPerson(foundPerson);
+
+    return conversionService.convert(personAggregate, PersonAggregateResponse.class);
   }
 }

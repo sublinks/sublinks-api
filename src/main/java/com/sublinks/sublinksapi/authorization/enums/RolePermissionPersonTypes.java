@@ -16,9 +16,8 @@ public enum RolePermissionPersonTypes implements RolePermissionInterface {
   MARK_REPLIES_AS_READ("user-reply-read", AuthorizeAction.UPDATE),
   RESET_PASSWORD("user-reset-password", AuthorizeAction.DELETE),
   USER_BLOCK("user", AuthorizeAction.BLOCK),
-
-  // Moderator permissions
-  MODERATOR_BAN_USER("user-moderator", AuthorizeAction.BAN),
+  USER_LOGIN("user-login", AuthorizeAction.READ),
+  USER_EXPORT("user-export", AuthorizeAction.READ),
 
   /**
    * Unused
