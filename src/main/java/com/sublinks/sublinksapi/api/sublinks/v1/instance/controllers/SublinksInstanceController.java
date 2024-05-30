@@ -37,11 +37,11 @@ public class SublinksInstanceController extends AbstractSublinksApiController {
   }
 
   @Operation(summary = "Get a specific instance")
-  @GetMapping("/{id}")
+  @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public InstanceResponse show(@PathVariable String id) {
+  public InstanceResponse show(@PathVariable String key) {
 
-    return sublinksInstanceService.show(id);
+    return sublinksInstanceService.show(key);
   }
 }
