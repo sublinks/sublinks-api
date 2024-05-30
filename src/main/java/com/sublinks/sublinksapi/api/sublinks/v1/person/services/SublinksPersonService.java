@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.moderation.IndexBannedPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.enums.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonAggregateResponse;
@@ -36,6 +37,7 @@ import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.person.services.UserDataService;
+import com.sublinks.sublinksapi.utils.PaginationUtils;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -92,6 +94,51 @@ public class SublinksPersonService {
         .name(name)
         .domain(domain)
         .build();
+  }
+
+  /**
+   * Retrieves a list of PersonResponse objects based on the search criteria.
+   *
+   * @param indexPerson The object containing the search criteria for the persons.
+   * @return A list of PersonResponse objects representing the persons that match the search
+   * criteria.
+   */
+  public List<PersonResponse> index(final IndexPerson indexPerson) {
+
+    if (indexPerson.search() == null) {
+      return personRepository.findAll(
+              PageRequest.of(Math.max(indexPerson.page() != null ? indexPerson.page() : 1, 1),
+                  PaginationUtils.Clamp(indexPerson.perPage() != null ? indexPerson.perPage() : 20, 1,
+                      20)))
+          .stream()
+          .map(person -> conversionService.convert(person, PersonResponse.class))
+          .toList();
+    }
+    return personRepository.findAllByNameAndBiography(indexPerson.search(),
+            PageRequest.of(Math.max(indexPerson.page() != null ? indexPerson.page() : 1, 1),
+                PaginationUtils.Clamp(indexPerson.perPage() != null ? indexPerson.perPage() : 20, 1,
+                    20)))
+        .stream()
+        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .toList();
+  }
+
+  /**
+   * Retrieves a PersonResponse object based on the provided key.
+   *
+   * @param key The key containing the person's information. If the key contains "@", it is split
+   *            into name and domain using "@" as the separator. Otherwise, the name is set as the
+   *            key and the domain is obtained from the local instance context.
+   * @return The PersonResponse object representing the person information.
+   * @throws ResponseStatusException if the person is not found.
+   */
+  public PersonResponse show(final String key) {
+
+    final PersonIdentity ids = getPersonIdentifiersFromKey(key);
+
+    return personRepository.findOneByNameAndInstance_Domain(ids.name(), ids.domain())
+        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
   }
 
   /**

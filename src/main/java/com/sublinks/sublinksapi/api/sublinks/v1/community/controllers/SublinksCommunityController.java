@@ -47,7 +47,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public List<CommunityResponse> index(
       @RequestParam(required = false) final Optional<IndexCommunity> indexCommunityParam,
-      final SublinksJwtPerson sublinksJwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
@@ -73,7 +74,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse create(@RequestBody @Valid final CreateCommunity createCommunity,
-      final SublinksJwtPerson sublinksJwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
@@ -85,7 +87,8 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse update(@PathVariable final String key,
-      @RequestBody @Valid UpdateCommunity updateCommunityForm, final SublinksJwtPerson principal) {
+      @RequestBody @Valid UpdateCommunity updateCommunityForm, final SublinksJwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

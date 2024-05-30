@@ -140,6 +140,10 @@ CREATE TABLE instances
   name            VARCHAR(255)                              NULL,
   description     TEXT                                      NULL,
   sidebar         TEXT                                      NULL,
+  search_vector   TSVECTOR GENERATED ALWAYS AS (to_tsvector('english',
+                                                            coalesce(name, '') ||
+                                                            ' ' ||
+                                                            coalesce(description, ''))) STORED,
   icon_url        TEXT                                      NULL,
   banner_url      TEXT                                      NULL,
   public_key      TEXT                                      NOT NULL,

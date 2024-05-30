@@ -26,11 +26,17 @@ public class PaginationUtils {
    * @param size  The number of records per page.
    */
   public static <T> void applyPagination(TypedQuery<T> query, @Nullable Integer page,
-      Integer size) {
+      Integer size)
+  {
 
     if (page != null) {
       query.setFirstResult(getOffset(page, size));
     }
     query.setMaxResults(Math.abs(size));
+  }
+
+  public static <T extends Integer> int Clamp(T value, T min, T max) {
+
+    return Math.min(Math.max(value, min), max);
   }
 }
