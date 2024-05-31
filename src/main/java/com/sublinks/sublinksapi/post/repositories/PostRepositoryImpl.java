@@ -4,7 +4,6 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
-import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.services.PostSearchQueryService;
@@ -35,18 +34,17 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     final Builder searchBuilder = postSearchQueryService.builder();
     if (postSearchCriteria.person() != null) {
-      searchBuilder
-          .setPerson(postSearchCriteria.person())
+      searchBuilder.setPerson(postSearchCriteria.person())
           .addPersonLikesToPost();
     }
     if (postSearchCriteria.communityIds() != null) {
-      searchBuilder
-          .filterByCommunities(postSearchCriteria.communityIds());
+      searchBuilder.filterByCommunities(postSearchCriteria.communityIds());
     }
-    if (postSearchCriteria.person() != null
-        && postSearchCriteria.listingType() == ListingType.Subscribed) {
-      searchBuilder
-          .filterByListingType(postSearchCriteria.listingType());
+    if (postSearchCriteria.person() != null) {
+      searchBuilder.filterByListingType(postSearchCriteria.listingType(),
+          postSearchCriteria.person());
+    } else {
+      searchBuilder.filterByListingType(postSearchCriteria.listingType());
     }
     if (postSearchCriteria.cursorBasedPageable() != null) {
       searchBuilder.setCursor(postSearchCriteria.cursorBasedPageable());
@@ -93,7 +91,8 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 
   @Override
@@ -122,6 +121,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 }

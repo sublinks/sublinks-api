@@ -110,8 +110,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @return The created comment response.
    */
   @Operation(summary = "Create a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping
   @Transactional
   public CommentResponse create(@Valid @RequestBody final CreateComment createCommentForm,
@@ -205,8 +207,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @throws ResponseStatusException If the comment is blocked by the slur filter.
    */
   @Operation(summary = "Edit a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))})})
   @PutMapping
   CommentResponse update(@Valid @RequestBody final EditComment editCommentForm,
       final JwtPerson principal) {
@@ -272,8 +276,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @throws ResponseStatusException If the user is not authorized or the comment is not found.
    */
   @Operation(summary = "Delete a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping("delete")
   CommentResponse delete(@Valid @RequestBody final DeleteComment deleteCommentForm,
       final JwtPerson principal) {
@@ -316,8 +322,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @return The comment response after marking the comment as read.
    */
   @Operation(summary = "Mark a comment as read.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping("mark_as_read")
   CommentResponse markAsRead(
       @Valid @RequestBody final MarkCommentReplyAsRead markCommentReplyAsRead,
@@ -358,8 +366,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @return The CommentResponse after liking/voting on the comment.
    */
   @Operation(summary = "Like / Vote on a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))})})
   @PostMapping("like")
   CommentResponse like(@Valid @RequestBody CreateCommentLike createCommentLikeForm,
       JwtPerson principal) {
@@ -399,8 +409,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @return The response containing the list of comment likes/votes.
    */
   @Operation(summary = "Get Votes on a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommentLikesResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ListCommentLikesResponse.class))})})
   @GetMapping("like/list")
   ListCommentLikesResponse listLikes(@Valid final ListCommentLikes listCommentLikesForm,
       final JwtPerson principal) {
@@ -421,7 +433,9 @@ public class CommentController extends AbstractLemmyApiController {
     for (CommentLike like : likes) {
       voteViews.add(conversionService.convert(like, VoteView.class));
     }
-    return ListCommentLikesResponse.builder().comment_likes(voteViews).build();
+    return ListCommentLikesResponse.builder()
+        .comment_likes(voteViews)
+        .build();
   }
 
   /**
@@ -432,8 +446,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @return The comment response after saving the comment.
    */
   @Operation(summary = "Save a comment for later.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))})})
   @PutMapping("save")
   CommentResponse saveForLater(@Valid @RequestBody final SaveComment saveCommentForm,
       final JwtPerson principal) {
@@ -457,8 +473,10 @@ public class CommentController extends AbstractLemmyApiController {
             .recipient_ids(new ArrayList<>())
             .build();
       }
-      commentSaveForLaterService.createCommentSave(
-          CommentSave.builder().comment(comment).person(person).build());
+      commentSaveForLaterService.createCommentSave(CommentSave.builder()
+          .comment(comment)
+          .person(person)
+          .build());
     } else {
       if (commentSaveForLater.isEmpty()) {
         return CommentResponse.builder()
@@ -487,8 +505,10 @@ public class CommentController extends AbstractLemmyApiController {
    * @throws ResponseStatusException If the provided pagination parameters are invalid.
    */
   @Operation(summary = "Get / fetch comments.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCommentsResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = GetCommentsResponse.class))})})
   @GetMapping("list")
   GetCommentsResponse list(@Valid final GetComments getCommentsForm, final JwtPerson principal) {
 
@@ -545,7 +565,9 @@ public class CommentController extends AbstractLemmyApiController {
       }
       commentViews.add(commentView);
     }
-    return GetCommentsResponse.builder().comments(commentViews).build();
+    return GetCommentsResponse.builder()
+        .comments(commentViews)
+        .build();
   }
 
   /**
@@ -558,8 +580,10 @@ public class CommentController extends AbstractLemmyApiController {
    *                                 request is invalid.
    */
   @Operation(summary = "Report a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentReportResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentReportResponse.class))})})
   @PostMapping("report")
   CommentReportResponse report(
       @Valid @RequestBody final CreateCommentReport createCommentReportForm,
@@ -587,6 +611,8 @@ public class CommentController extends AbstractLemmyApiController {
     final CommentReportView commentReportView = lemmyCommentReportService.createCommentReportView(
         commentReport, person);
 
-    return CommentReportResponse.builder().comment_report_view(commentReportView).build();
+    return CommentReportResponse.builder()
+        .comment_report_view(commentReportView)
+        .build();
   }
 }
