@@ -7,11 +7,18 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import lombok.Builder;
 
 @Builder
-public record IndexCommunity(String search,
-                             @Schema(description = "Sort type", example = "Hot", requiredMode = RequiredMode.NOT_REQUIRED) SortType sortType,
-                             @Schema(description = "Sublinks listing type", example = "All", requiredMode = RequiredMode.NOT_REQUIRED) SublinksListingType sublinksListingType,
-                             @Schema(description = "Show NSFW", example = "false", requiredMode = RequiredMode.NOT_REQUIRED) Boolean showNsfw,
-                             Integer limit,
-                             Integer page) {
+public record IndexCommunity(
+    String search,
+    @Schema(description = "Sort type",
+        example = "Hot",
+        requiredMode = RequiredMode.NOT_REQUIRED) SortType sortType,
+    @Schema(description = "Sublinks listing type",
+        example = "All",
+        requiredMode = RequiredMode.NOT_REQUIRED) SublinksListingType sublinksListingType,
+    @Schema(description = "Show NSFW",
+        example = "false",
+        requiredMode = RequiredMode.NOT_REQUIRED) Boolean showNsfw,
+    Integer perPage,
+    Integer page) {
 
 }

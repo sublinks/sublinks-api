@@ -65,7 +65,7 @@ public class ModerationLogController extends AbstractLemmyApiController {
         RolePermissionModLogTypes.READ_MODLOG,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    // Lemmy limit is 20 per ModLog table and there are 15 tables
+    // Lemmy perPage is 20 per ModLog table and there are 15 tables
     final int limit = 300;
 
     final List<ModRemovePostView> removed_posts = new ArrayList<>();

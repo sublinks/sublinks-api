@@ -63,7 +63,7 @@ public class SublinksCommentService {
    * @return A list of CommentResponse objects representing the retrieved comments.
    * @throws ResponseStatusException If the user does not have permission to read comments.
    */
-  public List<CommentResponse> index(IndexComment indexCommentForm, Person person) {
+  public List<CommentResponse> index(final IndexComment indexCommentForm, final Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENTS,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_update_not_permitted"));
@@ -108,7 +108,7 @@ public class SublinksCommentService {
     CommentSearchCriteria.CommentSearchCriteriaBuilder commentSearchCriteria = CommentSearchCriteria.builder()
         .page(indexCommentForm.page())
         .commentSortType(conversionService.convert(sortType, CommentSortType.class))
-        .perPage(indexCommentForm.limit())
+        .perPage(indexCommentForm.perPage())
         .savedOnly(indexCommentForm.savedOnly())
         .listingType(conversionService.convert(sublinksListingType, ListingType.class))
         .community(community.orElse(null))

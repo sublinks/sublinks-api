@@ -1,18 +1,16 @@
-package com.sublinks.sublinksapi.api.sublinks.v1.comment.models;
+package com.sublinks.sublinksapi.api.sublinks.v1.search.models;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
 import lombok.Builder;
 
+// @todo: Add Communities, Posts, Comments, and Messages
 @Builder
-public record IndexComment(
+public record Search(
     String search,
-    SortType sortType,
+    SortType type,
     SublinksListingType sublinksListingType,
-    String communityKey,
-    String postKey,
     Boolean showNsfw,
-    Boolean savedOnly,
     Integer perPage,
     Integer page) {
 
