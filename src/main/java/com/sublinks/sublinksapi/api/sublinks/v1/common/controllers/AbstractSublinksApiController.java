@@ -16,10 +16,14 @@ public abstract class AbstractSublinksApiController {
    * @return Person
    * @throws ResponseStatusException Exception thrown when Person not present
    */
-  public Person getPersonOrThrowBadRequest(SublinksJwtPerson principal) throws ResponseStatusException {
+  public Person getPersonOrThrowBadRequest(SublinksJwtPerson principal)
+      throws ResponseStatusException
+  {
 
-    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    return Optional.ofNullable(principal)
+        .map(p -> (Person) p.getPrincipal())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
   }
 
   /**
@@ -30,10 +34,13 @@ public abstract class AbstractSublinksApiController {
    * @throws ResponseStatusException Exception thrown when Person not present
    */
   public <X extends Throwable> Person getPersonOrThrow(SublinksJwtPerson principal,
-                                                       Supplier<? extends X> exceptionSupplier) throws X {
+      Supplier<? extends X> exceptionSupplier) throws X
+  {
 
-    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
-        exceptionSupplier);
+    return Optional.ofNullable(principal)
+        .map(p -> (Person) p.getPrincipal())
+        .orElseThrow(
+            exceptionSupplier);
   }
 
 
@@ -44,10 +51,14 @@ public abstract class AbstractSublinksApiController {
    * @return Person
    * @throws ResponseStatusException Exception thrown when Person not present
    */
-  public Person getPersonOrThrowUnauthorized(SublinksJwtPerson principal) throws ResponseStatusException {
+  public Person getPersonOrThrowUnauthorized(SublinksJwtPerson principal)
+      throws ResponseStatusException
+  {
 
-    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+    return Optional.ofNullable(principal)
+        .map(p -> (Person) p.getPrincipal())
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
   }
 
   public Person getPerson(SublinksJwtPerson principal) {
@@ -57,6 +68,7 @@ public abstract class AbstractSublinksApiController {
 
   public Optional<Person> getOptionalPerson(SublinksJwtPerson principal) {
 
-    return Optional.ofNullable(principal).map(p -> (Person) p.getPrincipal());
+    return Optional.ofNullable(principal)
+        .map(p -> (Person) p.getPrincipal());
   }
 }

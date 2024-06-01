@@ -10,7 +10,8 @@ import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksPersonMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {SublinksPersonMapper.class})
 public abstract class SublinksPrivateMessageMapper implements
     Converter<PrivateMessage, PrivateMessageResponse> {
 
@@ -26,7 +27,11 @@ public abstract class SublinksPrivateMessageMapper implements
   //@Mapping(target = "recipient", expression = "java(personMapper.convert(privateMessage.getRecipient()))")
   @Mapping(target = "sender", source = "privateMessage.sender")
   @Mapping(target = "recipient", source = "privateMessage.recipient")
-  @Mapping(target = "createdAt", source = "privateMessage.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "updatedAt", source = "privateMessage.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "createdAt",
+      source = "privateMessage.createdAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "updatedAt",
+      source = "privateMessage.updatedAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract PrivateMessageResponse convert(@Nullable PrivateMessage privateMessage);
 }

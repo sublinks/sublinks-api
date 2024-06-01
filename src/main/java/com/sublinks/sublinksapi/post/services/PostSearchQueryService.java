@@ -48,9 +48,8 @@ public class PostSearchQueryService {
     private final Builder builder;
     private int perPage = 20;
 
-    public Results(
-        Builder builder
-    ) {
+    public Results(Builder builder)
+    {
 
       this.builder = builder;
     }
@@ -73,14 +72,16 @@ public class PostSearchQueryService {
       if (builder.getSorter() != null) {
         builder.getSorter()
             .applySorting(builder);
-        if (builder.getCursor() != null && !builder.getCursor().isBlank()) {
+        if (builder.getCursor() != null && !builder.getCursor()
+            .isBlank()) {
           builder.getSorter()
               .applyCursor(builder);
         }
       }
 
       builder.getCriteriaQuery()
-          .where(builder.getPredicates().toArray(new Predicate[0]));
+          .where(builder.getPredicates()
+              .toArray(new Predicate[0]));
 
       return builder.getEntityManager()
           .createQuery(builder.getCriteriaQuery());
@@ -118,11 +119,9 @@ public class PostSearchQueryService {
     private String cursor;
     private SortingTypeInterface sorter;
 
-    public Builder(
-        EntityManager entityManager,
-        CriteriaBuilder criteriaBuilder,
-        SortFactory sortFactory
-    ) {
+    public Builder(EntityManager entityManager, CriteriaBuilder criteriaBuilder,
+        SortFactory sortFactory)
+    {
 
       this.entityManager = entityManager;
       this.criteriaBuilder = criteriaBuilder;
@@ -192,7 +191,8 @@ public class PostSearchQueryService {
 
     public Builder setCursor(final String cursor) {
 
-      byte[] decodedBytes = Base64.getDecoder().decode(cursor);
+      byte[] decodedBytes = Base64.getDecoder()
+          .decode(cursor);
       this.cursor = new String(decodedBytes);
       return this;
     }
@@ -200,6 +200,28 @@ public class PostSearchQueryService {
     public Builder setPerson(Person person) {
 
       this.person = person;
+      return this;
+    }
+
+    public Builder setShowNsfw(Boolean isShowNsfw) {
+
+      if (!isShowNsfw) {
+        predicates.add(criteriaBuilder.isFalse(postTable.get("isNsfw")));
+      }
+      return this;
+    }
+
+    public Builder addSearch(String search) {
+
+      if (search != null && !search.isBlank()) {
+
+        Expression<String> searchVector = this.postTable.get("search_vector");
+        Predicate searchPredicate = this.criteriaBuilder.equal(
+            this.criteriaBuilder.function("@@", Boolean.class, searchVector,
+                this.criteriaBuilder.function("to_tsquery", String.class,
+                    this.criteriaBuilder.literal(search))), true);
+        predicates.add(searchPredicate);
+      }
       return this;
     }
   }

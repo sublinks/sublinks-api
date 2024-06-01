@@ -6,22 +6,23 @@ import java.util.Optional;
 import lombok.Builder;
 
 @Builder
-public record CommunityResponse(String key,
-                                String title,
-                                String titleSlug,
-                                String description,
-                                String iconImageUrl,
-                                Optional<String> bannerImageUrl,
-                                String activityPubId,
-                                List<LanguageResponse> languages,
-                                Boolean isLocal,
-                                Boolean isDeleted,
-                                Boolean isRemoved,
-                                Boolean isNsfw,
-                                Boolean restrictedToModerators,
-                                String publicKey,
-                                String createdAt,
-                                String updatedAt
+public record CommunityResponse(
+    String key,
+    String title,
+    String titleSlug,
+    String description,
+    String iconImageUrl,
+    Optional<String> bannerImageUrl,
+    String activityPubId,
+    List<LanguageResponse> languages,
+    Boolean isLocal,
+    Boolean isDeleted,
+    Boolean isRemoved,
+    Boolean isNsfw,
+    Boolean restrictedToModerators,
+    String publicKey,
+    String createdAt,
+    String updatedAt
 
 ) {
 

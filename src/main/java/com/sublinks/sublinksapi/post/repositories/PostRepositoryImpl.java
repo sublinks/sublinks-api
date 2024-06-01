@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.post.repositories;
 
 import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
@@ -29,24 +30,22 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
   private final EntityManager em;
   private final PostSearchQueryService postSearchQueryService;
+  private final LocalInstanceContext localInstanceContext;
 
   @Override
   public List<Post> allPostsBySearchCriteria(final PostSearchCriteria postSearchCriteria) {
 
     final Builder searchBuilder = postSearchQueryService.builder();
     if (postSearchCriteria.person() != null) {
-      searchBuilder
-          .setPerson(postSearchCriteria.person())
+      searchBuilder.setPerson(postSearchCriteria.person())
           .addPersonLikesToPost();
     }
     if (postSearchCriteria.communityIds() != null) {
-      searchBuilder
-          .filterByCommunities(postSearchCriteria.communityIds());
+      searchBuilder.filterByCommunities(postSearchCriteria.communityIds());
     }
     if (postSearchCriteria.person() != null
         && postSearchCriteria.listingType() == ListingType.Subscribed) {
-      searchBuilder
-          .filterByListingType(postSearchCriteria.listingType());
+      searchBuilder.filterByListingType(postSearchCriteria.listingType());
     }
     if (postSearchCriteria.cursorBasedPageable() != null) {
       searchBuilder.setCursor(postSearchCriteria.cursorBasedPageable());
@@ -54,6 +53,21 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     if (postSearchCriteria.sortType() != null) {
       searchBuilder.setSortType(postSearchCriteria.sortType());
     }
+
+    if (localInstanceContext.instance() != null && !localInstanceContext.instance()
+        .getInstanceConfig()
+        .isEnableNsfw()) {
+      searchBuilder.setShowNsfw(false);
+    } else if (postSearchCriteria.isShowNsfw() != null) {
+      searchBuilder.setShowNsfw(postSearchCriteria.isShowNsfw());
+    } else if (postSearchCriteria.person() != null) {
+      searchBuilder.setShowNsfw(postSearchCriteria.person()
+          .isShowNsfw());
+    } else {
+      searchBuilder.setShowNsfw(false);
+    }
+
+    searchBuilder.addSearch(postSearchCriteria.search());
 
     Results results = postSearchQueryService.results(searchBuilder);
     results.setPerPage(postSearchCriteria.perPage());
@@ -66,7 +80,8 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
   @Override
   public List<Post> allPostsByCommunityAndPersonAndRemoved(Community community, Person person,
-      List<RemovedState> removedStates) {
+      List<RemovedState> removedStates)
+  {
 
     if (community == null || person == null) {
       throw new IllegalArgumentException("Community and person cannot be null");
@@ -93,12 +108,14 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 
   @Override
   public List<Post> allPostsByPersonAndRemoved(@Nullable Person person,
-      @Nullable List<RemovedState> removedStates) {
+      @Nullable List<RemovedState> removedStates)
+  {
 
     final CriteriaBuilder cb = em.getCriteriaBuilder();
     final CriteriaQuery<Post> cq = cb.createQuery(Post.class);
@@ -122,6 +139,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 }

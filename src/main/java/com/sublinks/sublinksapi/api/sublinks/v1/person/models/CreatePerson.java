@@ -5,18 +5,19 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record CreatePerson(String name,
-                           String displayName,
-                           String email,
-                           List<LanguageResponse> languages,
-                           String avatarImageUrl,
-                           String bannerImageUrl,
-                           String bio,
-                           String matrixUserId,
-                           String password,
-                           String passwordConfirmation,
-                           String answer,
-                           String captcha_token,
-                           String captcha_answer) {
+public record CreatePerson(
+    String name,
+    String displayName,
+    String email,
+    List<LanguageResponse> languages,
+    String avatarImageUrl,
+    String bannerImageUrl,
+    String bio,
+    String matrixUserId,
+    String password,
+    String passwordConfirmation,
+    String answer,
+    String captcha_token,
+    String captcha_answer) {
 
 }

@@ -8,17 +8,21 @@ import lombok.Builder;
 
 @Builder
 public record IndexCommunity(
-    String search,
+    @Schema(description = "Search query",
+        example = "Search query",
+        requiredMode = RequiredMode.NOT_REQUIRED) String search,
     @Schema(description = "Sort type",
         example = "Hot",
         requiredMode = RequiredMode.NOT_REQUIRED) SortType sortType,
     @Schema(description = "Sublinks listing type",
         example = "All",
-        requiredMode = RequiredMode.NOT_REQUIRED) SublinksListingType sublinksListingType,
+        requiredMode = RequiredMode.NOT_REQUIRED) SublinksListingType listingType,
     @Schema(description = "Show NSFW",
         example = "false",
         requiredMode = RequiredMode.NOT_REQUIRED) Boolean showNsfw,
     Integer perPage,
-    Integer page) {
+    @Schema(description = "Page",
+        example = "1",
+        requiredMode = RequiredMode.NOT_REQUIRED) Integer page) {
 
 }

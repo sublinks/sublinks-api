@@ -7,7 +7,8 @@ import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksLanguageMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {SublinksLanguageMapper.class})
 public class OptionalStringMapper implements Converter<String, Optional<String>> {
 
   @Nullable

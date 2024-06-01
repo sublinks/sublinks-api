@@ -4,15 +4,16 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record UpdatePerson(String displayName,
-                           String email,
-                           List<String> languagesKeys,
-                           String avatarImageUrl,
-                           String bannerImageUrl,
-                           String bio,
-                           String matrixUserId,
-                           String oldPassword,
-                           String password,
-                           String passwordConfirmation) {
+public record UpdatePerson(
+    String displayName,
+    String email,
+    List<String> languagesKeys,
+    String avatarImageUrl,
+    String bannerImageUrl,
+    String bio,
+    String matrixUserId,
+    String oldPassword,
+    String password,
+    String passwordConfirmation) {
 
 }

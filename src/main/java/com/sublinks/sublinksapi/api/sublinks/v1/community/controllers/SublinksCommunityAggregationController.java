@@ -37,7 +37,8 @@ public class SublinksCommunityAggregationController extends AbstractSublinksApiC
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityAggregatesResponse show(@PathVariable final String key,
-      final SublinksJwtPerson sublinksJwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 

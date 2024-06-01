@@ -5,7 +5,8 @@ import org.springframework.lang.Nullable;
 public class PaginationControllerUtils {
 
   public static int getAbsoluteMinNumber(@Nullable Integer number,
-      @Nullable Integer defaultNumber) {
+      @Nullable Integer defaultNumber)
+  {
 
     if (number == null && defaultNumber == null) {
       return 1;

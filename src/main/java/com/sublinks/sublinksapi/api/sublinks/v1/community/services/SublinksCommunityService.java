@@ -68,7 +68,7 @@ public class SublinksCommunityService {
       }
     }
 
-    SublinksListingType sublinksListingType = indexCommunityParam.sublinksListingType();
+    SublinksListingType sublinksListingType = indexCommunityParam.listingType();
 
     if (sublinksListingType == null) {
       if (person != null && person.getDefaultListingType() != null) {
@@ -90,14 +90,14 @@ public class SublinksCommunityService {
             person != null && person.isShowNsfw());
 
     final CommunitySearchCriteria.CommunitySearchCriteriaBuilder criteria = CommunitySearchCriteria.builder()
-        .perPage(indexCommunityParam.limit())
+        .perPage(indexCommunityParam.perPage())
         .page(indexCommunityParam.page())
         .sortType(conversionService.convert(sortType, SortType.class))
         .listingType(conversionService.convert(sublinksListingType, ListingType.class))
         .showNsfw(showNsfw)
         .person(person);
 
-    if (indexCommunityParam.limit() == 0) {
+    if (indexCommunityParam.perPage() == 0) {
       criteria.perPage(20);
     }
     if (indexCommunityParam.page() == 0) {
@@ -161,7 +161,8 @@ public class SublinksCommunityService {
    *                                 to perform the update.
    */
   public CommunityResponse updateCommunity(String key, UpdateCommunity updateCommunityForm,
-      Person person) {
+      Person person)
+  {
 
     String domain = ActorIdUtils.getActorDomain(key);
     if (domain != null && domain.equals(localInstanceContext.instance()
@@ -236,7 +237,8 @@ public class SublinksCommunityService {
    *                                 not authorized to perform the ban action.
    */
   public Person banPerson(String key, String personKey, Person person,
-      CommunityBanPerson communityBanPersonForm) {
+      CommunityBanPerson communityBanPersonForm)
+  {
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)
         .orElseThrow(

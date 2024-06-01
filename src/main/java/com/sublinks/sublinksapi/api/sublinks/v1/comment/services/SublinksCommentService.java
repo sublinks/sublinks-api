@@ -94,7 +94,7 @@ public class SublinksCommentService {
       }
     }
 
-    SublinksListingType sublinksListingType = indexCommentForm.sublinksListingType();
+    SublinksListingType sublinksListingType = indexCommentForm.listingType();
 
     if (sublinksListingType == null) {
       if (person.getDefaultListingType() != null) {
@@ -106,6 +106,7 @@ public class SublinksCommentService {
     }
 
     CommentSearchCriteria.CommentSearchCriteriaBuilder commentSearchCriteria = CommentSearchCriteria.builder()
+        .search(indexCommentForm.search())
         .page(indexCommentForm.page())
         .commentSortType(conversionService.convert(sortType, CommentSortType.class))
         .perPage(indexCommentForm.perPage())

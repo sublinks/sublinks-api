@@ -30,7 +30,11 @@ public abstract class SublinksCommunityMapper implements Converter<Community, Co
   @Mapping(target = "isNsfw", source = "community.nsfw")
   @Mapping(target = "restrictedToModerators", source = "community.postingRestrictedToMods")
   @Mapping(target = "publicKey", source = "community.publicKey")
-  @Mapping(target = "createdAt", source = "community.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "updatedAt", source = "community.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "createdAt",
+      source = "community.createdAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "updatedAt",
+      source = "community.updatedAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract CommunityResponse convert(@Nullable Community community);
 }

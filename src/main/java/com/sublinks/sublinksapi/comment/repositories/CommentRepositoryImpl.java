@@ -51,6 +51,15 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
       predicates.add(cb.equal(commentTable.get("community"), commentSearchCriteria.community()));
     }
 
+    if (commentSearchCriteria.search() != null && !commentSearchCriteria.search()
+        .isEmpty()) {
+      Expression<String> searchVector = commentTable.get("search_vector");
+      Predicate searchPredicate = cb.equal(cb.function("@@", Boolean.class, searchVector,
+              cb.function("to_tsquery", String.class, cb.literal(commentSearchCriteria.search()))),
+          true);
+      predicates.add(searchPredicate);
+    }
+
     cq.where(predicates.toArray(new Predicate[0]));
 
     // @todo determine hot / top / (controversial)
@@ -72,14 +81,15 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     final TypedQuery<Comment> query = em.createQuery(cq);
 
-    applyPagination(query, commentSearchCriteria.page(), perPage);
+    applyPagination(query, page, perPage);
 
     return query.getResultList();
   }
 
   @Override
   public List<Comment> allCommentsByCommunityAndPersonAndRemoved(Community community, Person person,
-      @Nullable List<RemovedState> removedStates) {
+      @Nullable List<RemovedState> removedStates)
+  {
 
     if (community == null || person == null) {
       throw new IllegalArgumentException("Community and person must be provided");
@@ -103,12 +113,14 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 
   @Override
   public List<Comment> allCommentsByPersonAndRemoved(Person person,
-      @Nullable List<RemovedState> removedStates) {
+      @Nullable List<RemovedState> removedStates)
+  {
 
     if (person == null) {
       throw new IllegalArgumentException("Person must be provided");
@@ -130,6 +142,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 }

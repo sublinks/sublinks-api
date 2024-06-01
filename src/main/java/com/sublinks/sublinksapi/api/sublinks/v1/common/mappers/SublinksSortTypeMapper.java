@@ -13,7 +13,8 @@ public class SublinksSortTypeMapper implements
   @Nullable
   @Override
   public SortType convert(
-      com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType listingType) {
+      com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType listingType)
+  {
 
     return SortType.valueOf(listingType.name());
   }

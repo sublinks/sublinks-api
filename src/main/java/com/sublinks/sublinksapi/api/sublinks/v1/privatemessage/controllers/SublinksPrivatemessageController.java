@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/v1/privatemessage")
 @Tag(name = "Privatemessage", description = "Privatemessage API")
 public class SublinksPrivatemessageController extends AbstractSublinksApiController {
- @Operation(summary = "Get a list of privatemessages")
+
+  @Operation(summary = "Get a list of privatemessages")
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)

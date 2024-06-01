@@ -60,7 +60,11 @@ public class SublinksJwtUtil implements Serializable {
   private Claims extractAllClaims(final String token) {
 
     final SecretKey key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
-    return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+    return Jwts.parser()
+        .verifyWith(key)
+        .build()
+        .parseSignedClaims(token)
+        .getPayload();
   }
 
   private Boolean isTokenExpired(final String token) {

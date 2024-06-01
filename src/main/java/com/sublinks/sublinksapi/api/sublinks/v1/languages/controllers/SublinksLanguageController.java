@@ -32,7 +32,9 @@ public class SublinksLanguageController extends AbstractSublinksApiController {
   @Operation(summary = "Get a list of languagesKeys")
   @GetMapping
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "List of languagesKeys", useReturnTypeSchema = true)})
+      @ApiResponse(responseCode = "200",
+          description = "List of languagesKeys",
+          useReturnTypeSchema = true)})
   public List<LanguageResponse> index() {
 
     List<Language> languages = localInstanceContext.instance()

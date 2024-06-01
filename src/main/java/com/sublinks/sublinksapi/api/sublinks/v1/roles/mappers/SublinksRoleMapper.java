@@ -22,9 +22,15 @@ public abstract class SublinksRoleMapper implements
   @Mapping(target = "description", source = "role.description")
   @Mapping(target = "isActive", source = "role.active")
   @Mapping(target = "isExpired", source = "role", qualifiedByName = "is_expired")
-  @Mapping(target = "expiresAt", source = "role.expiresAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "createdAt", source = "role.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "updatedAt", source = "role.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "expiresAt",
+      source = "role.expiresAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "createdAt",
+      source = "role.createdAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "updatedAt",
+      source = "role.updatedAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role convert(
       @Nullable Role role);
 

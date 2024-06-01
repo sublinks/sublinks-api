@@ -35,7 +35,8 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse remove(@PathVariable final String key,
       @RequestBody @Valid final CommentRemove commentRemove,
-      final SublinksJwtPerson sublinksJwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
@@ -48,7 +49,8 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse delete(@PathVariable final String key,
       @RequestBody @Valid final CommentDelete commentDeleteForm,
-      final SublinksJwtPerson sublinksJwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
@@ -60,7 +62,8 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse highlight(@PathVariable final String key, final CommentPin commentPinForm,
-      final SublinksJwtPerson sublinksJwtPerson) {
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 

@@ -42,7 +42,6 @@ public class SublinksSecurityConfig {
         .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS));
 
-
     return http.build();
   }
 }

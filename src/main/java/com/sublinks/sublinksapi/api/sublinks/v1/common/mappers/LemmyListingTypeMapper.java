@@ -14,7 +14,8 @@ public class LemmyListingTypeMapper implements
   @Nullable
   @Override
   public ListingType convert(
-      SublinksListingType sublinksListingType) {
+      SublinksListingType sublinksListingType)
+  {
 
     return ListingType.valueOf(sublinksListingType.name());
   }

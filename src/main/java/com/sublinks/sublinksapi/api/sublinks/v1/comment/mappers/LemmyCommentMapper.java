@@ -10,7 +10,8 @@ import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksPersonMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {SublinksPersonMapper.class})
 public abstract class LemmyCommentMapper implements Converter<Comment, CommentResponse> {
 
   SublinksPersonMapper personMapper;
@@ -26,8 +27,12 @@ public abstract class LemmyCommentMapper implements Converter<Comment, CommentRe
   @Mapping(target = "isRemoved", expression = "java(comment.isRemoved())")
   // @Mapping(target = "creator", expression = "java(personMapper.convert(comment.getPerson()))")
   @Mapping(target = "creator", source = "comment.person")
-  @Mapping(target = "createdAt", source = "comment.createdAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "updatedAt", source = "comment.updatedAt", dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "createdAt",
+      source = "comment.createdAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "updatedAt",
+      source = "comment.updatedAt",
+      dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   public abstract CommentResponse convert(@Nullable Comment comment);
 
 
