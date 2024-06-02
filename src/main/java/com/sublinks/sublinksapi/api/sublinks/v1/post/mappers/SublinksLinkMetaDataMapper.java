@@ -12,7 +12,7 @@ import org.springframework.lang.Nullable;
 public abstract class SublinksLinkMetaDataMapper implements Converter<Post, LinkMetaData> {
 
   @Override
-  @Mapping(target = "key", source = "post.linkUrl")
+  @Mapping(target = "postKey", source = "post.titleSlug")
   @Mapping(target = "linkUrl", source = "post.linkUrl")
   @Mapping(target = "linkTitle", source = "post.linkTitle")
   @Mapping(target = "linkDescription", source = "post.linkDescription")

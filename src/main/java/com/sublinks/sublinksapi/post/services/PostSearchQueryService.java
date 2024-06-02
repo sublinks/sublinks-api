@@ -215,12 +215,9 @@ public class PostSearchQueryService {
 
       if (search != null && !search.isBlank()) {
 
-        Expression<String> searchVector = this.postTable.get("search_vector");
-        Predicate searchPredicate = this.criteriaBuilder.equal(
-            this.criteriaBuilder.function("@@", Boolean.class, searchVector,
-                this.criteriaBuilder.function("to_tsquery", String.class,
-                    this.criteriaBuilder.literal(search))), true);
-        predicates.add(searchPredicate);
+        predicates.add(criteriaBuilder.equal(
+            criteriaBuilder.function("fn_search_vector_is_same", Boolean.class,
+                postTable.get("searchVector"), criteriaBuilder.literal(search)), true));
       }
       return this;
     }

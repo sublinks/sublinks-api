@@ -12,6 +12,18 @@ END;
 $$ language 'plpgsql';
 
 /**
+  A that checks if a search_vector is the same as a text with the @@ operator
+ */
+
+CREATE OR REPLACE FUNCTION fn_search_vector_is_same(search_vector TSVECTOR, text TEXT)
+  RETURNS BOOLEAN AS
+$$
+BEGIN
+  RETURN search_vector @@ to_tsquery('english', text);
+END;
+$$ language 'plpgsql';
+
+/**
  * Comments table
  */
 CREATE TABLE comments

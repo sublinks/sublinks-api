@@ -4,6 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record LinkMetaData(
+    String postKey,
     String linkUrl,
     String linkTitle,
     String linkDescription,

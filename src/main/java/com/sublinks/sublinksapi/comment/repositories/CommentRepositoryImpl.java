@@ -53,11 +53,9 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     if (commentSearchCriteria.search() != null && !commentSearchCriteria.search()
         .isEmpty()) {
-      Expression<String> searchVector = commentTable.get("search_vector");
-      Predicate searchPredicate = cb.equal(cb.function("@@", Boolean.class, searchVector,
-              cb.function("to_tsquery", String.class, cb.literal(commentSearchCriteria.search()))),
-          true);
-      predicates.add(searchPredicate);
+      predicates.add(cb.equal(
+          cb.function("fn_search_vector_is_same", Boolean.class,
+              commentTable.get("searchVector"), cb.literal(commentSearchCriteria.search())), true));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));

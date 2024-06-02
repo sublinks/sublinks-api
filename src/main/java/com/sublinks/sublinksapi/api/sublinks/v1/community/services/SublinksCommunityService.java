@@ -47,17 +47,17 @@ public class SublinksCommunityService {
   /**
    * Retrieves a list of CommunityResponse objects based on the search criteria provided.
    *
-   * @param indexCommunityParam The search criteria for retrieving community responses.
-   * @param person              The person requesting the community responses.
+   * @param indexCommunityForm The search criteria for retrieving community responses.
+   * @param person             The person requesting the community responses.
    * @return The list of CommunityResponse objects that match the search criteria.
    */
-  public List<CommunityResponse> index(IndexCommunity indexCommunityParam, Person person) {
+  public List<CommunityResponse> index(IndexCommunity indexCommunityForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.READ_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
             "not_authorized_to_read_community"));
 
-    com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType sortType = indexCommunityParam.sortType();
+    com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType sortType = indexCommunityForm.sortType();
 
     if (sortType == null) {
       if (person != null && person.getDefaultSortType() != null) {
@@ -68,7 +68,7 @@ public class SublinksCommunityService {
       }
     }
 
-    SublinksListingType sublinksListingType = indexCommunityParam.listingType();
+    SublinksListingType sublinksListingType = indexCommunityForm.listingType();
 
     if (sublinksListingType == null) {
       if (person != null && person.getDefaultListingType() != null) {
@@ -86,23 +86,17 @@ public class SublinksCommunityService {
     }
 
     boolean showNsfw =
-        (indexCommunityParam.showNsfw() != null && indexCommunityParam.showNsfw()) || (
-            person != null && person.isShowNsfw());
+        (indexCommunityForm.showNsfw() != null && indexCommunityForm.showNsfw()) || (person != null
+            && person.isShowNsfw());
 
     final CommunitySearchCriteria.CommunitySearchCriteriaBuilder criteria = CommunitySearchCriteria.builder()
-        .perPage(indexCommunityParam.perPage())
-        .page(indexCommunityParam.page())
+        .perPage(indexCommunityForm.perPage())
+        .page(indexCommunityForm.page())
         .sortType(conversionService.convert(sortType, SortType.class))
         .listingType(conversionService.convert(sublinksListingType, ListingType.class))
         .showNsfw(showNsfw)
+        .search(indexCommunityForm.search())
         .person(person);
-
-    if (indexCommunityParam.perPage() == 0) {
-      criteria.perPage(20);
-    }
-    if (indexCommunityParam.page() == 0) {
-      criteria.page(1);
-    }
 
     final CommunitySearchCriteria communitySearchCriteria = criteria.build();
 

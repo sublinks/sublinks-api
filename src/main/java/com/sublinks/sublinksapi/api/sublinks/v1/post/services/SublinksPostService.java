@@ -10,7 +10,6 @@ import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostService;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -25,13 +24,13 @@ public class SublinksPostService {
   private final CommunityRepository communityRepository;
 
   /**
-   * Retrieves a list of PostResponse objects based on the search criteria provided.
+   * Retrieves a list of PostResponse objects based on the provided search criteria.
    *
-   * @param indexPostForm The search criteria for retrieving posts. Must not be null.
-   * @param person        An optional Person object representing the requesting user. May be empty.
+   * @param indexPostForm The IndexPost object containing the search criteria.
+   * @param person        The Person object representing the user.
    * @return A list of PostResponse objects matching the search criteria.
    */
-  public List<PostResponse> index(final IndexPost indexPostForm, final Optional<Person> person) {
+  public List<PostResponse> index(final IndexPost indexPostForm, final Person person) {
 
     final List<Community> communities = indexPostForm.communityKeys() == null ? null
         : communityRepository.findCommunityByTitleSlugIn(indexPostForm.communityKeys());
@@ -49,7 +48,8 @@ public class SublinksPostService {
         .isSavedOnly(indexPostForm.savedOnly())
         .perPage(indexPostForm.perPage())
         .page(indexPostForm.page())
-        .person(person.orElse(null))
+        .person(person)
+        .cursorBasedPageable(indexPostForm.pageCursor())
         .build());
 
     return posts.stream()

@@ -29,7 +29,7 @@ public abstract class SublinksInstanceConfigMapper implements
   @Mapping(target = "federationEnabled", source = "instanceConfig.federationEnabled")
   @Mapping(target = "captchaEnabled", source = "instanceConfig.captchaEnabled")
   @Mapping(target = "captchaDifficulty", source = "instanceConfig.captchaDifficulty")
-  @Mapping(target = "nameMaxLength", source = "instanceConfig.nameMaxLength")
+  @Mapping(target = "nameMaxLength", source = "instanceConfig.actorNameMaxLength")
   @Mapping(target = "defaultTheme", source = "instanceConfig.defaultTheme")
   @Mapping(target = "defaultPostListingType", source = "instanceConfig.defaultPostListingType")
   @Mapping(target = "legalInformation", source = "instanceConfig.legalInformation")

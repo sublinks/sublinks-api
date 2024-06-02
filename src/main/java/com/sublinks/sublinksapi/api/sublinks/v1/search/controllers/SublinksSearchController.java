@@ -29,11 +29,10 @@ public class SublinksSearchController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void index(@RequestBody Search search, final SublinksJwtPerson principal) {
+  public SearchResponse index(@RequestBody Search search, final SublinksJwtPerson principal) {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    final SearchResponse.SearchResponseBuilder searchResponseBuilder = SearchResponse.builder();
-
+    return sublinksSearchService.list(search, person);
   }
 }

@@ -10,19 +10,20 @@ import com.sublinks.sublinksapi.post.entities.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
-import org.mapstruct.Named;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {
-    SublinksLinkMetaDataMapper.class, SublinksPostAggregationMapper.class,
-    SublinksPersonMapper.class, SublinksCommunityMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {SublinksLinkMetaDataMapper.class, SublinksPostAggregationMapper.class,
+        SublinksPersonMapper.class, SublinksCommunityMapper.class, ConversionService.class})
 public abstract class SublinksPostMapper implements Converter<Post, PostResponse> {
 
-  SublinksPostAggregationMapper sublinksPostAggregationMapper;
-  SublinksLinkMetaDataMapper sublinksLinkMetaDataMapper;
-  SublinksPersonMapper sublinksPersonMapper;
-  SublinksCommunityMapper sublinksCommunityMapper;
+  protected SublinksPostAggregationMapper sublinksPostAggregationMapper;
+  protected SublinksLinkMetaDataMapper sublinksLinkMetaDataMapper;
+  protected SublinksPersonMapper sublinksPersonMapper;
+  protected SublinksCommunityMapper sublinksCommunityMapper;
+  protected ConversionService conversionService;
 
   @Override
   @Mapping(target = "key", source = "post.titleSlug")
@@ -37,7 +38,9 @@ public abstract class SublinksPostMapper implements Converter<Post, PostResponse
   @Mapping(target = "isFeatured", source = "post.featured")
   @Mapping(target = "isFeaturedInCommunity", source = "post.featuredInCommunity")
   @Mapping(target = "community", source = "post.community")
-  @Mapping(target = "creator", source = "post", qualifiedByName = "getCreator")
+  @Mapping(target = "creator",
+      source = "post",
+      defaultExpression = "java(getCreator(post, conversionService))")
   @Mapping(target = "postAggregate", source = "post.postAggregate")
   @Mapping(target = "activityPubId", source = "post.activityPubId")
   @Mapping(target = "publicKey", source = "post.publicKey")
@@ -45,15 +48,16 @@ public abstract class SublinksPostMapper implements Converter<Post, PostResponse
   public abstract PostResponse convert(@Nullable Post post);
 
 
-  @Named("getCreator")
-  public PersonResponse getCreator(Post post) {
+  public PersonResponse getCreator(Post post, ConversionService conversionService)
+  {
 
     for (LinkPersonPost linkPersonPost : post.getLinkPersonPost()) {
       if (linkPersonPost.getLinkType()
           .equals(LinkPersonPostType.creator)) {
-        return sublinksPersonMapper.convert(linkPersonPost.getPerson());
+        return conversionService.convert(linkPersonPost.getPerson(), PersonResponse.class);
       }
     }
     return null;
   }
+
 }

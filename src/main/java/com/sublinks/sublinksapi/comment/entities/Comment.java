@@ -106,11 +106,14 @@ public class Comment implements Serializable, AclEntityInterface {
   @Column(nullable = false)
   private String path;
 
+  @Column(nullable = false, name = "search_vector")
+  private String searchVector;
+
   @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
+
   @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")
   private Date updatedAt;

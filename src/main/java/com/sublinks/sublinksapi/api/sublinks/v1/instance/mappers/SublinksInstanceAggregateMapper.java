@@ -22,6 +22,6 @@ public abstract class SublinksInstanceAggregateMapper implements
   @Mapping(target = "activeWeeklyUserCount", source = "instanceAggregate.activeWeeklyUserCount")
   @Mapping(target = "activeMonthlyUserCount", source = "instanceAggregate.activeMonthlyUserCount")
   @Mapping(target = "activeHalfYearlyUserCount",
-      source = "instanceAggregate.activeHalfYearlyUserCount")
+      source = "instanceAggregate.activeHalfYearUserCount")
   public abstract InstanceAggregateResponse convert(@Nullable InstanceAggregate instanceAggregate);
 }

@@ -6,7 +6,7 @@ public record PostAggregateResponse(
     String downvoteCount,
     String upvoteCount,
     String score,
-    String hotScore,
-    String controversyScore) {
+    String hotRank,
+    String controversyRank) {
 
 }

@@ -20,4 +20,15 @@ public record IndexComment(
     @Schema(description = "Per page", requiredMode = RequiredMode.NOT_REQUIRED) Integer perPage,
     @Schema(description = "Page", requiredMode = RequiredMode.NOT_REQUIRED) Integer page) {
 
+  @Override
+  public Integer perPage() {
+
+    return perPage != null ? perPage : 20;
+  }
+
+  @Override
+  public Integer page() {
+
+    return page != null ? page : 1;
+  }
 }

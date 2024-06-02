@@ -6,7 +6,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import java.text.SimpleDateFormat;
-import java.util.Optional;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
@@ -24,7 +23,7 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Mapping(target = "name", source = "person.name")
   @Mapping(target = "displayName", source = "person", qualifiedByName = "display_name")
   @Mapping(target = "isBanned", source = "person", qualifiedByName = "is_banned")
-  @Mapping(target = "banExpiresAt", source = "person", qualifiedByName = "banExpiresAt")
+  @Mapping(target = "banExpiresAt", source = "person", qualifiedByName = "ban_expires_at")
   @Mapping(target = "isDeleted", source = "person.deleted")
   @Mapping(target = "avatarImageUrl", source = "person", qualifiedByName = "avatar")
   @Mapping(target = "bannerImageUrl", source = "person", qualifiedByName = "banner")
@@ -74,15 +73,15 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
         .isBlank() ? person.getBannerImageUrl() : null;
   }
 
-  @Named("banExpiresAt")
-  Optional<String> mapBanExpiresAt(Person person) {
+  @Named("ban_expires_at")
+  String mapBanExpiresAt(Person person) {
 
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat();
 
     simpleDateFormat.applyPattern(DateUtils.FRONT_END_DATE_FORMAT);
 
-    return Optional.ofNullable(person.getRole()
+    return person.getRole()
         .getExpiresAt() != null ? simpleDateFormat.format(person.getRole()
-        .getExpiresAt()) : null);
+        .getExpiresAt()) : null;
   }
 }

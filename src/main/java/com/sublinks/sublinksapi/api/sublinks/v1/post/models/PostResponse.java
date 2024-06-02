@@ -9,7 +9,6 @@ public record PostResponse(
     String titleSlug,
     String body,
     LinkMetaData linkMetaData,
-    String type,
     Boolean isLocal,
     Boolean isDeleted,
     Boolean isRemoved,

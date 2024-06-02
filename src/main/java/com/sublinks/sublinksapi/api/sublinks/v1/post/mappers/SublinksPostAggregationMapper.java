@@ -15,11 +15,11 @@ public abstract class SublinksPostAggregationMapper implements
   @Override
   @Mapping(target = "key", source = "postAggregate.id")
   @Mapping(target = "commentCount", source = "postAggregate.commentCount")
-  @Mapping(target = "downvoteCount", source = "postAggregate.downvoteCount")
-  @Mapping(target = "upvoteCount", source = "postAggregate.upvoteCount")
+  @Mapping(target = "downvoteCount", source = "postAggregate.downVoteCount")
+  @Mapping(target = "upvoteCount", source = "postAggregate.upVoteCount")
   @Mapping(target = "score", source = "postAggregate.score")
-  @Mapping(target = "hotScore", source = "postAggregate.hotRank")
-  @Mapping(target = "controversyScore", source = "postAggregate.controversyScore")
+  @Mapping(target = "hotRank", source = "postAggregate.hotRank")
+  @Mapping(target = "controversyRank", source = "postAggregate.controversyRank")
   public abstract PostAggregateResponse convert(@Nullable PostAggregate postAggregate);
 
 

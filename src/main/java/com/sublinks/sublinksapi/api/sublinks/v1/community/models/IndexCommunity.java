@@ -25,4 +25,15 @@ public record IndexCommunity(
         example = "1",
         requiredMode = RequiredMode.NOT_REQUIRED) Integer page) {
 
+  @Override
+  public Integer perPage() {
+
+    return perPage != null ? perPage : 20;
+  }
+
+  @Override
+  public Integer page() {
+
+    return page != null ? page : 1;
+  }
 }
