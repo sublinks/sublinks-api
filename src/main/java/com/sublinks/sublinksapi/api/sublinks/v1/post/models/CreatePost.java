@@ -10,14 +10,25 @@ import org.springframework.web.server.ResponseStatusException;
 public record CreatePost(
     String title,
     String body,
-    @Schema(description = "The language key of the comment",
+    @Schema(description = "The language key of the post",
         defaultValue = "und",
         example = "und",
         requiredMode = RequiredMode.NOT_REQUIRED) String languageKey,
-    @Schema(description = "Whether the comment is featured ( Requires permission to do so. )",
+    @Schema(description = "Whether the post is featured ( Requires permission to do so. )",
         defaultValue = "false",
         example = "false",
-        requiredMode = RequiredMode.NOT_REQUIRED) Boolean featured) {
+        requiredMode = RequiredMode.NOT_REQUIRED) Boolean featuredLocal,
+    @Schema(description = "Whether the post is featured in the community ( Requires permission to do so. )",
+        defaultValue = "false",
+        example = "false",
+        requiredMode = RequiredMode.NOT_REQUIRED) Boolean featuredCommunity,
+
+    @Schema(description = "The community key of the post",
+        requiredMode = RequiredMode.NOT_REQUIRED) String communityKey,
+    @Schema(description = "Is the post nsfw",
+        defaultValue = "false",
+        example = "false",
+        requiredMode = RequiredMode.NOT_REQUIRED) Boolean nsfw) {
 
   public CreatePost {
 
@@ -33,4 +44,20 @@ public record CreatePost(
 
     return languageKey == null ? "und" : languageKey;
   }
+
+  public Boolean featuredLocal() {
+
+    return featuredLocal != null && featuredLocal;
+  }
+
+  public Boolean featuredCommunity() {
+
+    return featuredCommunity != null && featuredCommunity;
+  }
+
+  public Boolean nsfw() {
+
+    return nsfw != null && nsfw;
+  }
+
 }
