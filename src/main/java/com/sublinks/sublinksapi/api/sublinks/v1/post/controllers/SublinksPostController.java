@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.post.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.services.SublinksPostService;
@@ -36,8 +37,7 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<PostResponse> index(
-      final Optional<IndexPost> indexPost,
+  public List<PostResponse> index(final Optional<IndexPost> indexPost,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
@@ -48,19 +48,25 @@ public class SublinksPostController extends AbstractSublinksApiController {
   }
 
   @Operation(summary = "Get a specific post")
-  @GetMapping("/{id}")
+  @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void show(@PathVariable String id) {
-    // TODO: implement
+  public void show(@PathVariable String key, final SublinksJwtPerson sublinksJwtPerson) {
+
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    sublinksPostService.show(key, person.orElse(null));
   }
 
   @Operation(summary = "Create a new post")
   @PostMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void create() {
-    // TODO: implement
+  public void create(final CreatePost createPost, final SublinksJwtPerson sublinksJwtPerson) {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    sublinksPostService.create(createPost, person);
   }
 
   @Operation(summary = "Update an post")

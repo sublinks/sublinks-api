@@ -10,11 +10,13 @@ import com.sublinks.sublinksapi.post.entities.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
     uses = {SublinksLinkMetaDataMapper.class, SublinksPostAggregationMapper.class,
         SublinksPersonMapper.class, SublinksCommunityMapper.class, ConversionService.class})
 public abstract class SublinksPostMapper implements Converter<Post, PostResponse> {

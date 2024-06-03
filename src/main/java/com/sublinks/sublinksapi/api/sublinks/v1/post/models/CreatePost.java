@@ -28,7 +28,9 @@ public record CreatePost(
     @Schema(description = "Is the post nsfw",
         defaultValue = "false",
         example = "false",
-        requiredMode = RequiredMode.NOT_REQUIRED) Boolean nsfw) {
+        requiredMode = RequiredMode.NOT_REQUIRED) Boolean nsfw,
+    @Schema(description = "The link of the post",
+        requiredMode = RequiredMode.NOT_REQUIRED) String link) {
 
   public CreatePost {
 

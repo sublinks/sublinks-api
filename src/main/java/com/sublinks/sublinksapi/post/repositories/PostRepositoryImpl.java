@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
+import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
 import com.sublinks.sublinksapi.post.services.PostSearchQueryService;
@@ -47,6 +48,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
           postSearchCriteria.person());
     } else {
       searchBuilder.filterByListingType(postSearchCriteria.listingType());
+    }
     if (postSearchCriteria.person() != null
         && postSearchCriteria.listingType() == ListingType.Subscribed) {
       searchBuilder.filterByListingType(postSearchCriteria.listingType());
