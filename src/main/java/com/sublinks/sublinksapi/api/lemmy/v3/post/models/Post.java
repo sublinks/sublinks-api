@@ -2,7 +2,9 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.models;
 
 import lombok.Builder;
 
-@Builder
+@Builder(
+    toBuilder = true
+)
 @SuppressWarnings("RecordComponentName")
 public record Post(
     Long id,

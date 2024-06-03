@@ -29,6 +29,8 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.SiteMetadata;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.PaginationControllerUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
@@ -36,7 +38,9 @@ import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.SortType;
+import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.entities.PostReport;
@@ -50,6 +54,7 @@ import com.sublinks.sublinksapi.post.sorts.SortFactory;
 import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import com.sublinks.sublinksapi.utils.models.LemmyException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -102,6 +107,8 @@ public class PostController extends AbstractLemmyApiController {
   private final LocalInstanceContext localInstanceContext;
   private final RolePermissionService rolePermissionService;
   private final SortFactory sortFactory;
+  private final LinkPersonPostService linkPersonPostService;
+  private final CommentRepository commentRepository;
 
   @Operation(summary = "Get / fetch a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200",
@@ -113,16 +120,63 @@ public class PostController extends AbstractLemmyApiController {
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @GetMapping
-  GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal) {
+  GetPostResponse show(@Valid final GetPost getPostForm, final JwtPerson principal)
+      throws LemmyException {
 
-    final Post post = postRepository.findById((long) getPostForm.id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    Post post = null;
+
+    if (getPostForm.id() != null) {
+      post = postRepository.findById((long) getPostForm.id())
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    } else {
+      post = commentRepository.findById((long) getPostForm.comment_id())
+          .map(Comment::getPost)
+          .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
     final Community community = post.getCommunity();
 
     Optional<Person> person = getOptionalPerson(principal);
 
     rolePermissionService.isPermitted(person.orElse(null), RolePermissionPostTypes.READ_POST,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
+    if (post.isDeleted() || post.isRemoved()) {
+      if (person.isPresent()) {
+        Person viewer = person.get();
+
+        boolean isCreator = post.getLinkPersonPost()
+            .stream()
+            .anyMatch(l -> l.getPerson()
+                .equals(viewer) && l.getLinkType() == LinkPersonPostType.creator);
+        if (!(rolePermissionService.isPermitted(viewer,
+            RolePermissionPostTypes.MODERATOR_SHOW_DELETED_POST) && post.getCommunity()
+            .getLinkPersonCommunity()
+            .stream()
+            .anyMatch(l -> l.getPerson()
+                .getId()
+                .equals(viewer.getId()) && l.getLinkType() == LinkPersonCommunityType.moderator))
+            && !rolePermissionService.isPermitted(viewer,
+            RolePermissionPostTypes.ADMIN_SHOW_DELETED_POST)) {
+
+          if (!(post.isDeleted() && !post.isRemoved() && isCreator)) {
+            if (post.isRemoved()) {
+              throw new LemmyException("post_removed_by_mod", HttpStatus.BAD_REQUEST);
+            } else {
+              throw new LemmyException("post_deleted", HttpStatus.BAD_REQUEST);
+            }
+          }
+        }
+
+        // fall through
+      } else {
+        if (post.isRemoved()) {
+          throw new LemmyException("post_removed_by_mod", HttpStatus.BAD_REQUEST);
+        } else {
+          throw new LemmyException("post_deleted", HttpStatus.BAD_REQUEST);
+        }
+      }
+    }
 
     PostView postView;
     final CommunityView communityView;
@@ -160,6 +214,33 @@ public class PostController extends AbstractLemmyApiController {
         .build();
   }
 
+  @Operation(summary = "Mark a post as read.")
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
+  @PostMapping("mark_as_read")
+  PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
+      final JwtPerson principal) {
+
+    final Person person = getPersonOrThrowBadRequest(principal);
+
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.MARK_POST_AS_READ,
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+
+    // @todo support multiple posts
+    final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    postReadService.markPostReadByPerson(post, person);
+    return PostResponse.builder()
+        .post_view(lemmyPostService.postViewFromPost(post, person))
+        .build();
+  }
+
   @Operation(summary = "Get / fetch posts, with various filters.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200",
       description = "OK",
@@ -183,7 +264,6 @@ public class PostController extends AbstractLemmyApiController {
           if (person.isEmpty()) {
             break;
           }
-
           final Set<LinkPersonCommunity> personCommunities = person.get()
               .getLinkPersonCommunity();
           if (!personCommunities.isEmpty()) {
@@ -281,33 +361,6 @@ public class PostController extends AbstractLemmyApiController {
         .build();
   }
 
-  @Operation(summary = "Mark a post as read.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200",
-      description = "OK",
-      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-          schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
-          description = "Post Not Found",
-          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ApiError.class))})})
-  @PostMapping("mark_as_read")
-  PostResponse markAsRead(@Valid @RequestBody final MarkPostAsRead markPostAsReadForm,
-      final JwtPerson principal)
-  {
-
-    final Person person = getPersonOrThrowBadRequest(principal);
-
-    rolePermissionService.isPermitted(person, RolePermissionPostTypes.MARK_POST_AS_READ,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-
-    // @todo support multiple posts
-    final Post post = postRepository.findById((long) markPostAsReadForm.post_id())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-    postReadService.markPostReadByPerson(post, person);
-    return PostResponse.builder()
-        .post_view(lemmyPostService.postViewFromPost(post, person))
-        .build();
-  }
 
   @Operation(summary = "Like / vote on a post.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200",
@@ -421,7 +474,7 @@ public class PostController extends AbstractLemmyApiController {
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ResponseStatusException.class))})})
   @PostMapping("report")
-  PostReportResponse report(@Valid @RequestBody final CreatePostReport createPostReportForm,
+  public PostReportResponse report(@Valid @RequestBody final CreatePostReport createPostReportForm,
       final JwtPerson principal)
   {
 

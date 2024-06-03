@@ -50,8 +50,9 @@ public class LinkPersonCommunityService {
 
     final List<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkTypeIsIn(
         community, person, types);
-    return linkPersonCommunity.isEmpty();
+    return !linkPersonCommunity.isEmpty();
   }
+
 
   @Transactional
   public void addLink(Person person, Community community, LinkPersonCommunityType type) {
@@ -63,10 +64,16 @@ public class LinkPersonCommunityService {
   public void addLink(Person person, Community community, LinkPersonCommunityType type,
       Date expireAt) {
 
-    final LinkPersonCommunity newLink = LinkPersonCommunity.builder().community(community).person(
-        person).linkType(type).expireAt(expireAt).build();
-    person.getLinkPersonCommunity().add(newLink);
-    community.getLinkPersonCommunity().add(newLink);
+    final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
+        .community(community)
+        .person(person)
+        .linkType(type)
+        .expireAt(expireAt)
+        .build();
+    person.getLinkPersonCommunity()
+        .add(newLink);
+    community.getLinkPersonCommunity()
+        .add(newLink);
     linkPersonCommunityRepository.save(newLink);
     linkPersonCommunityCreatedPublisher.publish(newLink);
   }
@@ -79,10 +86,12 @@ public class LinkPersonCommunityService {
     if (linkPersonCommunity.isEmpty()) {
       return;
     }
-    person.getLinkPersonCommunity().removeIf(
-        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
-    community.getLinkPersonCommunity().removeIf(
-        l -> Objects.equals(l.getId(), linkPersonCommunity.get().getId()));
+    person.getLinkPersonCommunity()
+        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
+            .getId()));
+    community.getLinkPersonCommunity()
+        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
+            .getId()));
     linkPersonCommunityRepository.delete(linkPersonCommunity.get());
     linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
   }

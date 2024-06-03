@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInterface;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionMediaTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionModLogTypes;
@@ -80,6 +81,7 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION);
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS);
     rolePermissions.add(RolePermissionPersonTypes.USER_LOGIN);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_SEARCH);
   }
 
   /**
