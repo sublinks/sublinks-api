@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.post.services;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.UpdatePost;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -162,7 +163,21 @@ public class SublinksPostService {
           "language_not_supported_by_instance");
     }
 
-    languageRepository.findLanguageByCode("und");
+    // @todo: modlog?
+
+    if (createPostForm.featuredLocal()) {
+      if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+      }
+    }
+    if (createPostForm.featuredCommunity()) {
+      if (!(rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_PIN_POST)
+          && linkPersonCommunityService.hasAnyLink(person, community,
+          List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))
+          && !rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+      }
+    }
 
     final PostBuilder postBuilder = Post.builder()
         .title(createPostForm.title())
@@ -212,20 +227,6 @@ public class SublinksPostService {
       }
     }
 
-    if (createPostForm.featuredLocal()) {
-      if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
-      }
-    }
-    if (createPostForm.featuredCommunity()) {
-      if (!(rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_PIN_POST)
-          && linkPersonCommunityService.hasAnyLink(person, community,
-          List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))
-          && !rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
-      }
-    }
-
     final Post post = postBuilder.build();
     postService.createPost(post, person);
 
@@ -234,6 +235,123 @@ public class SublinksPostService {
           .post(post)
           .creator(person)
           .reason("AUTOMATED: Post creation triggered a slur filter")
+          .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
+          .originalTitle(post.getTitle() == null ? "" : post.getTitle())
+          .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl())
+          .build());
+    }
+
+    return conversionService.convert(post, PostResponse.class);
+  }
+
+  public PostResponse update(final String postKey, final UpdatePost updatePostForm,
+      final Person person)
+  {
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+    final Community community = post.getCommunity();
+    if (updatePostForm.languageKey() != null && !updatePostForm.languageKey()
+        .isEmpty()) {
+
+      final Language language = languageRepository.findLanguageByCode(updatePostForm.languageKey());
+
+      if (language == null) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "language_not_found");
+      }
+
+      if (community.getLanguages()
+          .stream()
+          .noneMatch(communityLanguage -> communityLanguage.getCode()
+              .equals(language.getCode()))) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "language_not_supported_by_community");
+      }
+
+      if (community.getInstance()
+          .getLanguages()
+          .stream()
+          .noneMatch(instanceLanguage -> instanceLanguage.getCode()
+              .equals(language.getCode()))) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+            "language_not_supported_by_instance");
+      }
+    }
+
+    // @todo: modlog?
+
+    if (updatePostForm.featuredLocal() != null) {
+      if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+      }
+
+      post.setFeatured(updatePostForm.featuredLocal());
+    }
+    if (updatePostForm.featuredCommunity() != null) {
+      if (!(rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_PIN_POST)
+          && linkPersonCommunityService.hasAnyLink(person, post.getCommunity(),
+          List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))
+          && !rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+      }
+
+      post.setFeatured(updatePostForm.featuredCommunity());
+    }
+
+    boolean shouldReport = false;
+
+    if (updatePostForm.title() != null && !updatePostForm.title()
+        .isBlank()) {
+      try {
+        post.setPostBody(slurFilterService.censorText(updatePostForm.body()));
+      } catch (SlurFilterReportException e) {
+        shouldReport = true;
+        post.setPostBody(updatePostForm.body());
+      } catch (SlurFilterBlockedException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_blocked_by_slur_filter");
+      }
+    }
+
+    if (updatePostForm.nsfw() != null) {
+      post.setNsfw(updatePostForm.nsfw());
+    }
+    if (updatePostForm.body() != null && !updatePostForm.body()
+        .isBlank()) {
+      try {
+        post.setTitle(slurFilterService.censorText(updatePostForm.title()));
+      } catch (SlurFilterReportException e) {
+        shouldReport = true;
+        post.setTitle(updatePostForm.title());
+      } catch (SlurFilterBlockedException e) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "post_blocked_by_slur_filter");
+      }
+    }
+
+    String url = updatePostForm.link();
+    SiteMetadataUtil.SiteMetadata metadata = null;
+    if (url != null) {
+      String metadataUrl = urlUtil.normalizeUrl(url);
+      urlUtil.checkUrlProtocol(metadataUrl);
+      metadata = siteMetadataUtil.fetchSiteMetadata(metadataUrl);
+    }
+
+    if (url != null) {
+      post.setLinkUrl(url);
+      if (metadata != null) {
+        post.setLinkUrl(metadata.title());
+        post.setLinkDescription(metadata.description());
+        post.setLinkVideoUrl(metadata.videoUrl());
+        post.setLinkThumbnailUrl(metadata.imageUrl());
+      }
+    }
+
+    postService.updatePost(post);
+
+    if (shouldReport) {
+      postReportService.createPostReport(PostReport.builder()
+          .post(post)
+          .creator(person)
+          .reason("AUTOMATED: Post update triggered a slur filter")
           .originalBody(post.getPostBody() == null ? "" : post.getPostBody())
           .originalTitle(post.getTitle() == null ? "" : post.getTitle())
           .originalUrl(post.getLinkUrl() == null ? "" : post.getLinkUrl())

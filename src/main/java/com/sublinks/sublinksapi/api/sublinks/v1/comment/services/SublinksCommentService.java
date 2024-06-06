@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.comment.services;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
@@ -14,6 +15,7 @@ import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
+import com.sublinks.sublinksapi.comment.repositories.CommentAggregateRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -47,6 +49,7 @@ public class SublinksCommentService {
   private final LanguageRepository languageRepository;
   private final CommunityRepository communityRepository;
   private final CommentRepository commentRepository;
+  private final CommentAggregateRepository commentAggregateRepository;
   private final CommentService commentService;
   private final PostRepository postRepository;
   private final LanguageService languageService;
@@ -231,6 +234,7 @@ public class SublinksCommentService {
     return conversionService.convert(comment, CommentResponse.class);
   }
 
+
   /**
    * Removes a comment based on the provided key, comment remove form, and person.
    *
@@ -290,6 +294,16 @@ public class SublinksCommentService {
     return conversionService.convert(comment, CommentResponse.class);
   }
 
+  /**
+   * Pins a comment based on the provided key, CommentPin object, and Person object.
+   *
+   * @param key            The key of the comment to be pinned.
+   * @param commentPinForm The CommentPin object representing the pin status of the comment.
+   * @param person         The Person object representing the user performing the pinning.
+   * @return A CommentResponse object representing the pinned comment.
+   * @throws ResponseStatusException If the user does not have permission to pin the comment or the
+   *                                 comment is not found.
+   */
   public CommentResponse pin(String key, CommentPin commentPinForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
@@ -309,5 +323,22 @@ public class SublinksCommentService {
     commentService.updateComment(comment);
 
     return conversionService.convert(comment, CommentResponse.class);
+  }
+
+  /**
+   * Retrieves a {@link CommentAggregateResponse} based on the provided comment key and person.
+   *
+   * @param commentKey The key of the comment to retrieve the aggregate for.
+   * @param person The {@link Person} object representing the user performing the operation.
+   * @return A {@link CommentAggregateResponse} object representing the retrieved comment aggregate.
+   * @throws ResponseStatusException If the comment is not found.
+   */
+  public CommentAggregateResponse aggregate(String commentKey, Person person) {
+
+    return commentAggregateRepository.findByComment_Path(commentKey)
+        .map(commentAggregate -> conversionService.convert(commentAggregate,
+            CommentAggregateResponse.class))
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
   }
 }

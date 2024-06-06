@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @Builder
-public record CreatePost(
+public record UpdatePost(
     @Schema(description = "The title of the post",
         requiredMode = RequiredMode.REQUIRED) String title,
     @Schema(description = "The body of the post",
@@ -24,9 +24,6 @@ public record CreatePost(
         defaultValue = "false",
         example = "false",
         requiredMode = RequiredMode.NOT_REQUIRED) Boolean featuredCommunity,
-
-    @Schema(description = "The community key of the post",
-        requiredMode = RequiredMode.NOT_REQUIRED) String communityKey,
     @Schema(description = "Is the post nsfw",
         defaultValue = "false",
         example = "false",
@@ -34,7 +31,7 @@ public record CreatePost(
     @Schema(description = "The link of the post",
         requiredMode = RequiredMode.NOT_REQUIRED) String link) {
 
-  public CreatePost {
+  public UpdatePost {
 
     if (title.isBlank()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "title_can_not_be_blank");
@@ -45,20 +42,4 @@ public record CreatePost(
 
     return languageKey == null ? "und" : languageKey;
   }
-
-  public Boolean featuredLocal() {
-
-    return featuredLocal != null && featuredLocal;
-  }
-
-  public Boolean featuredCommunity() {
-
-    return featuredCommunity != null && featuredCommunity;
-  }
-
-  public Boolean nsfw() {
-
-    return nsfw != null && nsfw;
-  }
-
 }
