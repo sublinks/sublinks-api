@@ -36,6 +36,13 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     final Root<Comment> commentTable = cq.from(Comment.class);
 
     final List<Predicate> predicates = new ArrayList<>();
+
+    // Parent Comment
+    if (commentSearchCriteria.parent() != null) {
+      predicates.add(cb.like(commentTable.get("path"), commentSearchCriteria.parent()
+          .getPath() + ".%"));
+    }
+
     // Post
     if (commentSearchCriteria.post() != null) {
       predicates.add(cb.equal(commentTable.get("post"), commentSearchCriteria.post()));
@@ -103,7 +110,8 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 
   @Override
@@ -130,6 +138,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     cq.where(predicates.toArray(new Predicate[0]));
 
-    return em.createQuery(cq).getResultList();
+    return em.createQuery(cq)
+        .getResultList();
   }
 }
