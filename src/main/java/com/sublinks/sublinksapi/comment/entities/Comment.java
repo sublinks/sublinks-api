@@ -92,7 +92,6 @@ public class Comment implements Serializable, AclEntityInterface {
 
   @Column(nullable = false, name = "removed_state")
   @Enumerated(EnumType.STRING)
-
   private RemovedState removedState;
 
   @Column(nullable = false, name = "is_local")
@@ -111,7 +110,7 @@ public class Comment implements Serializable, AclEntityInterface {
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
+
   @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")
   private Date updatedAt;
@@ -142,7 +141,8 @@ public class Comment implements Serializable, AclEntityInterface {
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 
   public boolean isRemoved() {

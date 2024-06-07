@@ -39,8 +39,15 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     // Parent Comment
     if (commentSearchCriteria.parent() != null) {
-      predicates.add(cb.like(commentTable.get("path"), commentSearchCriteria.parent()
-          .getPath() + ".%"));
+      int maxDepth = commentSearchCriteria.maxDepth() > 0 ? commentSearchCriteria.maxDepth() : 2;
+
+      // Use regexp_like to match the parent comment path with the specific depth
+
+      String regex = "^" + commentSearchCriteria.parent()
+          .getPath() + "\\.(?:[0-9]+\\.?){1," + maxDepth + "}$";
+
+      predicates.add(cb.isTrue(
+          cb.function("regexp_like", Boolean.class, commentTable.get("path"), cb.literal(regex))));
     }
 
     // Post
@@ -79,7 +86,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
 
     final TypedQuery<Comment> query = em.createQuery(cq);
 
-    applyPagination(query, commentSearchCriteria.page(), perPage);
+    applyPagination(query, page, perPage);
 
     return query.getResultList();
   }
