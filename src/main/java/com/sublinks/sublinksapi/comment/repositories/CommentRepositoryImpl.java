@@ -38,17 +38,17 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     final List<Predicate> predicates = new ArrayList<>();
 
     // Parent Comment
+    int maxDepth = commentSearchCriteria.maxDepth() != null && commentSearchCriteria.maxDepth() > 0
+        ? commentSearchCriteria.maxDepth() : 2;
+
+    String regex = "^0\\.(?:[0-9]+\\.?){1," + (maxDepth + 1) + "}$";
+
     if (commentSearchCriteria.parent() != null) {
-      int maxDepth = commentSearchCriteria.maxDepth() > 0 ? commentSearchCriteria.maxDepth() : 2;
-
-      // Use regexp_like to match the parent comment path with the specific depth
-
-      String regex = "^" + commentSearchCriteria.parent()
-          .getPath() + "\\.(?:[0-9]+\\.?){1," + maxDepth + "}$";
-
-      predicates.add(cb.isTrue(
-          cb.function("regexp_like", Boolean.class, commentTable.get("path"), cb.literal(regex))));
+      regex = "^" + commentSearchCriteria.parent()
+          .getPath() + "\\.(?:[0-9]+\\.?){1," + (maxDepth + 1) + "}$";
     }
+    predicates.add(cb.isTrue(
+        cb.function("regexp_like", Boolean.class, commentTable.get("path"), cb.literal(regex))));
 
     // Post
     if (commentSearchCriteria.post() != null) {
@@ -82,7 +82,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     }
 
     final int perPage = Math.min(Math.abs(commentSearchCriteria.perPage()), 50);
-    final int page = Math.max(commentSearchCriteria.page() - 1, 0);
+    final int page = Math.max(commentSearchCriteria.page() - 1, 1);
 
     final TypedQuery<Comment> query = em.createQuery(cq);
 
