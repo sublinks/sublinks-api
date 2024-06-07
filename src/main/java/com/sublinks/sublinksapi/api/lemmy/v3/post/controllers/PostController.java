@@ -313,9 +313,7 @@ public class PostController extends AbstractLemmyApiController {
     }
     SortingTypeInterface sorting = sortFactory.createSort(sortType);
 
-    ListingType listingType = config != null ? localInstanceContext.instance()
-        .getInstanceConfig()
-        .getDefaultPostListingType() : null;
+    ListingType listingType = config != null ? config.getDefaultPostListingType() : ListingType.All;
     if (getPostsForm.type_() != null) {
       listingType = conversionService.convert(getPostsForm.type_(), ListingType.class);
     }
@@ -332,7 +330,7 @@ public class PostController extends AbstractLemmyApiController {
         .isDislikedOnly(getPostsForm.disliked_only() != null && getPostsForm.disliked_only())
         .sortType(sortType)
         .person(person.orElse(null))
-        .communityIds(communityIds)
+        .communityIds(!communityIds.isEmpty() ? communityIds : null)
         .cursorBasedPageable(getPostsForm.page_cursor())
         .build();
 
