@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.moderation.IndexBannedPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.enums.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.DeletePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
@@ -19,6 +20,7 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
+import com.sublinks.sublinksapi.comment.services.CommentReportService;
 import com.sublinks.sublinksapi.email.entities.Email;
 import com.sublinks.sublinksapi.email.enums.EmailTemplatesEnum;
 import com.sublinks.sublinksapi.email.services.EmailService;
@@ -37,6 +39,8 @@ import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.person.services.UserDataService;
+import com.sublinks.sublinksapi.post.services.PostReportService;
+import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageReportService;
 import com.sublinks.sublinksapi.utils.PaginationUtils;
 import java.util.List;
 import java.util.Locale;
@@ -69,6 +73,9 @@ public class SublinksPersonService {
   private final RoleService roleService;
   private final RolePermissionService rolePermissionService;
   private final PersonAggregateRepository personAggregateRepository;
+  private final PostReportService postReportService;
+  private final CommentReportService commentReportService;
+  private final PrivateMessageReportService privateMessageReportService;
 
   /**
    * Retrieves the name and domain identifiers of a person from the given key.
@@ -411,10 +418,20 @@ public class SublinksPersonService {
     return conversionService.convert(person, PersonResponse.class);
   }
 
-  public PersonAggregateResponse showAggregate(final String key, final Optional<Person> person) {
+  /**
+   * Retrieves the aggregate information of a person.
+   *
+   * @param key    The key containing the person's information. If the key contains "@", it is split
+   *               into name and domain using "@" as the separator. Otherwise, the name is set as
+   *               the key and the domain is obtained from the local instance context.
+   * @param person The Person object representing the person making the request.
+   * @return The PersonAggregateResponse object containing the aggregate information of the person.
+   * @throws ResponseStatusException If the person is not authorized to read the person aggregation
+   *                                 or if the person is not found.
+   */
+  public PersonAggregateResponse showAggregate(final String key, final Person person) {
 
-    rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
             "not_authorized_to_read_community_aggregation"));
 
@@ -427,5 +444,47 @@ public class SublinksPersonService {
     final PersonAggregate personAggregate = personAggregateRepository.findByPerson(foundPerson);
 
     return conversionService.convert(personAggregate, PersonAggregateResponse.class);
+  }
+
+  /**
+   * Sets the person deleted to true.
+   *
+   * @param key              The key containing the person's information. If the key contains "@",
+   *                         it is split into name and domain using "@" as the separator. Otherwise,
+   *                         the name is set as the key and the domain is obtained from the local
+   *                         instance context.
+   * @param deletePersonForm The form containing the reason for deleting the person.
+   * @param person           The person object to be deleted.
+   * @return The PersonResponse object representing the deleted person information.
+   * @throws ResponseStatusException if the person is not authorized to delete a user, if the person
+   *                                 is not found, or if there is an error while deleting the
+   *                                 person.
+   */
+  public PersonResponse deletePerson(final String key, final DeletePerson deletePersonForm,
+      final Person person)
+  {
+
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.DELETE_USER, () -> {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_delete_person");
+    });
+
+    final PersonIdentity ids = getPersonIdentifiersFromKey(key);
+
+    final Person personToDelete = personRepository.findOneByNameAndInstance_Domain(ids.name(),
+            ids.domain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    personToDelete.setDeleted(true);
+    // @todo: modlog
+    personRepository.save(personToDelete);
+
+    // Resolve all reports by the person
+    postReportService.resolveAllReportsByPerson(personToDelete, person);
+    commentReportService.resolveAllReportsByCommentCreator(personToDelete, person);
+    privateMessageReportService.resolveAllReportsByPerson(personToDelete, person);
+
+    personService.deleteUserAccount(personToDelete, deletePersonForm.deleteContent());
+
+    return conversionService.convert(personToDelete, PersonResponse.class);
   }
 }

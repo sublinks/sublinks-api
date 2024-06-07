@@ -15,6 +15,7 @@ public record IndexComment(
     @Schema(description = "Community key",
         requiredMode = RequiredMode.NOT_REQUIRED) String communityKey,
     @Schema(description = "Post key", requiredMode = RequiredMode.NOT_REQUIRED) String postKey,
+    @Schema(description = "Parent Comment key", requiredMode = RequiredMode.NOT_REQUIRED) String parentCommentKey,
     @Schema(description = "Show NSFW", requiredMode = RequiredMode.NOT_REQUIRED) Boolean showNsfw,
     @Schema(description = "Saved only", requiredMode = RequiredMode.NOT_REQUIRED) Boolean savedOnly,
     @Schema(description = "Per page", requiredMode = RequiredMode.NOT_REQUIRED) Integer perPage,

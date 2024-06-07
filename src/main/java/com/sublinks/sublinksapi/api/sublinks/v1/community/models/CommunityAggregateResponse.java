@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.community.models;
 
-public record CommunityAggregatesResponse(
+public record CommunityAggregateResponse(
     String communityKey,
     Integer subscriberCount,
     Integer postCount,

@@ -4,6 +4,8 @@ import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,10 +13,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @AllArgsConstructor
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SublinksCommentAggerateController extends AbstractSublinksApiController {
 
   private final SublinksCommentService sublinksCommentService;
+  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Aggregate a comment")
   @GetMapping
@@ -33,6 +38,10 @@ public class SublinksCommentAggerateController extends AbstractSublinksApiContro
   {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionCommentTypes.READ_COMMENT_AGGREGATE,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_view_not_permitted"));
 
     return sublinksCommentService.aggregate(key, person.orElse(null));
   }

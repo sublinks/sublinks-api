@@ -1,9 +1,11 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.services;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.UpdatePost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.RemovePost;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -244,6 +246,16 @@ public class SublinksPostService {
     return conversionService.convert(post, PostResponse.class);
   }
 
+  /**
+   * Updates a post with the provided information.
+   *
+   * @param postKey        The key of the post to update.
+   * @param updatePostForm The UpdatePost object containing the updated information.
+   * @param person         The Person object representing the user making the update.
+   * @return The updated PostResponse object.
+   * @throws ResponseStatusException If the post is not found, the language is not supported, or the
+   *                                 user does not have permission to update the post.
+   */
   public PostResponse update(final String postKey, final UpdatePost updatePostForm,
       final Person person)
   {
@@ -276,6 +288,8 @@ public class SublinksPostService {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
             "language_not_supported_by_instance");
       }
+
+      post.setLanguage(language);
     }
 
     // @todo: modlog?
@@ -361,4 +375,67 @@ public class SublinksPostService {
     return conversionService.convert(post, PostResponse.class);
   }
 
+  /**
+   * Removes a post.
+   *
+   * @param postKey        The key of the post to remove.
+   * @param removePostForm The RemovePost object containing additional parameters for the removal.
+   * @param person         The Person object representing the user performing the removal.
+   * @return The PostResponse object for the removed post.
+   * @throws ResponseStatusException If the post is not found or the user is not permitted to remove
+   *                                 the post.
+   */
+  public PostResponse remove(final String postKey, final RemovePost removePostForm,
+      final Person person)
+  {
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+
+    if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.REMOVE_POST) && !(
+        rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_REMOVE_POST)
+            && linkPersonCommunityService.hasAnyLink(person, post.getCommunity(),
+            List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "remove_post_permission_denied");
+    }
+
+    post.setRemovedState(removePostForm.remove() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
+
+    // @todo: modlog?
+
+    postService.updatePost(post);
+    return conversionService.convert(post, PostResponse.class);
+  }
+
+  /**
+   * Deletes a post with the specified post key, using the provided delete post form and person.
+   *
+   * @param postKey        The key of the post to delete.
+   * @param deletePostForm The DeletePost object containing additional parameters for the deletion.
+   * @param person         The Person object representing the user performing the deletion.
+   * @return The PostResponse object for the deleted post.
+   * @throws ResponseStatusException If the post is not found or the user is not permitted to delete
+   *                                 the post.
+   */
+  public PostResponse delete(final String postKey, final DeletePost deletePostForm,
+      final Person person)
+  {
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+
+    if (rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST)
+        && postService.getPostCreator(post)
+        .getId()
+        .equals(person.getId()) && !post.isRemoved()) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "delete_post_permission_denied");
+    }
+
+    post.setDeleted(deletePostForm.remove());
+
+    // @todo: modlog?
+
+    postService.updatePost(post);
+    return conversionService.convert(post, PostResponse.class);
+  }
 }

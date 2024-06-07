@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.DeleteCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
@@ -99,7 +100,12 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @DeleteMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void delete(@PathVariable String key) {
-    // @TODO: implement
+  public CommunityResponse delete(@RequestBody final DeleteCommunity deleteCommunityForm,
+      @PathVariable final String key, final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksCommunityService.delete(key, deleteCommunityForm, person);
   }
 }

@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.controllers;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.DeletePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -99,5 +101,16 @@ public class SublinksPersonController extends AbstractSublinksApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     return sublinksPersonService.updatePerson(person, updatePersonForm);
+  }
+
+  @Operation(summary = "Delete an person")
+  @DeleteMapping("/{key}")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PersonResponse delete(@RequestBody final DeletePerson deletePersonForm, @PathVariable String key, final SublinksJwtPerson principal) {
+
+    final Person person = getPersonOrThrowUnauthorized(principal);
+
+    return sublinksPersonService.deletePerson(key, deletePersonForm, person);
   }
 }

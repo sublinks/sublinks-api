@@ -3,12 +3,13 @@ package com.sublinks.sublinksapi.api.sublinks.v1.community.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.ListingType;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.DeleteCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityDelete;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityRemove;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.RemoveCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.ActorIdUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
@@ -279,7 +280,7 @@ public class SublinksCommunityService {
    * @throws ResponseStatusException If the community is not found, or the person is not authorized
    *                                 to remove the community.
    */
-  public CommunityResponse remove(String key, CommunityRemove removeComment, Person person) {
+  public CommunityResponse remove(String key, RemoveCommunity removeComment, Person person) {
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)
         .orElseThrow(
@@ -302,14 +303,14 @@ public class SublinksCommunityService {
    * Deletes a community based on the provided key, delete form, and person.
    *
    * @param key                 The key of the community to delete.
-   * @param communityDeleteForm The delete form specifying the reason for deletion and whether to
+   * @param deleteCommunityForm The delete form specifying the reason for deletion and whether to
    *                            remove the community.
    * @param person              The person performing the deletion.
    * @return The response containing the deleted community.
    * @throws ResponseStatusException If the community is not found, or the person is not authorized
    *                                 to delete the community.
    */
-  public CommunityResponse delete(String key, CommunityDelete communityDeleteForm, Person person) {
+  public CommunityResponse delete(String key, DeleteCommunity deleteCommunityForm, Person person) {
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)
         .orElseThrow(
@@ -322,11 +323,34 @@ public class SublinksCommunityService {
     }
 
     community.setDeleted(
-        communityDeleteForm.remove() != null ? communityDeleteForm.remove() : true);
+        deleteCommunityForm.remove() != null ? deleteCommunityForm.remove() : true);
 
     communityService.updateCommunity(community);
     // @todo: modlog
 
     return conversionService.convert(community, CommunityResponse.class);
+  }
+
+  /**
+   * Retrieves the aggregated information of a community.
+   *
+   * @param communityKey The key of the community.
+   * @param person       The person requesting the information.
+   * @return The CommunityAggregateResponse containing the aggregated information of the community.
+   * @throws ResponseStatusException If the person is not authorized to read the community
+   *                                 aggregation or if the community is not found.
+   */
+  public CommunityAggregateResponse showAggregate(String communityKey, Person person) {
+
+    rolePermissionService.isPermitted(person,
+        RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "not_authorized_to_read_community_aggregation"));
+
+    final Community community = communityRepository.findCommunityByTitleSlug(communityKey)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    return conversionService.convert(community, CommunityAggregateResponse.class);
   }
 }

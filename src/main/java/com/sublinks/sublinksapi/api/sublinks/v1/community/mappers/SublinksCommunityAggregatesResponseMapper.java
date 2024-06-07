@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.community.mappers;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregatesResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregateResponse;
 import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class SublinksCommunityAggregatesResponseMapper implements
-    Converter<CommunityAggregate, CommunityAggregatesResponse> {
+    Converter<CommunityAggregate, CommunityAggregateResponse> {
 
   @Override
   @Mapping(target = "communityKey", source = "communityAggregate.community.titleSlug")
@@ -22,6 +22,6 @@ public abstract class SublinksCommunityAggregatesResponseMapper implements
   @Mapping(target = "activeMonthlyUserCount", source = "communityAggregate.activeMonthlyUserCount")
   @Mapping(target = "activeHalfYearUserCount",
       source = "communityAggregate.activeHalfYearUserCount")
-  public abstract CommunityAggregatesResponse convert(
+  public abstract CommunityAggregateResponse convert(
       @Nullable CommunityAggregate communityAggregate);
 }

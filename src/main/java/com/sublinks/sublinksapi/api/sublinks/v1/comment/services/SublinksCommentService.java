@@ -73,7 +73,7 @@ public class SublinksCommentService {
 
     Optional<Comment> parentComment = Optional.empty();
     if (indexCommentForm.postKey() != null) {
-      parentComment = commentRepository.findByPath(indexCommentForm.postKey());
+      parentComment = commentRepository.findByPath(indexCommentForm.parentCommentKey());
     }
 
     Optional<Community> community = Optional.empty();
@@ -264,7 +264,7 @@ public class SublinksCommentService {
   }
 
   /**
-   * Deletes a comment based on the provided key, comment delete form, and person.
+   * Deletes a comment based on the provided key, CommentDelete form, and Person.
    *
    * @param key               The key of the comment to be deleted.
    * @param commentDeleteForm The CommentDelete object representing the delete form data.
@@ -274,9 +274,6 @@ public class SublinksCommentService {
    *                                 the comment is not found.
    */
   public CommentResponse delete(String key, CommentDelete commentDeleteForm, Person person) {
-
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.DELETE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted"));
 
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
@@ -295,19 +292,17 @@ public class SublinksCommentService {
   }
 
   /**
-   * Pins a comment based on the provided key, CommentPin object, and Person object.
+   * Pins or unpins a comment and returns the updated CommentResponse object.
    *
-   * @param key            The key of the comment to be pinned.
-   * @param commentPinForm The CommentPin object representing the pin status of the comment.
-   * @param person         The Person object representing the user performing the pinning.
-   * @return A CommentResponse object representing the pinned comment.
-   * @throws ResponseStatusException If the user does not have permission to pin the comment or the
-   *                                 comment is not found.
+   * @param key            The key of the comment.
+   * @param commentPinForm The CommentPin object representing the pin form data.
+   * @param person         The Person object representing the user performing the
+   *                       pinning/unpinning.
+   * @return A CommentResponse object representing the updated comment.
+   * @throws ResponseStatusException If the comment is not found or the user does not have
+   *                                 permission to perform the operation.
    */
   public CommentResponse pin(String key, CommentPin commentPinForm, Person person) {
-
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted"));
 
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
@@ -329,7 +324,7 @@ public class SublinksCommentService {
    * Retrieves a {@link CommentAggregateResponse} based on the provided comment key and person.
    *
    * @param commentKey The key of the comment to retrieve the aggregate for.
-   * @param person The {@link Person} object representing the user performing the operation.
+   * @param person     The {@link Person} object representing the user performing the operation.
    * @return A {@link CommentAggregateResponse} object representing the retrieved comment aggregate.
    * @throws ResponseStatusException If the comment is not found.
    */

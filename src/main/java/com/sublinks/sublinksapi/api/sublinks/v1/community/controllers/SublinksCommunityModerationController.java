@@ -4,9 +4,8 @@ import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityDelete;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityRemove;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.RemoveCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
@@ -48,30 +47,17 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   private final ConversionService conversionService;
   private final RolePermissionService rolePermissionService;
 
-  @Operation(summary = "Delete a community")
-  @PostMapping("/delete")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityResponse delete(@PathVariable final String key,
-      @RequestBody @Valid CommunityDelete communityDeleteForm, SublinksJwtPerson sublinksJwtPerson)
-  {
-
-    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
-
-    return sublinksCommunityService.delete(key, communityDeleteForm, person);
-  }
-
   @Operation(summary = "Remove a community")
   @GetMapping("/remove")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse remove(@PathVariable final String key,
-      @RequestBody @Valid CommunityRemove communityRemoveForm, SublinksJwtPerson sublinksJwtPerson)
+      @RequestBody @Valid RemoveCommunity removeCommunityForm, SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksCommunityService.remove(key, communityRemoveForm, person);
+    return sublinksCommunityService.remove(key, removeCommunityForm, person);
   }
 
 

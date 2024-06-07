@@ -2,7 +2,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.community.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregatesResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityAggregateResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.CommunityAggregate;
@@ -36,7 +36,7 @@ public class SublinksCommunityAggregationController extends AbstractSublinksApiC
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityAggregatesResponse show(@PathVariable final String key,
+  public CommunityAggregateResponse show(@PathVariable final String key,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
@@ -53,6 +53,6 @@ public class SublinksCommunityAggregationController extends AbstractSublinksApiC
       throw new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found");
     }
 
-    return conversionService.convert(communityAggregate, CommunityAggregatesResponse.class);
+    return conversionService.convert(communityAggregate, CommunityAggregateResponse.class);
   }
 }
