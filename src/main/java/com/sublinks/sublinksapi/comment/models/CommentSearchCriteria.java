@@ -15,6 +15,7 @@ public record CommentSearchCriteria(
     CommentSortType commentSortType,
     Integer perPage,
     Integer page,
+    Integer maxDepth,
     Community community,
     Post post,
     Comment parent,

@@ -518,8 +518,8 @@ public class CommentController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
-    final Optional<Integer> page = Optional.ofNullable(getCommentsForm.page());
-    final Optional<Integer> perPage = Optional.ofNullable(getCommentsForm.limit());
+    Optional<Integer> page = Optional.ofNullable(getCommentsForm.page());
+    Optional<Integer> perPage = Optional.ofNullable(getCommentsForm.limit());
 
     final CommentSortType sortType = conversionService.convert(getCommentsForm.sort(),
         CommentSortType.class);
@@ -539,14 +539,22 @@ public class CommentController extends AbstractLemmyApiController {
       }
     }
 
-    // @todo Should this really throw a error? Why not just clamp the values?
-    if (perPage.isPresent() && (perPage.get() < 1 || perPage.get() > 50)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+    searchBuilder.maxDepth(
+        getCommentsForm.max_depth() != null ? Math.max(Math.min(getCommentsForm.max_depth(), 2), 0)
+            : 2);
+
+    if (perPage.isPresent()) {
+      if (perPage.get() < 1) {
+        perPage = Optional.of(1);
+      }
+      if (perPage.get() > 50) {
+        page = Optional.of(50);
+      }
     }
     searchBuilder.perPage(perPage.orElse(10));
 
     if (page.isPresent() && page.get() < 1) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "couldnt_get_comments");
+      page = Optional.of(1);
     }
     searchBuilder.page(page.orElse(1));
 

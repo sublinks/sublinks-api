@@ -40,7 +40,8 @@ public class CommentService {
   public String generateActivityPubId(
       final com.sublinks.sublinksapi.comment.entities.Comment comment) {
 
-    String domain = localInstanceContext.instance().getDomain();
+    String domain = localInstanceContext.instance()
+        .getDomain();
     return String.format("%s/comment/%d", domain, comment.getId());
   }
 
@@ -56,7 +57,8 @@ public class CommentService {
       return Optional.empty();
     }
 
-    String[] path = comment.getPath().split("\\.");
+    String[] path = comment.getPath()
+        .split("\\.");
     if (path.length == 1) {
       return Optional.empty();
     }
@@ -73,14 +75,17 @@ public class CommentService {
   @Transactional
   public void createComment(final Comment comment) {
 
-    if (comment.getPath() == null || comment.getPath().isBlank()) {
+    if (comment.getPath() == null || comment.getPath()
+        .isBlank()) {
       commentRepository.saveAndFlush(comment);
       comment.setPath(String.format("0.%d", comment.getId()));
     }
     comment.setActivityPubId(generateActivityPubId(comment));
     commentRepository.save(comment);
 
-    CommentAggregate commentAggregate = CommentAggregate.builder().comment(comment).build();
+    CommentAggregate commentAggregate = CommentAggregate.builder()
+        .comment(comment)
+        .build();
     commentAggregateRepository.save(commentAggregate);
     comment.setCommentAggregate(commentAggregate);
     commentRepository.save(comment);
@@ -99,7 +104,14 @@ public class CommentService {
 
     commentRepository.saveAndFlush(comment);
     comment.setPath(String.format("%s.%d", parent.getPath(), comment.getId()));
+
     createComment(comment);
+    final CommentAggregate commentAggregate = parent.getCommentAggregate();
+    commentAggregate.setChildrenCount(commentAggregate.getChildrenCount() + 1);
+    commentAggregateRepository.save(commentAggregate);
+
+    parent.setCommentAggregate(commentAggregate);
+    commentRepository.save(parent);
   }
 
   /**
@@ -111,10 +123,11 @@ public class CommentService {
 
     String DELETED_REPLACEMENT_TEXT = "*Permanently Deleted*";
 
-    Comment foundComment = commentRepository.findById(comment.getId()).orElseThrow(() -> {
-      logger.error("no comment found by id: {}", comment.getId());
-      return new EntityNotFoundException("could not find comment by Id");
-    });
+    Comment foundComment = commentRepository.findById(comment.getId())
+        .orElseThrow(() -> {
+          logger.error("no comment found by id: {}", comment.getId());
+          return new EntityNotFoundException("could not find comment by Id");
+        });
     foundComment.setCommentBody(DELETED_REPLACEMENT_TEXT);
     foundComment.setRemovedState(RemovedState.PURGED);
 
@@ -125,10 +138,11 @@ public class CommentService {
 
   public Comment softDeleteComment(final Comment comment) {
 
-    Comment foundComment = commentRepository.findById(comment.getId()).orElseThrow(() -> {
-      logger.error("no comment found by id: {}", comment.getId());
-      return new EntityNotFoundException("could not find comment by Id");
-    });
+    Comment foundComment = commentRepository.findById(comment.getId())
+        .orElseThrow(() -> {
+          logger.error("no comment found by id: {}", comment.getId());
+          return new EntityNotFoundException("could not find comment by Id");
+        });
 
     final Comment updatedComment = commentRepository.save(foundComment);
     commentDeletedPublisher.publish(updatedComment);
