@@ -25,10 +25,18 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
   HashSet<Person> findAllByRole(Role role);
 
+  List<Person> findAllByLocal(Boolean local, Pageable pageable);
+
   @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)",
       countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)",
       nativeQuery = true)
   List<Person> findAllByNameAndBiography(@Param("keyword") String keyword, Pageable pageable);
+
+  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword) AND p.is_local = :local",
+      countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)",
+      nativeQuery = true)
+  List<Person> findAllByNameAndBiographyAndLocal(@Param("keyword") String keyword,
+      @Param("local") Boolean local, Pageable pageable);
 
   @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword) AND p.role_id = :role",
       countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword) AND p.role_id = :role",

@@ -82,6 +82,8 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS);
     rolePermissions.add(RolePermissionPersonTypes.USER_LOGIN);
     rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_SEARCH);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENT);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENTS);
   }
 
   /**

@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.enums.RegistrationMode;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtUtil;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.moderation.IndexBannedPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.enums.RegistrationState;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
@@ -113,18 +114,33 @@ public class SublinksPersonService {
   public List<PersonResponse> index(final IndexPerson indexPerson) {
 
     if (indexPerson.search() == null) {
-      return personRepository.findAll(
-              PageRequest.of(Math.max(indexPerson.page() != null ? indexPerson.page() : 1, 1),
-                  PaginationUtils.Clamp(indexPerson.perPage() != null ? indexPerson.perPage() : 20, 1,
-                      20)))
+
+      if (indexPerson.listingType() == SublinksListingType.Local) {
+        return personRepository.findAllByLocal(true, PageRequest.of(Math.max(indexPerson.page(), 1),
+                PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
+            .stream()
+            .map(person -> conversionService.convert(person, PersonResponse.class))
+            .toList();
+      }
+      return personRepository.findAll(PageRequest.of(Math.max(indexPerson.page(), 1),
+              PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
           .stream()
           .map(person -> conversionService.convert(person, PersonResponse.class))
           .toList();
     }
+
+    if (indexPerson.listingType() == SublinksListingType.Local) {
+      return personRepository.findAllByNameAndBiographyAndLocal(indexPerson.search(), true,
+              PageRequest.of(Math.max(indexPerson.page(), 1),
+                  PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
+          .stream()
+          .map(person -> conversionService.convert(person, PersonResponse.class))
+          .toList();
+    }
+
     return personRepository.findAllByNameAndBiography(indexPerson.search(),
-            PageRequest.of(Math.max(indexPerson.page() != null ? indexPerson.page() : 1, 1),
-                PaginationUtils.Clamp(indexPerson.perPage() != null ? indexPerson.perPage() : 20, 1,
-                    20)))
+            PageRequest.of(Math.max(indexPerson.page(), 1),
+                PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
         .stream()
         .map(person -> conversionService.convert(person, PersonResponse.class))
         .toList();

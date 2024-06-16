@@ -62,7 +62,7 @@ public class SublinksSearchService {
           .search(search)
           .page(page)
           .perPage(perPage)
-          .sublinksListingType(searchForm.listingType())
+          .listingType(searchForm.listingType())
           .sortType(searchForm.type())
           .build()));
     }
