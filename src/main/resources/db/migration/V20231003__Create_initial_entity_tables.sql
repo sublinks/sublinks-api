@@ -652,6 +652,7 @@ CREATE TABLE announcements
 (
   id            BIGSERIAL PRIMARY KEY,
   content       TEXT                                      NOT NULL,
+  is_active     BOOL                                      NOT NULL DEFAULT true,
   local_site_id BIGINT                                    NOT NULL,
   created_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
   updated_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL

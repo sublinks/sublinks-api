@@ -39,6 +39,9 @@ public class Announcement {
   @Column(name = "content")
   private String content;
 
+  @Column(name = "is_active")
+  private Boolean active;
+
   @Column(name = "local_site_id")
   private Long localSiteId;
 
