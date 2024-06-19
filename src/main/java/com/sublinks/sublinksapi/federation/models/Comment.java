@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.federation.models;
 
 import lombok.Builder;
+import java.util.Date;
 
 /**
  * Represents a comment in federation queue.
@@ -13,8 +14,8 @@ public record Comment(
     String post_id,
     String author_id,
     Boolean nsfw,
-    String content
-    //    Published time.Time `json:"published"`
+    String content,
+    Date published
 ) {
 
 }

@@ -45,6 +45,7 @@ public class CommentCreateListener implements ApplicationListener<CommentCreated
             .post_id(comment.getPost()
                 .getActivityPubId())
             .url_stub(comment.getPath())
+            .published(comment.getCreatedAt())
             .build();
 
     getFederationProducer().sendMessage(getFederationExchange(),
