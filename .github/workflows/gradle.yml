@@ -40,7 +40,7 @@ jobs:
           java-version: '17'
           distribution: 'corretto'
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@v3
+        uses: gradle/actions/setup-action@v3
         with:
           arguments: build
 
