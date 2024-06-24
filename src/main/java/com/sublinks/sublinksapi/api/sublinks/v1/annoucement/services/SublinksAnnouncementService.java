@@ -51,7 +51,7 @@ public class SublinksAnnouncementService {
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "forbidden_to_read_announcements"));
 
     final List<Announcement> announcements = this.announcementRepository.findAll(
-            PageRequest.of(indexAnnouncementForm.page(), indexAnnouncementForm.perPage(), Sort.by(
+            PageRequest.of(indexAnnouncementForm.page() - 1, indexAnnouncementForm.perPage(), Sort.by(
                 indexAnnouncementForm.sortOrder() == SortOrder.Desc ? Direction.DESC : Direction.ASC,
                 "createdAt")))
         .toList();
@@ -109,7 +109,11 @@ public class SublinksAnnouncementService {
         .content(createAnnouncementForm.content())
         .localSiteId(localInstanceContext.instance()
             .getId())
+        .active(createAnnouncementForm.active())
+        .creator(person)
         .build();
+
+    this.announcementRepository.save(announcement);
 
     return this.conversionService.convert(announcement, AnnouncementResponse.class);
   }
@@ -133,7 +137,12 @@ public class SublinksAnnouncementService {
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 
-    announcement.setContent(updateAnnouncementForm.content());
+    if(updateAnnouncementForm.content() != null){
+      announcement.setContent(updateAnnouncementForm.content());
+    }
+    if(updateAnnouncementForm.active() != null){
+      announcement.setActive(updateAnnouncementForm.active());
+    }
     this.announcementRepository.save(announcement);
     return conversionService.convert(announcement, AnnouncementResponse.class);
   }

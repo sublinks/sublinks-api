@@ -12,7 +12,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
     uses = {SublinksPersonMapper.class})
-public abstract class LemmyCommentMapper implements Converter<Comment, CommentResponse> {
+public abstract class SublinksCommentMapper implements Converter<Comment, CommentResponse> {
 
   SublinksPersonMapper personMapper;
 

@@ -13,6 +13,11 @@ public record AnnouncementResponse(
     @Schema(description = "The created at date",
         requiredMode = RequiredMode.REQUIRED,
         example = "2021-01-01T00:00:00Z") String createdAt,
+    @Schema(
+        description = "The active status of the announcement",
+        requiredMode = RequiredMode.REQUIRED,
+        example = "true"
+    ) Boolean active,
     @Schema(description = "The updated at date",
         requiredMode = RequiredMode.REQUIRED,
         example = "2021-01-01T00:00:00Z") String updatedAt) {

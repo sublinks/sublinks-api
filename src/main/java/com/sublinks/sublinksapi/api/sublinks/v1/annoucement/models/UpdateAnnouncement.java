@@ -2,17 +2,12 @@ package com.sublinks.sublinksapi.api.sublinks.v1.annoucement.models;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 public record UpdateAnnouncement(
     @Schema(description = "The new content of the announcement",
-        requiredMode = RequiredMode.REQUIRED) String content) {
+        requiredMode = RequiredMode.NOT_REQUIRED) String content,
+    @Schema(description = "The new active status of the announcement",
+        requiredMode = RequiredMode.NOT_REQUIRED,
+        defaultValue = "true") Boolean active) {
 
-  public UpdateAnnouncement {
-
-    if (content == null) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "content_required");
-    }
-  }
 }

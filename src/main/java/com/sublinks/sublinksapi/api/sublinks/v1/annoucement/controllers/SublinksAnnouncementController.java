@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -60,7 +61,9 @@ public class SublinksAnnouncementController extends AbstractSublinksApiControlle
   @PostMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public AnnouncementResponse create(final CreateAnnouncement createAnnouncementForm, final SublinksJwtPerson sublinksJwtPerson) {
+  public AnnouncementResponse create(@RequestBody final CreateAnnouncement createAnnouncementForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
@@ -71,7 +74,10 @@ public class SublinksAnnouncementController extends AbstractSublinksApiControlle
   @PostMapping("/{id}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public AnnouncementResponse update(@PathVariable final String id, final UpdateAnnouncement updateAnnouncementForm, final SublinksJwtPerson sublinksJwtPerson) {
+  public AnnouncementResponse update(@PathVariable final String id,
+      @RequestBody final UpdateAnnouncement updateAnnouncementForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
@@ -82,7 +88,9 @@ public class SublinksAnnouncementController extends AbstractSublinksApiControlle
   @DeleteMapping("/{id}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public AnnouncementResponse delete(@PathVariable final String id, final SublinksJwtPerson sublinksJwtPerson) {
+  public AnnouncementResponse delete(@PathVariable final String id,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
