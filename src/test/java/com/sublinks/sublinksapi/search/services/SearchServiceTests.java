@@ -13,6 +13,7 @@ import com.sublinks.sublinksapi.search.repositories.PersonSearchRepository;
 import com.sublinks.sublinksapi.search.repositories.PostSearchRepository;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -123,8 +124,86 @@ public class SearchServiceTests {
     assertEquals(expectedPage, result);
   }
 
+  @Disabled
   @Test
-  public void testSearchPostByUrlWithCrossPostsReturnsResults() {
+  public void testSearchPostByUrlReturnsEmptyWhenNoPosts() {
+    String url = "http://example.com";
+    int page = 0;
+    int pageSize = 2;
+    Sort sort = Sort.by("id");
+    String cleanUrl = "http://example.com/clean";
+    String hash = "hashed-url";
+
+
+    CrossPost crossPost = new CrossPost();
+    crossPost.setPosts(Collections.emptySet());
+
+    when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
+    when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
+    when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
+
+    Page<Post> expectedPage = Page.empty();
+    Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
+
+    assertEquals(expectedPage, result);
+  }
+
+  @Disabled
+  @Test
+  public void testSearchPostByUrlWithCrossPostsFewerPostsThanPageSize() {
+    String url = "http://example.com";
+    int page = 0;
+    int pageSize = 5;
+    Sort sort = Sort.by("id");
+    String cleanUrl = "http://example.com/clean";
+    String hash = "hashed-url";
+
+    Post post1 = new Post();
+    Post post2 = new Post();
+    Set<Post> posts = Set.of(post1,post2);
+    CrossPost crossPost = new CrossPost();
+    crossPost.setPosts(posts);
+
+    when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
+    when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
+    when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
+
+    Page<Post> expectedPage = Page.empty();
+
+    Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
+
+    assertEquals(expectedPage, result);
+  }
+
+  @Disabled
+  @Test
+  public void testSearchPostByUrlWithCrossPostsOnePageWorthOfPostsRequestSecondPage() {
+    String url = "http://example.com";
+    int page = 1;
+    int pageSize = 2;
+    Sort sort = Sort.by("id");
+    String cleanUrl = "http://example.com/clean";
+    String hash = "hashed-url";
+
+    Post post1 = new Post();
+    Post post2 = new Post();
+    Set<Post> posts = Set.of(post1,post2);
+    CrossPost crossPost = new CrossPost();
+    crossPost.setPosts(posts);
+
+    when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
+    when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
+    when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
+
+    Page<Post> expectedPage = Page.empty();
+
+    Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
+
+    assertEquals(expectedPage, result);
+  }
+
+  @Test
+  public void testSearchPostByUrlWithCrossPostsReturnsExactlyOnePageWorthOfResults() {
     String url = "http://example.com";
     int page = 0;
     int pageSize = 2;
@@ -143,7 +222,63 @@ public class SearchServiceTests {
     when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
 
     List<Post> postList = crossPost.getPosts().stream().toList();
-    Page<Post> expectedPage = new PageImpl<>(postList.subList(page * pageSize, (page + 1) * pageSize),
+    Page<Post> expectedPage = new PageImpl<>(postList,
+        PageRequest.of(page, pageSize, sort),posts.size());
+
+    Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
+
+    assertEquals(expectedPage, result);
+  }
+
+  @Test
+  public void testSearchPostByUrlWithCrossPostsPageOneOfTwo() {
+    String url = "http://example.com";
+    int page = 0;
+    int pageSize = 1;
+    Sort sort = Sort.by("id");
+    String cleanUrl = "http://example.com/clean";
+    String hash = "hashed-url";
+
+    Post post1 = new Post();
+    Post post2 = new Post();
+    Set<Post> posts = Set.of(post1,post2);
+    CrossPost crossPost = new CrossPost();
+    crossPost.setPosts(posts);
+
+    when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
+    when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
+    when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
+
+    List<Post> postList = crossPost.getPosts().stream().toList();
+    Page<Post> expectedPage = new PageImpl<>(postList.subList(0, 1),
+        PageRequest.of(page, pageSize, sort),posts.size());
+
+    Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
+
+    assertEquals(expectedPage, result);
+  }
+
+  @Test
+  public void testSearchPostByUrlWithCrossPostsPageTwoOfTwo() {
+    String url = "http://example.com";
+    int page = 1;
+    int pageSize = 1;
+    Sort sort = Sort.by("id");
+    String cleanUrl = "http://example.com/clean";
+    String hash = "hashed-url";
+
+    Post post1 = new Post();
+    Post post2 = new Post();
+    Set<Post> posts = Set.of(post1,post2);
+    CrossPost crossPost = new CrossPost();
+    crossPost.setPosts(posts);
+
+    when(urlUtil.normalizeUrl(url)).thenReturn(cleanUrl);
+    when(postService.getStringMd5Hash(cleanUrl)).thenReturn(hash);
+    when(crossPostRepository.getCrossPostByMd5Hash(hash)).thenReturn(Optional.of(crossPost));
+
+    List<Post> postList = crossPost.getPosts().stream().toList();
+    Page<Post> expectedPage = new PageImpl<>(postList.subList(1, 2),
         PageRequest.of(page, pageSize, sort),posts.size());
 
     Page<Post> result = searchService.searchPostByUrl(url, page, pageSize, sort);
