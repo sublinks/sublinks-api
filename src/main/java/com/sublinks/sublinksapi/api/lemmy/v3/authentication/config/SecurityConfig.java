@@ -33,7 +33,6 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 
     http
-        .csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests((requests) -> requests
             .anyRequest().permitAll()
         )
