@@ -47,7 +47,7 @@ public class SearchService {
       final Sort sort) {
 
     final int realPage = page <= 0 ? 1 : page;
-    final int realPageSize = pageSize <= 0 ? 1 : Math.min(pageSize, 20);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return communitySearchRepository.searchAllByKeyword(query,
         PageRequest.of(realPage, realPageSize, sort));
@@ -60,20 +60,13 @@ public class SearchService {
    * @param page     The page number of the search results.
    * @param pageSize The number of results per page.
    * @param sort     The sorting criteria for the search results.
-   * @param query    The keyword to search for.
-   * @param page     The page number of the search results.
-   * @param pageSize The number of results per page.
-   * @param sort     The sorting criteria for the search results.
-   * @return A Page object containing the search results. If no results are found, an empty Page
-   * will be returned.
-   * @return A Page object containing the search results. If no results are found, an empty Page
-   * will be returned.
+   * @return A Page object containing the search results. If no results are found, an empty Page will be returned.
    */
   public Page<Post> searchPost(final String query, final int page, final int pageSize,
       final Sort sort) {
 
     final int realPage = page <= 0 ? 1 : page;
-    final int realPageSize = pageSize <= 0 ? 1 : Math.min(pageSize, 20);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return postSearchRepository.searchAllByKeyword(query,
         PageRequest.of(realPage, realPageSize, sort));
@@ -93,7 +86,7 @@ public class SearchService {
       final Sort sort) {
 
     final int realPage = page <= 0 ? 1 : page;
-    final int realPageSize = pageSize <= 0 ? 1 : Math.min(pageSize, 20);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return commentSearchRepository.searchAllByKeyword(query,
         PageRequest.of(realPage, realPageSize, sort));
@@ -125,7 +118,7 @@ public class SearchService {
         .toList();
 
     final int realPage = page <= 0 ? 1 : page;
-    final int realPageSize = pageSize <= 0 ? 1 : Math.min(pageSize, 20);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return new PageImpl<>(posts.subList(realPage * realPageSize, (realPage + 1) * realPageSize),
         PageRequest.of(realPage, realPageSize, sort), posts.size());
@@ -145,7 +138,7 @@ public class SearchService {
       final Sort sort) {
 
     final int realPage = page <= 0 ? 1 : page;
-    final int realPageSize = pageSize <= 0 ? 1 : Math.min(pageSize, 20);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
     return personSearchRepository.searchAllByKeyword(query,
         PageRequest.of(realPage, realPageSize, sort));
   }

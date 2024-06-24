@@ -53,10 +53,14 @@ public class SearchController extends AbstractLemmyApiController {
   private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Search lemmy.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = SearchResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Gets returned if type_ is null", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class))}
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = SearchResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Gets returned if type_ is null",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ResponseStatusException.class))}
 
       )})
   @GetMapping
@@ -78,8 +82,10 @@ public class SearchController extends AbstractLemmyApiController {
     }
 
     Sort sort = switch (searchForm.sort()) {
-      case "New" -> Sort.by("createdAt").descending();
-      case "Old" -> Sort.by("createdAt").ascending();
+      case "New" -> Sort.by("createdAt")
+          .descending();
+      case "Old" -> Sort.by("createdAt")
+          .ascending();
       default -> Sort.unsorted();
     };
 
@@ -93,35 +99,44 @@ public class SearchController extends AbstractLemmyApiController {
     if (searchForm.type_() == SearchType.Comments || isAll) {
       List<Comment> comments = searchService.searchComments(searchForm.q(), page, limit, sort)
           .getContent();
-      commentViewList.addAll(
-          comments.stream().map(lemmyCommentService::createCommentView).toList());
+      commentViewList.addAll(comments.stream()
+          .map(lemmyCommentService::createCommentView)
+          .toList());
 
     }
 
     if (searchForm.type_() == SearchType.Posts || isAll) {
-      List<Post> posts = searchService.searchPost(searchForm.q(), page, limit, sort).getContent();
-      postViewList.addAll(posts.stream().map(lemmyPostService::postViewFromPost).toList());
+      List<Post> posts = searchService.searchPost(searchForm.q(), page, limit, sort)
+          .getContent();
+      postViewList.addAll(posts.stream()
+          .map(lemmyPostService::postViewFromPost)
+          .toList());
     }
 
     if (searchForm.type_() == SearchType.Communities || isAll) {
       List<Community> communities = searchService.searchCommunity(searchForm.q(), page, limit, sort)
           .getContent();
-      communityViewList.addAll(
-          communities.stream().map(lemmyCommunityService::communityViewFromCommunity).toList());
+      communityViewList.addAll(communities.stream()
+          .map(lemmyCommunityService::communityViewFromCommunity)
+          .toList());
 
     }
 
     if (searchForm.type_() == SearchType.Users || isAll) {
       List<Person> people = searchService.searchPerson(searchForm.q(), page, limit, sort)
           .getContent();
-      peopleViewList.addAll(people.stream().map(lemmyPersonService::getPersonView).toList());
+      peopleViewList.addAll(people.stream()
+          .map(lemmyPersonService::getPersonView)
+          .toList());
 
     }
 
     if (searchForm.type_() == SearchType.Url || isAll) {
       List<Post> posts = searchService.searchPostByUrl(searchForm.q(), page, limit, sort)
           .getContent();
-      postViewList.addAll(posts.stream().map(lemmyPostService::postViewFromPost).toList());
+      postViewList.addAll(posts.stream()
+          .map(lemmyPostService::postViewFromPost)
+          .toList());
     }
 
     responseBuilder.comments(commentViewList);
