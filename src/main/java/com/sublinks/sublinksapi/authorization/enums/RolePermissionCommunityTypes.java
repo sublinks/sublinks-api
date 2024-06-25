@@ -29,6 +29,7 @@ public enum RolePermissionCommunityTypes implements RolePermissionInterface {
   /**
    * Unused
    */
+  ADMIN_UPDATE_COMMUNITY("community-admin", AuthorizeAction.UPDATE),
   ADMIN_REMOVE_COMMUNITY("community-admin", AuthorizeAction.REMOVE),
   ADMIN_ADD_COMMUNITY_MODERATOR("community-admin-moderator", AuthorizeAction.CREATE),
   ADMIN_REMOVE_COMMUNITY_MODERATOR("community-admin-moderator", AuthorizeAction.REMOVE),

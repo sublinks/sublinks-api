@@ -39,10 +39,6 @@ public class SublinksCommentAggerateController extends AbstractSublinksApiContro
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionCommentTypes.READ_COMMENT_AGGREGATE,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_view_not_permitted"));
-
     return sublinksCommentService.aggregate(key, person.orElse(null));
   }
 }

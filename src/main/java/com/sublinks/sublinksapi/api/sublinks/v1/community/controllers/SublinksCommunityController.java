@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @AllArgsConstructor
@@ -62,12 +60,13 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityResponse show(@PathVariable final String key) {
+  public CommunityResponse show(@PathVariable final String key,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
-    return communityRepository.findCommunityByTitleSlug(key)
-        .map(comm -> conversionService.convert(comm, CommunityResponse.class))
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Community not found"));
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    return sublinksCommunityService.show(key, person.orElse(null));
   }
 
   @Operation(summary = "Create a new community")

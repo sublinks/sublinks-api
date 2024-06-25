@@ -275,6 +275,9 @@ public class SublinksCommentService {
    */
   public CommentResponse delete(String key, CommentDelete commentDeleteForm, Person person) {
 
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.DELETE_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted"));
+
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
@@ -304,6 +307,9 @@ public class SublinksCommentService {
    */
   public CommentResponse pin(String key, CommentPin commentPinForm, Person person) {
 
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted"));
+
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
@@ -329,6 +335,9 @@ public class SublinksCommentService {
    * @throws ResponseStatusException If the comment is not found.
    */
   public CommentAggregateResponse aggregate(String commentKey, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENT_AGGREGATE,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_view_not_permitted"));
 
     return commentAggregateRepository.findByComment_Path(commentKey)
         .map(commentAggregate -> conversionService.convert(commentAggregate,

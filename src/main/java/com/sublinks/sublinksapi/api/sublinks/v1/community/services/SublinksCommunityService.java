@@ -44,6 +44,18 @@ public class SublinksCommunityService {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PersonRepository personRepository;
 
+  public CommunityResponse show(String key, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.READ_COMMUNITY,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "not_authorized_to_read_community"));
+
+    final Community community = communityRepository.findCommunityByTitleSlug(key)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
+
+    return conversionService.convert(community, CommunityResponse.class);
+  }
 
   /**
    * Retrieves a list of CommunityResponse objects based on the search criteria provided.
@@ -56,7 +68,7 @@ public class SublinksCommunityService {
 
     rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.READ_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_community"));
+            "not_authorized_to_read_communities"));
 
     com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType sortType = indexCommunityForm.sortType();
 
@@ -170,8 +182,9 @@ public class SublinksCommunityService {
 
     if (!(linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
-        && rolePermissionService.isPermitted(person,
-        RolePermissionCommunityTypes.UPDATE_COMMUNITY))) {
+        && rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.UPDATE_COMMUNITY))
+        && !rolePermissionService.isPermitted(person,
+        RolePermissionCommunityTypes.ADMIN_UPDATE_COMMUNITY)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_community");
     }
 

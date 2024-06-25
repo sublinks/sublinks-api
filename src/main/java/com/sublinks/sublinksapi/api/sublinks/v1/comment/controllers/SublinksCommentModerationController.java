@@ -7,7 +7,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.Commen
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentRemove;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
-import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,14 +15,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @AllArgsConstructor
@@ -59,9 +56,6 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.DELETE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted"));
-
     return sublinksCommentService.delete(key, commentDeleteForm, person);
   }
 
@@ -74,9 +68,6 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
-
-    rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted"));
 
     return sublinksCommentService.pin(key, commentPinForm, person);
   }
