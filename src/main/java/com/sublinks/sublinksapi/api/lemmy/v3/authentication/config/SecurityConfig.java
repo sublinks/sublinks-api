@@ -34,23 +34,14 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 
-    http.addFilterBefore(lemmyJwtFilter, UsernamePasswordAuthenticationFilter.class);
     http.csrf(AbstractHttpConfigurer::disable)
         .securityMatcher("/api/v3/**")
         .authorizeHttpRequests((requests) -> requests.anyRequest()
             .permitAll())
         .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
-            SessionCreationPolicy.STATELESS));
+            SessionCreationPolicy.STATELESS))
+        .addFilterBefore(lemmyJwtFilter, UsernamePasswordAuthenticationFilter.class);
 
-    http
-        .authorizeHttpRequests((requests) -> requests
-            .anyRequest().permitAll()
-        )
-        .sessionManagement(
-            (sessionManagement) -> sessionManagement.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS)
-        )
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 }
