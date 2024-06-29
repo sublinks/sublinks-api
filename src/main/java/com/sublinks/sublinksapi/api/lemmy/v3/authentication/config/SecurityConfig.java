@@ -42,7 +42,15 @@ public class SecurityConfig {
         .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
             SessionCreationPolicy.STATELESS));
 
+    http
+        .authorizeHttpRequests((requests) -> requests
+            .anyRequest().permitAll()
+        )
+        .sessionManagement(
+            (sessionManagement) -> sessionManagement.sessionCreationPolicy(
+                SessionCreationPolicy.STATELESS)
+        )
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
-
 }
