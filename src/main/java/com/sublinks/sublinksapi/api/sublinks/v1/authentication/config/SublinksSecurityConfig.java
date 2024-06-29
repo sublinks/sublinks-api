@@ -34,13 +34,13 @@ public class SublinksSecurityConfig {
   @Bean
   public SecurityFilterChain sublinksFilterChain(final HttpSecurity http) throws Exception {
 
-    http.addFilterBefore(sublinksJwtFilter, UsernamePasswordAuthenticationFilter.class);
     http.csrf(AbstractHttpConfigurer::disable)
         .securityMatcher("/api/v1/**")
         .authorizeHttpRequests((requests) -> requests.anyRequest()
             .permitAll())
         .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
-            SessionCreationPolicy.STATELESS));
+            SessionCreationPolicy.STATELESS))
+        .addFilterBefore(sublinksJwtFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
