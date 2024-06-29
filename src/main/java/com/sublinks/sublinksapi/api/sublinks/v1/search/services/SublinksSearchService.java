@@ -64,7 +64,7 @@ public class SublinksSearchService {
           .perPage(perPage)
           .listingType(searchForm.listingType())
           .sortType(searchForm.type())
-          .build()));
+          .build(), person.orElse(null)));
     }
 
     if (rolePermissionService.isPermitted(person.orElse(null),

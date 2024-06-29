@@ -19,6 +19,15 @@ public enum RolePermissionPersonTypes implements RolePermissionInterface {
   USER_LOGIN("user-login", AuthorizeAction.READ),
   USER_EXPORT("user-export", AuthorizeAction.READ),
 
+  READ_USER_METADATA("user-metadata", AuthorizeAction.READ),
+  READ_USER_METADATAS("user-metadatas", AuthorizeAction.READ),
+  READ_USER_OWN_METADATA("user-own-metadata", AuthorizeAction.READ),
+  READ_USER_OWN_METADATAS("user-own-metadatas", AuthorizeAction.READ),
+  INVALIDATE_USER_METADATA("user-metadata", AuthorizeAction.UPDATE),
+  INVALIDATE_USER_OWN_METADATA("user-own-metadata", AuthorizeAction.UPDATE),
+  DELETE_USER_METADATA("user-metadata", AuthorizeAction.DELETE),
+  DELETE_USER_OWN_METADATA("user-own-metadata", AuthorizeAction.DELETE),
+
   /**
    * Unused
    */

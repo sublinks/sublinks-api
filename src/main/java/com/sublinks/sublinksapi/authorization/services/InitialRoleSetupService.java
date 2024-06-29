@@ -173,6 +173,10 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionPersonTypes.UPDATE_USER_SETTINGS);
     rolePermissions.add(RolePermissionPersonTypes.RESET_PASSWORD);
     rolePermissions.add(RolePermissionPersonTypes.USER_EXPORT);
+    rolePermissions.add(RolePermissionPersonTypes.READ_USER_OWN_METADATAS);
+    rolePermissions.add(RolePermissionPersonTypes.READ_USER_OWN_METADATA);
+    rolePermissions.add(RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA);
+    rolePermissions.add(RolePermissionPersonTypes.DELETE_USER_OWN_METADATA);
     rolePermissions.add(RolePermissionPersonTypes.MARK_MENTION_AS_READ);
     rolePermissions.add(RolePermissionPersonTypes.MARK_REPLIES_AS_READ);
     rolePermissions.add(RolePermissionPersonTypes.READ_MENTION_USER);

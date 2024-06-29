@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class SublinksPersonModerationController extends AbstractSublinksApiController {
 
   private final SublinksPersonService sublinksPersonService;
-  private final ConversionService conversionService;
 
   @Operation(summary = "Ban a person")
   @GetMapping("/ban")

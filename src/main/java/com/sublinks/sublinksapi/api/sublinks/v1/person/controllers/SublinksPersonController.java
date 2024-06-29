@@ -52,7 +52,7 @@ public class SublinksPersonController extends AbstractSublinksApiController {
     final Optional<Person> person = getOptionalPerson(principal);
 
     return sublinksPersonService.index(indexPerson == null ? IndexPerson.builder()
-        .build() : indexPerson);
+        .build() : indexPerson, person.orElse(null));
   }
 
   @Operation(summary = "Get a specific person")
@@ -63,7 +63,7 @@ public class SublinksPersonController extends AbstractSublinksApiController {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    return sublinksPersonService.show(key);
+    return sublinksPersonService.show(key, person.orElse(null));
   }
 
   @Operation(summary = "Register a new person")
@@ -107,7 +107,9 @@ public class SublinksPersonController extends AbstractSublinksApiController {
   @DeleteMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public PersonResponse delete(@RequestBody final DeletePerson deletePersonForm, @PathVariable String key, final SublinksJwtPerson principal) {
+  public PersonResponse delete(@RequestBody final DeletePerson deletePersonForm,
+      @PathVariable String key, final SublinksJwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

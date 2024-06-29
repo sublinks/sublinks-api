@@ -13,7 +13,9 @@ import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonSessionDataResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonSessionData;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;
 import com.sublinks.sublinksapi.authorization.entities.Role;
@@ -31,11 +33,13 @@ import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.PersonAggregate;
 import com.sublinks.sublinksapi.person.entities.PersonEmailVerification;
+import com.sublinks.sublinksapi.person.entities.PersonMetaData;
 import com.sublinks.sublinksapi.person.entities.PersonRegistrationApplication;
 import com.sublinks.sublinksapi.person.enums.PersonRegistrationApplicationStatus;
 import com.sublinks.sublinksapi.person.repositories.PersonAggregateRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRegistrationApplicationRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.repositories.UserDataRepository;
 import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService;
 import com.sublinks.sublinksapi.person.services.PersonRegistrationApplicationService;
 import com.sublinks.sublinksapi.person.services.PersonService;
@@ -46,6 +50,7 @@ import com.sublinks.sublinksapi.utils.PaginationUtils;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -77,6 +82,7 @@ public class SublinksPersonService {
   private final PostReportService postReportService;
   private final CommentReportService commentReportService;
   private final PrivateMessageReportService privateMessageReportService;
+  private final UserDataRepository userDataRepository;
 
   /**
    * Retrieves the name and domain identifiers of a person from the given key.
@@ -111,21 +117,23 @@ public class SublinksPersonService {
    * @return A list of PersonResponse objects representing the persons that match the search
    * criteria.
    */
-  public List<PersonResponse> index(final IndexPerson indexPerson) {
+  public List<PersonResponse> index(final IndexPerson indexPerson, final Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_USERS,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_read_persons"));
 
     if (indexPerson.search() == null) {
-
       if (indexPerson.listingType() == SublinksListingType.Local) {
         return personRepository.findAllByLocal(true, PageRequest.of(Math.max(indexPerson.page(), 1),
                 PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
             .stream()
-            .map(person -> conversionService.convert(person, PersonResponse.class))
+            .map(p -> conversionService.convert(p, PersonResponse.class))
             .toList();
       }
       return personRepository.findAll(PageRequest.of(Math.max(indexPerson.page(), 1),
               PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
           .stream()
-          .map(person -> conversionService.convert(person, PersonResponse.class))
+          .map(p -> conversionService.convert(p, PersonResponse.class))
           .toList();
     }
 
@@ -134,7 +142,7 @@ public class SublinksPersonService {
               PageRequest.of(Math.max(indexPerson.page(), 1),
                   PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
           .stream()
-          .map(person -> conversionService.convert(person, PersonResponse.class))
+          .map(p -> conversionService.convert(p, PersonResponse.class))
           .toList();
     }
 
@@ -142,7 +150,7 @@ public class SublinksPersonService {
             PageRequest.of(Math.max(indexPerson.page(), 1),
                 PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
         .stream()
-        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .map(p -> conversionService.convert(p, PersonResponse.class))
         .toList();
   }
 
@@ -155,12 +163,15 @@ public class SublinksPersonService {
    * @return The PersonResponse object representing the person information.
    * @throws ResponseStatusException if the person is not found.
    */
-  public PersonResponse show(final String key) {
+  public PersonResponse show(final String key, final Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_USER,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_read_person"));
 
     final PersonIdentity ids = getPersonIdentifiersFromKey(key);
 
     return personRepository.findOneByNameAndInstance_Domain(ids.name(), ids.domain())
-        .map(person -> conversionService.convert(person, PersonResponse.class))
+        .map(p -> conversionService.convert(p, PersonResponse.class))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
   }
 
@@ -283,6 +294,9 @@ public class SublinksPersonService {
     final Person person = personRepository.findOneByNameIgnoreCase(loginPersonForm.username())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_LOGIN,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_login"));
+
     if (!rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_LOGIN)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_login");
     }
@@ -340,6 +354,10 @@ public class SublinksPersonService {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.UPDATE_USER_SETTINGS,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_person"));
+
+    if (person.isDeleted()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_deleted");
+    }
 
     if (Optional.ofNullable(updatePersonForm.languagesKeys())
         .isPresent()) {
@@ -502,5 +520,127 @@ public class SublinksPersonService {
     personService.deleteUserAccount(personToDelete, deletePersonForm.deleteContent());
 
     return conversionService.convert(personToDelete, PersonResponse.class);
+  }
+
+
+  public PersonSessionDataResponse getMetaData(final String targetKey, final Person person) {
+
+    final PersonIdentity targetIds = getPersonIdentifiersFromKey(targetKey);
+
+    final Person target = personRepository.findOneByNameAndInstance_Domain(targetIds.name(),
+            targetIds.domain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    if (!(rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.READ_USER_OWN_METADATAS) && person.equals(target))
+        && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.READ_USER_METADATAS)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "not_authorized_to_read_person_metadata");
+    }
+
+    final List<PersonMetaData> personMetaData = userDataRepository.findAllByPerson(target);
+
+    return PersonSessionDataResponse.builder()
+        .personKey(targetIds.name() + "@" + targetIds.domain())
+        .sessions(personMetaData.stream()
+            .map(m -> conversionService.convert(m,
+                PersonSessionData.class))
+            .toList())
+        .build();
+  }
+
+  public PersonSessionDataResponse getOneMetaData(final String targetsessionKey, final Person person)
+  {
+
+    final PersonMetaData personMetaData = userDataRepository.findById(
+            Long.parseLong(targetsessionKey))
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_metadata_not_found"));
+
+    if (!(rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.READ_USER_OWN_METADATAS) && personMetaData.getPerson()
+        .equals(person)) && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.READ_USER_METADATAS)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "not_authorized_to_read_person_metadatas");
+    }
+
+    return PersonSessionDataResponse.builder()
+        .personKey(personMetaData.getPerson()
+            .getName() + "@" + personMetaData.getPerson()
+            .getInstance()
+            .getDomain())
+        .sessions(List.of(Objects.requireNonNull(conversionService.convert(personMetaData,
+            PersonSessionData.class))))
+        .build();
+  }
+
+  public void invalidateUserData(String targetUserData, final Person person) {
+
+    final PersonMetaData personMetaData = userDataRepository.findById(
+            Long.parseLong(targetUserData))
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_metadata_not_found"));
+    if (!(rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA) && personMetaData.getPerson()
+        .equals(person)) && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "not_authorized_to_invalidate_person_metadata");
+    }
+
+    userDataService.invalidate(personMetaData);
+  }
+
+  public void invalidateAllUserData(final String targetPersonKey, final Person person) {
+
+    final Person target = personRepository.findOneByNameAndInstance_Domain(targetPersonKey,
+            localInstanceContext.instance()
+                .getDomain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+    if (!(rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA) && target.equals(person))
+        && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "not_authorized_to_invalidate_person_metadata");
+    }
+
+    userDataService.invalidateAllUserData(target);
+  }
+
+  public void deleteUserData(final String targetUserDataKey, final Person person) {
+
+    final PersonMetaData personMetaData = userDataRepository.findById(
+            Long.parseLong(targetUserDataKey))
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_metadata_not_found"));
+    if (rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.DELETE_USER_OWN_METADATA) && !personMetaData.getPerson()
+        .equals(person) && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.DELETE_USER_METADATA)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "not_authorized_to_delete_person_metadata");
+    }
+
+    userDataRepository.delete(personMetaData);
+  }
+
+  public void deleteAllUserData(final String targetPersonKey, final Person person)
+  {
+
+    final Person target = personRepository.findOneByNameAndInstance_Domain(targetPersonKey,
+            localInstanceContext.instance()
+                .getDomain())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+    if (!(rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.DELETE_USER_OWN_METADATA) && target.equals(person))
+        && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.DELETE_USER_METADATA)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "not_authorized_to_invalidate_person_metadata");
+    }
+    userDataRepository.deleteAll(userDataRepository.findAllByPerson(target));
   }
 }
