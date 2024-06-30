@@ -19,13 +19,15 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
   Optional<Person> findOneByNameIgnoreCase(String name);
 
+  @Query(value = "SELECT p.*, lpi.instance_id, lpi.person_id, i.id as iid FROM people p JOIN link_person_instances lpi ON lpi.person_id = p.id JOIN instances i ON i.id = lpi.instance_id WHERE p.name = :name AND i.domain ILIKE concat('%','/',:instance_domain)",
+      nativeQuery = true)
   Optional<Person> findOneByNameAndInstance_Domain(String name, String instance_domain);
 
   Optional<Person> findOneByEmail(String email);
 
   HashSet<Person> findAllByRole(Role role);
 
-  List<Person> findAllByLocal(Boolean local, Pageable pageable);
+  List<Person> findAllByIsLocal(Boolean local, Pageable pageable);
 
   @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)",
       countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)",

@@ -13,6 +13,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Application Boot.
@@ -75,5 +77,11 @@ public class SublinksApiApplication {
             .servers(servers.stream().map(s -> new Server().url(s)).toList()))
         .pathsToMatch("/api/v1/**")
         .build();
+  }
+
+  public void configurePathMatch(PathMatchConfigurer configurer) {
+    UrlPathHelper urlPathHelper = new UrlPathHelper();
+    urlPathHelper.setUrlDecode(false);
+    configurer.setUrlPathHelper(urlPathHelper);
   }
 }

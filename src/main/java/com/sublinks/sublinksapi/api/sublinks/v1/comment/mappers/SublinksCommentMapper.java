@@ -14,8 +14,6 @@ import org.springframework.lang.Nullable;
     uses = {SublinksPersonMapper.class})
 public abstract class SublinksCommentMapper implements Converter<Comment, CommentResponse> {
 
-  SublinksPersonMapper personMapper;
-
   @Override
   @Mapping(target = "key", source = "comment.path")
   @Mapping(target = "activityPubId", source = "comment.activityPubId")
@@ -33,6 +31,7 @@ public abstract class SublinksCommentMapper implements Converter<Comment, Commen
   @Mapping(target = "updatedAt",
       source = "comment.updatedAt",
       dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
+  @Mapping(target = "replies", ignore = true)
   public abstract CommentResponse convert(@Nullable Comment comment);
 
 

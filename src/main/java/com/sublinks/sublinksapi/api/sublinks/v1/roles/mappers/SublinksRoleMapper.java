@@ -11,8 +11,8 @@ import org.mapstruct.Named;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {
-    RolePermissionService.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {RolePermissionService.class})
 public abstract class SublinksRoleMapper implements
     Converter<Role, com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role> {
 
@@ -37,6 +37,9 @@ public abstract class SublinksRoleMapper implements
   @Named("is_expired")
   Boolean mapIsExpired(Role role) {
 
+    if (role.getExpiresAt() == null) {
+      return false;
+    }
     return new Date().after(role.getExpiresAt());
   }
 }

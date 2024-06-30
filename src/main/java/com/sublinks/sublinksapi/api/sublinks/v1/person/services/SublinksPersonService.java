@@ -13,11 +13,12 @@ import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.LoginResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
-import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonSessionDataResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonSessionData;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonSessionDataResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.utils.PersonKeyUtils;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
@@ -47,6 +48,7 @@ import com.sublinks.sublinksapi.person.services.UserDataService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.privatemessages.services.PrivateMessageReportService;
 import com.sublinks.sublinksapi.utils.PaginationUtils;
+import com.sublinks.sublinksapi.utils.UrlUtil;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -83,6 +85,8 @@ public class SublinksPersonService {
   private final CommentReportService commentReportService;
   private final PrivateMessageReportService privateMessageReportService;
   private final UserDataRepository userDataRepository;
+  private final PersonKeyUtils personKeyUtils;
+  private final UrlUtil urlUtil;
 
   /**
    * Retrieves the name and domain identifiers of a person from the given key.
@@ -96,12 +100,11 @@ public class SublinksPersonService {
 
     String name, domain;
     if (key.contains("@")) {
-      name = key.substring(0, key.indexOf('@'));
-      domain = key.substring(key.indexOf('@') + 1);
+      return personKeyUtils.getPersonIdentity(key);
     } else {
       name = key;
-      domain = localInstanceContext.instance()
-          .getDomain();
+      domain = urlUtil.cleanUrlProtocol(localInstanceContext.instance()
+          .getDomain());
     }
 
     return PersonIdentity.builder()
@@ -124,8 +127,9 @@ public class SublinksPersonService {
 
     if (indexPerson.search() == null) {
       if (indexPerson.listingType() == SublinksListingType.Local) {
-        return personRepository.findAllByLocal(true, PageRequest.of(Math.max(indexPerson.page(), 1),
-                PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
+        return personRepository.findAllByIsLocal(true,
+                PageRequest.of(Math.max(indexPerson.page(), 0),
+                    PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
             .stream()
             .map(p -> conversionService.convert(p, PersonResponse.class))
             .toList();
@@ -523,6 +527,20 @@ public class SublinksPersonService {
   }
 
 
+  /**
+   * Retrieves the meta data of a person's sessions based on the provided target key and person.
+   *
+   * @param targetKey The key containing the target person's information. If the key contains "@",
+   *                  it is split into name and domain using "@" as the separator. Otherwise, the
+   *                  name is set as the key and the domain is obtained from the local instance
+   *                  context.
+   * @param person    The Person object representing the person making the request.
+   * @return The PersonSessionDataResponse object containing the meta data of the target person's
+   * sessions.
+   * @throws ResponseStatusException If the person is not authorized to read the person's meta data
+   *                                 or if the person does not have permission to read the target
+   *                                 person's meta data or if the target person is not found.
+   */
   public PersonSessionDataResponse getMetaData(final String targetKey, final Person person) {
 
     final PersonIdentity targetIds = getPersonIdentifiersFromKey(targetKey);
@@ -544,13 +562,24 @@ public class SublinksPersonService {
     return PersonSessionDataResponse.builder()
         .personKey(targetIds.name() + "@" + targetIds.domain())
         .sessions(personMetaData.stream()
-            .map(m -> conversionService.convert(m,
-                PersonSessionData.class))
+            .map(m -> conversionService.convert(m, PersonSessionData.class))
             .toList())
         .build();
   }
 
-  public PersonSessionDataResponse getOneMetaData(final String targetsessionKey, final Person person)
+  /**
+   * Retrieves the meta data of a single session belonging to a person based on the provided session
+   * key and person.
+   *
+   * @param targetSessionKey The session key containing the session's information.
+   * @param person           The Person object representing the person making the request.
+   * @return The PersonSessionDataResponse object containing the meta data of the session.
+   * @throws ResponseStatusException If the person is not authorized to read the person's meta data
+   *                                 or if the person does not have permission to read the session's
+   *                                 meta data or if the session is not found.
+   */
+  public PersonSessionDataResponse getOneMetaData(final String targetsessionKey,
+      final Person person)
   {
 
     final PersonMetaData personMetaData = userDataRepository.findById(
@@ -571,11 +600,21 @@ public class SublinksPersonService {
             .getName() + "@" + personMetaData.getPerson()
             .getInstance()
             .getDomain())
-        .sessions(List.of(Objects.requireNonNull(conversionService.convert(personMetaData,
-            PersonSessionData.class))))
+        .sessions(List.of(Objects.requireNonNull(
+            conversionService.convert(personMetaData, PersonSessionData.class))))
         .build();
   }
 
+  /**
+   * Invalidates the data associated with a specific user.
+   *
+   * @param targetUserData The key containing the user's data. If the key contains "@", it is split
+   *                       into name and domain using "@" as the separator. Otherwise, the key is
+   *                       assumed to be the user ID.
+   * @param person         The Person object representing the user performing the operation.
+   * @throws ResponseStatusException If the user is not authorized to invalidate the user data or if
+   *                                 the user data is not found.
+   */
   public void invalidateUserData(String targetUserData, final Person person) {
 
     final PersonMetaData personMetaData = userDataRepository.findById(
@@ -593,12 +632,24 @@ public class SublinksPersonService {
     userDataService.invalidate(personMetaData);
   }
 
+  /**
+   * Invalidates the data associated with all user data for a specific person.
+   *
+   * @param targetPersonKey The key containing the target person's information. If the key contains
+   *                        "@", it is split into name and domain using "@" as the separator.
+   *                        Otherwise, the key is assumed to be the user ID.
+   * @param person          The Person object representing the user performing the operation.
+   * @throws ResponseStatusException If the user is not authorized to invalidate the user data or if
+   *                                 the person is not found.
+   */
   public void invalidateAllUserData(final String targetPersonKey, final Person person) {
 
-    final Person target = personRepository.findOneByNameAndInstance_Domain(targetPersonKey,
-            localInstanceContext.instance()
-                .getDomain())
+    final PersonIdentity personIdentity = personKeyUtils.getPersonIdentity(targetPersonKey);
+
+    final Person target = personRepository.findOneByNameAndInstance_Domain(personIdentity.name(),
+            personIdentity.domain())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
     if (!(rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA) && target.equals(person))
         && !rolePermissionService.isPermitted(person,
@@ -610,6 +661,14 @@ public class SublinksPersonService {
     userDataService.invalidateAllUserData(target);
   }
 
+  /**
+   * Deletes the user data for a given targetUserDataKey and person.
+   *
+   * @param targetUserDataKey The key of the user data to delete.
+   * @param person            The person associated with the user data.
+   * @throws ResponseStatusException If the user data is not found or the person is not authorized
+   *                                 to delete it.
+   */
   public void deleteUserData(final String targetUserDataKey, final Person person) {
 
     final PersonMetaData personMetaData = userDataRepository.findById(
@@ -627,12 +686,21 @@ public class SublinksPersonService {
     userDataRepository.delete(personMetaData);
   }
 
+  /**
+   * Deletes all user data for a given person.
+   *
+   * @param targetPersonKey The unique key of the target person.
+   * @param person          The person performing the deletion.
+   * @throws ResponseStatusException if the target person is not found or the person is not
+   *                                 authorized to delete the data.
+   */
   public void deleteAllUserData(final String targetPersonKey, final Person person)
   {
 
-    final Person target = personRepository.findOneByNameAndInstance_Domain(targetPersonKey,
-            localInstanceContext.instance()
-                .getDomain())
+    final PersonIdentity targetPersonIdentity = personKeyUtils.getPersonIdentity(targetPersonKey);
+
+    final Person target = personRepository.findOneByNameAndInstance_Domain(
+            targetPersonIdentity.name(), targetPersonIdentity.domain())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
     if (!(rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.DELETE_USER_OWN_METADATA) && target.equals(person))

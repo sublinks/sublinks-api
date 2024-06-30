@@ -47,7 +47,7 @@ public class SublinksPersonSessionController extends AbstractSublinksApiControll
 
     final Person person = getPersonOrThrowUnauthorized(jwtPerson);
 
-    return sublinksPersonService.getMetaData(sessionKey, person);
+    return sublinksPersonService.getOneMetaData(sessionKey, person);
   }
 
   @Operation(summary = "Invalidate one metadata for a person ( requires permission to invalidate other peoples metadata )")
@@ -88,7 +88,7 @@ public class SublinksPersonSessionController extends AbstractSublinksApiControll
   }
 
   @Operation(summary = "Deletes one metadata for a person ( requires permission to delete other peoples metadata )")
-  @DeleteMapping("/person/{sessionKey}")
+  @DeleteMapping("/data/{sessionKey}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public void deleteOneMetaData(@PathVariable String sessionKey, final SublinksJwtPerson jwtPerson)

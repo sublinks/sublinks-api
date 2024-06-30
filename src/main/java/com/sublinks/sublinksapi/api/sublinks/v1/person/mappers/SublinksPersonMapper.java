@@ -3,20 +3,24 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksRoleMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
+import com.sublinks.sublinksapi.api.sublinks.v1.utils.PersonKeyUtils;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.utils.UrlUtil;
 import java.text.SimpleDateFormat;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksRoleMapper.class})
 public abstract class SublinksPersonMapper implements Converter<Person, PersonResponse> {
 
-  SublinksRoleMapper roleMapper;
+  @Autowired
+  public PersonKeyUtils personKeyUtils;
 
   @Override
   @Mapping(target = "key", source = "person", qualifiedByName = "personKey")
@@ -28,7 +32,7 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Mapping(target = "avatarImageUrl", source = "person", qualifiedByName = "avatar")
   @Mapping(target = "bannerImageUrl", source = "person", qualifiedByName = "banner")
   @Mapping(target = "isBotAccount", source = "person.botAccount")
-  @Mapping(target = "role", expression = "java(roleMapper.convert(person.getRole()))")
+  @Mapping(target = "role", source = "person.role")
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "isLocal", source = "person.local")
   @Mapping(target = "createdAt",
@@ -42,8 +46,7 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Named("personKey")
   String mapPersonKey(Person person) {
 
-    return person.getName() + "@" + person.getInstance()
-        .getDomain();
+    return personKeyUtils.getPersonKey(person);
   }
 
   @Named("is_banned")
