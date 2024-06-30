@@ -38,47 +38,20 @@ public class UserDataService {
   {
 
     boolean saveUserIps = userDataConfig.isSaveUserData();
-    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndIpAddress(person, token,
-        ipAddress, userAgent).or(() -> getActiveUserDataByPersonAndToken(person, token));
+    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndToken(person, token);
 
     if (foundData.isPresent()) {
 
       PersonMetaData personMetaData = foundData.get();
-
-      if (saveUserIps && userAgent != null && !personMetaData.getUserAgent()
-          .equals(userAgent)) {
-        final PersonMetaData newPersonMetaData = PersonMetaData.builder()
-            .person(person)
-            .ipAddress(ipAddress)
-            .userAgent(userAgent)
-            .token(token)
-            .active(true)
-            .build();
-
-        userDataRepository.saveAndFlush(newPersonMetaData);
-        userDataCreatedEventPublisher.publish(newPersonMetaData);
-        return;
+      if (saveUserIps) {
+        personMetaData.setIpAddress(ipAddress);
+        if (userAgent != null) {
+          personMetaData.setUserAgent(userAgent);
+        }
       }
-
-      if (saveUserIps && !personMetaData.getIpAddress()
-          .equals(ipAddress)) {
-        final PersonMetaData newPersonMetaData = PersonMetaData.builder()
-            .person(person)
-            .ipAddress(ipAddress)
-            .userAgent(userAgent)
-            .token(token)
-            .active(true)
-            .build();
-
-        userDataRepository.saveAndFlush(newPersonMetaData);
-        userDataCreatedEventPublisher.publish(newPersonMetaData);
-        return;
-      }
-
       personMetaData.setLastUsedAt(new Date());
 
-      userDataRepository.saveAndFlush(personMetaData);
-      userDataUpdatedPublisher.publish(personMetaData);
+      userDataUpdatedPublisher.publish(userDataRepository.saveAndFlush(personMetaData));
       return;
     }
     PersonMetaData personMetaData = PersonMetaData.builder()
