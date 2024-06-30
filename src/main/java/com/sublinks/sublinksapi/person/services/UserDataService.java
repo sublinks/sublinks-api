@@ -29,53 +29,29 @@ public class UserDataService {
   public void invalidate(PersonMetaData personMetaData) {
 
     personMetaData.setActive(false);
-    userDataRepository.save(personMetaData);
+    userDataRepository.saveAndFlush(personMetaData);
     userDataInvalidationEventPublisher.publish(personMetaData);
   }
 
   public void checkAndAddIpRelation(Person person, String ipAddress, String token,
-      @Nullable String userAgent) {
+      @Nullable String userAgent)
+  {
 
     boolean saveUserIps = userDataConfig.isSaveUserData();
-    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndIpAddress(person, token, ipAddress,
-        userAgent);
+    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndToken(person, token);
 
     if (foundData.isPresent()) {
 
       PersonMetaData personMetaData = foundData.get();
-
-      if (saveUserIps && userAgent != null && !personMetaData.getUserAgent().equals(userAgent)) {
-        final PersonMetaData newPersonMetaData = PersonMetaData.builder()
-            .person(person)
-            .ipAddress(ipAddress)
-            .userAgent(userAgent)
-            .token(token)
-            .active(true)
-            .build();
-
-        userDataRepository.save(newPersonMetaData);
-        userDataCreatedEventPublisher.publish(newPersonMetaData);
-        return;
+      if (saveUserIps) {
+        personMetaData.setIpAddress(ipAddress);
+        if (userAgent != null) {
+          personMetaData.setUserAgent(userAgent);
+        }
       }
-
-      if (saveUserIps && !personMetaData.getIpAddress().equals(ipAddress)) {
-        final PersonMetaData newPersonMetaData = PersonMetaData.builder()
-            .person(person)
-            .ipAddress(ipAddress)
-            .userAgent(userAgent)
-            .token(token)
-            .active(true)
-            .build();
-
-        userDataRepository.save(newPersonMetaData);
-        userDataCreatedEventPublisher.publish(newPersonMetaData);
-        return;
-      }
-
       personMetaData.setLastUsedAt(new Date());
 
-      userDataRepository.save(personMetaData);
-      userDataUpdatedPublisher.publish(personMetaData);
+      userDataUpdatedPublisher.publish(userDataRepository.saveAndFlush(personMetaData));
       return;
     }
     PersonMetaData personMetaData = PersonMetaData.builder()
@@ -85,7 +61,7 @@ public class UserDataService {
         .token(token)
         .active(true)
         .build();
-    PersonMetaData createdPersonMetaData = userDataRepository.save(personMetaData);
+    PersonMetaData createdPersonMetaData = userDataRepository.saveAndFlush(personMetaData);
     userDataCreatedEventPublisher.publish(createdPersonMetaData);
   }
 
@@ -94,12 +70,9 @@ public class UserDataService {
     return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, token);
   }
 
-  private Optional<PersonMetaData> getActiveUserDataByPersonAndIpAddress(Person person, String token,
-      String ipAddress, String userAgent) {
-
-    if (userDataConfig.isSaveUserData()) {
-      return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, ipAddress);
-    }
+  private Optional<PersonMetaData> getActiveUserDataByPersonAndIpAddress(Person person,
+      String token, String ipAddress, String userAgent)
+  {
 
     return userDataRepository.findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(
         person, token, ipAddress, userAgent);
@@ -109,6 +82,7 @@ public class UserDataService {
   public void invalidateAllUserData(Person person) {
 
     userDataRepository.updateAllByPersonSetActiveToFalse(person);
+    userDataRepository.flush();
     userDataInvalidationEventPublisher.publish(person);
   }
 

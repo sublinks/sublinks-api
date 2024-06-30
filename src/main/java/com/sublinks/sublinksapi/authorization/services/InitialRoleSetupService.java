@@ -71,11 +71,19 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionPostTypes.READ_POST);
     rolePermissions.add(RolePermissionPostTypes.READ_POSTS);
     rolePermissions.add(RolePermissionCommentTypes.READ_COMMENT);
+    rolePermissions.add(RolePermissionCommentTypes.READ_COMMENTS);
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY);
     rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITIES);
     rolePermissions.add(RolePermissionPersonTypes.READ_USER);
+    rolePermissions.add(RolePermissionPersonTypes.READ_USERS);
     rolePermissions.add(RolePermissionModLogTypes.READ_MODLOG);
+    rolePermissions.add(RolePermissionPersonTypes.READ_PERSON_AGGREGATION);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS);
+    rolePermissions.add(RolePermissionPersonTypes.USER_LOGIN);
     rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_SEARCH);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENT);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENTS);
   }
 
   /**
@@ -151,6 +159,8 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionCommunityTypes.CREATE_COMMUNITY);
     rolePermissions.add(RolePermissionCommunityTypes.UPDATE_COMMUNITY);
     rolePermissions.add(RolePermissionCommunityTypes.DELETE_COMMUNITY);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION);
+    rolePermissions.add(RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS);
 
     rolePermissions.add(RolePermissionPostTypes.CREATE_POST);
     rolePermissions.add(RolePermissionPostTypes.UPDATE_POST);
@@ -162,11 +172,21 @@ public class InitialRoleSetupService {
 
     rolePermissions.add(RolePermissionPersonTypes.UPDATE_USER_SETTINGS);
     rolePermissions.add(RolePermissionPersonTypes.RESET_PASSWORD);
+    rolePermissions.add(RolePermissionPersonTypes.USER_EXPORT);
+    rolePermissions.add(RolePermissionPersonTypes.READ_USER_OWN_METADATAS);
+    rolePermissions.add(RolePermissionPersonTypes.READ_USER_OWN_METADATA);
+    rolePermissions.add(RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA);
+    rolePermissions.add(RolePermissionPersonTypes.DELETE_USER_OWN_METADATA);
+    rolePermissions.add(RolePermissionPersonTypes.MARK_MENTION_AS_READ);
+    rolePermissions.add(RolePermissionPersonTypes.MARK_REPLIES_AS_READ);
+    rolePermissions.add(RolePermissionPersonTypes.READ_MENTION_USER);
+    rolePermissions.add(RolePermissionPersonTypes.READ_REPLIES);
 
     rolePermissions.add(RolePermissionPostTypes.MODERATOR_REMOVE_POST);
     rolePermissions.add(RolePermissionCommentTypes.MODERATOR_REMOVE_COMMENT);
     rolePermissions.add(RolePermissionCommunityTypes.MODERATOR_REMOVE_COMMUNITY);
-    rolePermissions.add(RolePermissionPersonTypes.MODERATOR_BAN_USER);
+    rolePermissions.add(RolePermissionCommunityTypes.MODERATOR_BAN_USER);
+
     rolePermissions.add(RolePermissionCommentTypes.MODERATOR_SPEAK);
     rolePermissions.add(RolePermissionCommentTypes.MODERATOR_SHOW_DELETED_COMMENT);
     rolePermissions.add(RolePermissionPostTypes.MODERATOR_SHOW_DELETED_POST);

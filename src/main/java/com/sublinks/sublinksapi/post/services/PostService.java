@@ -48,7 +48,8 @@ public class PostService {
     }
 
     try {
-      final byte[] bytesOfLink = urlUtil.normalizeUrl(post).getBytes(StandardCharsets.UTF_8);
+      final byte[] bytesOfLink = urlUtil.normalizeUrl(post)
+          .getBytes(StandardCharsets.UTF_8);
       final MessageDigest md = MessageDigest.getInstance("MD5");
       final byte[] bytesOfMD5Link = md.digest(bytesOfLink);
       return new BigInteger(1, bytesOfMD5Link).toString(16);
@@ -59,7 +60,8 @@ public class PostService {
 
   public Person getPostCreator(final Post post) {
 
-    if (post.getLinkPersonPost() == null || post.getLinkPersonPost().isEmpty()) {
+    if (post.getLinkPersonPost() == null || post.getLinkPersonPost()
+        .isEmpty()) {
       return null;
     }
     for (LinkPersonPost linkPersonPost : post.getLinkPersonPost()) {
@@ -92,7 +94,8 @@ public class PostService {
     post.setPostAggregate(postAggregate);
     post.setActivityPubId("");
     postRepository.save(post); // @todo fix second save making post look edited right away
-    post.setActivityPubId("%s/post/%d".formatted(post.getInstance().getDomain(), post.getId()));
+    post.setActivityPubId("%s/post/%d".formatted(post.getInstance()
+        .getDomain(), post.getId()));
     postRepository.save(post);
 
     linkPersonPostService.createLink(creator, post, LinkPersonPostType.creator);
@@ -125,7 +128,8 @@ public class PostService {
 
   @Transactional
   public void removeAllPostsFromCommunityAndUser(final Community community, final Person person,
-      final boolean removed) {
+      final boolean removed)
+  {
 
     postRepository.allPostsByCommunityAndPersonAndRemoved(community, person,
             List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_COMMUNITY))

@@ -39,8 +39,10 @@ public class LinkPersonPostService {
     if (person.getLinkPersonPost() == null) {
       person.setLinkPersonPost(new LinkedHashSet<>());
     }
-    post.getLinkPersonPost().add(newLink);
-    person.getLinkPersonPost().add(newLink);
+    post.getLinkPersonPost()
+        .add(newLink);
+    person.getLinkPersonPost()
+        .add(newLink);
     linkPersonPostRepository.save(newLink);
     postLikeService.updateOrCreatePostLikeLike(post, person);
     linkPersonPostCreatedPublisher.publish(newLink);
@@ -49,18 +51,17 @@ public class LinkPersonPostService {
   @Transactional
   public void removeLink(Person person, Post post, LinkPersonPostType type) {
 
-    Optional<LinkPersonPost> linkPersonPost
-        = linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(
-        post,
-        person,
-        type
-    );
+    Optional<LinkPersonPost> linkPersonPost = linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(
+        post, person, type);
     if (linkPersonPost.isEmpty()) {
       return;
     }
     person.getLinkPersonPost()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonPost.get().getId()));
-    post.getLinkPersonPost().removeIf(l -> Objects.equals(l.getId(), linkPersonPost.get().getId()));
+        .removeIf(l -> Objects.equals(l.getId(), linkPersonPost.get()
+            .getId()));
+    post.getLinkPersonPost()
+        .removeIf(l -> Objects.equals(l.getId(), linkPersonPost.get()
+            .getId()));
     linkPersonPostRepository.delete(linkPersonPost.get());
     linkPersonPostDeletedPublisher.publish(linkPersonPost.get());
   }

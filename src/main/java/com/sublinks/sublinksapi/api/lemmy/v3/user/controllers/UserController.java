@@ -101,8 +101,9 @@ public class UserController extends AbstractLemmyApiController {
   private final RoleService roleService;
 
   @Operation(summary = "Get the details for a person.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = GetPersonDetailsResponse.class))})})
   @GetMapping()
   GetPersonDetailsResponse show(@Valid final GetPersonDetails getPersonDetailsForm) {
@@ -134,12 +135,14 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Get mentions for your user.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = GetPersonMentionsResponse.class))})})
   @GetMapping("mention")
   GetPersonMentionsResponse mention(@Valid final GetPersonMentions getPersonMentionsForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -173,12 +176,14 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Mark a person mention as read.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PersonMentionResponse.class))})})
   @PostMapping("mention/mark_as_read")
   PersonMentionResponse mentionMarkAsRead(
-      @Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm, final JwtPerson principal) {
+      @Valid final MarkPersonMentionAsRead markPersonMentionAsReadForm, final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -203,8 +208,9 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Get comment replies.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = GetRepliesResponse.class))})})
   @GetMapping("replies")
   GetRepliesResponse replies(@Valid final GetReplies getReplies, JwtPerson principal) {
@@ -237,8 +243,9 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Get a list of banned users.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = BannedPersonsResponse.class))})})
   @GetMapping("banned")
   BannedPersonsResponse bannedList(final JwtPerson principal) {
@@ -259,8 +266,9 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Mark all replies as read.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = GetRepliesResponse.class))})})
   @PostMapping("mark_all_as_read")
   GetRepliesResponse markAllAsRead(final JwtPerson principal) {
@@ -285,18 +293,21 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Save your user settings.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = LoginResponse.class))})})
   @Transactional
   @PutMapping("save_user_settings")
   public LoginResponse saveUserSettings(@Valid @RequestBody SaveUserSettings saveUserSettingsForm,
-      JwtPerson principal) {
+      JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.UPDATE_USER_SETTINGS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "no_permission_to_update_user_settings"));
 
     // @todo expand form validation to check for email formatting, etc.
     if (saveUserSettingsForm.show_nsfw() != null) {
@@ -409,12 +420,14 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Get your unread counts.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = GetUnreadCountResponse.class))})})
   @GetMapping("unread_count")
   GetUnreadCountResponse unreadCount(@Valid final GetUnreadCount getUnreadCountForm,
-      JwtPerson principal) {
+      JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -446,14 +459,20 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Import your User Settings.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = SuccessResponse.class))})})
   @PostMapping("import_settings")
   SuccessResponse import_settings(@Valid final ImportSettings importSettingsForm,
-      JwtPerson principal) {
+      JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.UPDATE_USER_SETTINGS,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "no_permission_to_update_user_settings"));
 
     final SuccessResponse.SuccessResponseBuilder builder = SuccessResponse.builder();
 
@@ -526,13 +545,17 @@ public class UserController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Get your user settings.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = SaveUserSettings.class))})})
   @GetMapping("export_settings")
   ExportSettingsResponse export_settings(final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
+
+    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_EXPORT,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "no_permission"));
 
     ExportSettingsResponse.ExportSettingsResponseBuilder builder = ExportSettingsResponse.builder();
 

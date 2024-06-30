@@ -31,6 +31,7 @@ public interface UserDataRepository extends JpaRepository<PersonMetaData, Long> 
 
   List<PersonMetaData> findAllByLastUsedAtBefore(Date lastUsedAt);
 
+  List<PersonMetaData> findAllByPerson(Person person);
 
   @Modifying
   @Query("update PersonMetaData u set u.active = false where u.person = :person")
