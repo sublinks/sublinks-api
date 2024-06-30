@@ -37,14 +37,15 @@ public class UserDataService {
       @Nullable String userAgent) {
 
     boolean saveUserIps = userDataConfig.isSaveUserData();
-    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndIpAddress(person, token, ipAddress,
-        userAgent);
+    Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndIpAddress(person, token,
+        ipAddress, userAgent).or(() -> getActiveUserDataByPersonAndToken(person, token));
 
     if (foundData.isPresent()) {
 
       PersonMetaData personMetaData = foundData.get();
 
-      if (saveUserIps && userAgent != null && !personMetaData.getUserAgent().equals(userAgent)) {
+      if (saveUserIps && userAgent != null && !personMetaData.getUserAgent()
+          .equals(userAgent)) {
         final PersonMetaData newPersonMetaData = PersonMetaData.builder()
             .person(person)
             .ipAddress(ipAddress)
@@ -53,12 +54,13 @@ public class UserDataService {
             .active(true)
             .build();
 
-        userDataRepository.save(newPersonMetaData);
+        userDataRepository.saveAndFlush(newPersonMetaData);
         userDataCreatedEventPublisher.publish(newPersonMetaData);
         return;
       }
 
-      if (saveUserIps && !personMetaData.getIpAddress().equals(ipAddress)) {
+      if (saveUserIps && !personMetaData.getIpAddress()
+          .equals(ipAddress)) {
         final PersonMetaData newPersonMetaData = PersonMetaData.builder()
             .person(person)
             .ipAddress(ipAddress)
@@ -67,14 +69,14 @@ public class UserDataService {
             .active(true)
             .build();
 
-        userDataRepository.save(newPersonMetaData);
+        userDataRepository.saveAndFlush(newPersonMetaData);
         userDataCreatedEventPublisher.publish(newPersonMetaData);
         return;
       }
 
       personMetaData.setLastUsedAt(new Date());
 
-      userDataRepository.save(personMetaData);
+      userDataRepository.saveAndFlush(personMetaData);
       userDataUpdatedPublisher.publish(personMetaData);
       return;
     }
@@ -85,7 +87,7 @@ public class UserDataService {
         .token(token)
         .active(true)
         .build();
-    PersonMetaData createdPersonMetaData = userDataRepository.save(personMetaData);
+    PersonMetaData createdPersonMetaData = userDataRepository.saveAndFlush(personMetaData);
     userDataCreatedEventPublisher.publish(createdPersonMetaData);
   }
 
@@ -94,7 +96,8 @@ public class UserDataService {
     return userDataRepository.findFirstByPersonAndTokenAndActiveIsTrue(person, token);
   }
 
-  private Optional<PersonMetaData> getActiveUserDataByPersonAndIpAddress(Person person, String token,
+  private Optional<PersonMetaData> getActiveUserDataByPersonAndIpAddress(Person person,
+      String token,
       String ipAddress, String userAgent) {
 
     if (userDataConfig.isSaveUserData()) {
