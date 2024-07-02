@@ -8,12 +8,12 @@ import com.sublinks.sublinksapi.person.events.UserDataInvalidationEventPublisher
 import com.sublinks.sublinksapi.person.events.UserDataUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.UserDataRepository;
 import jakarta.annotation.Nullable;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
