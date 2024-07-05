@@ -98,5 +98,4 @@ public class SublinksPersonSessionController extends AbstractSublinksApiControll
 
     sublinksPersonService.deleteUserData(sessionKey, person);
   }
-
 }

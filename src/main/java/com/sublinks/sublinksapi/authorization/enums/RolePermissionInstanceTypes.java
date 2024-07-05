@@ -7,6 +7,7 @@ package com.sublinks.sublinksapi.authorization.enums;
 public enum RolePermissionInstanceTypes implements RolePermissionInterface {
 
   // Person permissions
+  INSTANCE_READ_CONFIG("instance-config", AuthorizeAction.READ),
   INSTANCE_UPDATE_SETTINGS("instance", AuthorizeAction.UPDATE),
   INSTANCE_BAN_USER("user-admin", AuthorizeAction.BAN),
   INSTANCE_BAN_READ("user-admin-ban", AuthorizeAction.READ),

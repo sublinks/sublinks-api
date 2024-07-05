@@ -84,6 +84,7 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_SEARCH);
     rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENT);
     rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENTS);
+    rolePermissions.add(RolePermissionInstanceTypes.INSTANCE_READ_CONFIG);
   }
 
   /**
