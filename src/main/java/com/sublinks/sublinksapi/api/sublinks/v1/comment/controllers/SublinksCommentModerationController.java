@@ -2,9 +2,9 @@ package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentDelete;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentPin;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentRemove;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.DeleteComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PinComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.RemoveComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
@@ -36,39 +36,39 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse remove(@PathVariable final String key,
-      @RequestBody @Valid final CommentRemove commentRemove,
+      @RequestBody @Valid final RemoveComment removeComment,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksCommentService.remove(key, commentRemove, person);
+    return sublinksCommentService.remove(key, removeComment, person);
   }
 
-  @Operation(summary = "Delete a comment")
+  @Operation(summary = "Purge a comment")
   @PostMapping("/delete")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentResponse delete(@PathVariable final String key,
-      @RequestBody @Valid final CommentDelete commentDeleteForm,
+      @RequestBody @Valid final DeleteComment deleteCommentForm,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksCommentService.delete(key, commentDeleteForm, person);
+    return sublinksCommentService.delete(key, deleteCommentForm, person);
   }
 
   @Operation(summary = "Pin/Unpin a comment")
   @GetMapping("/pin")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommentResponse highlight(@PathVariable final String key, final CommentPin commentPinForm,
+  public CommentResponse pin(@PathVariable final String key, final PinComment pinCommentForm,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksCommentService.pin(key, commentPinForm, person);
+    return sublinksCommentService.pin(key, pinCommentForm, person);
   }
 }

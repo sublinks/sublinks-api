@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation;
 
-public record RemovePost(
+public record DeletePost(
     String reason,
     Boolean remove) {
 

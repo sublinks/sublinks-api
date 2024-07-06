@@ -424,10 +424,10 @@ public class SublinksPostService {
     final Post post = postRepository.findByTitleSlug(postKey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
 
-    if (rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST)
+    if (!(rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST)
         && postService.getPostCreator(post)
         .getId()
-        .equals(person.getId()) && !post.isRemoved()) {
+        .equals(person.getId()) && !post.isRemoved())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "delete_post_permission_denied");
     }
 

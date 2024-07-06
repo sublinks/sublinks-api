@@ -4,9 +4,9 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentAggregateR
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentDelete;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentPin;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.CommentRemove;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.DeleteComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PinComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.RemoveComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
@@ -239,13 +239,13 @@ public class SublinksCommentService {
    * Removes a comment based on the provided key, comment remove form, and person.
    *
    * @param key               The key of the comment to be removed.
-   * @param commentRemoveForm The CommentRemove object representing the remove form data.
+   * @param removeCommentForm The CommentRemove object representing the remove form data.
    * @param person            The Person object representing the user performing the removal.
    * @return A CommentResponse object representing the removed comment.
    * @throws ResponseStatusException If the user does not have permission to remove the comment or
    *                                 the comment is not found.
    */
-  public CommentResponse remove(String key, CommentRemove commentRemoveForm, Person person) {
+  public CommentResponse remove(String key, RemoveComment removeCommentForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.REMOVE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_remove_not_permitted"));
@@ -255,7 +255,7 @@ public class SublinksCommentService {
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
 
     comment.setRemovedState(
-        commentRemoveForm.remove() != null ? commentRemoveForm.remove() ? RemovedState.REMOVED
+        removeCommentForm.remove() != null ? removeCommentForm.remove() ? RemovedState.REMOVED
             : RemovedState.NOT_REMOVED : RemovedState.REMOVED);
     commentService.updateComment(comment);
     // @todo: modlog
@@ -267,13 +267,13 @@ public class SublinksCommentService {
    * Deletes a comment based on the provided key, CommentDelete form, and Person.
    *
    * @param key               The key of the comment to be deleted.
-   * @param commentDeleteForm The CommentDelete object representing the delete form data.
+   * @param deleteCommentForm The CommentDelete object representing the delete form data.
    * @param person            The Person object representing the user performing the deletion.
    * @return A CommentResponse object representing the deleted comment.
    * @throws ResponseStatusException If the user does not have permission to delete the comment or
    *                                 the comment is not found.
    */
-  public CommentResponse delete(String key, CommentDelete commentDeleteForm, Person person) {
+  public CommentResponse delete(String key, DeleteComment deleteCommentForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.DELETE_COMMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted"));
@@ -287,7 +287,7 @@ public class SublinksCommentService {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted");
     }
 
-    comment.setDeleted(commentDeleteForm.remove());
+    comment.setDeleted(deleteCommentForm.remove());
     commentService.updateComment(comment);
     // @todo: modlog
 
@@ -298,14 +298,14 @@ public class SublinksCommentService {
    * Pins or unpins a comment and returns the updated CommentResponse object.
    *
    * @param key            The key of the comment.
-   * @param commentPinForm The CommentPin object representing the pin form data.
+   * @param pinCommentForm The CommentPin object representing the pin form data.
    * @param person         The Person object representing the user performing the
    *                       pinning/unpinning.
    * @return A CommentResponse object representing the updated comment.
    * @throws ResponseStatusException If the comment is not found or the user does not have
    *                                 permission to perform the operation.
    */
-  public CommentResponse pin(String key, CommentPin commentPinForm, Person person) {
+  public CommentResponse pin(String key, PinComment pinCommentForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted"));
@@ -319,7 +319,7 @@ public class SublinksCommentService {
     }
 
     comment.setFeatured(
-        commentPinForm.pin() != null ? commentPinForm.pin() : !comment.isFeatured());
+        pinCommentForm.pin() != null ? pinCommentForm.pin() : !comment.isFeatured());
 
     commentService.updateComment(comment);
 
