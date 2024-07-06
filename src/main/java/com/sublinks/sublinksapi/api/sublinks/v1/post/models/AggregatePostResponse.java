@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.models;
 
-public record PostAggregateResponse(
+public record AggregatePostResponse(
     String key,
     String commentCount,
     String downvoteCount,

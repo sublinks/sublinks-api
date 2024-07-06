@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.mappers;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostAggregateResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.AggregatePostResponse;
 import com.sublinks.sublinksapi.post.entities.PostAggregate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -10,7 +10,7 @@ import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class SublinksPostAggregationMapper implements
-    Converter<PostAggregate, PostAggregateResponse> {
+    Converter<PostAggregate, AggregatePostResponse> {
 
   @Override
   @Mapping(target = "key", source = "postAggregate.id")
@@ -20,7 +20,7 @@ public abstract class SublinksPostAggregationMapper implements
   @Mapping(target = "score", source = "postAggregate.score")
   @Mapping(target = "hotRank", source = "postAggregate.hotRank")
   @Mapping(target = "controversyRank", source = "postAggregate.controversyRank")
-  public abstract PostAggregateResponse convert(@Nullable PostAggregate postAggregate);
+  public abstract AggregatePostResponse convert(@Nullable PostAggregate postAggregate);
 
 
 }

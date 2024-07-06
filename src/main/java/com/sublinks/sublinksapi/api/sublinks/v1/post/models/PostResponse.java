@@ -18,7 +18,7 @@ public record PostResponse(
     Boolean isFeaturedInCommunity,
     CommunityResponse community,
     PersonResponse creator,
-    PostAggregateResponse postAggregate,
+    AggregatePostResponse postAggregate,
     String activityPubId,
     String publicKey,
     String createdAt,

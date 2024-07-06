@@ -1,10 +1,9 @@
-package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
+package com.sublinks.sublinksapi.api.sublinks.v1.post.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.AggregateCommentResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
-import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.AggregatePostResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.services.SublinksPostService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,21 +20,20 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RequestMapping("api/v1/comment/{key}/aggregate")
 @Tag(name = "Comment Aggregation", description = "Comment Aggregate API")
-public class SublinksCommentAggerateController extends AbstractSublinksApiController {
+public class SublinksPostAggerateController extends AbstractSublinksApiController {
 
-  private final SublinksCommentService sublinksCommentService;
-  private final RolePermissionService rolePermissionService;
+  private final SublinksPostService sublinksPostService;
 
   @Operation(summary = "Aggregate a comment")
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public AggregateCommentResponse aggregate(@PathVariable final String key,
-                                            final SublinksJwtPerson sublinksJwtPerson)
+  public AggregatePostResponse aggregate(@PathVariable final String key,
+      final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    return sublinksCommentService.aggregate(key, person.orElse(null));
+    return sublinksPostService.aggregate(key, person.orElse(null));
   }
 }

@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import lombok.Builder;
 
 @Builder
-public record CommentAggregateResponse(
+public record AggregateCommentResponse(
     @Schema(description = "Search query",
         requiredMode = RequiredMode.NOT_REQUIRED) String commentKey,
     @Schema(description = "The number of upvotes",

@@ -1,11 +1,14 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.services;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.AggregateCommentResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.AggregatePostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.UpdatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.RemovePost;
+import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -23,6 +26,7 @@ import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.Post.PostBuilder;
 import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.models.PostSearchCriteria;
+import com.sublinks.sublinksapi.post.repositories.PostAggregateRepository;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostReportService;
 import com.sublinks.sublinksapi.post.services.PostService;
@@ -56,6 +60,7 @@ public class SublinksPostService {
   private final SiteMetadataUtil siteMetadataUtil;
   private final PostReportService postReportService;
   private final PersonService personService;
+  private final PostAggregateRepository postAggregateRepository;
 
   /**
    * Retrieves a list of PostResponse objects based on the provided search criteria.
@@ -437,5 +442,15 @@ public class SublinksPostService {
 
     postService.updatePost(post);
     return conversionService.convert(post, PostResponse.class);
+  }
+
+  public AggregatePostResponse aggregate(String postKey, Person person) {
+
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.READ_POST_AGGREGATE,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "aggregate_post_permission_denied"));
+
+    return postAggregateRepository.findByPost_TitleSlug(postKey)
+        .map(postAggregate -> conversionService.convert(postAggregate, AggregatePostResponse.class))
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
   }
 }
