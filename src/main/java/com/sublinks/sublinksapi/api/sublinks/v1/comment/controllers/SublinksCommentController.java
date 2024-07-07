@@ -6,6 +6,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
@@ -90,7 +91,11 @@ public class SublinksCommentController extends AbstractSublinksApiController {
   @DeleteMapping("/{id}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void delete(@PathVariable String id) {
+  public RequestResponse delete(@PathVariable String id) {
     // TODO: implement
+
+    return RequestResponse.builder()
+        .success(true)
+        .build();
   }
 }

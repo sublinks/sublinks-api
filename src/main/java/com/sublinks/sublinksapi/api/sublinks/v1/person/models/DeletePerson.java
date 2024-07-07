@@ -7,7 +7,7 @@ public record DeletePerson(
     @Schema(description = "The reason for deleting the person",
         example = "I dont use this account anymore",
         requiredMode = RequiredMode.NOT_REQUIRED) String reason,
-    @Schema(description = "Whether to remove your Post/Comments/Private Messages or not",
+    @Schema(description = "Whether to pin your Post/Comments/Private Messages or not",
         example = "true",
         defaultValue = "false",
         requiredMode = RequiredMode.NOT_REQUIRED) Boolean deleteContent) {

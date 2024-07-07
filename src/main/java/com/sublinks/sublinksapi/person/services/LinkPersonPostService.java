@@ -44,7 +44,9 @@ public class LinkPersonPostService {
     person.getLinkPersonPost()
         .add(newLink);
     linkPersonPostRepository.save(newLink);
-    postLikeService.updateOrCreatePostLikeLike(post, person);
+    if (type == LinkPersonPostType.creator) {
+      postLikeService.updateOrCreatePostLikeLike(post, person);
+    }
     linkPersonPostCreatedPublisher.publish(newLink);
   }
 

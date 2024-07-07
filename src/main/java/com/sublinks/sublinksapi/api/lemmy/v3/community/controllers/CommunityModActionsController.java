@@ -154,7 +154,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         .build();
   }
 
-  @Operation(summary = "A moderator remove for a community.")
+  @Operation(summary = "A moderator pin for a community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = CommunityResponse.class))})})

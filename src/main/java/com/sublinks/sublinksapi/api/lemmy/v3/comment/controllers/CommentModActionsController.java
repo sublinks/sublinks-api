@@ -82,7 +82,7 @@ public class CommentModActionsController extends AbstractLemmyApiController {
    * @param principal         The authenticated user.
    * @return The updated comment response.
    */
-  @Operation(summary = "A moderator remove for a comment.")
+  @Operation(summary = "A moderator pin for a comment.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
       @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class)))})

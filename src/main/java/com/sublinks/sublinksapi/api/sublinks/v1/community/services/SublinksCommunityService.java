@@ -283,15 +283,15 @@ public class SublinksCommunityService {
   }
 
   /**
-   * Removes a community based on the provided key, remove comment, and person.
+   * Removes a community based on the provided key, pin comment, and person.
    *
-   * @param key           The key of the community to remove.
-   * @param removeComment The comment specifying the reason for removal and whether to remove all
+   * @param key           The key of the community to pin.
+   * @param removeComment The comment specifying the reason for removal and whether to pin all
    *                      content.
    * @param person        The person performing the removal.
    * @return The response containing the removed community.
    * @throws ResponseStatusException If the community is not found, or the person is not authorized
-   *                                 to remove the community.
+   *                                 to pin the community.
    */
   public CommunityResponse remove(String key, RemoveCommunity removeComment, Person person) {
 
@@ -317,7 +317,7 @@ public class SublinksCommunityService {
    *
    * @param key                 The key of the community to delete.
    * @param deleteCommunityForm The delete form specifying the reason for deletion and whether to
-   *                            remove the community.
+   *                            pin the community.
    * @param person              The person performing the deletion.
    * @return The response containing the deleted community.
    * @throws ResponseStatusException If the community is not found, or the person is not authorized

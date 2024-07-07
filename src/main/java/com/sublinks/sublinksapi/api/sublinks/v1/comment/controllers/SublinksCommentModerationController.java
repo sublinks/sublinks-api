@@ -2,10 +2,11 @@ package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.DeleteComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PinComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PurgeComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.RemoveComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -46,17 +47,22 @@ public class SublinksCommentModerationController extends AbstractSublinksApiCont
   }
 
   @Operation(summary = "Purge a comment")
-  @PostMapping("/delete")
+  @PostMapping("/purge")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommentResponse delete(@PathVariable final String key,
-      @RequestBody @Valid final DeleteComment deleteCommentForm,
+  public RequestResponse delete(@PathVariable final String key,
+      @RequestBody @Valid final PurgeComment purgeCommentForm,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksCommentService.delete(key, deleteCommentForm, person);
+    // @todo: Implement purge
+
+    return RequestResponse.builder()
+        .success(false)
+        .error("not_implemented")
+        .build();
   }
 
   @Operation(summary = "Pin/Unpin a comment")

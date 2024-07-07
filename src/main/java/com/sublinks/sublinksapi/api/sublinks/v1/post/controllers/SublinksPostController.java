@@ -1,12 +1,14 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.UpdatePost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.FavoritePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.services.SublinksPostService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,11 +52,11 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @GetMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void show(@PathVariable String key, final SublinksJwtPerson sublinksJwtPerson) {
+  public PostResponse show(@PathVariable String key, final SublinksJwtPerson sublinksJwtPerson) {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    sublinksPostService.show(key, person.orElse(null));
+    return sublinksPostService.show(key, person.orElse(null));
   }
 
   @Operation(summary = "Create a new post")
@@ -72,25 +74,43 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @PostMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void update(final UpdatePost updatePostForm, @PathVariable final String key,
+  public PostResponse update(final UpdatePost updatePostForm, @PathVariable final String key,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    sublinksPostService.update(key, updatePostForm, person);
+    return sublinksPostService.update(key, updatePostForm, person);
   }
 
   @Operation(summary = "Delete an post")
   @DeleteMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public void delete(@RequestBody final DeletePost deletePostForm, @PathVariable final String key,
-      final SublinksJwtPerson sublinksJwtPerson)
+  public RequestResponse delete(@PathVariable final String key,
+      @RequestBody final DeletePost deletePostForm, final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
     sublinksPostService.delete(key, deletePostForm, person);
+
+    return RequestResponse.builder()
+        .success(true)
+        .build();
   }
+
+  @Operation(summary = "Favorite a post")
+  @PostMapping("{key}/favorite")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PostResponse favorite(@PathVariable final String key,
+      @RequestBody final FavoritePost favoritePostForm, final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksPostService.favorite(key, favoritePostForm, person);
+  }
+
 }

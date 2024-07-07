@@ -1,14 +1,14 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.services;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.AggregateCommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.AggregatePostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.UpdatePost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.FavoritePost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PinPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.RemovePost;
-import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
@@ -18,9 +18,12 @@ import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.Post.PostBuilder;
@@ -61,6 +64,8 @@ public class SublinksPostService {
   private final PostReportService postReportService;
   private final PersonService personService;
   private final PostAggregateRepository postAggregateRepository;
+  private final LinkPersonPostService linkPersonPostService;
+  private final LinkPersonPostRepository linkPersonPostRepository;
 
   /**
    * Retrieves a list of PostResponse objects based on the provided search criteria.
@@ -383,11 +388,11 @@ public class SublinksPostService {
   /**
    * Removes a post.
    *
-   * @param postKey        The key of the post to remove.
+   * @param postKey        The key of the post to pin.
    * @param removePostForm The RemovePost object containing additional parameters for the removal.
    * @param person         The Person object representing the user performing the removal.
    * @return The PostResponse object for the removed post.
-   * @throws ResponseStatusException If the post is not found or the user is not permitted to remove
+   * @throws ResponseStatusException If the post is not found or the user is not permitted to pin
    *                                 the post.
    */
   public PostResponse remove(final String postKey, final RemovePost removePostForm,
@@ -444,13 +449,103 @@ public class SublinksPostService {
     return conversionService.convert(post, PostResponse.class);
   }
 
+  /**
+   * Retrieves the aggregated post information for the given post key and person.
+   *
+   * @param postKey The key of the post to aggregate.
+   * @param person  The Person object representing the user.
+   * @return The aggregated post information as an AggregatePostResponse object.
+   * @throws ResponseStatusException If the post is not found or the user does not have permission
+   *                                 to access the post.
+   */
   public AggregatePostResponse aggregate(String postKey, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.READ_POST_AGGREGATE,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "aggregate_post_permission_denied"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+            "aggregate_post_permission_denied"));
 
     return postAggregateRepository.findByPost_TitleSlug(postKey)
         .map(postAggregate -> conversionService.convert(postAggregate, AggregatePostResponse.class))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+  }
+
+
+  public PostResponse favorite(final String postKey, final FavoritePost favoritePostForm,
+      final Person person)
+  {
+
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.FAVORITE_POST,
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "favorite_post_permission_denied"));
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+
+    if (favoritePostForm.favorite()) {
+      if (linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(post, person,
+              LinkPersonPostType.follower)
+          .isEmpty()) {
+        linkPersonPostService.createLink(person, post, LinkPersonPostType.follower);
+      }
+    } else {
+      linkPersonPostService.removeLink(person, post, LinkPersonPostType.follower);
+    }
+
+    return conversionService.convert(post, PostResponse.class);
+  }
+
+  /**
+   * Pins a post.
+   *
+   * @param postKey     The key of the post to pin.
+   * @param pinPostForm The PinPost object containing the pin information.
+   * @param person      The Person object representing the user pinning the post.
+   * @return The PostResponse object for the pinned post.
+   * @throws ResponseStatusException If the post is not found or the user does not have permission
+   *                                 to pin the post.
+   */
+  public PostResponse pin(final String postKey, final PinPost pinPostForm, final Person person) {
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+
+    if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "pin_post_permission_denied");
+    }
+
+    post.setFeatured(pinPostForm.pin());
+    postService.updatePost(post);
+
+    return conversionService.convert(post, PostResponse.class);
+  }
+
+  /**
+   * Pins a post in a community.
+   *
+   * @param postKey     The key of the post to pin.
+   * @param pinPostForm The PinPost object containing the pin information.
+   * @param person      The Person object representing the user pinning the post.
+   * @return The PostResponse object for the pinned post.
+   * @throws ResponseStatusException If the post is not found or the user does not have permission
+   *                                 to pin the post.
+   */
+  public PostResponse pinCommunity(final String postKey, final PinPost pinPostForm,
+      final Person person)
+  {
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+
+    if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST) && !(
+        rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_PIN_POST)
+            && !linkPersonCommunityService.hasAnyLink(person, post.getCommunity(),
+            List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+          "instance_pin_post_permission_denied");
+    }
+
+    post.setFeaturedInCommunity(pinPostForm.pin());
+    postService.updatePost(post);
+
+    return conversionService.convert(post, PostResponse.class);
   }
 }
