@@ -95,7 +95,7 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
     return sublinksCommunityService.updateCommunity(key, updateCommunityForm, person);
   }
 
-  @Operation(summary = "Purge an community")
+  @Operation(summary = "Delete a community")
   @DeleteMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
