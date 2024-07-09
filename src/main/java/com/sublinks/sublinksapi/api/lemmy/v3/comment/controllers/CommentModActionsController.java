@@ -83,9 +83,14 @@ public class CommentModActionsController extends AbstractLemmyApiController {
    * @return The updated comment response.
    */
   @Operation(summary = "A moderator remove for a comment.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class)))})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))}),
+      @ApiResponse(responseCode = "404",
+          description = "Not Found",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ResponseStatusException.class)))})
   @PostMapping("remove")
   CommentResponse remove(@Valid @RequestBody RemoveComment removeCommentForm, JwtPerson principal) {
 
@@ -112,10 +117,14 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         .removed(removeCommentForm.removed())
         .entityId(comment.getId())
         .commentId(comment.getId())
-        .postId(comment.getPost().getId())
-        .communityId(comment.getCommunity().getId())
-        .instance(comment.getPost().getInstance())
-        .otherPersonId(comment.getPerson().getId())
+        .postId(comment.getPost()
+            .getId())
+        .communityId(comment.getCommunity()
+            .getId())
+        .instance(comment.getPost()
+            .getInstance())
+        .otherPersonId(comment.getPerson()
+            .getId())
         .moderationPersonId(person.getId())
         .build();
     moderationLogService.createModerationLog(moderationLog);
@@ -133,9 +142,14 @@ public class CommentModActionsController extends AbstractLemmyApiController {
    * @return The updated comment response.
    */
   @Operation(summary = "Distinguishes a comment (speak as moderator).")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class)))})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentResponse.class))}),
+      @ApiResponse(responseCode = "404",
+          description = "Not Found",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ResponseStatusException.class)))})
   @PostMapping("distinguish")
   CommentResponse distinguish(@Valid @RequestBody DistinguishComment distinguishCommentForm,
       JwtPerson principal) {
@@ -168,8 +182,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
    * @return The updated comment report response. (type: CommentReportResponse)
    */
   @Operation(summary = "Resolve a comment report. Only a mod can do this.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommentReportResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommentReportResponse.class))})})
   @PutMapping("report/resolve")
   CommentReportResponse reportResolve(
       @Valid @RequestBody ResolveCommentReport resolveCommentReportForm, JwtPerson principal) {
@@ -188,10 +204,11 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
-      final boolean isModerator =
-          linkPersonCommunityService.hasLink(person, commentReport.getComment().getCommunity(),
-              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
-              commentReport.getComment().getCommunity(), LinkPersonCommunityType.owner);
+      final boolean isModerator = linkPersonCommunityService.hasLink(person,
+          commentReport.getComment()
+              .getCommunity(), LinkPersonCommunityType.moderator)
+          || linkPersonCommunityService.hasLink(person, commentReport.getComment()
+          .getCommunity(), LinkPersonCommunityType.owner);
       if (!isModerator) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
       }
@@ -215,8 +232,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
    * @return A response containing a list of comment report views.
    */
   @Operation(summary = "List comment reports.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommentReportsResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ListCommentReportsResponse.class))})})
   @GetMapping("report/list")
   ListCommentReportsResponse reportList(@Valid ListCommentReports listCommentReportsForm,
       JwtPerson principal) {
@@ -297,6 +316,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
           commentReport.getCreator()));
     }
 
-    return ListCommentReportsResponse.builder().comment_reports(commentReportViews).build();
+    return ListCommentReportsResponse.builder()
+        .comment_reports(commentReportViews)
+        .build();
   }
 }

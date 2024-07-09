@@ -101,6 +101,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionInstanceTypes.INSTANCE_ADD_ADMIN)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToAdd = personRepository.findById((long) addAdminForm.person_id())
@@ -142,6 +143,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(
@@ -161,6 +163,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionRegistrationApplicationTypes.REGISTRATION_APPLICATION_READ)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final List<PersonRegistrationApplication> personRegistrationApplications = personRegistrationApplicationRepository.findAllByApplicationStatus(
@@ -185,6 +188,7 @@ public class AdminController extends AbstractLemmyApiController {
     aclService.canPerson(person)
         .performTheAction(
             RolePermissionRegistrationApplicationTypes.REGISTRATION_APPLICATION_UPDATE)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final PersonRegistrationApplication personRegistrationApplication = personRegistrationApplicationRepository.findById(
@@ -217,6 +221,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPersonTypes.PURGE_USER)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Person personToPurge = personRepository.findById((long) purgePersonForm.person_id())
@@ -241,6 +246,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionCommunityTypes.PURGE_COMMUNITY)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     throw new ResponseStatusException(HttpStatus.NOT_IMPLEMENTED);
@@ -257,6 +263,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPostTypes.PURGE_POST)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Post postToPurge = postRepository.getReferenceById((long) purgePostForm.post_id());
@@ -282,6 +289,7 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionCommentTypes.PURGE_COMMENT)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final Comment commentToPurge = commentRepository.getReferenceById(

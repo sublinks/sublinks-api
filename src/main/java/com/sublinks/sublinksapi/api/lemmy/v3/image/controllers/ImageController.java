@@ -64,6 +64,7 @@ public class ImageController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
     aclService.canPerson(person)
         .performTheAction(RolePermissionMediaTypes.CREATE_MEDIA)
+        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Resource resource = new ByteArrayResource(images.getBytes()) {
