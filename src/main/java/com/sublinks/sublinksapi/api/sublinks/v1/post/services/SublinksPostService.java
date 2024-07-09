@@ -512,7 +512,7 @@ public class SublinksPostService {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "pin_post_permission_denied");
     }
 
-    post.setFeatured(pinPostForm.pin());
+    post.setFeatured(pinPostForm.pin() != null ? pinPostForm.pin() : !post.isFeatured());
     postService.updatePost(post);
 
     return conversionService.convert(post, PostResponse.class);
