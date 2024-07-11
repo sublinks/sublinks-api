@@ -127,7 +127,6 @@ public class CommentController extends AbstractLemmyApiController {
     aclService.canPerson(person)
         .performTheAction(RolePermissionCommentTypes.CREATE_COMMENT)
         .onCommunity(post.getCommunity())
-        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     if (post.isDeleted() || post.isRemoved()) {
@@ -390,7 +389,6 @@ public class CommentController extends AbstractLemmyApiController {
     aclService.canPerson(person)
         .performTheAction(roleType)
         .onCommunity(comment.getCommunity())
-        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     if (createCommentLikeForm.score() == 1) {
@@ -430,7 +428,6 @@ public class CommentController extends AbstractLemmyApiController {
     aclService.canPerson(person)
         .performTheAction(RolePermissionCommentTypes.COMMENT_LIST_VOTES)
         .onCommunity(comment.getCommunity())
-        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     List<CommentLike> likes = commentLikeService.getCommentLikes(comment,
@@ -469,7 +466,6 @@ public class CommentController extends AbstractLemmyApiController {
     aclService.canPerson(person)
         .performTheAction(RolePermissionCommentTypes.FAVORITE_COMMENT)
         .onCommunity(comment.getCommunity())
-        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
@@ -524,7 +520,6 @@ public class CommentController extends AbstractLemmyApiController {
     Optional<Person> person = getOptionalPerson(principal);
     aclService.canPerson(person.orElse(null))
         .performTheAction(RolePermissionCommentTypes.READ_COMMENT)
-        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
@@ -616,7 +611,7 @@ public class CommentController extends AbstractLemmyApiController {
     aclService.canPerson(person)
         .performTheAction(RolePermissionCommentTypes.REPORT_COMMENT)
         .onCommunity(comment.getCommunity())
-        .check()
+
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final CommentReport commentReport = CommentReport.builder()

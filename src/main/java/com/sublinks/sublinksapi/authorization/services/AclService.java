@@ -181,13 +181,6 @@ public class AclService {
         }
       }
 
-      execute();
-      return this;
-    }
-
-    public EntityPolicy check() {
-
-      execute();
       return this;
     }
 
@@ -198,6 +191,7 @@ public class AclService {
      */
     public boolean isPermitted() {
 
+      execute();
       return isPermitted;
     }
 
@@ -211,6 +205,7 @@ public class AclService {
     public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier)
         throws X {
 
+      execute();
       if (!isPermitted) {
         throw exceptionSupplier.get();
       }

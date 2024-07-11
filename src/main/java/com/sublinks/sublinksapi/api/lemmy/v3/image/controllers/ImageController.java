@@ -54,17 +54,14 @@ public class ImageController extends AbstractLemmyApiController {
   private final AclService aclService;
 
   @Operation(summary = "Uploads an image.", hidden = true)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK")}
-  )
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @PostMapping
-  ImagesResponse upload(@RequestParam("images[]") final MultipartFile images, final JwtPerson principal)
-      throws IOException {
+  ImagesResponse upload(@RequestParam("images[]") final MultipartFile images,
+      final JwtPerson principal) throws IOException {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
     aclService.canPerson(person)
         .performTheAction(RolePermissionMediaTypes.CREATE_MEDIA)
-        .check()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     Resource resource = new ByteArrayResource(images.getBytes()) {
@@ -75,14 +72,18 @@ public class ImageController extends AbstractLemmyApiController {
       }
     };
 
-    final WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
-    Mono<ResponseEntity<ImagesResponse>> response = webClient.post().uri("/image")
+    final WebClient webClient = WebClient.builder()
+        .baseUrl(pictrsUri)
+        .build();
+    Mono<ResponseEntity<ImagesResponse>> response = webClient.post()
+        .uri("/image")
         .contentType(MediaType.MULTIPART_FORM_DATA)
         .body(BodyInserters.fromMultipartData("images[]", resource))
         .retrieve()
         .toEntity(ImagesResponse.class);
 
-    final ImagesResponse imagesResponse = Objects.requireNonNull(response.block()).getBody();
+    final ImagesResponse imagesResponse = Objects.requireNonNull(response.block())
+        .getBody();
     assert imagesResponse != null;
     for (Image image : imagesResponse.files()) {
       mediaRepository.save(Media.builder()
@@ -103,14 +104,14 @@ public class ImageController extends AbstractLemmyApiController {
    * server.
    */
   @Operation(summary = "Gets the full resolution image.", hidden = true)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK")}
-  )
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @GetMapping("{filename}")
   Mono<ResponseEntity<ByteArrayResource>> fullResImage(@Valid PictrsParams pictrsParams,
       @PathVariable String filename) {
 
-    WebClient webClient = WebClient.builder().baseUrl(pictrsUri).build();
+    WebClient webClient = WebClient.builder()
+        .baseUrl(pictrsUri)
+        .build();
 
     String url;
     if (pictrsParams.format() == null && pictrsParams.thumbnail() == null) {
@@ -141,18 +142,20 @@ public class ImageController extends AbstractLemmyApiController {
    * @return A Mono with ResponseEntity&lt;String&gt; representing the response from the server.
    */
   @Operation(summary = "Deletes an image.", hidden = true)
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK")}
-  )
+  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK")})
   @GetMapping("delete/{token}/{filename}")
   Mono<ResponseEntity<String>> delete(@PathVariable String token, @PathVariable String filename) {
 
-    var webClient = WebClient.builder().baseUrl(pictrsUri).build();
+    var webClient = WebClient.builder()
+        .baseUrl(pictrsUri)
+        .build();
     String url = "/image/delete/" + token + "/" + filename;
 
-    return webClient.delete().uri(url)
+    return webClient.delete()
+        .uri(url)
         .exchangeToMono(response -> {
-          var status = response.statusCode().isError() ? response.statusCode() : HttpStatus.OK;
+          var status = response.statusCode()
+              .isError() ? response.statusCode() : HttpStatus.OK;
           return response.bodyToMono(String.class)
               .flatMap(body -> Mono.just(new ResponseEntity<>(body, status)));
         });
