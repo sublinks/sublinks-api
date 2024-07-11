@@ -11,10 +11,18 @@ updates:
     schedule:
       interval: "weekly"
   # Maintain dependencies for Gradle
-  - directory: "/"
+  - package-ecosystem: "gradle"
+    directory: "/"
     schedule:
       interval: "weekly"
-    package-ecosystem: "gradle"
+    groups:
+       dependencies:
+          applies-to: version-updates # Applies the group rule to version updates
+          patterns:
+            - "*"
+          update-types:
+            - "minor"
+            - "patch"
   # Maintain dependencies for submodules
   - package-ecosystem: "gitsubmodule"
     directory: "/"
