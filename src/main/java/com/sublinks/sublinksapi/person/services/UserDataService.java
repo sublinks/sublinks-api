@@ -36,13 +36,13 @@ public class UserDataService {
   public void checkAndAddIpRelation(Person person, String ipAddress, String token,
       @Nullable String userAgent) {
 
-    boolean saveUserIps = userDataConfig.isSaveUserData();
+    boolean saveUserData = userDataConfig.isSaveUserData();
     Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndToken(person, token);
 
     if (foundData.isPresent()) {
 
       PersonMetaData personMetaData = foundData.get();
-      if (saveUserIps) {
+      if (saveUserData) {
         personMetaData.setIpAddress(ipAddress);
         if (userAgent != null) {
           personMetaData.setUserAgent(userAgent);
@@ -55,8 +55,8 @@ public class UserDataService {
     }
     PersonMetaData personMetaData = PersonMetaData.builder()
         .person(person)
-        .ipAddress(saveUserIps ? ipAddress : null)
-        .userAgent(saveUserIps ? userAgent : null)
+        .ipAddress(saveUserData ? ipAddress : null)
+        .userAgent(saveUserData ? userAgent : null)
         .token(token)
         .active(true)
         .build();
