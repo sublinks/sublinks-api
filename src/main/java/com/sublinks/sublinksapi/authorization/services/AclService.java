@@ -210,6 +210,7 @@ public class AclService {
      */
     public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier)
         throws X {
+
       if (!isPermitted) {
         throw exceptionSupplier.get();
       }
