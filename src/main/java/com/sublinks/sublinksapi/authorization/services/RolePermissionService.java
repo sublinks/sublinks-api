@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
+import jakarta.validation.constraints.Null;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -256,10 +257,15 @@ public class RolePermissionService {
     if (person != null && person.isDeleted()) {
       return false;
     }
-    final Role role = person == null ? roleService.getDefaultGuestRole(
-        () -> new RuntimeException("No Guest role found.")) : isBannedInCommunity(person,
-        communityId) ? this.roleService.getBannedRole()
+    Role role = null;
+
+    if(person != null) {
+      role = isBannedInCommunity(person, communityId) ? this.roleService.getBannedRole()
         .orElseThrow(() -> new RuntimeException("No Banned role found.")) : person.getRole();
+    } else {
+      role = roleService.getDefaultGuestRole(
+        () -> new RuntimeException("No Guest role found."));
+    }
 
     return isAdmin(role) || doesRoleHavePermission(role, rolePermission);
   }
