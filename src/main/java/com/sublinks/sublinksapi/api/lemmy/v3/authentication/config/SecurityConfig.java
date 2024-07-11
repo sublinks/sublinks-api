@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 /**
  * This class represents the configuration for the security of the application. It is responsible
@@ -33,14 +34,12 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(final HttpSecurity http) throws Exception {
 
     http
-        .authorizeHttpRequests((requests) -> requests
-            .anyRequest().permitAll()
-        )
-        .sessionManagement(
-            (sessionManagement) -> sessionManagement.sessionCreationPolicy(
-                SessionCreationPolicy.STATELESS)
-        )
-        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+        .csrf(AbstractHttpConfigurer::disable)
+        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+        .authorizeHttpRequests((requests) -> requests.anyRequest()
+            .permitAll())
+        .sessionManagement((sessionManagement) -> sessionManagement.sessionCreationPolicy(
+            SessionCreationPolicy.STATELESS));
     return http.build();
   }
 }
