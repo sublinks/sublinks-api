@@ -46,7 +46,7 @@ public class SearchService {
   public Page<Community> searchCommunity(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    final int realPage = page <= 0 ? 1 : page;
+    final int realPage = Math.max(page, 0);
     final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return communitySearchRepository.searchAllByKeyword(query,
@@ -65,7 +65,7 @@ public class SearchService {
   public Page<Post> searchPost(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    final int realPage = page <= 0 ? 1 : page;
+    final int realPage = Math.max(page, 0);
     final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return postSearchRepository.searchAllByKeyword(query,
@@ -85,7 +85,7 @@ public class SearchService {
   public Page<Comment> searchComments(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    final int realPage = page <= 0 ? 1 : page;
+    final int realPage = Math.max(page, 0);
     final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return commentSearchRepository.searchAllByKeyword(query,
@@ -117,7 +117,7 @@ public class SearchService {
         .stream()
         .toList();
 
-    final int realPage = page <= 0 ? 1 : page;
+    final int realPage = Math.max(page, 0);
     final int realPageSize = pageSize <= 0 ? 1 : pageSize;
 
     return new PageImpl<>(posts.subList(realPage * realPageSize, (realPage + 1) * realPageSize),
@@ -137,7 +137,7 @@ public class SearchService {
   public Page<Person> searchPerson(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    final int realPage = page <= 0 ? 1 : page;
+    final int realPage = Math.max(page, 0);
     final int realPageSize = pageSize <= 0 ? 1 : pageSize;
     return personSearchRepository.searchAllByKeyword(query,
         PageRequest.of(realPage, realPageSize, sort));
