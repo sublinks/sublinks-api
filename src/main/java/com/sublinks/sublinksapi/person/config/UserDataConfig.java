@@ -14,6 +14,6 @@ public class UserDataConfig {
   @Value("${sublinks.settings.userdata.clear_rate}")
   private long clearRate;
 
-  @Value("${sublinks.settings.userdata.clear_older_than}")
+  @Value("${sublinks.settings.userdata.clear_unused_older_than}")
   private long clearOlderThan;
 }
