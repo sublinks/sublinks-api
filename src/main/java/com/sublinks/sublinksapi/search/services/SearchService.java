@@ -33,25 +33,75 @@ public class SearchService {
   private final CrossPostRepository crossPostRepository;
   private final UrlUtil urlUtil;
 
+  /**
+   * Searches for communities based on a given query.
+   *
+   * @param query    The keyword to search for.
+   * @param page     The page number of the search results.
+   * @param pageSize The number of results per page.
+   * @param sort     The sorting criteria for the search results.
+   * @return A Page object containing the search results. If no results are found, an empty Page
+   * will be returned.
+   */
   public Page<Community> searchCommunity(final String query, final int page, final int pageSize,
       final Sort sort) {
 
+    final int realPage = Math.max(page, 0);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
+
     return communitySearchRepository.searchAllByKeyword(query,
-        PageRequest.of(page, pageSize, sort));
+        PageRequest.of(realPage, realPageSize, sort));
   }
 
+  /**
+   * Searches for posts based on a given query.
+   *
+   * @param query    The keyword to search for.
+   * @param page     The page number of the search results.
+   * @param pageSize The number of results per page.
+   * @param sort     The sorting criteria for the search results.
+   * @return A Page object containing the search results. If no results are found, an empty Page will be returned.
+   */
   public Page<Post> searchPost(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    return postSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+    final int realPage = Math.max(page, 0);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
+
+    return postSearchRepository.searchAllByKeyword(query,
+        PageRequest.of(realPage, realPageSize, sort));
   }
 
+  /**
+   * Searches for comments based on a given query.
+   *
+   * @param query    The keyword to search for.
+   * @param page     The page number of the search results.
+   * @param pageSize The number of results per page.
+   * @param sort     The sorting criteria for the search results.
+   * @return A Page object containing the search results. If no results are found, an empty Page
+   * will be returned.
+   */
   public Page<Comment> searchComments(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    return commentSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+    final int realPage = Math.max(page, 0);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
+
+    return commentSearchRepository.searchAllByKeyword(query,
+        PageRequest.of(realPage, realPageSize, sort));
   }
 
+  /**
+   * Searches for a post by URL.
+   *
+   * @param url      The URL to search for.
+   * @param page     The page number of the search results.
+   * @param pageSize The number of results per page.
+   * @param sort     The sorting criteria for the search results.
+   * @return A Page object containing the search results. If no results are found, an empty Page
+   * will be returned.
+   */
   public Page<Post> searchPostByUrl(final String url, final int page, final int pageSize,
       final Sort sort) {
 
@@ -62,14 +112,34 @@ public class SearchService {
     if (crossPost.isEmpty()) {
       return Page.empty();
     }
-    List<Post> posts = crossPost.get().getPosts().stream().toList();
-    return new PageImpl<>(posts.subList(page * pageSize, (page + 1) * pageSize),
-        PageRequest.of(page, pageSize, sort), posts.size());
+    List<Post> posts = crossPost.get()
+        .getPosts()
+        .stream()
+        .toList();
+
+    final int realPage = Math.max(page, 0);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
+
+    return new PageImpl<>(posts.subList(realPage * realPageSize, (realPage + 1) * realPageSize),
+        PageRequest.of(realPage, realPageSize, sort), posts.size());
   }
 
+  /**
+   * Searches for persons based on a given query.
+   *
+   * @param query    The keyword to search for.
+   * @param page     The page number of the search results.
+   * @param pageSize The number of results per page.
+   * @param sort     The sorting criteria for the search results.
+   * @return A Page object containing the search results. If no results are found, an empty Page
+   * will be returned.
+   */
   public Page<Person> searchPerson(final String query, final int page, final int pageSize,
       final Sort sort) {
 
-    return personSearchRepository.searchAllByKeyword(query, PageRequest.of(page, pageSize, sort));
+    final int realPage = Math.max(page, 0);
+    final int realPageSize = pageSize <= 0 ? 1 : pageSize;
+    return personSearchRepository.searchAllByKeyword(query,
+        PageRequest.of(realPage, realPageSize, sort));
   }
 }
