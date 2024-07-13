@@ -5,7 +5,10 @@ import com.sublinks.sublinksapi.authorization.entities.Acl;
 import com.sublinks.sublinksapi.authorization.enums.AuthorizedEntityType;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInterface;
 import com.sublinks.sublinksapi.authorization.repositories.AclRepository;
+import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.post.entities.Post;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -32,20 +35,10 @@ public class AclService {
   public EntityPolicy canPerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(
-          ActionType.check,
-          aclRepository,
-          rolePermissionService,
-          roleService
-      );
+      return new EntityPolicy(ActionType.check, aclRepository, rolePermissionService, roleService);
     }
-    return new EntityPolicy(
-        person,
-        ActionType.check,
-        aclRepository,
-        rolePermissionService,
-        roleService
-    );
+    return new EntityPolicy(person, ActionType.check, aclRepository, rolePermissionService,
+        roleService);
   }
 
   /**
@@ -57,20 +50,10 @@ public class AclService {
   public EntityPolicy allowPerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(
-          ActionType.allow,
-          aclRepository,
-          rolePermissionService,
-          roleService
-      );
+      return new EntityPolicy(ActionType.allow, aclRepository, rolePermissionService, roleService);
     }
-    return new EntityPolicy(
-        person,
-        ActionType.allow,
-        aclRepository,
-        rolePermissionService,
-        roleService
-    );
+    return new EntityPolicy(person, ActionType.allow, aclRepository, rolePermissionService,
+        roleService);
   }
 
   /**
@@ -83,20 +66,10 @@ public class AclService {
   public EntityPolicy revokePerson(final Person person) {
 
     if (person == null) {
-      return new EntityPolicy(
-          ActionType.revoke,
-          aclRepository,
-          rolePermissionService,
-          roleService
-      );
+      return new EntityPolicy(ActionType.revoke, aclRepository, rolePermissionService, roleService);
     }
-    return new EntityPolicy(
-        person,
-        ActionType.revoke,
-        aclRepository,
-        rolePermissionService,
-        roleService
-    );
+    return new EntityPolicy(person, ActionType.revoke, aclRepository, rolePermissionService,
+        roleService);
   }
 
   /**
@@ -124,6 +97,7 @@ public class AclService {
     private boolean isPermitted = true;
     private AuthorizedEntityType entityType;
     private Long entityId;
+    private Community community;
 
     /**
      * The EntityPolicy class represents a policy for accessing and manipulating entities in an
@@ -132,15 +106,13 @@ public class AclService {
      * @param actionType    the type of action to be performed
      * @param aclRepository the repository for accessing and manipulating ACL entities
      */
-    public EntityPolicy(
-        final ActionType actionType,
-        final AclRepository aclRepository,
-        final RolePermissionService rolePermissionService, RoleService roleService
-    ) {
+    public EntityPolicy(final ActionType actionType, final AclRepository aclRepository,
+        final RolePermissionService rolePermissionService, RoleService roleService) {
 
       this.roleService = roleService;
 
-      this.person = Person.builder().build();
+      this.person = Person.builder()
+          .build();
       this.actionType = actionType;
       this.aclRepository = aclRepository;
       this.rolePermissionService = rolePermissionService;
@@ -154,12 +126,9 @@ public class AclService {
      * @param actionType    the type of action to be performed
      * @param aclRepository the repository for accessing and manipulating ACL entities
      */
-    public EntityPolicy(
-        final Person person,
-        final ActionType actionType,
-        final AclRepository aclRepository,
-        RolePermissionService rolePermissionService, RoleService roleService
-    ) {
+    public EntityPolicy(final Person person, final ActionType actionType,
+        final AclRepository aclRepository, RolePermissionService rolePermissionService,
+        RoleService roleService) {
 
       this.person = person;
       this.actionType = actionType;
@@ -180,6 +149,12 @@ public class AclService {
       return this;
     }
 
+    public EntityPolicy onCommunity(final Community community) {
+
+      this.community = community;
+      return this;
+    }
+
     /**
      * Executes the specified action on the provided entity and sets the entity type and ID for the
      * policy.
@@ -191,7 +166,21 @@ public class AclService {
 
       this.entityType = entity.entityType();
       this.entityId = entity.getId();
-      execute();
+
+      switch (entityType) {
+        case post: {
+          this.community = ((Post) entity).getCommunity();
+          break;
+        }
+        case comment: {
+          this.community = ((Comment) entity).getCommunity();
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+
       return this;
     }
 
@@ -202,6 +191,7 @@ public class AclService {
      */
     public boolean isPermitted() {
 
+      execute();
       return isPermitted;
     }
 
@@ -215,6 +205,7 @@ public class AclService {
     public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier)
         throws X {
 
+      execute();
       if (!isPermitted) {
         throw exceptionSupplier.get();
       }
@@ -236,28 +227,37 @@ public class AclService {
       switch (actionType) {
         case allow -> createAclRules();
         case revoke -> revokeAclRules();
-        default -> checkAclRules();
+        default -> {
+          checkAclRules();
+          checkRoles();
+        }
       }
     }
 
     /**
-     * Checks the role permissions for the current policy. If a person is associated with the
-     * policy, it checks if the person is permitted to perform the specified role permission. If no
-     * person is associated with the policy, it checks if the default guest role is permitted to
-     * perform the specified role permission.
+     * Checks the role permission for the current policy.
+     * <p>
+     * This method checks if the person associated with the policy is banned in the specified
+     * community or in general. If banned, it checks if the authorized action is allowed in the
+     * banned role to determine if the policy is permitted. If not banned, it checks if the person
+     * has the required role permission to perform the authorized action.
      */
     private void checkRolePermission() {
 
       if (this.person != null) {
-        this.isPermitted = rolePermissionService.isPermitted(
-            this.person,
-            (RolePermissionInterface) this.authorizedActions
-        );
+        if (community != null) {
+          // Only permitted if the authorized action allowed in the banned role
+          this.isPermitted = rolePermissionService.isPermitted(person,
+              (RolePermissionInterface) this.authorizedActions, community.getId());
+
+        } else {
+          this.isPermitted = rolePermissionService.isPermitted(this.person,
+              (RolePermissionInterface) this.authorizedActions);
+        }
       } else {
-        this.isPermitted = rolePermissionService.isPermitted(
-            roleService.getDefaultGuestRole(() -> new RuntimeException("No guest role defined.")),
-            (RolePermissionInterface) this.authorizedActions
-        );
+        this.isPermitted = rolePermissionService.isPermitted(roleService.getDefaultGuestRole()
+                .orElseThrow(() -> new RuntimeException("No default registered role defined.")),
+            (RolePermissionInterface) this.authorizedActions);
       }
     }
 
@@ -268,13 +268,41 @@ public class AclService {
 
       for (String authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(
-            person.getId(), entityType, entityId, authorizedAction
-        );
+            person.getId(), entityType, entityId, authorizedAction);
         if (acl != null && !acl.isPermitted()) {
           isPermitted = false;
         }
         if (acl == null) {
           isPermitted = false;
+        }
+      }
+    }
+
+    /**
+     * Checks the roles of the current policy.
+     *
+     * <p>
+     * This method checks if the person associated with the policy is banned in the specified
+     * community or in general. If the person is banned, it checks if the authorized action is
+     * allowed in the banned role to determine if the policy is permitted. If the person is not
+     * banned, it checks if the person has the required role permission to perform the authorized
+     * action.
+     */
+    private void checkRoles() {
+
+      // Only permitted if the authorized action allowed in the banned role
+      if (this.person != null) {
+        if (RolePermissionService.isBanned(this.person)) {
+          this.isPermitted = rolePermissionService.isPermitted(roleService.getBannedRole()
+                  .orElseThrow(() -> new RuntimeException("No banned role defined.")),
+              (RolePermissionInterface) this.authorizedActions);
+        }
+        if (community != null) {
+          if (rolePermissionService.isBannedInCommunity(this.person, community.getId())) {
+            this.isPermitted = rolePermissionService.isPermitted(roleService.getBannedRole()
+                    .orElseThrow(() -> new RuntimeException("No banned role defined.")),
+                (RolePermissionInterface) this.authorizedActions);
+          }
         }
       }
     }
@@ -286,8 +314,7 @@ public class AclService {
 
       for (String authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
-            person.getId(), entityType, entityId, authorizedAction, true
-        );
+            person.getId(), entityType, entityId, authorizedAction, true);
         if (acl == null) {
           aclRepository.saveAndFlush(Acl.builder()
               .personId(person.getId())
@@ -310,8 +337,7 @@ public class AclService {
 
       for (String authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
-            person.getId(), entityType, entityId, authorizedAction, false
-        );
+            person.getId(), entityType, entityId, authorizedAction, false);
         if (acl == null) {
           aclRepository.saveAndFlush(Acl.builder()
               .personId(person.getId())
