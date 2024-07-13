@@ -62,8 +62,10 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   private final SlurFilterService slurFilterService;
 
   @Operation(summary = "Create a new community.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommunityResponse.class))})})
   @PostMapping
   @Transactional
   public CommunityResponse create(@Valid @RequestBody final CreateCommunity createCommunityForm,
@@ -71,8 +73,7 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
 
     Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person,
-        RolePermissionCommunityTypes.CREATE_COMMUNITY,
+    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.CREATE_COMMUNITY,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final List<Language> languages = new ArrayList<>();
@@ -85,13 +86,15 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     }
 
     Community.CommunityBuilder communityBuilder = Community.builder()
-        .instance(localInstanceContext.instance()).title(createCommunityForm.title())
+        .instance(localInstanceContext.instance())
+        .title(createCommunityForm.title())
         .titleSlug(slugUtil.stringToSlug(createCommunityForm.name()))
-        .description(createCommunityForm.description()).isPostingRestrictedToMods(
-            createCommunityForm.posting_restricted_to_mods() != null
-                && createCommunityForm.posting_restricted_to_mods())
+        .description(createCommunityForm.description())
+        .isPostingRestrictedToMods(createCommunityForm.posting_restricted_to_mods() != null
+            && createCommunityForm.posting_restricted_to_mods())
         .isNsfw(createCommunityForm.nsfw() != null && createCommunityForm.nsfw())
-        .iconImageUrl(createCommunityForm.icon()).bannerImageUrl(createCommunityForm.banner())
+        .iconImageUrl(createCommunityForm.icon())
+        .bannerImageUrl(createCommunityForm.banner())
         .languages(languages);
 
     try {
@@ -135,10 +138,16 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
     Community community = communityBuilder.build();
 
     final Set<LinkPersonCommunity> linkPersonCommunities = new LinkedHashSet<>();
-    linkPersonCommunities.add(LinkPersonCommunity.builder().community(community).person(person)
-        .linkType(LinkPersonCommunityType.owner).build());
-    linkPersonCommunities.add(LinkPersonCommunity.builder().community(community).person(person)
-        .linkType(LinkPersonCommunityType.follower).build());
+    linkPersonCommunities.add(LinkPersonCommunity.builder()
+        .community(community)
+        .person(person)
+        .linkType(LinkPersonCommunityType.owner)
+        .build());
+    linkPersonCommunities.add(LinkPersonCommunity.builder()
+        .community(community)
+        .person(person)
+        .linkType(LinkPersonCommunityType.follower)
+        .build());
 
     communityService.createCommunity(community);
 
@@ -148,10 +157,14 @@ public class CommunityOwnerController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Edit a community.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommunityResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Community Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
   @PutMapping
   CommunityResponse update(@Valid final @RequestBody EditCommunity editCommunityForm,
       final JwtPerson principal) {

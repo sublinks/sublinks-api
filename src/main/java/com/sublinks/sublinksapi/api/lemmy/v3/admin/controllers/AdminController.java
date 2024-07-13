@@ -92,8 +92,10 @@ public class AdminController extends AbstractLemmyApiController {
   private final AclService aclService;
 
   @Operation(summary = "Add an admin to your site.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = AddAdminResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = AddAdminResponse.class))})})
   @PostMapping("add")
   AddAdminResponse create(@Valid @RequestBody final AddAdmin addAdminForm, JwtPerson principal) {
 
@@ -126,13 +128,19 @@ public class AdminController extends AbstractLemmyApiController {
         .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return AddAdminResponse.builder().admins(
-        roleService.getAdmins().stream().map(lemmyPersonService::getPersonView).toList()).build();
+    return AddAdminResponse.builder()
+        .admins(roleService.getAdmins()
+            .stream()
+            .map(lemmyPersonService::getPersonView)
+            .toList())
+        .build();
   }
 
   @Operation(summary = "Get the unread registration applications count.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetUnreadRegistrationApplicationCountResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = GetUnreadRegistrationApplicationCountResponse.class))})})
   @GetMapping("registration_application/count")
   GetUnreadRegistrationApplicationCountResponse registrationApplicationCount(
       @Valid GetUnreadRegistrationApplicationCount getUnreadRegistrationApplicationCountForm,
@@ -142,16 +150,21 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN)
+
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
-    return GetUnreadRegistrationApplicationCountResponse.builder().registration_applications(
-        (int) personRegistrationApplicationRepository.countByApplicationStatus(
-            PersonRegistrationApplicationStatus.pending)).build();
+    return GetUnreadRegistrationApplicationCountResponse.builder()
+        .registration_applications(
+            (int) personRegistrationApplicationRepository.countByApplicationStatus(
+                PersonRegistrationApplicationStatus.pending))
+        .build();
   }
 
   @Operation(summary = "List the registration applications.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListRegistrationApplicationsResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ListRegistrationApplicationsResponse.class))})})
   @GetMapping("registration_application/list")
   ListRegistrationApplicationsResponse registrationApplicationList(
       @Valid final ListRegistrationApplications listRegistrationApplicationsForm,
@@ -166,15 +179,18 @@ public class AdminController extends AbstractLemmyApiController {
     final List<PersonRegistrationApplication> personRegistrationApplications = personRegistrationApplicationRepository.findAllByApplicationStatus(
         PersonRegistrationApplicationStatus.pending);
 
-    return ListRegistrationApplicationsResponse.builder().registration_applications(
-        personRegistrationApplications.stream()
+    return ListRegistrationApplicationsResponse.builder()
+        .registration_applications(personRegistrationApplications.stream()
             .map(lemmyPersonRegistrationApplicationService::getPersonRegistrationApplicationView)
-            .toList()).build();
+            .toList())
+        .build();
   }
 
   @Operation(summary = "Approve a registration application.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = RegistrationApplicationResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = RegistrationApplicationResponse.class))})})
   @PutMapping("registration_application/approve")
   RegistrationApplicationResponse registrationApplicationApprove(
       @Valid final ApproveRegistrationApplication approveRegistrationApplicationForm,
@@ -188,8 +204,8 @@ public class AdminController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
     final PersonRegistrationApplication personRegistrationApplication = personRegistrationApplicationRepository.findById(
-        (long) approveRegistrationApplicationForm.id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+            (long) approveRegistrationApplicationForm.id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
             "registration_application_not_found"));
 
     personRegistrationApplication.setApplicationStatus(
@@ -201,14 +217,18 @@ public class AdminController extends AbstractLemmyApiController {
     personRegistrationApplicationService.updatePersonRegistrationApplication(
         personRegistrationApplication);
 
-    return RegistrationApplicationResponse.builder().registration_application(
-        lemmyPersonRegistrationApplicationService.getPersonRegistrationApplicationView(
-            personRegistrationApplication)).build();
+    return RegistrationApplicationResponse.builder()
+        .registration_application(
+            lemmyPersonRegistrationApplicationService.getPersonRegistrationApplicationView(
+                personRegistrationApplication))
+        .build();
   }
 
   @Operation(summary = "Purge / Delete a person from the database.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/person")
   PurgeItemResponse purgePerson(@Valid @RequestBody final PurgePerson purgePersonForm,
       final JwtPerson principal) {
@@ -231,8 +251,10 @@ public class AdminController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Purge / Delete a community from the database.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/community")
   PurgeItemResponse purgeCommunity(@Valid @RequestBody final PurgeCommunity purgeCommunityForm,
       final JwtPerson principal) {
@@ -247,8 +269,10 @@ public class AdminController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Purge / Delete a post from the database.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/post")
   PurgeItemResponse purgePost(@Valid @RequestBody final PurgePost purgePostForm,
       final JwtPerson principal) {
@@ -272,8 +296,10 @@ public class AdminController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Purge / Delete a comment from the database.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PurgeItemResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PurgeItemResponse.class))})})
   @PostMapping("purge/comment")
   PurgeItemResponse purgeComment(@Valid @RequestBody final PurgeComment purgeCommentForm,
       final JwtPerson principal) {
@@ -301,6 +327,7 @@ public class AdminController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
-    return PurgeItemResponse.builder().build();
+    return PurgeItemResponse.builder()
+        .build();
   }
 }

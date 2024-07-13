@@ -73,10 +73,14 @@ public class PostOwnerController extends AbstractLemmyApiController {
   private final PostReportService postReportService;
 
   @Operation(summary = "Create a post.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Community Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
   @PostMapping
   @Transactional
   public PostResponse create(@Valid @RequestBody final CreatePost createPostForm,
@@ -84,11 +88,12 @@ public class PostOwnerController extends AbstractLemmyApiController {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
-
     final Community community = communityRepository.findById((long) createPostForm.community_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
+        community.getId(),
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     // Language
     Optional<Language> language;
@@ -102,7 +107,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
       language = Optional.ofNullable(languageRepository.findLanguageByCode("und"));
     }
 
-    String url = createPostForm.url().orElse(null);
+    String url = createPostForm.url()
+        .orElse(null);
     SiteMetadataUtil.SiteMetadata metadata = null;
     if (url != null) {
       String metadataUrl = urlUtil.normalizeUrl(url);
@@ -172,20 +178,25 @@ public class PostOwnerController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Edit a post.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
   @PutMapping
   PostResponse update(@Valid @RequestBody EditPost editPostForm, JwtPerson principal) {
 
-    final Post post = postRepository.findById((long) editPostForm.post_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    final Post post = postRepository.findById((long) editPostForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.UPDATE_POST,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+        post.getCommunity()
+            .getId(), () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     post.setTitle(editPostForm.name());
     post.setPostBody(editPostForm.body());
@@ -246,20 +257,25 @@ public class PostOwnerController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Delete a post.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PostResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("delete")
   PostResponse delete(@Valid @RequestBody DeletePost deletePostForm, JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+    final Post post = postRepository.findById((long) deletePostForm.post_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
-    final Post post = postRepository.findById((long) deletePostForm.post_id()).orElseThrow(
-        () -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+    rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST,
+        post.getCommunity()
+            .getId(), () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     post.setDeleted(deletePostForm.deleted());
 

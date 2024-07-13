@@ -255,7 +255,7 @@ public class UserAuthController extends AbstractLemmyApiController {
       throws LemmyException {
 
     final Person person = personRepository.findOneByNameIgnoreCase(loginForm.username_or_email())
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     // @todo verify password
 
     if (person.isDeleted()) {
