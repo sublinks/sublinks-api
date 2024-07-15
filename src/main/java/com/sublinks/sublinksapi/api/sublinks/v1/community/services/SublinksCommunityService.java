@@ -8,9 +8,9 @@ import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityRespon
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CreateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.DeleteCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.RemoveCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.CommunityBanPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.RemoveCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.ActorIdUtils;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;

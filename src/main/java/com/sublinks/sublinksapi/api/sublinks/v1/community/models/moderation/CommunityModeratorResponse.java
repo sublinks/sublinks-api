@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation;
+package com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.community.enums.SublinksPersonCommunityType;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;

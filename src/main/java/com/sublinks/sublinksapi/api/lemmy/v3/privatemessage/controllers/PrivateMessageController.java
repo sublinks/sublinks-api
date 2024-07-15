@@ -70,11 +70,14 @@ public class PrivateMessageController extends AbstractLemmyApiController {
   private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Get / fetch private messages.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessagesResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessagesResponse.class))})})
   @GetMapping("list")
   PrivateMessagesResponse list(@Valid final GetPrivateMessages getPrivateMessagesForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person sender = getPersonOrThrowUnauthorized(principal);
 
@@ -95,7 +98,8 @@ public class PrivateMessageController extends AbstractLemmyApiController {
         .perPage(perPage)
         .privateMessageSortType(sortType)
         .person(sender)
-        .unreadOnly(getPrivateMessagesForm.unread_only().orElse(false))
+        .unreadOnly(
+            getPrivateMessagesForm.unread_only() != null && getPrivateMessagesForm.unread_only())
         .build();
 
     final List<PrivateMessage> privateMessages = privateMessageRepository.allPrivateMessagesBySearchCriteria(
@@ -104,18 +108,25 @@ public class PrivateMessageController extends AbstractLemmyApiController {
     privateMessages.forEach(privateMessage -> privateMessageViews.add(
         lemmyPrivateMessageService.createPrivateMessageView(privateMessage)));
 
-    return PrivateMessagesResponse.builder().private_messages(privateMessageViews).build();
+    return PrivateMessagesResponse.builder()
+        .private_messages(privateMessageViews)
+        .build();
   }
 
   @Operation(summary = "Create a private message.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessageResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Recipient Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
+      responseCode = "400",
+      description = "Recipient Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ApiError.class))})})
   @PostMapping
   PrivateMessageResponse create(
       @Valid @RequestBody final CreatePrivateMessage createPrivateMessageForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person sender = getPersonOrThrowUnauthorized(principal);
 
@@ -139,17 +150,24 @@ public class PrivateMessageController extends AbstractLemmyApiController {
     final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
         privateMessage);
 
-    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+    return PrivateMessageResponse.builder()
+        .private_message_view(privateMessageView)
+        .build();
   }
 
   @Operation(summary = "Edit a private message.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessageResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Private Message Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
+      responseCode = "400",
+      description = "Private Message Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ApiError.class))})})
   @PutMapping
   PrivateMessageResponse update(@Valid @RequestBody final EditPrivateMessage editPrivateMessageForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -168,18 +186,25 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
         privateMessage);
-    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+    return PrivateMessageResponse.builder()
+        .private_message_view(privateMessageView)
+        .build();
   }
 
   @Operation(summary = "Delete a private message.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessageResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Private Message Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
+      responseCode = "400",
+      description = "Private Message Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("delete")
   PrivateMessageResponse delete(
       @Valid @RequestBody final DeletePrivateMessage deletePrivateMessageForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -196,18 +221,25 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
         privateMessage);
-    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+    return PrivateMessageResponse.builder()
+        .private_message_view(privateMessageView)
+        .build();
   }
 
   @Operation(summary = "Mark a private message as read.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessageResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Private Message Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
+      responseCode = "400",
+      description = "Private Message Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("mark_as_read")
   PrivateMessageResponse markAsRead(
       @Valid @RequestBody MarkPrivateMessageAsRead markPrivateMessageAsReadForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -226,16 +258,21 @@ public class PrivateMessageController extends AbstractLemmyApiController {
 
     final PrivateMessageView privateMessageView = lemmyPrivateMessageService.createPrivateMessageView(
         privateMessage);
-    return PrivateMessageResponse.builder().private_message_view(privateMessageView).build();
+    return PrivateMessageResponse.builder()
+        .private_message_view(privateMessageView)
+        .build();
   }
 
   @Operation(summary = "Create a report for a private message.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessageReportResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessageReportResponse.class))})})
   @PostMapping("report")
   PrivateMessageReportResponse report(
       @Valid @RequestBody final CreatePrivateMessageReport privateMessageReportForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
@@ -265,17 +302,19 @@ public class PrivateMessageController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Resolve a report for a private message.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = PrivateMessageReportResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = PrivateMessageReportResponse.class))})})
   @PutMapping("report/resolve")
   PrivateMessageReportResponse reportResolve(
       @Valid @RequestBody ResolvePrivateMessageReport privateMessageReportForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    rolePermissionService.isPermitted(person,
-        RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE,
+    rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final PrivateMessageReport privateMessageReport = privateMessageReportRepository.findById(
@@ -295,12 +334,15 @@ public class PrivateMessageController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "List private message reports.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListPrivateMessageReportsResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ListPrivateMessageReportsResponse.class))})})
   @GetMapping("report/list")
   ListPrivateMessageReportsResponse reportList(
       @Valid final ListPrivateMessageReports listPrivateMessageReportsForm,
-      final JwtPerson principal) {
+      final JwtPerson principal)
+  {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 

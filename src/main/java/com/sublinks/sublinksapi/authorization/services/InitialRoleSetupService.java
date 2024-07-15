@@ -67,6 +67,7 @@ public class InitialRoleSetupService {
    */
   private void applyCommonPermissions(Set<RolePermissionInterface> rolePermissions) {
 
+    rolePermissions.add(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGE);
     rolePermissions.add(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES);
     rolePermissions.add(RolePermissionPostTypes.READ_POST);
     rolePermissions.add(RolePermissionPostTypes.READ_POSTS);

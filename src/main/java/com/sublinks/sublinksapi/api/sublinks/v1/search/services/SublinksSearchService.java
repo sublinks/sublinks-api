@@ -4,10 +4,13 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
+import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.IndexInstance;
+import com.sublinks.sublinksapi.api.sublinks.v1.instance.service.SublinksInstanceService;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.services.SublinksPersonService;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.services.SublinksPostService;
+import com.sublinks.sublinksapi.api.sublinks.v1.search.enums.SearchScope;
 import com.sublinks.sublinksapi.api.sublinks.v1.search.models.Search;
 import com.sublinks.sublinksapi.api.sublinks.v1.search.models.SearchResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
@@ -33,6 +36,7 @@ public class SublinksSearchService {
   private final SublinksCommentService sublinksCommentService;
   private final SublinksCommunityService sublinksCommunityService;
   private final SublinksPostService sublinksPostService;
+  private final SublinksInstanceService sublinksInstanceService;
 
   /**
    * Perform a search and return the search result.
@@ -55,8 +59,9 @@ public class SublinksSearchService {
 
     final SearchResponse.SearchResponseBuilder searchResponseBuilder = SearchResponse.builder();
 
-    if (rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionPostTypes.READ_POSTS)) {
+    if (rolePermissionService.isPermitted(person.orElse(null), RolePermissionPostTypes.READ_POSTS)
+        && searchForm.scopes()
+        .contains(SearchScope.POSTS)) {
 
       searchResponseBuilder.persons(sublinksPersonService.index(IndexPerson.builder()
           .search(search)
@@ -67,8 +72,9 @@ public class SublinksSearchService {
           .build(), person.orElse(null)));
     }
 
-    if (rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionPostTypes.READ_POSTS)) {
+    if (rolePermissionService.isPermitted(person.orElse(null), RolePermissionPostTypes.READ_POSTS)
+        && searchForm.scopes()
+        .contains(SearchScope.POSTS)) {
 
       searchResponseBuilder.posts(sublinksPostService.index(IndexPost.builder()
           .search(search)
@@ -82,7 +88,8 @@ public class SublinksSearchService {
     }
 
     if (rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionCommentTypes.READ_COMMENTS)) {
+        RolePermissionCommentTypes.READ_COMMENTS) && searchForm.scopes()
+        .contains(SearchScope.COMMENTS)) {
 
       searchResponseBuilder.comments(sublinksCommentService.index(IndexComment.builder()
           .search(search)
@@ -94,7 +101,8 @@ public class SublinksSearchService {
     }
 
     if (rolePermissionService.isPermitted(person.orElse(null),
-        RolePermissionCommunityTypes.READ_COMMUNITIES)) {
+        RolePermissionCommunityTypes.READ_COMMUNITIES) && searchForm.scopes()
+        .contains(SearchScope.COMMUNITIES)) {
 
       searchResponseBuilder.communities(sublinksCommunityService.index(IndexCommunity.builder()
           .search(search)
@@ -105,6 +113,18 @@ public class SublinksSearchService {
           .sortType(searchForm.type())
           .build(), person.orElse(null)));
     }
+
+    if (rolePermissionService.isPermitted(person.orElse(null),
+        RolePermissionInstanceTypes.INSTANCE_SEARCH) && searchForm.scopes()
+        .contains(SearchScope.INSTANCES)) {
+      searchResponseBuilder.instances(sublinksInstanceService.index(IndexInstance.builder()
+          .search(search)
+          .page(page)
+          .perPage(perPage)
+          .build()));
+    }
+
+
 
     return searchResponseBuilder.build();
   }

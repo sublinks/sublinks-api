@@ -1,10 +1,20 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.controllers;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.CreatePrivateMessage;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.DeletePrivateMessage;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.IndexPrivateMessages;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.PrivateMessageResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.UpdatePrivateMessage;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.services.SublinksPrivateMessageService;
+import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,48 +27,80 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Privatemessage", description = "Privatemessage API")
 public class SublinksPrivatemessageController extends AbstractSublinksApiController {
 
+  private final SublinksPrivateMessageService sublinksPrivateMessageService;
+
+  public SublinksPrivatemessageController(
+      SublinksPrivateMessageService sublinksPrivateMessageService)
+  {
+
+    super();
+    this.sublinksPrivateMessageService = sublinksPrivateMessageService;
+  }
+
   @Operation(summary = "Get a list of privatemessages")
   @GetMapping
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
-  })
-  public void index() {
-    // TODO: implement
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public List<PrivateMessageResponse> index(final IndexPrivateMessages indexPrivateMessagesForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    return sublinksPrivateMessageService.index(indexPrivateMessagesForm, person.orElse(null));
   }
 
   @Operation(summary = "Get a specific privatemessage")
-  @GetMapping("/{id}")
+  @GetMapping("/{key}")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
-  })
-  public void show(@PathVariable String id) {
-    // TODO: implement
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PrivateMessageResponse show(@PathVariable String key,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+
+    return sublinksPrivateMessageService.show(key, person.orElse(null));
   }
 
   @Operation(summary = "Create a new privatemessage")
   @PostMapping
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
-  })
-  public void create() {
-    // TODO: implement
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PrivateMessageResponse create(final CreatePrivateMessage createPrivateMessageForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowBadRequest(sublinksJwtPerson);
+
+    return sublinksPrivateMessageService.create(createPrivateMessageForm, person);
   }
 
   @Operation(summary = "Update an privatemessage")
-  @PostMapping("/{id}")
+  @PostMapping("/{key}")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
-  })
-  public void update(@PathVariable String id) {
-    // TODO: implement
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PrivateMessageResponse update(@PathVariable String key,
+      final UpdatePrivateMessage updatePrivateMessageForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowBadRequest(sublinksJwtPerson);
+
+    return sublinksPrivateMessageService.update(updatePrivateMessageForm, person);
   }
 
   @Operation(summary = "Delete an privatemessage")
-  @DeleteMapping("/{id}")
+  @DeleteMapping("/{key}")
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)
-  })
-  public void delete(@PathVariable String id) {
-    // TODO: implement
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public PrivateMessageResponse delete(@PathVariable String key,
+      final DeletePrivateMessage deletePrivateMessageForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowBadRequest(sublinksJwtPerson);
+
+    return sublinksPrivateMessageService.delete(key, deletePrivateMessageForm, person);
   }
 }

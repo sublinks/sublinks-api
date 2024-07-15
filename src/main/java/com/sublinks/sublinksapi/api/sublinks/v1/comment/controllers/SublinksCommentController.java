@@ -3,11 +3,12 @@ package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.DeleteComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SublinksCommentController extends AbstractSublinksApiController {
 
   private final SublinksCommentService sublinksCommentService;
+  private final SublinksCommunityService sublinksCommunityService;
 
 
   @Operation(summary = "Get a list of comments")
@@ -91,11 +93,12 @@ public class SublinksCommentController extends AbstractSublinksApiController {
   @DeleteMapping("/{id}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public RequestResponse delete(@PathVariable String id) {
-    // TODO: implement
+  public CommentResponse delete(@PathVariable String id, final DeleteComment deleteCommentForm,
+      final SublinksJwtPerson sublinksJwtPerson)
+  {
 
-    return RequestResponse.builder()
-        .success(true)
-        .build();
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    return sublinksCommentService.delete(id, deleteCommentForm, person);
   }
 }

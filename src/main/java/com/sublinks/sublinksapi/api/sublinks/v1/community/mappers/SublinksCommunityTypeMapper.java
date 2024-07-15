@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.community.mappers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.community.enums.SublinksPersonCommunityType;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.CommunityModeratorResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.mappers.SublinksPersonMapper;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import org.mapstruct.Mapper;

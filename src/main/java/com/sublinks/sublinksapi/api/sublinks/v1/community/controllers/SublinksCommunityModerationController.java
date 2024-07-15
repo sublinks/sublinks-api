@@ -4,9 +4,10 @@ import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson
 import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityBanPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.CommunityModeratorResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.community.models.Moderation.RemoveCommunity;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.CommunityBanPerson;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.CommunityModeratorResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.PurgeCommunity;
+import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.RemoveCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommunityTypes;
@@ -59,6 +60,23 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
     return sublinksCommunityService.remove(key, removeCommunityForm, person);
+  }
+
+  @Operation(summary = "Purge a community")
+  @PostMapping("/purge")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public RequestResponse purge(@PathVariable final String key,
+      @RequestBody @Valid PurgeCommunity purgeCommunityForm, SublinksJwtPerson sublinksJwtPerson)
+  {
+
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
+
+    // @todo: Implement purge
+
+    return RequestResponse.builder()
+        .success(true)
+        .build();
   }
 
 

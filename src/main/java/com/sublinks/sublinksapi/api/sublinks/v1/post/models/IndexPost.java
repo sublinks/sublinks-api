@@ -30,6 +30,6 @@ public record IndexPost(
   @Override
   public Integer page() {
 
-    return page != null ? page : 1;
+    return page != null ? page : 0;
   }
 }
