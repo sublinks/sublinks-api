@@ -10,25 +10,19 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/privatemessage/{key}/")
 @Tag(name = "Privatemessage", description = "Privatemessage API")
 public class SublinksPrivatemessageModeratorController extends AbstractSublinksApiController {
 
   private final SublinksPrivateMessageService sublinksPrivateMessageService;
-
-  public SublinksPrivatemessageModeratorController(
-      SublinksPrivateMessageService sublinksPrivateMessageService)
-  {
-
-    super();
-    this.sublinksPrivateMessageService = sublinksPrivateMessageService;
-  }
 
   @Operation(summary = "Purge an privatemessage")
   @DeleteMapping

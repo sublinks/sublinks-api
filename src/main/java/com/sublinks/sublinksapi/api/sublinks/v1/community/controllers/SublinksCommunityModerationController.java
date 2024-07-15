@@ -214,31 +214,4 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
         .map(person -> conversionService.convert(person, PersonResponse.class))
         .toList();
   }
-
-  @Operation(summary = "Purge a community")
-  @PostMapping("/purge")
-  @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public RequestResponse purge(@PathVariable final String key,
-      final SublinksJwtPerson sublinksJwtPerson)
-  {
-
-    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
-
-    final Community community = communityRepository.findCommunityByTitleSlug(key)
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
-
-    rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.PURGE_COMMUNITY, () -> {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_purge_community");
-    });
-
-    // @todo: Implement purge
-
-    return RequestResponse.builder()
-        .success(false)
-        .error("not_implemented")
-        .build();
-  }
-
 }

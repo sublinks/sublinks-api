@@ -8,8 +8,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.community.models.DeleteCommunity
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.IndexCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.UpdateCommunity;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.services.SublinksCommunityService;
-import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
-import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -19,7 +17,6 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,10 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Community", description = "Community API")
 public class SublinksCommunityController extends AbstractSublinksApiController {
 
-  private final CommunityRepository communityRepository;
   private final SublinksCommunityService sublinksCommunityService;
-  private final ConversionService conversionService;
-  private final LocalInstanceContext localInstanceContext;
 
   @Operation(summary = "Get a list of communities")
   @GetMapping
