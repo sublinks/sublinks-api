@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("api/v1/comment/{key}/aggregate")
+@RequestMapping("api/v1/post/{key}/aggregate")
 @Tag(name = "Comment Aggregation", description = "Comment Aggregate API")
 public class SublinksPostAggerateController extends AbstractSublinksApiController {
 
