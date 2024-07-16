@@ -2,7 +2,7 @@
   Media
  */
 ALTER TABLE media
-    ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE;
+  ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE;
 
 /**
   Comments table
@@ -246,3 +246,10 @@ ALTER TABLE email_person_recipients
 ALTER TABLE comment_saves
   ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE,
   ADD FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE;
+
+/**
+  Link Person Person Table
+ */
+ALTER TABLE link_person_person
+  ADD FOREIGN KEY (from_person_id) REFERENCES people (id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (to_person_id) REFERENCES people (id) ON DELETE CASCADE;

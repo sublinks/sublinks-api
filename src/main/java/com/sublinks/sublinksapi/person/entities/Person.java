@@ -65,6 +65,9 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
 
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  Set<LinkPersonPerson> linkPersonPerson;
+
   @ManyToOne
   @JoinTable(name = "link_person_instances",
       joinColumns = @JoinColumn(name = "person_id"),
@@ -244,7 +247,7 @@ public class Person implements UserDetails, Principal {
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
+
   @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")
   private Date updatedAt;

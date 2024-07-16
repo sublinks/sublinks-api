@@ -13,7 +13,9 @@ import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -31,6 +33,7 @@ public class LemmyCommentService {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final CommentSaveService commentSaveService;
   private final LinkPersonInstanceRepository linkPersonInstanceRepository;
+  private final LinkPersonPersonRepository linkPersonPersonRepository;
 
   @NonNull
   public CommentView createCommentView(
@@ -62,6 +65,10 @@ public class LemmyCommentService {
 
     commentView.subscribed(subscribedType)
         .saved(false)// @todo check if saved
+        .creator_blocked(
+            linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndToPersonAndLinkType(person,
+                    comment.getPerson(), LinkPersonPersonType.blocked)
+                .isPresent())
         .my_vote(personVote);
 
     commentView.saved(commentSaveService.isCommentSavedByPerson(comment, person));
@@ -104,8 +111,7 @@ public class LemmyCommentService {
         .post(lemmyPost)
         .counts(lemmyCommentAggregates)
         .creator_banned_from_community(isBannedFromCommunity)
-        .creator_blocked(
-            false) // @todo check if creator is blocked by the viewer ( only for logged in users )
+        .creator_blocked(false)
         .creator_is_moderator(creatorIsModerator)
         .creator_is_admin(createIsAdmin);
   }
