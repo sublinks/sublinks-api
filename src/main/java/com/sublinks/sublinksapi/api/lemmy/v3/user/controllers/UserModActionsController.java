@@ -176,15 +176,25 @@ public class UserModActionsController extends AbstractLemmyApiController {
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = BlockPersonResponse.class))})})
   @PostMapping("block")
-  BlockPersonResponse block(final BlockPerson blockPersonForm, final JwtPerson principal) {
+  BlockPersonResponse block(@RequestBody final BlockPerson blockPersonForm,
+      final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_BLOCK,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "cannot_block_user"));
 
     final Person personToBlock = personRepository.findById((long) blockPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    if (person.getId()
+        .equals(personToBlock.getId())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_block_self");
+    }
+
+    if (personToBlock.isAdmin()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_block_admin");
+    }
 
     if (blockPersonForm.block()) {
       linkPersonPersonService.createLink(person, personToBlock, LinkPersonPersonType.blocked);
@@ -193,6 +203,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
     }
 
     return BlockPersonResponse.builder()
+        .person_view(lemmyPersonService.getPersonView(personToBlock))
         .blocked(blockPersonForm.block())
         .build();
   }

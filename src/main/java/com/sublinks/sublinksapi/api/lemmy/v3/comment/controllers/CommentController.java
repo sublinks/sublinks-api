@@ -520,7 +520,8 @@ public class CommentController extends AbstractLemmyApiController {
     Optional<Person> person = getOptionalPerson(principal);
     aclService.canPerson(person.orElse(null))
         .performTheAction(RolePermissionCommentTypes.READ_COMMENT)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "unauthorized_to_read_comments"));
 
     final Optional<Integer> post_id = Optional.ofNullable(getCommentsForm.post_id());
     Optional<Integer> page = Optional.ofNullable(getCommentsForm.page());
@@ -562,6 +563,7 @@ public class CommentController extends AbstractLemmyApiController {
       page = Optional.of(1);
     }
     searchBuilder.page(page.orElse(1));
+    searchBuilder.person(person.orElse(null));
 
     final CommentSearchCriteria commentRepositorySearch = searchBuilder.build();
 

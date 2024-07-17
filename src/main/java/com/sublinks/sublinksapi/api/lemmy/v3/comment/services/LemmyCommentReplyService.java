@@ -14,6 +14,7 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
@@ -30,6 +31,7 @@ public class LemmyCommentReplyService {
   private final LinkPersonPostRepository linkPersonPostRepository;
   private final LinkPersonPersonRepository linkPersonPersonRepository;
   private final RolePermissionService rolePermissionService;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @NonNull
   public CommentReplyView createCommentReplyView(
@@ -80,9 +82,8 @@ public class LemmyCommentReplyService {
 
     final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
 
-    final boolean creatorIsBlocked = linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndToPersonAndLinkType(
-            person, creator, LinkPersonPersonType.blocked)
-        .isPresent();
+    final boolean creatorIsBlocked = linkPersonPersonService.hasLink(person, creator,
+        LinkPersonPersonType.blocked);
 
     //@todo: Check if comment is saved
     return commentReplyViewBuilder.comment_reply(lemmyCommentReply)

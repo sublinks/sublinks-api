@@ -65,7 +65,7 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
 
-  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
   Set<LinkPersonPerson> linkPersonPerson;
 
   @ManyToOne

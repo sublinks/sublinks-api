@@ -1,10 +1,14 @@
 package com.sublinks.sublinksapi.post.services;
 
+import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPerson;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
@@ -150,6 +154,29 @@ public class PostSearchQueryService {
         final Expression<Long> expression = communityJoin.get("id");
         predicates.add(expression.in(communityIds));
       }
+      return this;
+    }
+
+    public Builder filterBlockedPosts(ListingType listingType) {
+
+      if (listingType == null || !listingType.equals(ListingType.ModeratorView)) {
+
+        final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
+            JoinType.INNER);
+        final Join<LinkPersonPost, Person> personJoin = linkPersonPostJoin.join("person",
+            JoinType.INNER);
+        final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
+            "linkPersonPerson", JoinType.INNER);
+        final Join<LinkPersonPerson, Person> linkPersonPersonPersonJoin = linkPersonPersonJoin.join(
+            "toPerson", JoinType.INNER);
+        final Join<Person, Role> roleJoin = linkPersonPersonPersonJoin.join("role", JoinType.INNER);
+
+        predicates.add(criteriaBuilder.and(
+            criteriaBuilder.equal(linkPersonPersonJoin.get("linkType"),
+                LinkPersonPersonType.blocked),
+            criteriaBuilder.notEqual(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
+      }
+
       return this;
     }
 

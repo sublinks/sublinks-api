@@ -93,7 +93,7 @@ public class AclService {
     private final AclRepository aclRepository;
     private final RolePermissionService rolePermissionService;
     private final RoleService roleService;
-    private final List<String> authorizedActions = new ArrayList<>();
+    private final List<RolePermissionInterface> authorizedActions = new ArrayList<>();
     private boolean isPermitted = true;
     private AuthorizedEntityType entityType;
     private Long entityId;
@@ -111,8 +111,7 @@ public class AclService {
 
       this.roleService = roleService;
 
-      this.person = Person.builder()
-          .build();
+      this.person = null;
       this.actionType = actionType;
       this.aclRepository = aclRepository;
       this.rolePermissionService = rolePermissionService;
@@ -145,7 +144,7 @@ public class AclService {
      */
     public EntityPolicy performTheAction(final RolePermissionInterface permission) {
 
-      this.authorizedActions.add(permission.toString());
+      this.authorizedActions.add(permission);
       return this;
     }
 
@@ -246,18 +245,18 @@ public class AclService {
 
       if (this.person != null) {
         if (community != null) {
-          // Only permitted if the authorized action allowed in the banned role
-          this.isPermitted = rolePermissionService.isPermitted(person,
-              (RolePermissionInterface) this.authorizedActions, community.getId());
+          this.isPermitted = this.authorizedActions.stream()
+              .allMatch(x -> rolePermissionService.isPermitted(this.person, x, community.getId()));
 
         } else {
-          this.isPermitted = rolePermissionService.isPermitted(this.person,
-              (RolePermissionInterface) this.authorizedActions);
+          this.isPermitted = this.authorizedActions.stream()
+              .allMatch(x -> rolePermissionService.isPermitted(this.person, x));
         }
       } else {
-        this.isPermitted = rolePermissionService.isPermitted(roleService.getDefaultGuestRole()
-                .orElseThrow(() -> new RuntimeException("No default registered role defined.")),
-            (RolePermissionInterface) this.authorizedActions);
+        this.isPermitted = this.authorizedActions.stream()
+            .allMatch(x -> rolePermissionService.isPermitted(roleService.getDefaultGuestRole()
+                    .orElseThrow(() -> new RuntimeException("No default registered role defined.")),
+                x));
       }
     }
 
@@ -266,9 +265,9 @@ public class AclService {
      */
     private void checkAclRules() {
 
-      for (String authorizedAction : authorizedActions) {
+      for (RolePermissionInterface authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedAction(
-            person.getId(), entityType, entityId, authorizedAction);
+            person.getId(), entityType, entityId, authorizedAction.toString());
         if (acl != null && !acl.isPermitted()) {
           isPermitted = false;
         }
@@ -293,15 +292,15 @@ public class AclService {
       // Only permitted if the authorized action allowed in the banned role
       if (this.person != null) {
         if (RolePermissionService.isBanned(this.person)) {
-          this.isPermitted = rolePermissionService.isPermitted(roleService.getBannedRole()
-                  .orElseThrow(() -> new RuntimeException("No banned role defined.")),
-              (RolePermissionInterface) this.authorizedActions);
+          this.isPermitted = this.authorizedActions.stream()
+              .allMatch(x -> rolePermissionService.isPermitted(roleService.getBannedRole()
+                  .orElseThrow(() -> new RuntimeException("No banned role defined.")), x));
         }
         if (community != null) {
           if (rolePermissionService.isBannedInCommunity(this.person, community.getId())) {
-            this.isPermitted = rolePermissionService.isPermitted(roleService.getBannedRole()
-                    .orElseThrow(() -> new RuntimeException("No banned role defined.")),
-                (RolePermissionInterface) this.authorizedActions);
+            this.isPermitted = this.authorizedActions.stream()
+                .allMatch(x -> rolePermissionService.isPermitted(roleService.getBannedRole()
+                    .orElseThrow(() -> new RuntimeException("No banned role defined.")), x));
           }
         }
       }
@@ -312,15 +311,15 @@ public class AclService {
      */
     private void revokeAclRules() {
 
-      for (String authorizedAction : authorizedActions) {
+      for (RolePermissionInterface authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
-            person.getId(), entityType, entityId, authorizedAction, true);
+            person.getId(), entityType, entityId, authorizedAction.toString(), true);
         if (acl == null) {
           aclRepository.saveAndFlush(Acl.builder()
               .personId(person.getId())
               .entityType(entityType)
               .entityId(entityId)
-              .authorizedAction(authorizedAction)
+              .authorizedAction(authorizedAction.toString())
               .permitted(false)
               .build());
         } else {
@@ -335,15 +334,15 @@ public class AclService {
      */
     private void createAclRules() {
 
-      for (String authorizedAction : authorizedActions) {
+      for (RolePermissionInterface authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
-            person.getId(), entityType, entityId, authorizedAction, false);
+            person.getId(), entityType, entityId, authorizedAction.toString(), false);
         if (acl == null) {
           aclRepository.saveAndFlush(Acl.builder()
               .personId(person.getId())
               .entityType(entityType)
               .entityId(entityId)
-              .authorizedAction(authorizedAction)
+              .authorizedAction(authorizedAction.toString())
               .permitted(true)
               .build());
         } else {

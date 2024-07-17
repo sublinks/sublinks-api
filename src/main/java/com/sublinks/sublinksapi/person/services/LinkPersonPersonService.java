@@ -5,6 +5,7 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.events.LinkPersonPersonDeletedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -75,5 +76,38 @@ public class LinkPersonPersonService {
         .remove(link);
     linkPersonPersonRepository.delete(link);
     linkPersonPersonDeletedPublisher.publish(link);
+  }
+
+  public Optional<LinkPersonPerson> getLink(Person fromPerson, Person toPerson,
+      LinkPersonPersonType linkType) {
+
+    if (toPerson != null && toPerson.isAdmin() && linkType.equals(LinkPersonPersonType.blocked)) {
+      return Optional.empty();
+    }
+    return linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndToPersonAndLinkType(
+        fromPerson, toPerson, linkType);
+  }
+
+  public boolean hasLink(Person fromPerson, Person toPerson, LinkPersonPersonType linkType) {
+
+    return getLink(fromPerson, toPerson, linkType).isPresent();
+  }
+
+  public boolean hasAllLinks(Person fromPerson, Person toPerson,
+      List<LinkPersonPersonType> linkTypes) {
+
+    for (LinkPersonPersonType linkType : linkTypes) {
+      if (!hasLink(fromPerson, toPerson, linkType)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  public List<LinkPersonPerson> getLinkPersonPersonByFromPersonAndLinkType(Person fromPerson,
+      LinkPersonPersonType linkType) {
+
+    return linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndLinkType(fromPerson,
+        linkType);
   }
 }

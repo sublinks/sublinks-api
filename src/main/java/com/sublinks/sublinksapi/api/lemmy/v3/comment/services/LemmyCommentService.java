@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.NonNull;
@@ -34,6 +35,7 @@ public class LemmyCommentService {
   private final CommentSaveService commentSaveService;
   private final LinkPersonInstanceRepository linkPersonInstanceRepository;
   private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @NonNull
   public CommentView createCommentView(
@@ -65,10 +67,8 @@ public class LemmyCommentService {
 
     commentView.subscribed(subscribedType)
         .saved(false)// @todo check if saved
-        .creator_blocked(
-            linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndToPersonAndLinkType(person,
-                    comment.getPerson(), LinkPersonPersonType.blocked)
-                .isPresent())
+        .creator_blocked(linkPersonPersonService.hasLink(person, comment.getPerson(),
+            LinkPersonPersonType.blocked))
         .my_vote(personVote);
 
     commentView.saved(commentSaveService.isCommentSavedByPerson(comment, person));

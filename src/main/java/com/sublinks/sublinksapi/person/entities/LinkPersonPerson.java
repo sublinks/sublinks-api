@@ -20,7 +20,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
@@ -58,11 +57,6 @@ public class LinkPersonPerson {
   @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
-
-
-  @UpdateTimestamp(source = SourceType.DB)
-  @Column(updatable = false, name = "updated_at")
-  private Date updatedAt;
 
   @Override
   public final boolean equals(Object o) {
