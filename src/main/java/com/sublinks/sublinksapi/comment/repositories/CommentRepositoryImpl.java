@@ -59,6 +59,7 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     if (commentSearchCriteria.post() != null) {
       predicates.add(cb.equal(commentTable.get("post"), commentSearchCriteria.post()));
     }
+    // @todo: implement comment read
     // Join for CommentView
 //    if (commentSearchCriteria.person() != null) {
 //      final Join<Comment, CommentRead> commentReadJoin = commentTable.join("commentReads",
@@ -74,20 +75,22 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
         || !commentSearchCriteria.listingType()
         .equals(ListingType.ModeratorView))) {
       final Join<Comment, Person> personJoin = commentTable.join("person", JoinType.LEFT);
+      personJoin.on(cb.equal(personJoin.get("id"), commentSearchCriteria.person()
+          .getId()));
+
       final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
           "linkPersonPerson", JoinType.LEFT);
-      linkPersonPersonJoin.on(
-          cb.equal(linkPersonPersonJoin.get("fromPerson"), commentSearchCriteria.person()));
 
       final Join<LinkPersonPerson, Person> linkToPersonPersonPersonJoin = linkPersonPersonJoin.join(
           "toPerson", JoinType.LEFT);
 
       final Join<Person, Role> roleJoin = linkToPersonPersonPersonJoin.join("role", JoinType.LEFT);
-      roleJoin.on(cb.equal(linkToPersonPersonPersonJoin.get("role"), roleJoin));
 
-      predicates.add(cb.or(cb.isNull(linkPersonPersonJoin.get("linkType")),
-          cb.notEqual(linkPersonPersonJoin.get("linkType"), LinkPersonPersonType.blocked),
-          cb.notEqual(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
+      predicates.add(cb.and(cb.or(linkPersonPersonJoin.isNull(),
+              cb.equal(linkPersonPersonJoin.get("fromPerson"), commentSearchCriteria.person())),
+          cb.or(linkPersonPersonJoin.isNull(),
+              cb.notEqual(linkPersonPersonJoin.get("linkType"), LinkPersonPersonType.blocked),
+              cb.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString()))));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
