@@ -17,7 +17,6 @@ import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.sorts.SortFactory;
 import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.shared.RemovedState;
-import io.hypersistence.utils.hibernate.query.SQLExtractor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -101,8 +100,6 @@ public class PostSearchQueryService {
 
       final TypedQuery<Post> query = builder.getEntityManager()
           .createQuery(builder.getCriteriaQuery());
-
-      System.out.println(SQLExtractor.from(query));
 
       return query;
     }

@@ -111,7 +111,6 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     final int page = Math.max(commentSearchCriteria.page() - 1, 1);
 
     final TypedQuery<Comment> query = em.createQuery(cq);
-    System.out.println(SQLExtractor.from(query));
     applyPagination(query, page, perPage);
 
     return query.getResultList();
