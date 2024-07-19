@@ -75,22 +75,20 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
         || !commentSearchCriteria.listingType()
         .equals(ListingType.ModeratorView))) {
       final Join<Comment, Person> personJoin = commentTable.join("person", JoinType.LEFT);
-      personJoin.on(cb.equal(personJoin.get("id"), commentSearchCriteria.person()
-          .getId()));
 
       final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
-          "linkPersonPerson", JoinType.LEFT);
+          "linkPersonPersonTo", JoinType.LEFT);
+      linkPersonPersonJoin.on(
+          cb.equal(linkPersonPersonJoin.get("fromPerson"), commentSearchCriteria.person()));
 
       final Join<LinkPersonPerson, Person> linkToPersonPersonPersonJoin = linkPersonPersonJoin.join(
           "toPerson", JoinType.LEFT);
 
       final Join<Person, Role> roleJoin = linkToPersonPersonPersonJoin.join("role", JoinType.LEFT);
 
-      predicates.add(cb.and(cb.or(linkPersonPersonJoin.isNull(),
-              cb.equal(linkPersonPersonJoin.get("fromPerson"), commentSearchCriteria.person())),
-          cb.or(linkPersonPersonJoin.isNull(),
-              cb.notEqual(linkPersonPersonJoin.get("linkType"), LinkPersonPersonType.blocked),
-              cb.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString()))));
+      predicates.add(cb.or(cb.or(linkPersonPersonJoin.isNull(),
+              cb.notEqual(linkPersonPersonJoin.get("linkType"), LinkPersonPersonType.blocked)),
+          cb.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));

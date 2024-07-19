@@ -43,6 +43,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     if (postSearchCriteria.person() != null) {
       searchBuilder.filterByListingType(postSearchCriteria.listingType(),
           postSearchCriteria.person());
+      searchBuilder.filterBlockedPosts(postSearchCriteria.listingType());
     } else {
       searchBuilder.filterByListingType(postSearchCriteria.listingType());
     }

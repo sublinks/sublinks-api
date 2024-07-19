@@ -293,7 +293,7 @@ public class RolePermissionService {
         communityId) ? this.roleService.getBannedRole()
         .orElseThrow(() -> new RuntimeException("No Banned role found.")) : person.getRole();
 
-    if (!isAdmin(role) || !doesRoleHavePermission(role, rolePermission)) {
+    if (!isAdmin(role) && !doesRoleHavePermission(role, rolePermission)) {
       throw exceptionSupplier.get();
     }
   }

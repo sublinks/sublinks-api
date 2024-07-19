@@ -17,6 +17,7 @@ import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.sorts.SortFactory;
 import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.shared.RemovedState;
+import io.hypersistence.utils.hibernate.query.SQLExtractor;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -90,17 +91,20 @@ public class PostSearchQueryService {
 
       if (!builder.getRemovedState()
           .isEmpty()) {
-        final Expression<RemovedState> expression = builder.getPostTable()
-            .get("removedState");
-        predicates.add(expression.in(builder.getRemovedState()));
+        predicates.add(builder.getPostTable()
+            .get("removedState")
+            .in(builder.getRemovedState()));
       }
 
       builder.getCriteriaQuery()
-          .where(builder.getPredicates()
-              .toArray(new Predicate[0]));
+          .where(predicates.toArray(new Predicate[0]));
 
-      return builder.getEntityManager()
+      final TypedQuery<Post> query = builder.getEntityManager()
           .createQuery(builder.getCriteriaQuery());
+
+      System.out.println(SQLExtractor.from(query));
+
+      return query;
     }
 
     public List<Post> getResults() {
@@ -159,22 +163,33 @@ public class PostSearchQueryService {
 
     public Builder filterBlockedPosts(ListingType listingType) {
 
-      if (listingType == null || !listingType.equals(ListingType.ModeratorView)) {
+      if (this.person != null && (listingType == null || !listingType.equals(
+          ListingType.ModeratorView))) {
 
-        final Join<Post, LinkPersonPost> linkPersonPostJoin = postTable.join("linkPersonPost",
-            JoinType.INNER);
+        final Join<Post, LinkPersonPost> linkPersonPostJoin = this.postTable.join("linkPersonPost",
+            JoinType.LEFT);
+
+        linkPersonPostJoin.on(
+            criteriaBuilder.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
+
         final Join<LinkPersonPost, Person> personJoin = linkPersonPostJoin.join("person",
-            JoinType.INNER);
-        final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
-            "linkPersonPerson", JoinType.INNER);
-        final Join<LinkPersonPerson, Person> linkPersonPersonPersonJoin = linkPersonPersonJoin.join(
-            "toPerson", JoinType.INNER);
-        final Join<Person, Role> roleJoin = linkPersonPersonPersonJoin.join("role", JoinType.INNER);
+            JoinType.LEFT);
 
-        predicates.add(criteriaBuilder.and(
-            criteriaBuilder.equal(linkPersonPersonJoin.get("linkType"),
-                LinkPersonPersonType.blocked),
-            criteriaBuilder.notEqual(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
+        final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
+            "linkPersonPersonTo", JoinType.LEFT);
+        linkPersonPersonJoin.on(
+            this.criteriaBuilder.equal(linkPersonPersonJoin.get("fromPerson"), this.person));
+
+        final Join<LinkPersonPerson, Person> linkToPersonPersonPersonJoin = linkPersonPersonJoin.join(
+            "fromPerson", JoinType.LEFT);
+
+        final Join<Person, Role> roleJoin = personJoin.join("role", JoinType.LEFT);
+
+        predicates.add(this.criteriaBuilder.or(
+            this.criteriaBuilder.or(linkPersonPersonJoin.isNull(),
+                this.criteriaBuilder.notEqual(linkPersonPersonJoin.get("linkType"),
+                    LinkPersonPersonType.blocked)),
+            this.criteriaBuilder.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
       }
 
       return this;
