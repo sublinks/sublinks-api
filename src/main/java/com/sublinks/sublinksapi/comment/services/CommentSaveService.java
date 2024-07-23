@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.comment.services;
 
 import com.sublinks.sublinksapi.comment.entities.Comment;
-import com.sublinks.sublinksapi.comment.entities.CommentSave;
+import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import com.sublinks.sublinksapi.comment.events.CommentSaveCreatedPublisher;
 import com.sublinks.sublinksapi.comment.events.CommentSaverDeletedPublisher;
 import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
@@ -24,16 +24,16 @@ public class CommentSaveService {
   }
 
   @Transactional
-  public void createCommentSave(final CommentSave commentSave) {
+  public void createCommentSave(final LinkPersonComment linkPersonComment) {
 
-    comentSaveRepository.save(commentSave);
-    commentSaveCreatedPublisher.publish(commentSave);
+    comentSaveRepository.save(linkPersonComment);
+    commentSaveCreatedPublisher.publish(linkPersonComment);
   }
 
   @Transactional
-  public void deleteCommentSave(final CommentSave commentSave) {
+  public void deleteCommentSave(final LinkPersonComment linkPersonComment) {
 
-    comentSaveRepository.delete(commentSave);
-    commentSaverDeletedPublisher.publish(commentSave);
+    comentSaveRepository.delete(linkPersonComment);
+    commentSaverDeletedPublisher.publish(linkPersonComment);
   }
 }

@@ -27,7 +27,7 @@ import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
-import com.sublinks.sublinksapi.comment.entities.CommentSave;
+import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria.CommentSearchCriteriaBuilder;
@@ -468,7 +468,7 @@ public class CommentController extends AbstractLemmyApiController {
         .onCommunity(comment.getCommunity())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    Optional<CommentSave> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
+    Optional<LinkPersonComment> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
         person, comment);
 
     if (saveCommentForm.save()) {
@@ -478,7 +478,7 @@ public class CommentController extends AbstractLemmyApiController {
             .recipient_ids(new ArrayList<>())
             .build();
       }
-      commentSaveForLaterService.createCommentSave(CommentSave.builder()
+      commentSaveForLaterService.createCommentSave(LinkPersonComment.builder()
           .comment(comment)
           .person(person)
           .build());

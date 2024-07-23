@@ -52,7 +52,6 @@ public class LinkPersonPost {
 
   @Column(nullable = false, name = "link_type")
   @Enumerated(EnumType.STRING)
-
   private LinkPersonPostType linkType;
 
   @CreationTimestamp(source = SourceType.DB)

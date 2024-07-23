@@ -62,22 +62,6 @@ CREATE INDEX IDX_COMMENT_ID ON comment_likes (comment_id);
 CREATE INDEX IDX_PERSON_ID ON comment_likes (person_id);
 
 /**
- Comment Saves table
- */
-CREATE TABLE comment_saves
-(
-
-  id         BIGSERIAL PRIMARY KEY,
-  person_id  BIGINT                                    NOT NULL,
-  comment_id BIGINT                                    NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
-);
-
-CREATE INDEX IDX_COMMENT_SAVES_PERSON_ID ON comment_saves (person_id);
-CREATE INDEX IDX_COMMENT_SAVES_COMMENT_ID ON comment_saves (comment_id);
-
-/**
  Communities table
  */
 CREATE TABLE communities
@@ -840,6 +824,23 @@ CREATE TABLE email_person_recipients
   person_id BIGINT NOT NULL,
   email_id  BIGINT NOT NULL
 );
+
+/**
+ Person Comment Link table
+ */
+CREATE TABLE link_person_comment
+(
+  id         BIGSERIAL PRIMARY KEY,
+  person_id  BIGINT                                    NOT NULL,
+  comment_id BIGINT                                    NOT NULL,
+  link_type  VARCHAR(255)                              NOT NULL,
+  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+);
+
+CREATE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID ON link_person_comment (person_id, comment_id);
+CREATE UNIQUE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID_LINK_TYPE ON link_person_comment (person_id,
+                                                                                                   comment_id,
+                                                                                                   link_type);
 
 -- Add a trigger for every updated_at column ( yes i know its hacky but it works ;) )
 

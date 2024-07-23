@@ -1,18 +1,18 @@
 package com.sublinks.sublinksapi.comment.events;
 
-import com.sublinks.sublinksapi.comment.entities.CommentSave;
+import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
 public class CommentSaveDeletedEvent extends ApplicationEvent {
 
-  private final CommentSave commentSave;
+  private final LinkPersonComment linkPersonComment;
 
   public CommentSaveDeletedEvent(final Object source,
-      final CommentSave commentSave) {
+      final LinkPersonComment linkPersonComment) {
 
     super(source);
-    this.commentSave = commentSave;
+    this.linkPersonComment = linkPersonComment;
   }
 }

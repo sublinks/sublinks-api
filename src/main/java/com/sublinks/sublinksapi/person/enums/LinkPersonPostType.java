@@ -4,4 +4,5 @@ public enum LinkPersonPostType {
   creator,
   follower,
   pending_follow,
+  saved
 }
