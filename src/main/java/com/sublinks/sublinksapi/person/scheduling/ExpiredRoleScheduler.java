@@ -29,31 +29,35 @@ public class ExpiredRoleScheduler {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PersonService personService;
 
-  @Scheduled(fixedRateString = "${sublinks.settings.check_expired_instance_roles}", timeUnit = TimeUnit.SECONDS)
+  @Scheduled(fixedRateString = "${sublinks.settings.check_expired_instance_roles}",
+      timeUnit = TimeUnit.SECONDS)
   public void clearInstanceRoles() {
 
     Optional<Role> foundRegisteredRole = roleService.getDefaultRegisteredRole();
 
     if (foundRegisteredRole.isEmpty()) {
 
-      logger.warning("Default registered role not found.");
+      logger.warning(
+          "Default registered role not found. (Expected if it is your initial start of the application.)");
       return;
     }
 
     Role registeredRole = foundRegisteredRole.get();
 
-    personRepository.findAllByRoleExpireAtBefore(new Date()).forEach(person -> {
-      person.setRole(registeredRole);
-      person.setRoleExpireAt(null);
-      personService.updatePerson(person);
-    });
+    personRepository.findAllByRoleExpireAtBefore(new Date())
+        .forEach(person -> {
+          person.setRole(registeredRole);
+          person.setRoleExpireAt(null);
+          personService.updatePerson(person);
+        });
   }
 
-  @Scheduled(fixedRateString = "${sublinks.settings.check_expired_community_roles}", timeUnit = TimeUnit.SECONDS)
+  @Scheduled(fixedRateString = "${sublinks.settings.check_expired_community_roles}",
+      timeUnit = TimeUnit.SECONDS)
   public void clearCommunityRoles() {
 
-    linkPersonCommunityRepository.getLinkPersonCommunitiesByExpireAtBefore(new Date()).forEach(
-        linkPersonCommunity -> {
+    linkPersonCommunityRepository.getLinkPersonCommunitiesByExpireAtBefore(new Date())
+        .forEach(linkPersonCommunity -> {
           linkPersonCommunityService.removeLink(linkPersonCommunity.getPerson(),
               linkPersonCommunity.getCommunity(), linkPersonCommunity.getLinkType());
         });
