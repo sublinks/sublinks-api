@@ -14,8 +14,11 @@ import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.lang.NonNull;
@@ -32,6 +35,8 @@ public class LemmyCommentService {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final LinkPersonCommentService linkPersonCommentService;
   private final LinkPersonInstanceRepository linkPersonInstanceRepository;
+  private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @NonNull
   public CommentView createCommentView(
@@ -63,6 +68,8 @@ public class LemmyCommentService {
 
     commentView.subscribed(subscribedType)
         .saved(false)// @todo check if saved
+        .creator_blocked(linkPersonPersonService.hasLink(person, comment.getPerson(),
+            LinkPersonPersonType.blocked))
         .my_vote(personVote);
 
     commentView.saved(
@@ -106,8 +113,7 @@ public class LemmyCommentService {
         .post(lemmyPost)
         .counts(lemmyCommentAggregates)
         .creator_banned_from_community(isBannedFromCommunity)
-        .creator_blocked(
-            false) // @todo check if creator is blocked by the viewer ( only for logged in users )
+        .creator_blocked(false)
         .creator_is_moderator(creatorIsModerator)
         .creator_is_admin(createIsAdmin);
   }

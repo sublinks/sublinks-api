@@ -92,8 +92,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
-        community.getId(),
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+        community.getId(), () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "not_authorized_to_create_post"));
 
     // Language
     Optional<Language> language;

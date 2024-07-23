@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class LemmyCommunityService {
 
   private final ConversionService conversionService;
+  private final LinkPersonCommunityService linkPersonCommunityService;
 
   public SubscribedType getPersonCommunitySubscribeType(final Person person,
       final Community community) {
@@ -60,7 +62,8 @@ public class LemmyCommunityService {
     SubscribedType subscribedType = SubscribedType.NotSubscribed;
     boolean isBlocked = false;
     for (LinkPersonCommunity linkPersonCommunity : person.getLinkPersonCommunity()) {
-      if (Objects.equals(community.getId(), linkPersonCommunity.getCommunity().getId())) {
+      if (Objects.equals(community.getId(), linkPersonCommunity.getCommunity()
+          .getId())) {
         if (linkPersonCommunity.getLinkType() == LinkPersonCommunityType.follower) {
           subscribedType = SubscribedType.Subscribed;
         } else if (linkPersonCommunity.getLinkType() == LinkPersonCommunityType.pending_follow) {
@@ -84,7 +87,9 @@ public class LemmyCommunityService {
   public CommunityAggregate communityAggregates(final Community community) {
 
     return Optional.ofNullable(community.getCommunityAggregate())
-        .orElse(CommunityAggregate.builder().community(community).build());
+        .orElse(CommunityAggregate.builder()
+            .community(community)
+            .build());
   }
 
   public List<Long> communityLanguageCodes(final Community community) {
@@ -101,14 +106,11 @@ public class LemmyCommunityService {
     final List<CommunityModeratorView> moderatorViews = new ArrayList<>();
     for (LinkPersonCommunity linkPerson : community.getLinkPersonCommunity()) {
       final CommunityModeratorView communityModeratorView = CommunityModeratorView.builder()
-          .community(conversionService.convert(
-              community,
-              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class)
-          )
-          .moderator(conversionService.convert(
-              linkPerson.getPerson(),
-              com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class)
-          ).build();
+          .community(conversionService.convert(community,
+              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+          .moderator(conversionService.convert(linkPerson.getPerson(),
+              com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class))
+          .build();
       if (linkPerson.getLinkType() == LinkPersonCommunityType.owner) {
         moderatorViews.add(0, communityModeratorView);
       }

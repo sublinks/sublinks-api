@@ -64,6 +64,12 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
 
+  @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
+  Set<LinkPersonPerson> linkPersonPerson;
+
+  @OneToMany(mappedBy = "toPerson", fetch = FetchType.LAZY)
+  Set<LinkPersonPerson> linkPersonPersonTo;
+
   @ManyToOne
   @JoinTable(name = "link_person_instances",
       joinColumns = @JoinColumn(name = "person_id"),

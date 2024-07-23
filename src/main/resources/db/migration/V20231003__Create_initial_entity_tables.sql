@@ -832,6 +832,18 @@ CREATE UNIQUE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID_LINK_TYPE ON li
                                                                                                     comment_id,
                                                                                                     link_type);
 
+/**
+  Link Person Person Table
+ */
+CREATE TABLE link_person_person
+(
+  id             BIGSERIAL PRIMARY KEY,
+  from_person_id BIGINT       NOT NULL,
+  to_person_id   BIGINT       NOT NULL,
+  link_type      VARCHAR(255) NOT NULL,
+  created_at     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+
 -- Add a trigger for every updated_at column ( yes i know its hacky but it works ;) )
 
 DO

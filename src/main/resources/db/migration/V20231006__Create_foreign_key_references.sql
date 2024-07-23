@@ -254,3 +254,9 @@ ALTER TABLE link_person_comments
 ALTER TABLE link_person_posts
   ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE,
   ADD FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE;
+/**
+  Link Person Person Table
+ */
+ALTER TABLE link_person_person
+  ADD FOREIGN KEY (from_person_id) REFERENCES people (id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (to_person_id) REFERENCES people (id) ON DELETE CASCADE;

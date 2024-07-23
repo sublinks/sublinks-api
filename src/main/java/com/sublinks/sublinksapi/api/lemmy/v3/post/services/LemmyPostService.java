@@ -7,8 +7,11 @@ import com.sublinks.sublinksapi.comment.repositories.CommentReadRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.repositories.PostReadRepository;
@@ -30,6 +33,8 @@ public class LemmyPostService {
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final LinkPersonPersonService linkPersonPersonService;
   private final PostReadRepository postReadRepository;
   private final CommentReadRepository commentReadRepository;
 
@@ -37,7 +42,6 @@ public class LemmyPostService {
 
     return postViewBuilder(post, null).saved(false)
         .read(false)
-        .creator_blocked(false)
         .my_vote(0)
         .unread_comments(0)
         .build();
@@ -57,7 +61,6 @@ public class LemmyPostService {
             linkPersonPostService.hasLink(post, person, LinkPersonPostType.saved))
         .read(postReadRepository.getPostReadByPostAndPerson(post, person)
             .isPresent())
-        .creator_blocked(false)
         .my_vote(vote)
         .unread_comments(post.getComments()
             .size()
@@ -102,7 +105,11 @@ public class LemmyPostService {
     final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         post.getCommunity(), LinkPersonCommunityType.banned);
 
+    final boolean creatorBlocked = person != null && linkPersonPersonService.hasLink(person,
+        creator, LinkPersonPersonType.blocked);
+
     return PostView.builder()
+        .creator_blocked(creatorBlocked)
         .post(lemmyPost)
         .creator(lemmyCreator)
         .community(community)
