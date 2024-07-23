@@ -3,6 +3,7 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
+import com.sublinks.sublinksapi.comment.repositories.CommentReadRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
@@ -13,6 +14,7 @@ import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.repositories.PostReadRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostService;
+import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.annotation.Nullable;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ public class LemmyPostService {
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PostReadRepository postReadRepository;
+  private final CommentReadRepository commentReadRepository;
 
   public PostView postViewFromPost(final Post post) {
 
@@ -56,7 +59,10 @@ public class LemmyPostService {
             .isPresent())
         .creator_blocked(false)
         .my_vote(vote)
-        .unread_comments(0)
+        .unread_comments(post.getComments()
+            .size()
+            - commentReadRepository.getAllCommentReadByPersonAndComment_PostAndComment_RemovedState(
+            person, post, RemovedState.NOT_REMOVED))
         .build();
   }
 
