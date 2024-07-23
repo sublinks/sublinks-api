@@ -10,8 +10,9 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
+import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
-import com.sublinks.sublinksapi.comment.services.CommentSaveService;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -29,7 +30,7 @@ public class LemmyCommentService {
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final CommentSaveService commentSaveService;
+  private final LinkPersonCommentService linkPersonCommentService;
   private final LinkPersonInstanceRepository linkPersonInstanceRepository;
 
   @NonNull
@@ -64,7 +65,8 @@ public class LemmyCommentService {
         .saved(false)// @todo check if saved
         .my_vote(personVote);
 
-    commentView.saved(commentSaveService.isCommentSavedByPerson(comment, person));
+    commentView.saved(
+        linkPersonCommentService.hasLink(comment, person, LinkPersonCommentType.saved));
 
     return commentView;
   }

@@ -325,22 +325,6 @@ CREATE TABLE post_likes
 
 CREATE INDEX IDX_POST_LIKES_POST_ID ON post_likes (post_id);
 
-/**
- Post Saves table
- */
-CREATE TABLE post_saves
-(
-
-  id         BIGSERIAL PRIMARY KEY,
-  person_id  BIGINT                                    NOT NULL,
-  post_id    BIGINT                                    NOT NULL,
-  created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
-);
-
-CREATE INDEX IDX_POST_SAVES_PERSON_ID ON post_saves (person_id);
-CREATE INDEX IDX_POST_SAVES_POST_ID ON post_saves (post_id);
-CREATE UNIQUE INDEX IDX_POST_SAVES_PERSON_ID_POST_ID ON post_saves (person_id, post_id);
 
 /**
  Person Posts table
@@ -353,6 +337,9 @@ CREATE TABLE link_person_posts
   link_type  VARCHAR(255)                              NOT NULL,
   created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
+
+CREATE INDEX IDX_LINK_PERSON_POSTS_PERSON_ID_POST_ID ON link_person_posts (person_id, post_id);
+CREATE UNIQUE INDEX IDX_LINK_PERSON_POSTS_PERSON_ID_POST_ID_LINK_TYPE ON link_person_posts (person_id, post_id, link_type);
 
 /**
  Person Access Control List table
@@ -825,10 +812,13 @@ CREATE TABLE email_person_recipients
   email_id  BIGINT NOT NULL
 );
 
+CREATE INDEX IDX_EMAIL_PERSON_RECIPIENTS_PERSON_ID ON email_person_recipients (person_id);
+CREATE INDEX IDX_EMAIL_PERSON_RECIPIENTS_EMAIL_ID ON email_person_recipients (email_id);
+
 /**
  Person Comment Link table
  */
-CREATE TABLE link_person_comment
+CREATE TABLE link_person_comments
 (
   id         BIGSERIAL PRIMARY KEY,
   person_id  BIGINT                                    NOT NULL,
@@ -837,10 +827,10 @@ CREATE TABLE link_person_comment
   created_at TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
-CREATE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID ON link_person_comment (person_id, comment_id);
-CREATE UNIQUE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID_LINK_TYPE ON link_person_comment (person_id,
-                                                                                                   comment_id,
-                                                                                                   link_type);
+CREATE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID ON link_person_comments (person_id, comment_id);
+CREATE UNIQUE INDEX IDX_LINK_PERSON_COMMENT_PERSON_ID_COMMENT_ID_LINK_TYPE ON link_person_comments (person_id,
+                                                                                                    comment_id,
+                                                                                                    link_type);
 
 -- Add a trigger for every updated_at column ( yes i know its hacky but it works ;) )
 

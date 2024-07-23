@@ -5,11 +5,13 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
+import com.sublinks.sublinksapi.post.repositories.PostReadRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
-import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import jakarta.annotation.Nullable;
 import java.util.Optional;
@@ -22,10 +24,11 @@ import org.springframework.stereotype.Service;
 public class LemmyPostService {
 
   private final PostService postService;
-  private final PostSaveService postSaveService;
+  private final LinkPersonPostService linkPersonPostService;
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final PostReadRepository postReadRepository;
 
   public PostView postViewFromPost(final Post post) {
 
@@ -47,8 +50,10 @@ public class LemmyPostService {
           .getScore();
     }
 
-    return postViewBuilder(post, person).saved(postSaveService.isPostSaved(post, person))
-        .read(false)
+    return postViewBuilder(post, person).saved(
+            linkPersonPostService.hasLink(post, person, LinkPersonPostType.saved))
+        .read(postReadRepository.getPostReadByPostAndPerson(post, person)
+            .isPresent())
         .creator_blocked(false)
         .my_vote(vote)
         .unread_comments(0)

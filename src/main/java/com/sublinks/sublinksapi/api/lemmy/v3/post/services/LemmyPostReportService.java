@@ -7,11 +7,12 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostReportView;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
+import com.sublinks.sublinksapi.person.services.PersonEmailVerificationService.LinkPersonPostService;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
-import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -23,7 +24,7 @@ public class LemmyPostReportService {
 
   private final PostService postService;
   private final PostReportService postReportService;
-  private final PostSaveService postSaveService;
+  private final LinkPersonPostService linkPersonPostService;
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;

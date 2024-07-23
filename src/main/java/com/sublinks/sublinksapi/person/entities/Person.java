@@ -11,7 +11,6 @@ import com.sublinks.sublinksapi.person.enums.PostListingMode;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.entities.PostRead;
-import com.sublinks.sublinksapi.post.entities.PostSave;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -79,6 +78,9 @@ public class Person implements UserDetails, Principal {
   private LinkPersonInstance linkPersonInstance;
 
   @OneToMany(mappedBy = "person")
+  private List<LinkPersonCommunity> linkPersonCommunities;
+
+  @OneToMany(mappedBy = "person")
   private List<PersonMetaData> personMetaData;
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "person")
@@ -92,10 +94,6 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person")
   @PrimaryKeyJoinColumn
   private List<CommentLike> commentReads;
-
-  @OneToMany(mappedBy = "person")
-  @PrimaryKeyJoinColumn
-  private List<PostSave> postSaves;
 
   @OneToMany(mappedBy = "person")
   @PrimaryKeyJoinColumn
@@ -244,7 +242,7 @@ public class Person implements UserDetails, Principal {
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
+
   @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")
   private Date updatedAt;

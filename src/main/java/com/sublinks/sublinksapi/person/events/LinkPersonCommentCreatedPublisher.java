@@ -1,4 +1,4 @@
-package com.sublinks.sublinksapi.comment.events;
+package com.sublinks.sublinksapi.person.events;
 
 import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import lombok.RequiredArgsConstructor;
@@ -7,14 +7,14 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class CommentSaveCreatedPublisher {
+public class LinkPersonCommentCreatedPublisher {
 
   private final ApplicationEventPublisher applicationEventPublisher;
 
   public void publish(final LinkPersonComment linkPersonComment) {
 
-    final CommentSaveCreatedEvent commentSaveEvent = new CommentSaveCreatedEvent(
+    final LinkPersonCommentCreatedEvent linkPersonCommentCreatedEvent = new LinkPersonCommentCreatedEvent(
         this, linkPersonComment);
-    applicationEventPublisher.publishEvent(commentSaveEvent);
+    applicationEventPublisher.publishEvent(linkPersonCommentCreatedEvent);
   }
 }

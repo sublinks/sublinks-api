@@ -1,67 +1,142 @@
 package com.sublinks.sublinksapi.person.services;
 
+import com.sublinks.sublinksapi.common.interfaces.ILinkingService;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostDeletedPublisher;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
+import com.sublinks.sublinksapi.person.events.LinkPersonPostUpdatedPublisher;
 import com.sublinks.sublinksapi.post.entities.Post;
-import com.sublinks.sublinksapi.post.services.PostLikeService;
+import com.sublinks.sublinksapi.post.repositories.LinkPersonPostRepository;
 import java.util.LinkedHashSet;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
-public class LinkPersonPostService {
+public class LinkPersonPostService implements
+    ILinkingService<LinkPersonPost, Post, Person, LinkPersonPostType> {
 
   private final LinkPersonPostRepository linkPersonPostRepository;
   private final LinkPersonPostCreatedPublisher linkPersonPostCreatedPublisher;
   private final LinkPersonPostDeletedPublisher linkPersonPostDeletedPublisher;
-  private final PostLikeService postLikeService;
+  private final LinkPersonPostUpdatedPublisher linkPersonPostUpdatedPublisher;
+
+  @Override
+  public boolean hasLink(Post post, Person person, LinkPersonPostType linkPersonPostType) {
+
+    return linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(post, person,
+            linkPersonPostType)
+        .isPresent();
+  }
+
+  @Override
+  public boolean hasAnyLink(Post post, Person person,
+      List<LinkPersonPostType> linkPersonPostTypes) {
+
+    return linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkTypeIn(post, person,
+            linkPersonPostTypes)
+        .isPresent();
+  }
 
   @Transactional
-  public void createLink(Person person, Post post, LinkPersonPostType type) {
+  public LinkPersonPost createPostLink(final Post post, final Person person,
+      final LinkPersonPostType type) {
 
-    final LinkPersonPost newLink = LinkPersonPost.builder()
+    final LinkPersonPost link = LinkPersonPost.builder()
         .post(post)
         .person(person)
         .linkType(type)
         .build();
+
     if (post.getLinkPersonPost() == null) {
       post.setLinkPersonPost(new LinkedHashSet<>());
     }
+
     if (person.getLinkPersonPost() == null) {
       person.setLinkPersonPost(new LinkedHashSet<>());
     }
-    post.getLinkPersonPost().add(newLink);
-    person.getLinkPersonPost().add(newLink);
-    linkPersonPostRepository.save(newLink);
-    postLikeService.updateOrCreatePostLikeLike(post, person);
-    linkPersonPostCreatedPublisher.publish(newLink);
+
+    this.createLink(link);
+    return link;
   }
 
   @Transactional
-  public void removeLink(Person person, Post post, LinkPersonPostType type) {
+  @Override
+  public void createLink(LinkPersonPost linkPersonPost) {
 
-    Optional<LinkPersonPost> linkPersonPost
-        = linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(
-        post,
-        person,
-        type
-    );
-    if (linkPersonPost.isEmpty()) {
-      return;
-    }
-    person.getLinkPersonPost()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonPost.get().getId()));
-    post.getLinkPersonPost().removeIf(l -> Objects.equals(l.getId(), linkPersonPost.get().getId()));
-    linkPersonPostRepository.delete(linkPersonPost.get());
-    linkPersonPostDeletedPublisher.publish(linkPersonPost.get());
+    linkPersonPostRepository.save(linkPersonPost);
+    linkPersonPostCreatedPublisher.publish(linkPersonPost);
+  }
+
+  @Transactional
+  @Override
+  public void createLinks(List<LinkPersonPost> linkPersonPosts) {
+
+    linkPersonPostRepository.saveAll(linkPersonPosts)
+        .forEach(linkPersonPostCreatedPublisher::publish);
+  }
+
+  @Transactional
+  @Override
+  public void updateLink(LinkPersonPost linkPersonPost) {
+
+    linkPersonPostRepository.save(linkPersonPost);
+    linkPersonPostUpdatedPublisher.publish(linkPersonPost);
+  }
+
+  @Transactional
+  @Override
+  public void updateLinks(List<LinkPersonPost> linkPersonPosts) {
+
+    linkPersonPostRepository.saveAll(linkPersonPosts)
+        .forEach(linkPersonPostUpdatedPublisher::publish);
+  }
+
+  @Transactional
+  @Override
+  public void deleteLink(LinkPersonPost linkPersonPost) {
+
+    linkPersonPostRepository.delete(linkPersonPost);
+    linkPersonPostDeletedPublisher.publish(linkPersonPost);
+  }
+
+  @Transactional
+  @Override
+  public void deleteLinks(List<LinkPersonPost> linkPersonPosts) {
+
+    linkPersonPostRepository.deleteAll(linkPersonPosts);
+    linkPersonPosts.forEach(linkPersonPostDeletedPublisher::publish);
+  }
+
+  @Override
+  public Optional<LinkPersonPost> getLink(Post post, Person person,
+      LinkPersonPostType linkPersonPostType) {
+
+    return linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(post, person,
+        linkPersonPostType);
+  }
+
+  @Override
+  public List<LinkPersonPost> getLinks(Person person) {
+
+    return linkPersonPostRepository.getLinkPersonPostByPerson(person);
+  }
+
+  @Override
+  public List<LinkPersonPost> getLinks(Person person, LinkPersonPostType linkPersonPostType) {
+
+    return linkPersonPostRepository.getLinkPersonPostByPersonAndLinkType(person,
+        linkPersonPostType);
+  }
+
+  @Override
+  public List<LinkPersonPost> getLinksByEntity(Post post) {
+
+    return linkPersonPostRepository.getLinkPersonPostByPost(post);
   }
 }

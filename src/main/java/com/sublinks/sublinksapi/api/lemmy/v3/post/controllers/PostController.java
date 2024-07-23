@@ -49,7 +49,6 @@ import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
-import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.sorts.SortFactory;
 import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
@@ -95,7 +94,7 @@ public class PostController extends AbstractLemmyApiController {
   private final LemmyCommunityService lemmyCommunityService;
   private final LemmyPostService lemmyPostService;
   private final PostLikeService postLikeService;
-  private final PostSaveService postSaveService;
+  private final LinkPersonPostService linkPersonPostService;
   private final CommunityRepository communityRepository;
   private final PostRepository postRepository;
   private final UrlUtil urlUtil;
@@ -450,9 +449,9 @@ public class PostController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     if (savePostForm.save()) {
-      postSaveService.createPostSave(post, person);
+      oldLinkPersonPostService.createPostSave(post, person);
     } else {
-      postSaveService.deletePostSave(post, person);
+      oldLinkPersonPostService.deletePostSave(post, person);
     }
     return PostResponse.builder()
         .post_view(lemmyPostService.postViewFromPost(post, person))

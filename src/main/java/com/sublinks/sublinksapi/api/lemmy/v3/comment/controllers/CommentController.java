@@ -22,28 +22,27 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.services.LemmyCommentServic
 import com.sublinks.sublinksapi.api.lemmy.v3.common.controllers.AbstractLemmyApiController;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.services.AclService;
-import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
 import com.sublinks.sublinksapi.comment.entities.CommentReply;
 import com.sublinks.sublinksapi.comment.entities.CommentReport;
 import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import com.sublinks.sublinksapi.comment.enums.CommentSortType;
+import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria.CommentSearchCriteriaBuilder;
-import com.sublinks.sublinksapi.comment.repositories.ComentSaveRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentReplyRepository;
 import com.sublinks.sublinksapi.comment.repositories.CommentRepository;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.comment.services.CommentReadService;
 import com.sublinks.sublinksapi.comment.services.CommentReplyService;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
-import com.sublinks.sublinksapi.comment.services.CommentSaveService;
 import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.language.repositories.LanguageRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
@@ -97,9 +96,7 @@ public class CommentController extends AbstractLemmyApiController {
   private final CommentReplyRepository commentReplyRepository;
   private final CommentReplyService commentReplyService;
   private final SlurFilterService slurFilterService;
-  private final RolePermissionService rolePermissionService;
-  private final CommentSaveService commentSaveForLaterService;
-  private final ComentSaveRepository commentSaveForLaterRepository;
+  private final LinkPersonCommentService linkPersonCommentService;
   private final AclService aclService;
 
   /**
@@ -468,29 +465,26 @@ public class CommentController extends AbstractLemmyApiController {
         .onCommunity(comment.getCommunity())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
-    Optional<LinkPersonComment> commentSaveForLater = commentSaveForLaterRepository.findFirstByPersonAndComment(
-        person, comment);
+    final Optional<LinkPersonComment> linkPersonComment = linkPersonCommentService.getLink(comment,
+        person, LinkPersonCommentType.saved);
 
     if (saveCommentForm.save()) {
-      if (commentSaveForLater.isPresent()) {
+      if (linkPersonComment.isPresent()) {
         return CommentResponse.builder()
             .comment_view(lemmyCommentService.createCommentView(comment, person))
             .recipient_ids(new ArrayList<>())
             .build();
       }
-      commentSaveForLaterService.createCommentSave(LinkPersonComment.builder()
-          .comment(comment)
-          .person(person)
-          .build());
+      linkPersonCommentService.createCommentLink(comment, person, LinkPersonCommentType.saved);
     } else {
-      if (commentSaveForLater.isEmpty()) {
+      if (linkPersonComment.isEmpty()) {
         return CommentResponse.builder()
             .comment_view(lemmyCommentService.createCommentView(comment, person))
             .recipient_ids(new ArrayList<>())
             .build();
       }
 
-      commentSaveForLaterService.deleteCommentSave(commentSaveForLater.get());
+      linkPersonCommentService.deleteLink(linkPersonComment.get());
     }
 
     return CommentResponse.builder()

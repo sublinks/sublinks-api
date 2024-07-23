@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.person.services;
 
+import com.sublinks.sublinksapi.common.interfaces.ILinkingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -19,7 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LinkPersonCommunityService {
+public class LinkPersonCommunityService implements
+    ILinkingService<LinkPersonCommunity, Community, Person, LinkPersonCommunityType> {
 
   private final LinkPersonCommunityRepository linkPersonCommunityRepository;
   private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
@@ -106,4 +108,73 @@ public class LinkPersonCommunityService {
         .toList();
   }
 
+  @Override
+  public boolean hasLink(Community community, Person person,
+      LinkPersonCommunityType linkPersonCommunityType) {
+
+    return false;
+  }
+
+  @Override
+  public boolean hasAnyLink(Community community, Person person,
+      List<LinkPersonCommunityType> linkPersonCommunityTypes) {
+
+    return false;
+  }
+
+  @Override
+  public void createLink(LinkPersonCommunity linkPersonCommunity) {
+
+  }
+
+  @Override
+  public void createLinks(List<LinkPersonCommunity> linkPersonCommunities) {
+
+  }
+
+  @Override
+  public void updateLink(LinkPersonCommunity linkPersonCommunity) {
+
+  }
+
+  @Override
+  public void updateLinks(List<LinkPersonCommunity> linkPersonCommunities) {
+
+  }
+
+  @Override
+  public void deleteLink(LinkPersonCommunity linkPersonCommunity) {
+
+  }
+
+  @Override
+  public void deleteLinks(List<LinkPersonCommunity> linkPersonCommunities) {
+
+  }
+
+  @Override
+  public Optional<LinkPersonCommunity> getLink(Community community, Person person,
+      LinkPersonCommunityType linkPersonCommunityType) {
+
+    return Optional.empty();
+  }
+
+  @Override
+  public List<LinkPersonCommunity> getLinks(Person person) {
+
+    return List.of();
+  }
+
+  @Override
+  public List<LinkPersonCommunity> getLinks(Person person,
+      LinkPersonCommunityType linkPersonCommunityType) {
+
+    return List.of();
+  }
+
+  @Override
+  public List<LinkPersonCommunity> getLinksByEntity(Community community) {
+
+    return List.of();
+  }
 }
