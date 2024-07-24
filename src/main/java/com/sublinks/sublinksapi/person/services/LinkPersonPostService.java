@@ -69,8 +69,16 @@ public class LinkPersonPostService implements
   @Override
   public void createLink(LinkPersonPost linkPersonPost) {
 
-    linkPersonPostRepository.save(linkPersonPost);
-    linkPersonPostCreatedPublisher.publish(linkPersonPost);
+    final Person person = linkPersonPost.getPerson();
+
+    if (person.getLinkPersonPost() == null) {
+      person.setLinkPersonPost(new LinkedHashSet<>());
+    }
+
+    person.getLinkPersonPost()
+        .add(linkPersonPost);
+
+    linkPersonPostCreatedPublisher.publish(linkPersonPostRepository.save(linkPersonPost));
   }
 
   @Transactional
@@ -78,15 +86,35 @@ public class LinkPersonPostService implements
   public void createLinks(List<LinkPersonPost> linkPersonPosts) {
 
     linkPersonPostRepository.saveAll(linkPersonPosts)
-        .forEach(linkPersonPostCreatedPublisher::publish);
+        .forEach((linkPersonPost) -> {
+
+          final Person person = linkPersonPost.getPerson();
+
+          if (person.getLinkPersonPost() == null) {
+            person.setLinkPersonPost(new LinkedHashSet<>());
+          }
+
+          person.getLinkPersonPost()
+              .add(linkPersonPost);
+
+          linkPersonPostCreatedPublisher.publish(linkPersonPost);
+        });
   }
 
   @Transactional
   @Override
   public void updateLink(LinkPersonPost linkPersonPost) {
 
-    linkPersonPostRepository.save(linkPersonPost);
-    linkPersonPostUpdatedPublisher.publish(linkPersonPost);
+    final Person person = linkPersonPost.getPerson();
+
+    if (person.getLinkPersonPost() == null) {
+      person.setLinkPersonPost(new LinkedHashSet<>());
+    }
+
+    person.getLinkPersonPost()
+        .add(linkPersonPost);
+
+    linkPersonPostUpdatedPublisher.publish(linkPersonPostRepository.save(linkPersonPost));
   }
 
   @Transactional
@@ -94,12 +122,32 @@ public class LinkPersonPostService implements
   public void updateLinks(List<LinkPersonPost> linkPersonPosts) {
 
     linkPersonPostRepository.saveAll(linkPersonPosts)
-        .forEach(linkPersonPostUpdatedPublisher::publish);
+        .forEach((linkPersonPost) -> {
+          final Person person = linkPersonPost.getPerson();
+
+          if (person.getLinkPersonPost() == null) {
+            person.setLinkPersonPost(new LinkedHashSet<>());
+          }
+
+          person.getLinkPersonPost()
+              .add(linkPersonPost);
+
+          linkPersonPostUpdatedPublisher.publish(linkPersonPost);
+        });
   }
 
   @Transactional
   @Override
   public void deleteLink(LinkPersonPost linkPersonPost) {
+
+    final Person person = linkPersonPost.getPerson();
+
+    if (person.getLinkPersonPost() == null) {
+      person.setLinkPersonPost(new LinkedHashSet<>());
+    }
+
+    person.getLinkPersonPost()
+        .remove(linkPersonPost);
 
     linkPersonPostRepository.delete(linkPersonPost);
     linkPersonPostDeletedPublisher.publish(linkPersonPost);
@@ -110,7 +158,18 @@ public class LinkPersonPostService implements
   public void deleteLinks(List<LinkPersonPost> linkPersonPosts) {
 
     linkPersonPostRepository.deleteAll(linkPersonPosts);
-    linkPersonPosts.forEach(linkPersonPostDeletedPublisher::publish);
+    linkPersonPosts.forEach((linkPersonPost) -> {
+      final Person person = linkPersonPost.getPerson();
+
+      if (person.getLinkPersonPost() == null) {
+        person.setLinkPersonPost(new LinkedHashSet<>());
+      }
+
+      person.getLinkPersonPost()
+          .remove(linkPersonPost);
+
+      linkPersonPostDeletedPublisher.publish(linkPersonPost);
+    });
   }
 
   @Override

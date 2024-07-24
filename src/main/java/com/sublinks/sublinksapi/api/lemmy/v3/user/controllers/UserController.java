@@ -582,8 +582,7 @@ public class UserController extends AbstractLemmyApiController {
     builder.blocked_communities(blocked_community);
 
     List<String> blocked_users = new ArrayList<>();
-    linkPersonPersonService.getLinkPersonPersonByFromPersonAndLinkType(person,
-            LinkPersonPersonType.blocked)
+    linkPersonPersonService.getLinks(person, LinkPersonPersonType.blocked)
         .forEach(linkPersonPerson -> blocked_users.add(linkPersonPerson.getToPerson()
             .getActivityPubId()));
 

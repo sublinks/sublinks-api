@@ -27,30 +27,14 @@ public class LinkPersonCommunityService implements
   private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
   private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
 
-  public boolean hasLink(Person person, Community community, LinkPersonCommunityType type) {
-
-    final Optional<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
-        community, person, type);
-    return linkPersonCommunity.isPresent();
-  }
-
-  public boolean hasAnyLink(Person person, Community community,
-      List<LinkPersonCommunityType> types) {
-
-    final List<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkTypeIsIn(
-        community, person, types);
-    return !linkPersonCommunity.isEmpty();
-  }
-
-
   @Transactional
-  public void addLink(Person person, Community community, LinkPersonCommunityType type) {
+  public void createLinkPersonCommunityLink(Person person, Community community, LinkPersonCommunityType type) {
 
-    addLink(person, community, type, null);
+    createLinkPersonCommunityLink(person, community, type, null);
   }
 
   @Transactional
-  public void addLink(Person person, Community community, LinkPersonCommunityType type,
+  public void createLinkPersonCommunityLink(Person person, Community community, LinkPersonCommunityType type,
       Date expireAt) {
 
     final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
@@ -65,24 +49,6 @@ public class LinkPersonCommunityService implements
         .add(newLink);
     linkPersonCommunityRepository.save(newLink);
     linkPersonCommunityCreatedPublisher.publish(newLink);
-  }
-
-  @Transactional
-  public void removeLink(Person person, Community community, LinkPersonCommunityType type) {
-
-    final Optional<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
-        community, person, type);
-    if (linkPersonCommunity.isEmpty()) {
-      return;
-    }
-    person.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
-            .getId()));
-    community.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
-            .getId()));
-    linkPersonCommunityRepository.delete(linkPersonCommunity.get());
-    linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
   }
 
   public Collection<Community> getPersonLinkByType(Person person, LinkPersonCommunityType type) {

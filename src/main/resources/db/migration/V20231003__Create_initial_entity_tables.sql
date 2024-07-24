@@ -844,6 +844,11 @@ CREATE TABLE link_person_person
   created_at     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 );
 
+CREATE INDEX IDX_LINK_PERSON_PERSON_FROM_PERSON_ID_TO_PERSON_ID ON link_person_person (from_person_id, to_person_id);
+CREATE UNIQUE INDEX IDX_LINK_PERSON_PERSON_FROM_PERSON_ID_TO_PERSON_ID_LINK_TYPE ON link_person_person (from_person_id,
+                                                                                                        to_person_id,
+                                                                                                        link_type);
+
 -- Add a trigger for every updated_at column ( yes i know its hacky but it works ;) )
 
 DO

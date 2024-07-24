@@ -93,7 +93,7 @@ public class PostService {
         .build();
     post.setPostAggregate(postAggregate);
     post.setActivityPubId("");
-    postRepository.save(post); // @todo fix second save making post look edited right away
+    postRepository.saveAndFlush(post); // @todo fix second save making post look edited right away
     post.setActivityPubId("%s/post/%d".formatted(post.getInstance()
         .getDomain(), post.getId()));
     postRepository.save(post);

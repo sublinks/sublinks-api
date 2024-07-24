@@ -197,9 +197,10 @@ public class UserModActionsController extends AbstractLemmyApiController {
     }
 
     if (blockPersonForm.block()) {
-      linkPersonPersonService.createLink(person, personToBlock, LinkPersonPersonType.blocked);
+      linkPersonPersonService.createPersonLink(person, personToBlock, LinkPersonPersonType.blocked);
     } else {
-      linkPersonPersonService.removeLink(person, personToBlock, LinkPersonPersonType.blocked);
+      linkPersonPersonService.getLink(person, personToBlock, LinkPersonPersonType.blocked)
+          .ifPresent(linkPersonPersonService::deleteLink);
     }
 
     return BlockPersonResponse.builder()

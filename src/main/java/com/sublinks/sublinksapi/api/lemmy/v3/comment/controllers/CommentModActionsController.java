@@ -204,11 +204,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
-      final boolean isModerator = linkPersonCommunityService.hasLink(person,
-          commentReport.getComment()
-              .getCommunity(), LinkPersonCommunityType.moderator)
-          || linkPersonCommunityService.hasLink(person, commentReport.getComment()
-          .getCommunity(), LinkPersonCommunityType.owner);
+      final boolean isModerator = linkPersonCommunityService.hasLink(commentReport.getComment()
+          .getCommunity(), person, LinkPersonCommunityType.moderator)
+          || linkPersonCommunityService.hasLink(commentReport.getComment()
+          .getCommunity(), person, LinkPersonCommunityType.owner);
       if (!isModerator) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
       }
@@ -269,8 +268,8 @@ public class CommentModActionsController extends AbstractLemmyApiController {
                 (long) listCommentReportsForm.community_id())
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
-        if (!linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner)
-            && !linkPersonCommunityService.hasLink(person, community,
+        if (!linkPersonCommunityService.hasLink(community, person, LinkPersonCommunityType.owner)
+            && !linkPersonCommunityService.hasLink(community, person,
             LinkPersonCommunityType.moderator)) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }

@@ -24,9 +24,11 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -62,12 +64,17 @@ public class CommunityController extends AbstractLemmyApiController {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final ConversionService conversionService;
   private final RolePermissionService rolePermissionService;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @Operation(summary = "Get / fetch a community.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = GetCommunityResponse.class))}), @ApiResponse(
+      responseCode = "400",
+      description = "Community Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ApiError.class))})})
   @GetMapping
   public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm,
       final JwtPerson principal) {
@@ -100,8 +107,10 @@ public class CommunityController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "List communities, with various filters.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ListCommunitiesResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ListCommunitiesResponse.class))})})
   @GetMapping("list")
   @Transactional
   public ListCommunitiesResponse list(@Valid final ListCommunities listCommunitiesForm,
@@ -123,16 +132,16 @@ public class CommunityController extends AbstractLemmyApiController {
         .perPage(perPage)
         .person(person.orElse(null))
         .listingType(listCommunitiesForm.type_() != null ? listCommunitiesForm.type_()
-            : (localInstanceContext.instance().getInstanceConfig() != null
-                ? localInstanceContext.instance()
+            : (localInstanceContext.instance()
+                .getInstanceConfig() != null ? localInstanceContext.instance()
                 .getInstanceConfig()
                 .getDefaultPostListingType() : ListingType.Local))
         .sortType(listCommunitiesForm.sort() != null ? listCommunitiesForm.sort() : SortType.New)
         .showNsfw(listCommunitiesForm.show_nsfw() != null ? listCommunitiesForm.show_nsfw() : true)
         .build();
 
-    final Collection<Community> communities = communityRepository
-        .allCommunitiesBySearchCriteria(searchCriteria);
+    final Collection<Community> communities = communityRepository.allCommunitiesBySearchCriteria(
+        searchCriteria);
     for (Community community : communities) {
       CommunityView communityView;
       if (person.isPresent()) {
@@ -143,14 +152,20 @@ public class CommunityController extends AbstractLemmyApiController {
       communityViews.add(communityView);
     }
 
-    return ListCommunitiesResponse.builder().communities(communityViews).build();
+    return ListCommunitiesResponse.builder()
+        .communities(communityViews)
+        .build();
   }
 
   @Operation(summary = "Follow / subscribe to a community.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = CommunityResponse.class))}),
+      @ApiResponse(responseCode = "400",
+          description = "Community Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("follow")
   CommunityResponse follow(@Valid @RequestBody final FollowCommunity followCommunityForm,
       final JwtPerson principal) {
@@ -167,25 +182,36 @@ public class CommunityController extends AbstractLemmyApiController {
     }
 
     if (followCommunityForm.follow()) {
-      if (linkPersonCommunityService.hasLink(person, community.get(),
+      if (linkPersonCommunityService.hasLink(community.get(), person,
           LinkPersonCommunityType.blocked)) {
-        linkPersonCommunityService.removeLink(person, community.get(),
-            LinkPersonCommunityType.blocked);
+
+        final Optional<LinkPersonCommunity> link = linkPersonCommunityService.getLink(
+            community.get(), person, LinkPersonCommunityType.blocked);
+
+        link.ifPresent(linkPersonCommunityService::deleteLink);
       }
-      linkPersonCommunityService.addLink(person, community.get(), LinkPersonCommunityType.follower);
-    } else {
-      linkPersonCommunityService.removeLink(person, community.get(),
+      linkPersonCommunityService.createLinkPersonCommunityLink(person, community.get(),
           LinkPersonCommunityType.follower);
+    } else {
+
+      final Optional<LinkPersonCommunity> link = linkPersonCommunityService.getLink(community.get(),
+          person, LinkPersonCommunityType.blocked);
+
+      link.ifPresent(linkPersonCommunityService::deleteLink);
     }
 
     return lemmyCommunityService.createCommunityResponse(community.get(), person);
   }
 
   @Operation(summary = "Block a community.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockCommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = BlockCommunityResponse.class))}), @ApiResponse(
+      responseCode = "400",
+      description = "Community Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("block")
   BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm,
       final JwtPerson principal) {
@@ -198,12 +224,15 @@ public class CommunityController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     if (blockCommunityForm.block()) {
-      if (linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.follower)) {
-        linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.follower);
+      if (linkPersonCommunityService.hasLink(community, person, LinkPersonCommunityType.follower)) {
+        linkPersonCommunityService.getLink(community, person, LinkPersonCommunityType.follower)
+            .ifPresent(linkPersonCommunityService::deleteLink);
       }
-      linkPersonCommunityService.addLink(person, community, LinkPersonCommunityType.blocked);
+      linkPersonCommunityService.createLinkPersonCommunityLink(person, community,
+          LinkPersonCommunityType.blocked);
     } else {
-      linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.blocked);
+      linkPersonCommunityService.getLink(community, person, LinkPersonCommunityType.follower)
+          .ifPresent(linkPersonCommunityService::deleteLink);
     }
 
     return BlockCommunityResponse.builder()
