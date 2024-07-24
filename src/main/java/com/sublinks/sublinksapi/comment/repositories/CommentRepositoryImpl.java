@@ -12,7 +12,6 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.shared.RemovedState;
-import io.hypersistence.utils.hibernate.query.SQLExtractor;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -60,12 +59,6 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
       predicates.add(cb.equal(commentTable.get("post"), commentSearchCriteria.post()));
     }
     // @todo: implement comment read
-    // Join for CommentView
-//    if (commentSearchCriteria.person() != null) {
-//      final Join<Comment, CommentRead> commentReadJoin = commentTable.join("commentReads",
-//          JoinType.LEFT);
-//      commentReadJoin.on(cb.equal(commentReadJoin.get("person"), commentSearchCriteria.person()));
-//    }
 
     if (commentSearchCriteria.community() != null) {
       predicates.add(cb.equal(commentTable.get("community"), commentSearchCriteria.community()));
