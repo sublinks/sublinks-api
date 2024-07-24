@@ -23,9 +23,10 @@ import org.hibernate.annotations.SourceType;
 import org.hibernate.proxy.HibernateProxy;
 
 /**
- * The Post class represents a post in a community or instance. It contains various attributes such
- * as the post body, title, link, and timestamps. It also has relationships with other entities such
- * as comments, likes, and history.
+ * The LinkPersonPerson class represents a link between two Person objects. It stores information
+ * about the link type, creation timestamp, and the two Person objects involved in the link. The
+ * class provides methods for accessing and modifying the attributes, as well as methods for
+ * equality comparison, hashcode calculation, and cloning.
  */
 @Getter
 @Setter

@@ -246,7 +246,8 @@ public class AclService {
       if (this.person != null) {
         if (community != null) {
           this.isPermitted = this.authorizedActions.stream()
-              .allMatch(x -> rolePermissionService.isPermitted(this.person, x, community.getId()));
+              .allMatch(permission -> rolePermissionService.isPermitted(this.person, permission,
+                  community.getId()));
 
         } else {
           this.isPermitted = this.authorizedActions.stream()
