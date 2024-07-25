@@ -251,13 +251,14 @@ public class AclService {
 
         } else {
           this.isPermitted = this.authorizedActions.stream()
-              .allMatch(x -> rolePermissionService.isPermitted(this.person, x));
+              .allMatch(permission -> rolePermissionService.isPermitted(this.person, permission));
         }
       } else {
         this.isPermitted = this.authorizedActions.stream()
-            .allMatch(x -> rolePermissionService.isPermitted(roleService.getDefaultGuestRole()
+            .allMatch(permission -> rolePermissionService.isPermitted(
+                roleService.getDefaultGuestRole()
                     .orElseThrow(() -> new RuntimeException("No default registered role defined.")),
-                x));
+                permission));
       }
     }
 
@@ -294,14 +295,14 @@ public class AclService {
       if (this.person != null) {
         if (RolePermissionService.isBanned(this.person)) {
           this.isPermitted = this.authorizedActions.stream()
-              .allMatch(x -> rolePermissionService.isPermitted(roleService.getBannedRole()
-                  .orElseThrow(() -> new RuntimeException("No banned role defined.")), x));
+              .allMatch(role -> rolePermissionService.isPermitted(roleService.getBannedRole()
+                  .orElseThrow(() -> new RuntimeException("No banned role defined.")), role));
         }
         if (community != null) {
           if (rolePermissionService.isBannedInCommunity(this.person, community.getId())) {
             this.isPermitted = this.authorizedActions.stream()
-                .allMatch(x -> rolePermissionService.isPermitted(roleService.getBannedRole()
-                    .orElseThrow(() -> new RuntimeException("No banned role defined.")), x));
+                .allMatch(role -> rolePermissionService.isPermitted(roleService.getBannedRole()
+                    .orElseThrow(() -> new RuntimeException("No banned role defined.")), role));
           }
         }
       }
@@ -311,6 +312,10 @@ public class AclService {
      * Revoke ACL rules for the authorized actions.
      */
     private void revokeAclRules() {
+
+      if (person == null) {
+        throw new RuntimeException("Person can not be null.");
+      }
 
       for (RolePermissionInterface authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(
@@ -334,6 +339,10 @@ public class AclService {
      * Creates ACL rules for the authorized actions.
      */
     private void createAclRules() {
+
+      if (person == null) {
+        throw new RuntimeException("Person can not be null.");
+      }
 
       for (RolePermissionInterface authorizedAction : authorizedActions) {
         Acl acl = aclRepository.findAclByPersonIdAndEntityTypeAndEntityIdAndAuthorizedActionAndPermitted(

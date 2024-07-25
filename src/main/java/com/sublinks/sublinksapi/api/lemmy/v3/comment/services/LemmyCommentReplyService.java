@@ -64,15 +64,21 @@ public class LemmyCommentReplyService {
 
     final Community lemmyCommunity = conversionService.convert(commentReply.getComment()
         .getCommunity(), Community.class);
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        commentReply.getComment()
-            .getCommunity(), LinkPersonCommunityType.banned);
 
     final int personVote = commentLikeService.getPersonCommentVote(person,
         commentReply.getComment());
 
+    final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
     boolean creatorIsModerator = false;
-    if (!creatorBannedFromCommunity) {
+    boolean creatorBannedFromCommunity = false;
+    boolean creatorIsBlocked = false;
+    if (!creatorIsAdmin) {
+      creatorIsBlocked = linkPersonPersonService.hasLink(creator, person,
+          LinkPersonPersonType.blocked);
+      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+          commentReply.getComment()
+              .getCommunity(), LinkPersonCommunityType.banned);
+    } else {
       creatorIsModerator = linkPersonCommunityService.hasAnyLink(creator, commentReply.getComment()
               .getCommunity(),
           List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner));
@@ -80,10 +86,6 @@ public class LemmyCommentReplyService {
 
     final CommentReply lemmyCommentReply = conversionService.convert(commentReply,
         CommentReply.class);
-    final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
-
-    final boolean creatorIsBlocked = linkPersonPersonService.hasLink(person, creator,
-        LinkPersonPersonType.blocked);
 
     //@todo: Check if comment is saved
     return commentReplyViewBuilder.comment_reply(lemmyCommentReply)

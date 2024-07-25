@@ -82,7 +82,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CustomEmojiResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Custom Emoji Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})
   })
   @PutMapping
@@ -119,7 +119,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = DeleteCustomEmojiResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Custom Emoji Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Custom Emoji Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})
   })
   @PostMapping("delete")

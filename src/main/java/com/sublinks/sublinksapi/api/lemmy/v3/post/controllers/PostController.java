@@ -115,7 +115,7 @@ public class PostController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = GetPostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -219,7 +219,7 @@ public class PostController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -365,7 +365,7 @@ public class PostController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -401,7 +401,7 @@ public class PostController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -435,7 +435,7 @@ public class PostController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -464,7 +464,7 @@ public class PostController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostReportResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ResponseStatusException.class))})})
