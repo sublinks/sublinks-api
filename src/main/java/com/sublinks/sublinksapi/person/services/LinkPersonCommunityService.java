@@ -9,7 +9,6 @@ import com.sublinks.sublinksapi.person.events.LinkPersonCommunityCreatedPublishe
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
-import jakarta.persistence.EntityManager;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +25,6 @@ public class LinkPersonCommunityService implements
   private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
   private final LinkPersonCommunityUpdatedPublisher linkPersonCommunityUpdatedPublisher;
   private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
-
-  private final EntityManager em;
 
   @Transactional
   public void createLinkPersonCommunityLink(Community community, Person person,
@@ -48,16 +45,6 @@ public class LinkPersonCommunityService implements
         .build();
 
     this.createLink(newLink);
-  }
-
-  @Override
-  public void refresh(LinkPersonCommunity data) {
-
-    final Community community = data.getCommunity();
-    final Person person = data.getPerson();
-
-    em.refresh(community);
-    em.refresh(person);
   }
 
   @Override
@@ -82,8 +69,8 @@ public class LinkPersonCommunityService implements
   @Override
   public void createLink(LinkPersonCommunity link) {
 
-    this.linkPersonCommunityRepository.save(link);
-    this.refresh(link);
+    this.linkPersonCommunityRepository.saveAndFlush(link);
+
     this.linkPersonCommunityCreatedPublisher.publish(link);
   }
 
@@ -91,19 +78,16 @@ public class LinkPersonCommunityService implements
   @Override
   public void createLinks(List<LinkPersonCommunity> linkPersonCommunities) {
 
-    this.linkPersonCommunityRepository.saveAll(linkPersonCommunities)
-        .forEach((link) -> {
-          this.refresh(link);
-          this.linkPersonCommunityCreatedPublisher.publish(link);
-        });
+    this.linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities)
+        .forEach(this.linkPersonCommunityCreatedPublisher::publish);
   }
 
   @Transactional
   @Override
   public void updateLink(LinkPersonCommunity link) {
 
-    this.linkPersonCommunityRepository.save(link);
-    this.refresh(link);
+    this.linkPersonCommunityRepository.saveAndFlush(link);
+
     this.linkPersonCommunityUpdatedPublisher.publish(link);
 
   }
@@ -112,11 +96,8 @@ public class LinkPersonCommunityService implements
   @Override
   public void updateLinks(List<LinkPersonCommunity> linkPersonCommunities) {
 
-    this.linkPersonCommunityRepository.saveAll(linkPersonCommunities)
-        .forEach((link) -> {
-          this.refresh(link);
-          this.linkPersonCommunityUpdatedPublisher.publish(link);
-        });
+    this.linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities)
+        .forEach(this.linkPersonCommunityUpdatedPublisher::publish);
   }
 
   @Transactional
@@ -124,7 +105,6 @@ public class LinkPersonCommunityService implements
   public void deleteLink(LinkPersonCommunity link) {
 
     this.linkPersonCommunityRepository.delete(link);
-    this.refresh(link);
     this.linkPersonCommunityDeletedPublisher.publish(link);
   }
 
@@ -138,7 +118,6 @@ public class LinkPersonCommunityService implements
 
     linkOptional.ifPresent((link) -> {
       this.linkPersonCommunityRepository.delete(link);
-      this.refresh(link);
       this.linkPersonCommunityDeletedPublisher.publish(link);
     });
   }
@@ -150,10 +129,7 @@ public class LinkPersonCommunityService implements
 
     this.linkPersonCommunityRepository.deleteAll(linkPersonCommunities);
 
-    linkPersonCommunities.forEach((link) -> {
-      this.refresh(link);
-      this.linkPersonCommunityDeletedPublisher.publish(link);
-    });
+    linkPersonCommunities.forEach(this.linkPersonCommunityDeletedPublisher::publish);
 
   }
 
@@ -169,6 +145,13 @@ public class LinkPersonCommunityService implements
   public List<LinkPersonCommunity> getLinks(Person person) {
 
     return this.linkPersonCommunityRepository.getLinkPersonCommunitiesByPerson(person);
+  }
+
+  @Override
+  public List<LinkPersonCommunity> getLinks(Person person, List<LinkPersonCommunityType> types) {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunityByPersonAndLinkTypeIn(person,
+        types);
   }
 
   @Override

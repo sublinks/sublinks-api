@@ -13,6 +13,6 @@ public interface CommentReadRepository extends JpaRepository<CommentRead, Long> 
   Optional<CommentRead> getCommentReadByCommentAndPerson(Comment comment, Person person);
 
 
-  int getAllCommentReadByPersonAndComment_PostAndComment_RemovedState(Person person, Post post,
+  long countByPersonAndComment_PostAndComment_RemovedState(Person person, Post post,
       RemovedState removedState);
 }

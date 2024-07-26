@@ -575,9 +575,9 @@ public class UserController extends AbstractLemmyApiController {
     // @todo Add Blocklist for Instnaces
 
     List<String> blocked_community = new ArrayList<>();
-    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked)
-        .forEach(
-            linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
+    linkPersonCommunityService.getLinks(person, LinkPersonCommunityType.blocked)
+        .forEach(linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getCommunity()
+            .getActivityPubId()));
 
     builder.blocked_communities(blocked_community);
 

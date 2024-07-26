@@ -8,10 +8,8 @@ import com.sublinks.sublinksapi.person.events.LinkPersonPersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPersonDeletedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +25,6 @@ public class LinkPersonPersonService implements
   private final LinkPersonPersonCreatedPublisher linkPersonPersonCreatedPublisher;
   private final LinkPersonPersonUpdatedPublisher linkPersonPersonUpdatedPublisher;
   private final LinkPersonPersonDeletedPublisher linkPersonPersonDeletedPublisher;
-
-  private final EntityManager em;
 
   @Override
   public Optional<LinkPersonPerson> getLink(Person fromPerson, Person toPerson,
@@ -55,6 +51,14 @@ public class LinkPersonPersonService implements
   }
 
   @Override
+  public List<LinkPersonPerson> getLinks(Person person,
+      List<LinkPersonPersonType> linkPersonPersonTypes) {
+
+    return linkPersonPersonRepository.getLinkPersonPeopleByFromPersonAndLinkTypeIn(person,
+        linkPersonPersonTypes);
+  }
+
+  @Override
   public List<LinkPersonPerson> getLinksByEntity(Person fromPerson, Person toPerson) {
 
     return this.linkPersonPersonRepository.getLinkPersonPeopleByFromPersonAndToPerson(fromPerson,
@@ -65,7 +69,7 @@ public class LinkPersonPersonService implements
   public List<LinkPersonPerson> getLinksByEntity(Person fromPerson,
       List<LinkPersonPersonType> linkPersonPersonTypes) {
 
-    return linkPersonPersonRepository.getLinkPersonPeopleByFromPersonAndLinkTypeIn(fromPerson,
+    return linkPersonPersonRepository.getLinkPersonPeopleByToPersonAndLinkTypeIn(fromPerson,
         linkPersonPersonTypes);
   }
 
@@ -73,16 +77,6 @@ public class LinkPersonPersonService implements
   public List<LinkPersonPerson> getLinksByEntity(Person person) {
 
     return linkPersonPersonRepository.getLinkPersonPeopleByToPerson(person);
-  }
-
-  @Override
-  public void refresh(LinkPersonPerson data) {
-
-    final Person fromPerson = data.getFromPerson();
-    final Person toPerson = data.getToPerson();
-
-    em.refresh(fromPerson);
-    em.refresh(toPerson);
   }
 
   @Override
@@ -109,14 +103,6 @@ public class LinkPersonPersonService implements
         .linkType(type)
         .build();
 
-    if (fromPerson.getLinkPersonPerson() == null) {
-      fromPerson.setLinkPersonPerson(Set.of());
-    }
-
-    if (toPerson.getLinkPersonPerson() == null) {
-      toPerson.setLinkPersonPerson(Set.of());
-    }
-
     this.createLink(link);
     return link;
   }
@@ -125,7 +111,6 @@ public class LinkPersonPersonService implements
   public void createLink(LinkPersonPerson link) {
 
     linkPersonPersonRepository.saveAndFlush(link);
-    this.refresh(link);
     linkPersonPersonCreatedPublisher.publish(link);
   }
 
@@ -133,17 +118,14 @@ public class LinkPersonPersonService implements
   public void createLinks(List<LinkPersonPerson> links) {
 
     linkPersonPersonRepository.saveAllAndFlush(links)
-        .forEach(link -> {
-          this.refresh(link);
-          linkPersonPersonCreatedPublisher.publish(link);
-        });
+        .forEach(linkPersonPersonCreatedPublisher::publish);
   }
 
   @Override
   public void updateLink(LinkPersonPerson link) {
 
     this.linkPersonPersonRepository.saveAndFlush(link);
-    this.refresh(link);
+
     this.linkPersonPersonUpdatedPublisher.publish(link);
 
   }
@@ -152,18 +134,13 @@ public class LinkPersonPersonService implements
   public void updateLinks(List<LinkPersonPerson> links) {
 
     this.linkPersonPersonRepository.saveAllAndFlush(links)
-        .forEach(link -> {
-          this.refresh(link);
-          linkPersonPersonUpdatedPublisher.publish(link);
-
-        });
+        .forEach(linkPersonPersonUpdatedPublisher::publish);
   }
 
   @Override
   public void deleteLink(LinkPersonPerson link) {
 
     linkPersonPersonRepository.delete(link);
-    this.refresh(link);
     linkPersonPersonDeletedPublisher.publish(link);
   }
 
@@ -173,11 +150,7 @@ public class LinkPersonPersonService implements
 
     final Optional<LinkPersonPerson> linkPersonPersonOptional = linkPersonPersonRepository.deleteLinkPersonPersonByFromPersonAndToPersonAndLinkType(
         fromPerson, toPerson, linkPersonPersonType);
-    if (linkPersonPersonOptional.isPresent()) {
-      final LinkPersonPerson link = linkPersonPersonOptional.get();
-      this.refresh(link);
-      linkPersonPersonDeletedPublisher.publish(link);
-    }
+    linkPersonPersonOptional.ifPresent(linkPersonPersonDeletedPublisher::publish);
   }
 
   @Override
@@ -186,16 +159,9 @@ public class LinkPersonPersonService implements
     linkPersonPeople.forEach(link -> {
 
       linkPersonPersonRepository.delete(link);
-      this.refresh(link);
+
       linkPersonPersonDeletedPublisher.publish(link);
     });
 
-  }
-
-  public List<LinkPersonPerson> getLinkPersonPersonByFromPersonAndLinkType(Person fromPerson,
-      LinkPersonPersonType linkType) {
-
-    return linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndLinkType(fromPerson,
-        linkType);
   }
 }

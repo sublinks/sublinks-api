@@ -6,8 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ILinkingService<LLink, LEntity, LPerson, LType> {
 
-  void refresh(final LLink data);
-
   boolean hasLink(final LEntity entity, final LPerson person, final LType type);
 
   boolean hasAnyLink(final LEntity entity, final LPerson person, final List<LType> types);
@@ -37,6 +35,8 @@ public interface ILinkingService<LLink, LEntity, LPerson, LType> {
   List<LLink> getLinks(final LPerson person);
 
   List<LLink> getLinks(final LPerson person, final LType type);
+
+  List<LLink> getLinks(final LPerson person, final List<LType> types);
 
   List<LLink> getLinksByEntity(final LEntity entity, final LPerson person);
 

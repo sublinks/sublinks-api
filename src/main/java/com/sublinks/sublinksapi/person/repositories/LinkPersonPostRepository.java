@@ -30,4 +30,7 @@ public interface LinkPersonPostRepository extends JpaRepository<LinkPersonPost, 
 
   List<LinkPersonPost> getLinkPersonPostByPostAndLinkTypeIn(Post post,
       List<LinkPersonPostType> linkPersonPostTypes);
+
+  List<LinkPersonPost> getLinkPersonPostByPersonAndLinkTypeIn(Person person,
+      List<LinkPersonPostType> linkPersonPostTypes);
 }

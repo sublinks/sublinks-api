@@ -38,4 +38,7 @@ public interface LinkPersonCommunityRepository extends JpaRepository<LinkPersonC
       Person person);
 
   List<LinkPersonCommunity> getLinkPersonCommunitiesByCommunity(Community community);
+
+  List<LinkPersonCommunity> getLinkPersonCommunityByPersonAndLinkTypeIn(Person person,
+      List<LinkPersonCommunityType> type);
 }

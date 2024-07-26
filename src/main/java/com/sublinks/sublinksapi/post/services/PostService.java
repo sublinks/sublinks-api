@@ -15,6 +15,7 @@ import com.sublinks.sublinksapi.shared.RemovedState;
 import com.sublinks.sublinksapi.utils.KeyGeneratorUtil;
 import com.sublinks.sublinksapi.utils.KeyStore;
 import com.sublinks.sublinksapi.utils.UrlUtil;
+import jakarta.persistence.EntityManager;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -35,6 +36,7 @@ public class PostService {
   private final PostLikeService postLikeService;
   private final PostUpdatedPublisher postUpdatedPublisher;
   private final UrlUtil urlUtil;
+  private final EntityManager em;
 
   public String getPostMd5Hash(final Post post) {
 
@@ -99,6 +101,7 @@ public class PostService {
     postRepository.save(post);
 
     linkPersonPostService.createPostLink(post, creator, LinkPersonPostType.creator);
+    em.refresh(post);
     postLikeService.updateOrCreatePostLikeLike(post, creator);
 
     postCreatedPublisher.publish(post);

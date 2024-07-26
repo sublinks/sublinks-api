@@ -28,6 +28,7 @@ import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
@@ -260,12 +261,12 @@ public class UserModActionsController extends AbstractLemmyApiController {
         builder.private_message_reports(
             (int) privateMessageReportRepository.countAllPrivateMessageReportsByResolvedFalse());
       } else {
-        List<Community> communities = new ArrayList<>();
 
-        communities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
-            LinkPersonCommunityType.moderator));
-        communities.addAll(
-            linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
+        List<Community> communities = new ArrayList<>(linkPersonCommunityService.getLinks(person,
+                List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))
+            .stream()
+            .map(LinkPersonCommunity::getCommunity)
+            .toList());
 
         builder.comment_reports(
             (int) commentReportRepository.countAllCommentReportsByResolvedFalseAndCommunity(

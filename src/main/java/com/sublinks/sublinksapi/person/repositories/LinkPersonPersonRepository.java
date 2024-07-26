@@ -30,4 +30,6 @@ public interface LinkPersonPersonRepository extends JpaRepository<LinkPersonPers
 
   Optional<LinkPersonPerson> getLinkPersonPeopleByFromPersonAndToPersonAndLinkTypeIn(
       Person fromPerson, Person toPerson, List<LinkPersonPersonType> linkPersonPersonTypes);
+
+  List<LinkPersonPerson> getLinkPersonPeopleByToPersonAndLinkTypeIn(Person fromPerson, List<LinkPersonPersonType> linkPersonPersonTypes);
 }

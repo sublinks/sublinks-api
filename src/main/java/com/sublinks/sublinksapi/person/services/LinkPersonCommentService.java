@@ -30,16 +30,6 @@ public class LinkPersonCommentService implements
   private final EntityManager em;
 
   @Override
-  public void refresh(LinkPersonComment linkPersonComment) {
-
-    final Person person = linkPersonComment.getPerson();
-    final Comment comment = linkPersonComment.getComment();
-
-    em.refresh(person);
-    em.refresh(comment);
-  }
-
-  @Override
   public boolean hasLink(Comment comment, Person person,
       LinkPersonCommentType linkPersonCommentType) {
 
@@ -80,7 +70,7 @@ public class LinkPersonCommentService implements
   public void createLink(LinkPersonComment link) {
 
     this.linkPersonCommentRepository.save(link);
-    this.refresh(link);
+
     this.linkPersonCommentCreatedPublisher.publish(link);
   }
 
@@ -89,10 +79,7 @@ public class LinkPersonCommentService implements
   public void createLinks(List<LinkPersonComment> links) {
 
     this.linkPersonCommentRepository.saveAllAndFlush(links)
-        .forEach((link) -> {
-          this.refresh(link);
-          this.linkPersonCommentCreatedPublisher.publish(link);
-        });
+        .forEach(this.linkPersonCommentCreatedPublisher::publish);
   }
 
 
@@ -110,7 +97,7 @@ public class LinkPersonCommentService implements
         .add(link);
 
     this.linkPersonCommentRepository.saveAndFlush(link);
-    this.refresh(link);
+
     this.linkPersonCommentUpdatedPublisher.publish(link);
   }
 
@@ -119,11 +106,7 @@ public class LinkPersonCommentService implements
   public void updateLinks(List<LinkPersonComment> links) {
 
     this.linkPersonCommentRepository.saveAllAndFlush(links)
-        .forEach((link) -> {
-
-          this.refresh(link);
-          linkPersonCommentUpdatedPublisher.publish(link);
-        });
+        .forEach(linkPersonCommentUpdatedPublisher::publish);
   }
 
   @Transactional
@@ -131,7 +114,7 @@ public class LinkPersonCommentService implements
   public void deleteLink(LinkPersonComment link) {
 
     this.linkPersonCommentRepository.delete(link);
-    this.refresh(link);
+
     this.linkPersonCommentDeletedPublisher.publish(link);
   }
 
@@ -142,11 +125,7 @@ public class LinkPersonCommentService implements
     final Optional<LinkPersonComment> linkPersonCommentOptional = this.linkPersonCommentRepository.deleteLinkPersonCommentByCommentAndPersonAndLinkType(
         comment, person, linkPersonCommentType);
 
-    if (linkPersonCommentOptional.isPresent()) {
-
-      this.refresh(linkPersonCommentOptional.get());
-      this.linkPersonCommentDeletedPublisher.publish(linkPersonCommentOptional.get());
-    }
+    linkPersonCommentOptional.ifPresent(this.linkPersonCommentDeletedPublisher::publish);
   }
 
   @Transactional
@@ -154,10 +133,7 @@ public class LinkPersonCommentService implements
   public void deleteLinks(List<LinkPersonComment> links) {
 
     this.linkPersonCommentRepository.deleteAll(links);
-    links.forEach((link) -> {
-      this.refresh(link);
-      this.linkPersonCommentDeletedPublisher.publish(link);
-    });
+    links.forEach(this.linkPersonCommentDeletedPublisher::publish);
   }
 
   @Override
@@ -180,6 +156,14 @@ public class LinkPersonCommentService implements
 
     return this.linkPersonCommentRepository.getLinkPersonCommentByPersonAndLinkType(person,
         linkPersonCommentType);
+  }
+
+  @Override
+  public List<LinkPersonComment> getLinks(Person person,
+      List<LinkPersonCommentType> linkPersonCommentTypes) {
+
+    return this.linkPersonCommentRepository.getLinkPersonCommentByPersonAndLinkTypeIn(person,
+        linkPersonCommentTypes);
   }
 
   @Override

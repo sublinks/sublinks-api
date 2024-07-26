@@ -61,7 +61,7 @@ public class LemmyPostService {
         .my_vote(vote)
         .unread_comments(post.getComments()
             .size()
-            - commentReadRepository.getAllCommentReadByPersonAndComment_PostAndComment_RemovedState(
+            - (int) commentReadRepository.countByPersonAndComment_PostAndComment_RemovedState(
             person, post, RemovedState.NOT_REMOVED))
         .build();
   }

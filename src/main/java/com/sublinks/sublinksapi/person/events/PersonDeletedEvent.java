@@ -8,10 +8,12 @@ import org.springframework.context.ApplicationEvent;
 public class PersonDeletedEvent extends ApplicationEvent {
 
   private final Person person;
+  private final Boolean deleteContent;
 
-  public PersonDeletedEvent(final Object source, final Person person) {
+  public PersonDeletedEvent(final Object source, final Person person, final Boolean deleteContent) {
 
     super(source);
     this.person = person;
+    this.deleteContent = deleteContent;
   }
 }

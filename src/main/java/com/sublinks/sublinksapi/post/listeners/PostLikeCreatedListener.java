@@ -18,11 +18,15 @@ public class PostLikeCreatedListener implements ApplicationListener<PostLikeCrea
   @Transactional
   public void onApplicationEvent(PostLikeCreatedEvent event) {
 
-    final PostAggregate postAggregate = event.getPostLike().getPost().getPostAggregate();
-    if (event.getPostLike().isUpVote()) {
+    final PostAggregate postAggregate = event.getPostLike()
+        .getPost()
+        .getPostAggregate();
+    if (event.getPostLike()
+        .isUpVote()) {
       postAggregate.setUpVoteCount(postAggregate.getUpVoteCount() + 1);
       postAggregate.setScore(postAggregate.getScore() + 1);
-    } else if (event.getPostLike().isDownVote()) {
+    } else if (event.getPostLike()
+        .isDownVote()) {
       postAggregate.setDownVoteCount(postAggregate.getDownVoteCount() + 1);
       postAggregate.setScore(postAggregate.getScore() - 1);
     } else {
