@@ -280,7 +280,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.MODERATOR_BAN_USER,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_allowed"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById((long) banPersonForm.community_id())
         .orElseThrow(

@@ -112,7 +112,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_USER,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
@@ -182,7 +182,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_BLOCK,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "cannot_block_user"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Person personToBlock = personRepository.findById((long) blockPersonForm.person_id())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
@@ -224,21 +224,21 @@ public class UserModActionsController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person,
         Set.of(RolePermissionInstanceTypes.REPORT_INSTANCE_READ,
             RolePermissionCommunityTypes.REPORT_COMMUNITY_READ),
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final GetReportCountResponse.GetReportCountResponseBuilder builder = GetReportCountResponse.builder();
 
     if (getReportCount.community_id() != null) {
       final Community community = communityRepository.findById((long) getReportCount.community_id())
           .orElseThrow(
-              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "coomunity_not_found"));
+              () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
       final boolean isModOfCommunity = linkPersonCommunityService.hasLink(community, person,
           LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(community,
           person, LinkPersonCommunityType.owner);
 
       if (!isModOfCommunity) {
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized");
       }
 
       builder.comment_reports(
@@ -291,7 +291,7 @@ public class UserModActionsController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     if (roleService.getAdmins()
         .size() == 1) {
