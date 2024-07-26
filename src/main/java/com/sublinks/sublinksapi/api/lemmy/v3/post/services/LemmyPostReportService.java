@@ -61,9 +61,9 @@ public class LemmyPostReportService {
     final PostAggregates counts = conversionService.convert(postReport.getPost()
         .getPostAggregate(), PostAggregates.class);
 
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(
         postReport.getPost()
-            .getCommunity(), LinkPersonCommunityType.banned);
+            .getCommunity(), creator, LinkPersonCommunityType.banned);
 
     return PostReportView.builder()
         .post(lemmyPost)

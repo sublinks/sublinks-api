@@ -233,9 +233,9 @@ public class UserModActionsController extends AbstractLemmyApiController {
           .orElseThrow(
               () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "coomunity_not_found"));
 
-      final boolean isModOfCommunity = linkPersonCommunityService.hasLink(person, community,
-          LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
-          community, LinkPersonCommunityType.owner);
+      final boolean isModOfCommunity = linkPersonCommunityService.hasLink(community, person,
+          LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(community,
+          person, LinkPersonCommunityType.owner);
 
       if (!isModOfCommunity) {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);

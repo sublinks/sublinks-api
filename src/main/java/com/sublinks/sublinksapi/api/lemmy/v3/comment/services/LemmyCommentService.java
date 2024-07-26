@@ -14,8 +14,6 @@ import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
@@ -34,8 +32,6 @@ public class LemmyCommentService {
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final LinkPersonCommentService linkPersonCommentService;
-  private final LinkPersonInstanceRepository linkPersonInstanceRepository;
-  private final LinkPersonPersonRepository linkPersonPersonRepository;
   private final LinkPersonPersonService linkPersonPersonService;
 
   @NonNull
