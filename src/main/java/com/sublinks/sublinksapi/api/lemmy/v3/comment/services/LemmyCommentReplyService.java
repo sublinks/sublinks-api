@@ -15,7 +15,6 @@ import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.core.convert.ConversionService;
@@ -64,26 +63,28 @@ public class LemmyCommentReplyService {
 
     final Community lemmyCommunity = conversionService.convert(commentReply.getComment()
         .getCommunity(), Community.class);
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        commentReply.getComment()
-            .getCommunity(), LinkPersonCommunityType.banned);
 
     final int personVote = commentLikeService.getPersonCommentVote(person,
         commentReply.getComment());
 
+    final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
     boolean creatorIsModerator = false;
-    if (!creatorBannedFromCommunity) {
-      creatorIsModerator = linkPersonCommunityService.hasAnyLink(creator, commentReply.getComment()
-              .getCommunity(),
-          List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner));
-    }
+    boolean creatorBannedFromCommunity = false;
+    boolean creatorIsBlocked = false;
+    if (!creatorIsAdmin) {
+      creatorIsBlocked = linkPersonPersonService.hasLink(creator, person,
+          LinkPersonPersonType.blocked);
+      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+          commentReply.getComment()
+              .getCommunity(), LinkPersonCommunityType.banned);
 
+    }
+    if (!creatorBannedFromCommunity) {
+      creatorIsModerator = linkPersonCommunityService.hasLink(creator, commentReply.getComment()
+          .getCommunity(), LinkPersonCommunityType.moderator);
+    }
     final CommentReply lemmyCommentReply = conversionService.convert(commentReply,
         CommentReply.class);
-    final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
-
-    final boolean creatorIsBlocked = linkPersonPersonService.hasLink(person, creator,
-        LinkPersonPersonType.blocked);
 
     //@todo: Check if comment is saved
     return commentReplyViewBuilder.comment_reply(lemmyCommentReply)

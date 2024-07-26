@@ -14,7 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 public abstract class AbstractLemmyApiController {
 
   /**
-   * Get the person object or throw a 400 Bad Request exception.
+   * Get the person object or throw a 404 Bad Request exception.
    *
    * @param principal JwtPerson object that contains the person as it's principal
    * @return Person
