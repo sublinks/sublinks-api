@@ -15,7 +15,6 @@ import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.core.convert.ConversionService;
@@ -78,12 +77,12 @@ public class LemmyCommentReplyService {
       creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
           commentReply.getComment()
               .getCommunity(), LinkPersonCommunityType.banned);
-    } else {
-      creatorIsModerator = linkPersonCommunityService.hasAnyLink(creator, commentReply.getComment()
-              .getCommunity(),
-          List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner));
-    }
 
+    }
+    if (!creatorBannedFromCommunity) {
+      creatorIsModerator = linkPersonCommunityService.hasLink(creator, commentReply.getComment()
+          .getCommunity(), LinkPersonCommunityType.moderator);
+    }
     final CommentReply lemmyCommentReply = conversionService.convert(commentReply,
         CommentReply.class);
 
