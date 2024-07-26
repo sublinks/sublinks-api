@@ -2,11 +2,15 @@ package com.sublinks.sublinksapi.comment.repositories;
 
 import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 
+import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.comment.entities.Comment;
-import com.sublinks.sublinksapi.comment.entities.CommentRead;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.community.entities.Community;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPerson;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
+import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.shared.RemovedState;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -54,15 +58,30 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     if (commentSearchCriteria.post() != null) {
       predicates.add(cb.equal(commentTable.get("post"), commentSearchCriteria.post()));
     }
-    // Join for CommentView
-    if (commentSearchCriteria.person() != null) {
-      final Join<Comment, CommentRead> commentReadJoin = commentTable.join("commentReads",
-          JoinType.LEFT);
-      commentReadJoin.on(cb.equal(commentReadJoin.get("person"), commentSearchCriteria.person()));
-    }
+    // @todo: implement comment read
 
     if (commentSearchCriteria.community() != null) {
       predicates.add(cb.equal(commentTable.get("community"), commentSearchCriteria.community()));
+    }
+
+    if (commentSearchCriteria.person() != null && (commentSearchCriteria.listingType() == null
+        || !commentSearchCriteria.listingType()
+        .equals(ListingType.ModeratorView))) {
+      final Join<Comment, Person> personJoin = commentTable.join("person", JoinType.LEFT);
+
+      final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
+          "linkPersonPersonTo", JoinType.LEFT);
+      linkPersonPersonJoin.on(
+          cb.equal(linkPersonPersonJoin.get("fromPerson"), commentSearchCriteria.person()));
+
+      final Join<LinkPersonPerson, Person> linkToPersonPersonPersonJoin = linkPersonPersonJoin.join(
+          "toPerson", JoinType.LEFT);
+
+      final Join<Person, Role> roleJoin = linkToPersonPersonPersonJoin.join("role", JoinType.LEFT);
+
+      predicates.add(cb.or(cb.or(linkPersonPersonJoin.isNull(),
+              cb.notEqual(linkPersonPersonJoin.get("linkType"), LinkPersonPersonType.blocked)),
+          cb.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
@@ -85,7 +104,6 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
     final int page = Math.max(commentSearchCriteria.page() - 1, 1);
 
     final TypedQuery<Comment> query = em.createQuery(cq);
-
     applyPagination(query, page, perPage);
 
     return query.getResultList();

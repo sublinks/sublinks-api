@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.person.entities;
 
-import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
-import com.sublinks.sublinksapi.post.entities.Post;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -23,26 +22,28 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
 import org.hibernate.proxy.HibernateProxy;
 
+/**
+ * The LinkPersonPerson class represents a link between two Person objects. It stores information
+ * about the link type, creation timestamp, and the two Person objects involved in the link. The
+ * class provides methods for accessing and modifying the attributes, as well as methods for
+ * equality comparison, hashcode calculation, and cloning.
+ */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "link_person_posts")
-public class LinkPersonPost {
-
-  /**
-   * Relationships.
-   */
-  @ManyToOne
-  @JoinColumn(name = "person_id")
-  Person person;
+@Table(name = "link_person_person")
+public class LinkPersonPerson {
 
   @ManyToOne
-  @JoinColumn(name = "post_id")
-  Post post;
+  @JoinColumn(name = "from_person_id")
+  Person fromPerson;
 
+  @ManyToOne
+  @JoinColumn(name = "to_person_id")
+  Person toPerson;
   /**
    * Attributes.
    */
@@ -52,7 +53,7 @@ public class LinkPersonPost {
 
   @Column(nullable = false, name = "link_type")
   @Enumerated(EnumType.STRING)
-  private LinkPersonPostType linkType;
+  private LinkPersonPersonType linkType;
 
   @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
@@ -76,8 +77,8 @@ public class LinkPersonPost {
     if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
-    LinkPersonPost that = (LinkPersonPost) o;
-    return getId() != null && Objects.equals(getId(), that.getId());
+    LinkPersonPerson post = (LinkPersonPerson) o;
+    return getId() != null && Objects.equals(getId(), post.getId());
   }
 
   @Override
@@ -86,5 +87,17 @@ public class LinkPersonPost {
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
         .getPersistentClass()
         .hashCode() : getClass().hashCode();
+  }
+
+  @Override
+  public LinkPersonPerson clone() {
+
+    try {
+      LinkPersonPerson clone = (LinkPersonPerson) super.clone();
+      // TODO: copy mutable state here, so the clone can't change the internals of the original
+      return clone;
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
   }
 }

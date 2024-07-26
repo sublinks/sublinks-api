@@ -11,6 +11,7 @@ import com.sublinks.sublinksapi.api.lemmy.v3.site.models.Tagline;
 import com.sublinks.sublinksapi.api.lemmy.v3.site.services.LemmySiteService;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BanPersonResponse;
+import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPerson;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.BlockPersonResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.GetReportCountResponse;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.services.LemmyPersonService;
@@ -29,8 +30,10 @@ import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.repositories.PostReportRepository;
 import com.sublinks.sublinksapi.post.services.PostReportService;
@@ -88,12 +91,21 @@ public class UserModActionsController extends AbstractLemmyApiController {
   private final PrivateMessageReportService privateMessageReportService;
   private final RoleService roleService;
   private final PersonService personService;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @Operation(summary = "Ban a person from your site.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BanPersonResponse.class))}),
-      @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class))),
-      @ApiResponse(responseCode = "404", description = "Person not found", content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ResponseStatusException.class)))})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = BanPersonResponse.class))}),
+      @ApiResponse(responseCode = "401",
+          description = "Unauthorized",
+          content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ResponseStatusException.class))), @ApiResponse(
+      responseCode = "404",
+      description = "Person not found",
+      content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ResponseStatusException.class)))})
   @PostMapping("ban")
   BanPersonResponse ban(@Valid @RequestBody final BanPerson banPersonForm, JwtPerson principal) {
 
@@ -152,29 +164,55 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .build();
     moderationLogService.createModerationLog(moderationLog);
 
-    return BanPersonResponse.builder().banned(banPersonForm.ban()).person_view(
-        lemmyPersonService.getPersonView(personToBan)).build();
+    return BanPersonResponse.builder()
+        .banned(banPersonForm.ban())
+        .person_view(lemmyPersonService.getPersonView(personToBan))
+        .build();
   }
 
   @Operation(summary = "Block a person.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockPersonResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = BlockPersonResponse.class))})})
   @PostMapping("block")
-  BlockPersonResponse block(final JwtPerson principal) {
+  BlockPersonResponse block(@RequestBody final BlockPerson blockPersonForm,
+      final JwtPerson principal) {
 
     final Person person = getPersonOrThrowUnauthorized(principal);
 
-    // @todo: implement user block ( probably community block too )
-
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_BLOCK,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "cannot_block_user"));
 
-    return BlockPersonResponse.builder().build();
+    final Person personToBlock = personRepository.findById((long) blockPersonForm.person_id())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
+
+    if (person.getId()
+        .equals(personToBlock.getId())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_block_self");
+    }
+
+    if (personToBlock.isAdmin()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_block_admin");
+    }
+
+    if (blockPersonForm.block()) {
+      linkPersonPersonService.createLink(person, personToBlock, LinkPersonPersonType.blocked);
+    } else {
+      linkPersonPersonService.removeLink(person, personToBlock, LinkPersonPersonType.blocked);
+    }
+
+    return BlockPersonResponse.builder()
+        .person_view(lemmyPersonService.getPersonView(personToBlock))
+        .blocked(blockPersonForm.block())
+        .build();
   }
 
   @Operation(summary = "Get counts for your reports.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetReportCountResponse.class))}),
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = GetReportCountResponse.class))}),
       @ApiResponse(responseCode = "404", description = "Community not found", content = @Content)})
   @GetMapping("report_count")
   GetReportCountResponse reportCount(@Valid final GetReportCount getReportCount,
@@ -242,8 +280,10 @@ public class UserModActionsController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Leave the Site admins.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetSiteResponse.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = GetSiteResponse.class))})})
   @PostMapping("leave_admin")
   GetSiteResponse leaveAdmin(JwtPerson principal) {
 
@@ -252,7 +292,8 @@ public class UserModActionsController extends AbstractLemmyApiController {
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN,
         () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
 
-    if (roleService.getAdmins().size() == 1) {
+    if (roleService.getAdmins()
+        .size() == 1) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "cannot_leave_last_admin");
     }
 
@@ -280,7 +321,10 @@ public class UserModActionsController extends AbstractLemmyApiController {
         .discussion_languages(languageService.instanceLanguageIds(localInstanceContext.instance()))
         .all_languages(lemmySiteService.allLanguages(localInstanceContext.languageRepository()))
         .custom_emojis(lemmySiteService.customEmojis())
-        .admins(roleService.getAdmins().stream().map(lemmyPersonService::getPersonView).toList())
+        .admins(roleService.getAdmins()
+            .stream()
+            .map(lemmyPersonService::getPersonView)
+            .toList())
         .build();
   }
 }

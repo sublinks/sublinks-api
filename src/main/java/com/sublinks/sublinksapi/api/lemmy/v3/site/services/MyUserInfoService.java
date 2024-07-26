@@ -13,9 +13,12 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonBlockView;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import java.util.ArrayList;
 import java.util.Collection;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -26,6 +29,8 @@ public class MyUserInfoService {
 
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   public MyUserInfo getMyUserInfo(com.sublinks.sublinksapi.person.entities.Person person) {
 
@@ -91,20 +96,18 @@ public class MyUserInfoService {
 
     Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
     for (Community community : communitiesOwned) {
-      communityModeratorViews.add(
-          CommunityModeratorView.builder()
-              .moderator(conversionService.convert(person, Person.class))
-              .community(conversionService.convert(community,
-                  com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
-              .build());
+      communityModeratorViews.add(CommunityModeratorView.builder()
+          .moderator(conversionService.convert(person, Person.class))
+          .community(conversionService.convert(community,
+              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+          .build());
     }
     for (Community community : communities) {
-      communityModeratorViews.add(
-          CommunityModeratorView.builder()
-              .moderator(conversionService.convert(person, Person.class))
-              .community(conversionService.convert(community,
-                  com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
-              .build());
+      communityModeratorViews.add(CommunityModeratorView.builder()
+          .moderator(conversionService.convert(person, Person.class))
+          .community(conversionService.convert(community,
+              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
+          .build());
     }
     return communityModeratorViews;
   }
@@ -129,6 +132,13 @@ public class MyUserInfoService {
   public Collection<PersonBlockView> getUserPeopleBlocked(
       com.sublinks.sublinksapi.person.entities.Person person) {
 
-    return new ArrayList<>(); // @todo people blocks
+    return linkPersonPersonService.getLinkPersonPersonByFromPersonAndLinkType(person,
+            LinkPersonPersonType.blocked)
+        .stream()
+        .map(link -> PersonBlockView.builder()
+            .target(conversionService.convert(link.getToPerson(), Person.class))
+            .person(conversionService.convert(person, Person.class))
+            .build())
+        .toList();
   }
 }

@@ -78,7 +78,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("remove")
@@ -137,7 +137,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ResponseStatusException.class))}),
       @ApiResponse(responseCode = "403", description = "Forbidden", content = {
@@ -189,7 +189,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("feature")
@@ -251,7 +251,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostReportResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ResponseStatusException.class))}),
       @ApiResponse(responseCode = "403", description = "Forbidden", content = {
@@ -298,7 +298,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = ListPostReportsResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Post Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ResponseStatusException.class))}),
       @ApiResponse(responseCode = "403", description = "Forbidden", content = {

@@ -77,7 +77,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Community Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -92,8 +92,8 @@ public class PostOwnerController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.CREATE_POST,
-        community.getId(),
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
+        community.getId(), () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+            "not_authorized_to_create_post"));
 
     // Language
     Optional<Language> language;
@@ -182,7 +182,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
@@ -261,7 +261,7 @@ public class PostOwnerController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "400",
+      @ApiResponse(responseCode = "404",
           description = "Post Not Found",
           content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})

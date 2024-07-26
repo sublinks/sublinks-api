@@ -5,7 +5,10 @@ import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
@@ -26,12 +29,13 @@ public class LemmyPostService {
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   public PostView postViewFromPost(final Post post) {
 
     return postViewBuilder(post, null).saved(false)
         .read(false)
-        .creator_blocked(false)
         .my_vote(0)
         .unread_comments(0)
         .build();
@@ -49,7 +53,6 @@ public class LemmyPostService {
 
     return postViewBuilder(post, person).saved(postSaveService.isPostSaved(post, person))
         .read(false)
-        .creator_blocked(false)
         .my_vote(vote)
         .unread_comments(0)
         .build();
@@ -91,7 +94,11 @@ public class LemmyPostService {
     final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
         post.getCommunity(), LinkPersonCommunityType.banned);
 
+    final boolean creatorBlocked = person != null && linkPersonPersonService.hasLink(person,
+        creator, LinkPersonPersonType.blocked);
+
     return PostView.builder()
+        .creator_blocked(creatorBlocked)
         .post(lemmyPost)
         .creator(lemmyCreator)
         .community(community)
