@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,14 +27,15 @@ public class LinkPersonCommunityService implements
   private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
 
   @Transactional
-  public void createLinkPersonCommunityLink(Person person, Community community, LinkPersonCommunityType type) {
+  public void createLinkPersonCommunityLink(Community community, Person person,
+      LinkPersonCommunityType type) {
 
-    createLinkPersonCommunityLink(person, community, type, null);
+    createLinkPersonCommunityLink(community, person, type, null);
   }
 
   @Transactional
-  public void createLinkPersonCommunityLink(Person person, Community community, LinkPersonCommunityType type,
-      Date expireAt) {
+  public void createLinkPersonCommunityLink(Community community, Person person,
+      LinkPersonCommunityType type, Date expireAt) {
 
     final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
         .community(community)
@@ -112,6 +112,13 @@ public class LinkPersonCommunityService implements
   public void deleteLink(LinkPersonCommunity linkPersonCommunity) {
 
   }
+
+  @Override
+  public void deleteLink(Community community, Person person,
+      LinkPersonCommunityType linkPersonCommunityType) {
+
+  }
+
 
   @Override
   public void deleteLinks(List<LinkPersonCommunity> linkPersonCommunities) {

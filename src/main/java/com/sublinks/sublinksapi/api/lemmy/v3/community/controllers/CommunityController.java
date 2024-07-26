@@ -24,7 +24,6 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.models.CommunitySearchCriteria;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
-import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -182,22 +181,15 @@ public class CommunityController extends AbstractLemmyApiController {
     }
 
     if (followCommunityForm.follow()) {
-      if (linkPersonCommunityService.hasLink(community.get(), person,
-          LinkPersonCommunityType.blocked)) {
 
-        final Optional<LinkPersonCommunity> link = linkPersonCommunityService.getLink(
-            community.get(), person, LinkPersonCommunityType.blocked);
-
-        link.ifPresent(linkPersonCommunityService::deleteLink);
-      }
-      linkPersonCommunityService.createLinkPersonCommunityLink(person, community.get(),
+      linkPersonCommunityService.deleteLink(community.get(), person,
+          LinkPersonCommunityType.blocked);
+      linkPersonCommunityService.createLinkPersonCommunityLink(community.get(), person,
           LinkPersonCommunityType.follower);
     } else {
 
-      final Optional<LinkPersonCommunity> link = linkPersonCommunityService.getLink(community.get(),
-          person, LinkPersonCommunityType.blocked);
-
-      link.ifPresent(linkPersonCommunityService::deleteLink);
+      linkPersonCommunityService.deleteLink(community.get(), person,
+          LinkPersonCommunityType.follower);
     }
 
     return lemmyCommunityService.createCommunityResponse(community.get(), person);
@@ -224,15 +216,11 @@ public class CommunityController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     if (blockCommunityForm.block()) {
-      if (linkPersonCommunityService.hasLink(community, person, LinkPersonCommunityType.follower)) {
-        linkPersonCommunityService.getLink(community, person, LinkPersonCommunityType.follower)
-            .ifPresent(linkPersonCommunityService::deleteLink);
-      }
-      linkPersonCommunityService.createLinkPersonCommunityLink(person, community,
+      linkPersonCommunityService.deleteLink(community, person, LinkPersonCommunityType.follower);
+      linkPersonCommunityService.createLinkPersonCommunityLink(community, person,
           LinkPersonCommunityType.blocked);
     } else {
-      linkPersonCommunityService.getLink(community, person, LinkPersonCommunityType.follower)
-          .ifPresent(linkPersonCommunityService::deleteLink);
+      linkPersonCommunityService.deleteLink(community, person, LinkPersonCommunityType.blocked);
     }
 
     return BlockCommunityResponse.builder()

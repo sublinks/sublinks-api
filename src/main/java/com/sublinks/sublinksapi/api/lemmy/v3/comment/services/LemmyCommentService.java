@@ -12,11 +12,11 @@ import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.CommentAggregate;
 import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
-import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonInstanceRepository;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +67,8 @@ public class LemmyCommentService {
     final int personVote = commentLikeService.getPersonCommentVote(person, comment);
 
     commentView.subscribed(subscribedType)
-        .saved(false)// @todo check if saved
+        .saved(linkPersonCommentService.hasLink(comment, person,
+            LinkPersonCommentType.saved))
         .creator_blocked(linkPersonPersonService.hasLink(person, comment.getPerson(),
             LinkPersonPersonType.blocked))
         .my_vote(personVote);

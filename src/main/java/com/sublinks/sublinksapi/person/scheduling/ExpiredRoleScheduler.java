@@ -58,8 +58,8 @@ public class ExpiredRoleScheduler {
 
     linkPersonCommunityRepository.getLinkPersonCommunitiesByExpireAtBefore(new Date())
         .forEach(linkPersonCommunity -> {
-          linkPersonCommunityService.removeLink(linkPersonCommunity.getPerson(),
-              linkPersonCommunity.getCommunity(), linkPersonCommunity.getLinkType());
+          linkPersonCommunityService.deleteLink(linkPersonCommunity.getCommunity(),
+              linkPersonCommunity.getPerson(), linkPersonCommunity.getLinkType());
         });
   }
 }

@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
+import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.enums.ListingType;
@@ -63,6 +64,9 @@ public class Person implements UserDetails, Principal {
 
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
+
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  Set<LinkPersonComment> linkPersonComment;
 
   @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
   Set<LinkPersonPerson> linkPersonPerson;

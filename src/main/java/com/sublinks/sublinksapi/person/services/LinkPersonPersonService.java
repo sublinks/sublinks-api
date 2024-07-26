@@ -181,6 +181,22 @@ public class LinkPersonPersonService implements
   }
 
   @Override
+  public void deleteLink(Person fromPerson, Person toPerson,
+      LinkPersonPersonType linkPersonPersonType) {
+
+    final Optional<LinkPersonPerson> linkPersonPersonOptional = linkPersonPersonRepository.deleteLinkPersonPersonByFromPersonAndToPersonAndLinkType(
+        fromPerson, toPerson, linkPersonPersonType);
+    if (linkPersonPersonOptional.isPresent()) {
+      final LinkPersonPerson linkPersonPerson = linkPersonPersonOptional.get();
+      fromPerson.getLinkPersonPerson()
+          .remove(linkPersonPerson);
+      toPerson.getLinkPersonPerson()
+          .remove(linkPersonPerson);
+      linkPersonPersonDeletedPublisher.publish(linkPersonPerson);
+    }
+  }
+
+  @Override
   public void deleteLinks(List<LinkPersonPerson> linkPersonPeople) {
 
     linkPersonPeople.forEach(linkPersonPerson -> {

@@ -23,4 +23,7 @@ public interface LinkPersonCommentRepository extends JpaRepository<LinkPersonCom
 
   List<LinkPersonComment> getLinkPersonCommentByPersonAndLinkType(Person person,
       LinkPersonCommentType type);
+
+  Optional<LinkPersonComment> deleteLinkPersonCommentByCommentAndPersonAndLinkType(Comment comment,
+      Person person, LinkPersonCommentType linkPersonCommentType);
 }

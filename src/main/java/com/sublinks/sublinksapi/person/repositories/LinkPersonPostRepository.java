@@ -22,4 +22,7 @@ public interface LinkPersonPostRepository extends JpaRepository<LinkPersonPost, 
 
   List<LinkPersonPost> getLinkPersonPostByPersonAndLinkType(Person person,
       LinkPersonPostType linkType);
+
+  Optional<LinkPersonPost> deleteLinkPersonPostByPostAndPersonAndLinkType(Post post, Person person,
+      LinkPersonPostType linkType);
 }

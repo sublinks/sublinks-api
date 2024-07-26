@@ -153,6 +153,26 @@ public class LinkPersonPostService implements
     linkPersonPostDeletedPublisher.publish(linkPersonPost);
   }
 
+  @Override
+  public void deleteLink(Post post, Person person, LinkPersonPostType linkPersonPostType) {
+
+    final Optional<LinkPersonPost> linkPersonPostOptional = linkPersonPostRepository.deleteLinkPersonPostByPostAndPersonAndLinkType(
+        post, person, linkPersonPostType);
+
+    if (linkPersonPostOptional.isPresent()) {
+      final LinkPersonPost linkPersonPost = linkPersonPostOptional.get();
+
+      if (person.getLinkPersonPost() == null) {
+        person.setLinkPersonPost(new LinkedHashSet<>());
+      }
+
+      person.getLinkPersonPost()
+          .remove(linkPersonPost);
+
+      linkPersonPostDeletedPublisher.publish(linkPersonPost);
+    }
+  }
+
   @Transactional
   @Override
   public void deleteLinks(List<LinkPersonPost> linkPersonPosts) {

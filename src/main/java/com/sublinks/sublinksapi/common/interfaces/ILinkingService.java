@@ -32,6 +32,8 @@ public interface ILinkingService<LLink, LEntity, LPerson, LType> {
   @Transactional
   void deleteLink(final LLink link);
 
+  void deleteLink(final LEntity entity, final LPerson person, final LType type);
+
   @Transactional
   void deleteLinks(final List<LLink> links);
 

@@ -18,4 +18,7 @@ public interface LinkPersonPersonRepository extends JpaRepository<LinkPersonPers
   List<LinkPersonPerson> getLinkPersonPeopleByFromPerson(Person fromPerson);
 
   List<LinkPersonPerson> getLinkPersonPeopleByToPerson(Person toPerson);
+
+  Optional<LinkPersonPerson> deleteLinkPersonPersonByFromPersonAndToPersonAndLinkType(
+      Person fromPerson, Person toPerson, LinkPersonPersonType linkType);
 }

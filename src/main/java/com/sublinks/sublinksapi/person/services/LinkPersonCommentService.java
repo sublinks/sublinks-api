@@ -66,6 +66,15 @@ public class LinkPersonCommentService implements
   @Override
   public void createLink(LinkPersonComment link) {
 
+    final Person person = link.getPerson();
+
+    if (person.getLinkPersonComment() == null) {
+      person.setLinkPersonComment(new LinkedHashSet<>());
+    }
+
+    person.getLinkPersonComment()
+        .add(link);
+
     this.linkPersonCommentRepository.save(link);
     linkPersonCommentCreatedPublisher.publish(link);
   }
@@ -75,13 +84,34 @@ public class LinkPersonCommentService implements
   public void createLinks(List<LinkPersonComment> links) {
 
     this.linkPersonCommentRepository.saveAll(links)
-        .forEach(linkPersonCommentCreatedPublisher::publish);
+        .forEach((link) -> {
+
+          final Person person = link.getPerson();
+
+          if (person.getLinkPersonComment() == null) {
+            person.setLinkPersonComment(new LinkedHashSet<>());
+          }
+
+          person.getLinkPersonComment()
+              .add(link);
+
+          linkPersonCommentCreatedPublisher.publish(link);
+        });
   }
 
 
   @Transactional
   @Override
   public void updateLink(LinkPersonComment link) {
+
+    final Person person = link.getPerson();
+
+    if (person.getLinkPersonComment() == null) {
+      person.setLinkPersonComment(new LinkedHashSet<>());
+    }
+
+    person.getLinkPersonComment()
+        .add(link);
 
     this.linkPersonCommentRepository.save(link);
     linkPersonCommentUpdatedPublisher.publish(link);
@@ -92,15 +122,52 @@ public class LinkPersonCommentService implements
   public void updateLinks(List<LinkPersonComment> links) {
 
     linkPersonCommentRepository.saveAll(links)
-        .forEach(linkPersonCommentUpdatedPublisher::publish);
+        .forEach((link) -> {
+
+          final Person person = link.getPerson();
+
+          if (person.getLinkPersonComment() == null) {
+            person.setLinkPersonComment(new LinkedHashSet<>());
+          }
+
+          person.getLinkPersonComment()
+              .add(link);
+
+          linkPersonCommentUpdatedPublisher.publish(link);
+        });
   }
 
   @Transactional
   @Override
   public void deleteLink(LinkPersonComment link) {
 
+    final Person person = link.getPerson();
+
+    if (person.getLinkPersonComment() == null) {
+      person.setLinkPersonComment(new LinkedHashSet<>());
+    }
+
+    person.getLinkPersonComment()
+        .remove(link);
+
     linkPersonCommentRepository.delete(link);
     linkPersonCommentDeletedPublisher.publish(link);
+  }
+
+  @Override
+  public void deleteLink(Comment comment, Person person,
+      LinkPersonCommentType linkPersonCommentType) {
+
+    final Optional<LinkPersonComment> linkPersonCommentOptional = this.linkPersonCommentRepository.deleteLinkPersonCommentByCommentAndPersonAndLinkType(
+        comment, person, linkPersonCommentType);
+
+    if (linkPersonCommentOptional.isPresent()) {
+
+      person.getLinkPersonComment()
+          .remove(linkPersonCommentOptional.get());
+
+      linkPersonCommentDeletedPublisher.publish(linkPersonCommentOptional.get());
+    }
   }
 
   @Transactional

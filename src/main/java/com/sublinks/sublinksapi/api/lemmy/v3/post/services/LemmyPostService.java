@@ -3,15 +3,15 @@ package com.sublinks.sublinksapi.api.lemmy.v3.post.services;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.PostView;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.repositories.CommentReadRepository;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
-import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPostService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.repositories.PostReadRepository;
@@ -33,16 +33,13 @@ public class LemmyPostService {
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final LinkPersonPersonRepository linkPersonPersonRepository;
   private final LinkPersonPersonService linkPersonPersonService;
   private final PostReadRepository postReadRepository;
   private final CommentReadRepository commentReadRepository;
 
   public PostView postViewFromPost(final Post post) {
 
-    return postViewBuilder(post, null).saved(false)
-        .read(false)
-        .my_vote(0)
+    return postViewBuilder(post, null).my_vote(0)
         .unread_comments(0)
         .build();
   }
@@ -102,18 +99,31 @@ public class LemmyPostService {
     final PostAggregates postAggregates = conversionService.convert(post.getPostAggregate(),
         PostAggregates.class);
 
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        post.getCommunity(), LinkPersonCommunityType.banned);
+    final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
+    boolean creatorIsModerator = false;
+    boolean creatorBannedFromCommunity = false;
+    boolean creatorIsBlocked = false;
+    if (!creatorIsAdmin) {
+      creatorIsBlocked = linkPersonPersonService.hasLink(creator, person,
+          LinkPersonPersonType.blocked);
+      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(post.getCommunity(), creator,
+          LinkPersonCommunityType.banned);
 
-    final boolean creatorBlocked = person != null && linkPersonPersonService.hasLink(person,
-        creator, LinkPersonPersonType.blocked);
-
+    }
+    if (!creatorBannedFromCommunity) {
+      creatorIsModerator = linkPersonCommunityService.hasLink(post.getCommunity(), creator,
+          LinkPersonCommunityType.moderator);
+    }
     return PostView.builder()
-        .creator_blocked(creatorBlocked)
+        .read(false)
+        .saved(linkPersonPostService.hasLink(post, person, LinkPersonPostType.saved))
         .post(lemmyPost)
         .creator(lemmyCreator)
         .community(community)
         .counts(postAggregates)
+        .creator_blocked(creatorIsBlocked)
+        .creator_is_admin(creatorIsAdmin)
+        .creator_is_moderator(creatorIsModerator)
         .creator_banned_from_community(creatorBannedFromCommunity);
   }
 }

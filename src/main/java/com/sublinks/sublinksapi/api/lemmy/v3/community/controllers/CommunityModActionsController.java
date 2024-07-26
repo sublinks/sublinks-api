@@ -242,12 +242,12 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         .stream()
         .findFirst()
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "owner_not_found"));
-    linkPersonCommunityService.createLinkPersonCommunityLink(oldOwner, community,
+    linkPersonCommunityService.createLinkPersonCommunityLink(community, oldOwner,
         LinkPersonCommunityType.moderator);
     linkPersonCommunityService.getLink(community, oldOwner, LinkPersonCommunityType.owner)
         .ifPresent(linkPersonCommunityService::deleteLink);
 
-    linkPersonCommunityService.createLinkPersonCommunityLink(newOwner, community,
+    linkPersonCommunityService.createLinkPersonCommunityLink(community, newOwner,
         LinkPersonCommunityType.owner);
     linkPersonCommunityService.getLink(community, newOwner, LinkPersonCommunityType.moderator)
         .ifPresent(linkPersonCommunityService::deleteLink);
@@ -306,7 +306,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
       }
       if (!linkPersonCommunityService.hasLink(community, personToBan,
           LinkPersonCommunityType.banned)) {
-        linkPersonCommunityService.createLinkPersonCommunityLink(personToBan, community,
+        linkPersonCommunityService.createLinkPersonCommunityLink(community, personToBan,
             LinkPersonCommunityType.banned,
             banPersonForm.expires() != null ? new Date(banPersonForm.expires() * 1000L) : null);
       }
@@ -314,8 +314,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
       commentService.removeAllCommentsFromCommunityAndUser(community, personToBan, false);
       postService.removeAllPostsFromCommunityAndUser(community, personToBan, false);
 
-      linkPersonCommunityService.getLink(community, personToBan, LinkPersonCommunityType.banned)
-          .ifPresent(linkPersonCommunityService::deleteLink);
+      linkPersonCommunityService.deleteLink(community, personToBan, LinkPersonCommunityType.banned);
     }
 
     // Create Moderation Log
@@ -373,14 +372,12 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
     if (addModToCommunityForm.added()) {
       if (!linkPersonCommunityService.hasLink(community, personToAdd,
           LinkPersonCommunityType.moderator)) {
-        linkPersonCommunityService.createLinkPersonCommunityLink(personToAdd, community,
+        linkPersonCommunityService.createLinkPersonCommunityLink(community, personToAdd,
             LinkPersonCommunityType.moderator);
       }
     } else {
-
-      linkPersonCommunityService.getLink(community, personToAdd, LinkPersonCommunityType.moderator)
-          .ifPresent(linkPersonCommunityService::deleteLink);
-
+      linkPersonCommunityService.deleteLink(community, personToAdd,
+          LinkPersonCommunityType.moderator);
     }
 
     Collection<Person> moderators = linkPersonCommunityService.getPersonsFromCommunityAndListTypes(
