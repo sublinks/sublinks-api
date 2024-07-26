@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -327,11 +328,17 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
-      moderatingCommunities.addAll(
-          linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
+      moderatingCommunities.addAll(linkPersonCommunityService.getLinks(person,
+              LinkPersonCommunityType.owner)
+          .stream()
+          .map(LinkPersonCommunity::getCommunity)
+          .toList());
 
-      moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
-          LinkPersonCommunityType.moderator));
+      moderatingCommunities.addAll(linkPersonCommunityService.getLinks(person,
+              LinkPersonCommunityType.moderator)
+          .stream()
+          .map(LinkPersonCommunity::getCommunity)
+          .toList());
 
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
           PostReportSearchCriteria.builder()

@@ -9,6 +9,7 @@ import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommentCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommentDeletedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommentUpdatedPublisher;
+import jakarta.persistence.EntityManager;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +26,18 @@ public class LinkPersonCommentService implements
   private final LinkPersonCommentCreatedPublisher linkPersonCommentCreatedPublisher;
   private final LinkPersonCommentUpdatedPublisher linkPersonCommentUpdatedPublisher;
   private final LinkPersonCommentDeletedPublisher linkPersonCommentDeletedPublisher;
+
+  private final EntityManager em;
+
+  @Override
+  public void refresh(LinkPersonComment linkPersonComment) {
+
+    final Person person = linkPersonComment.getPerson();
+    final Comment comment = linkPersonComment.getComment();
+
+    em.refresh(person);
+    em.refresh(comment);
+  }
 
   @Override
   public boolean hasLink(Comment comment, Person person,
@@ -66,36 +79,19 @@ public class LinkPersonCommentService implements
   @Override
   public void createLink(LinkPersonComment link) {
 
-    final Person person = link.getPerson();
-
-    if (person.getLinkPersonComment() == null) {
-      person.setLinkPersonComment(new LinkedHashSet<>());
-    }
-
-    person.getLinkPersonComment()
-        .add(link);
-
     this.linkPersonCommentRepository.save(link);
-    linkPersonCommentCreatedPublisher.publish(link);
+    this.refresh(link);
+    this.linkPersonCommentCreatedPublisher.publish(link);
   }
 
   @Transactional
   @Override
   public void createLinks(List<LinkPersonComment> links) {
 
-    this.linkPersonCommentRepository.saveAll(links)
+    this.linkPersonCommentRepository.saveAllAndFlush(links)
         .forEach((link) -> {
-
-          final Person person = link.getPerson();
-
-          if (person.getLinkPersonComment() == null) {
-            person.setLinkPersonComment(new LinkedHashSet<>());
-          }
-
-          person.getLinkPersonComment()
-              .add(link);
-
-          linkPersonCommentCreatedPublisher.publish(link);
+          this.refresh(link);
+          this.linkPersonCommentCreatedPublisher.publish(link);
         });
   }
 
@@ -113,26 +109,19 @@ public class LinkPersonCommentService implements
     person.getLinkPersonComment()
         .add(link);
 
-    this.linkPersonCommentRepository.save(link);
-    linkPersonCommentUpdatedPublisher.publish(link);
+    this.linkPersonCommentRepository.saveAndFlush(link);
+    this.refresh(link);
+    this.linkPersonCommentUpdatedPublisher.publish(link);
   }
 
   @Transactional
   @Override
   public void updateLinks(List<LinkPersonComment> links) {
 
-    linkPersonCommentRepository.saveAll(links)
+    this.linkPersonCommentRepository.saveAllAndFlush(links)
         .forEach((link) -> {
 
-          final Person person = link.getPerson();
-
-          if (person.getLinkPersonComment() == null) {
-            person.setLinkPersonComment(new LinkedHashSet<>());
-          }
-
-          person.getLinkPersonComment()
-              .add(link);
-
+          this.refresh(link);
           linkPersonCommentUpdatedPublisher.publish(link);
         });
   }
@@ -141,17 +130,9 @@ public class LinkPersonCommentService implements
   @Override
   public void deleteLink(LinkPersonComment link) {
 
-    final Person person = link.getPerson();
-
-    if (person.getLinkPersonComment() == null) {
-      person.setLinkPersonComment(new LinkedHashSet<>());
-    }
-
-    person.getLinkPersonComment()
-        .remove(link);
-
-    linkPersonCommentRepository.delete(link);
-    linkPersonCommentDeletedPublisher.publish(link);
+    this.linkPersonCommentRepository.delete(link);
+    this.refresh(link);
+    this.linkPersonCommentDeletedPublisher.publish(link);
   }
 
   @Override
@@ -163,10 +144,8 @@ public class LinkPersonCommentService implements
 
     if (linkPersonCommentOptional.isPresent()) {
 
-      person.getLinkPersonComment()
-          .remove(linkPersonCommentOptional.get());
-
-      linkPersonCommentDeletedPublisher.publish(linkPersonCommentOptional.get());
+      this.refresh(linkPersonCommentOptional.get());
+      this.linkPersonCommentDeletedPublisher.publish(linkPersonCommentOptional.get());
     }
   }
 
@@ -174,8 +153,11 @@ public class LinkPersonCommentService implements
   @Override
   public void deleteLinks(List<LinkPersonComment> links) {
 
-    linkPersonCommentRepository.deleteAll(links);
-    links.forEach(linkPersonCommentDeletedPublisher::publish);
+    this.linkPersonCommentRepository.deleteAll(links);
+    links.forEach((link) -> {
+      this.refresh(link);
+      this.linkPersonCommentDeletedPublisher.publish(link);
+    });
   }
 
   @Override
@@ -198,6 +180,20 @@ public class LinkPersonCommentService implements
 
     return this.linkPersonCommentRepository.getLinkPersonCommentByPersonAndLinkType(person,
         linkPersonCommentType);
+  }
+
+  @Override
+  public List<LinkPersonComment> getLinksByEntity(Comment comment, Person person) {
+
+    return this.linkPersonCommentRepository.getLinkPersonCommentByCommentAndPerson(comment, person);
+  }
+
+  @Override
+  public List<LinkPersonComment> getLinksByEntity(Comment comment,
+      List<LinkPersonCommentType> linkPersonCommentTypes) {
+
+    return this.linkPersonCommentRepository.getLinkPersonCommentByCommentAndLinkTypeIn(comment,
+        linkPersonCommentTypes);
   }
 
   @Override

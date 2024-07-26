@@ -4,7 +4,6 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -18,14 +17,25 @@ public interface LinkPersonCommunityRepository extends JpaRepository<LinkPersonC
   List<LinkPersonCommunity> getLinkPersonCommunityByCommunityAndPersonAndLinkTypeIsIn(
       Community community, Person person, List<LinkPersonCommunityType> types);
 
-  Optional<LinkPersonCommunity> getLinkPersonCommunityByPersonAndLinkType(Person person,
+  List<LinkPersonCommunity> getLinkPersonCommunityByPersonAndLinkType(Person person,
       LinkPersonCommunityType type);
 
-  Collection<LinkPersonCommunity> getLinkPersonCommunitiesByPersonAndLinkType(Person person,
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByPersonAndLinkType(Person person,
       LinkPersonCommunityType type);
 
-  Collection<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
-      Community community, List<LinkPersonCommunityType> types);
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndLinkTypeIn(Community community,
+      List<LinkPersonCommunityType> types);
 
-  Collection<LinkPersonCommunity> getLinkPersonCommunitiesByExpireAtBefore(Date expireAt);
+
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndLinkType(Community community,
+      LinkPersonCommunityType type);
+
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByPerson(Person person);
+
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByExpireAtBefore(Date expireAt);
+
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndPerson(Community community,
+      Person person);
+
+  List<LinkPersonCommunity> getLinkPersonCommunitiesByCommunity(Community community);
 }

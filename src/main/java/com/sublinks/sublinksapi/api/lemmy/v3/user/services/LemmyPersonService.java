@@ -45,9 +45,10 @@ public class LemmyPersonService {
 
     Collection<PostView> postViews = new ArrayList<>();
 
-    postRepository.allPostsByPersonAndRemoved(person, null).forEach(post -> {
-      postViews.add(lemmyPostService.postViewFromPost(post, person));
-    });
+    postRepository.allPostsByPersonAndRemoved(person, null)
+        .forEach(post -> {
+          postViews.add(lemmyPostService.postViewFromPost(post, person));
+        });
 
     return postViews;
   }
@@ -55,7 +56,7 @@ public class LemmyPersonService {
   public Collection<CommunityModeratorView> getPersonModerates(Person person) {
 
     Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
-    linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.moderator)
+    linkPersonCommunityService.getLinks(person, LinkPersonCommunityType.moderator)
         .forEach(community -> {
           communityModeratorViews.add(CommunityModeratorView.builder()
               .community(conversionService.convert(community,

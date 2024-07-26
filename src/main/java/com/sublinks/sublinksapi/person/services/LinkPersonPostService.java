@@ -9,7 +9,7 @@ import com.sublinks.sublinksapi.person.events.LinkPersonPostDeletedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPostUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.post.entities.Post;
-import java.util.LinkedHashSet;
+import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,18 @@ public class LinkPersonPostService implements
   private final LinkPersonPostCreatedPublisher linkPersonPostCreatedPublisher;
   private final LinkPersonPostDeletedPublisher linkPersonPostDeletedPublisher;
   private final LinkPersonPostUpdatedPublisher linkPersonPostUpdatedPublisher;
+
+  private final EntityManager em;
+
+  @Override
+  public void refresh(LinkPersonPost data) {
+
+    final Person person = data.getPerson();
+    final Post post = data.getPost();
+
+    em.refresh(person);
+    em.refresh(post);
+  }
 
   @Override
   public boolean hasLink(Post post, Person person, LinkPersonPostType linkPersonPostType) {
@@ -53,104 +65,57 @@ public class LinkPersonPostService implements
         .linkType(type)
         .build();
 
-    if (post.getLinkPersonPost() == null) {
-      post.setLinkPersonPost(new LinkedHashSet<>());
-    }
-
-    if (person.getLinkPersonPost() == null) {
-      person.setLinkPersonPost(new LinkedHashSet<>());
-    }
-
     this.createLink(link);
     return link;
   }
 
   @Transactional
   @Override
-  public void createLink(LinkPersonPost linkPersonPost) {
+  public void createLink(LinkPersonPost link) {
 
-    final Person person = linkPersonPost.getPerson();
-
-    if (person.getLinkPersonPost() == null) {
-      person.setLinkPersonPost(new LinkedHashSet<>());
-    }
-
-    person.getLinkPersonPost()
-        .add(linkPersonPost);
-
-    linkPersonPostCreatedPublisher.publish(linkPersonPostRepository.save(linkPersonPost));
+    linkPersonPostRepository.saveAndFlush(link);
+    this.refresh(link);
+    linkPersonPostCreatedPublisher.publish(link);
   }
 
   @Transactional
   @Override
   public void createLinks(List<LinkPersonPost> linkPersonPosts) {
 
-    linkPersonPostRepository.saveAll(linkPersonPosts)
-        .forEach((linkPersonPost) -> {
-
-          final Person person = linkPersonPost.getPerson();
-
-          if (person.getLinkPersonPost() == null) {
-            person.setLinkPersonPost(new LinkedHashSet<>());
-          }
-
-          person.getLinkPersonPost()
-              .add(linkPersonPost);
-
-          linkPersonPostCreatedPublisher.publish(linkPersonPost);
+    linkPersonPostRepository.saveAllAndFlush(linkPersonPosts)
+        .forEach((link) -> {
+          this.refresh(link);
+          this.linkPersonPostCreatedPublisher.publish(link);
         });
   }
 
   @Transactional
   @Override
-  public void updateLink(LinkPersonPost linkPersonPost) {
+  public void updateLink(LinkPersonPost link) {
 
-    final Person person = linkPersonPost.getPerson();
-
-    if (person.getLinkPersonPost() == null) {
-      person.setLinkPersonPost(new LinkedHashSet<>());
-    }
-
-    person.getLinkPersonPost()
-        .add(linkPersonPost);
-
-    linkPersonPostUpdatedPublisher.publish(linkPersonPostRepository.save(linkPersonPost));
+    this.linkPersonPostRepository.saveAndFlush(link);
+    this.refresh(link);
+    this.linkPersonPostUpdatedPublisher.publish(link);
   }
 
   @Transactional
   @Override
   public void updateLinks(List<LinkPersonPost> linkPersonPosts) {
 
-    linkPersonPostRepository.saveAll(linkPersonPosts)
-        .forEach((linkPersonPost) -> {
-          final Person person = linkPersonPost.getPerson();
-
-          if (person.getLinkPersonPost() == null) {
-            person.setLinkPersonPost(new LinkedHashSet<>());
-          }
-
-          person.getLinkPersonPost()
-              .add(linkPersonPost);
-
-          linkPersonPostUpdatedPublisher.publish(linkPersonPost);
+    this.linkPersonPostRepository.saveAllAndFlush(linkPersonPosts)
+        .forEach((link) -> {
+          this.refresh(link);
+          linkPersonPostUpdatedPublisher.publish(link);
         });
   }
 
   @Transactional
   @Override
-  public void deleteLink(LinkPersonPost linkPersonPost) {
+  public void deleteLink(LinkPersonPost link) {
 
-    final Person person = linkPersonPost.getPerson();
-
-    if (person.getLinkPersonPost() == null) {
-      person.setLinkPersonPost(new LinkedHashSet<>());
-    }
-
-    person.getLinkPersonPost()
-        .remove(linkPersonPost);
-
-    linkPersonPostRepository.delete(linkPersonPost);
-    linkPersonPostDeletedPublisher.publish(linkPersonPost);
+    linkPersonPostRepository.delete(link);
+    this.refresh(link);
+    this.linkPersonPostDeletedPublisher.publish(link);
   }
 
   @Override
@@ -160,16 +125,10 @@ public class LinkPersonPostService implements
         post, person, linkPersonPostType);
 
     if (linkPersonPostOptional.isPresent()) {
-      final LinkPersonPost linkPersonPost = linkPersonPostOptional.get();
+      final LinkPersonPost link = linkPersonPostOptional.get();
 
-      if (person.getLinkPersonPost() == null) {
-        person.setLinkPersonPost(new LinkedHashSet<>());
-      }
-
-      person.getLinkPersonPost()
-          .remove(linkPersonPost);
-
-      linkPersonPostDeletedPublisher.publish(linkPersonPost);
+      this.refresh(link);
+      this.linkPersonPostDeletedPublisher.publish(link);
     }
   }
 
@@ -177,18 +136,10 @@ public class LinkPersonPostService implements
   @Override
   public void deleteLinks(List<LinkPersonPost> linkPersonPosts) {
 
-    linkPersonPostRepository.deleteAll(linkPersonPosts);
-    linkPersonPosts.forEach((linkPersonPost) -> {
-      final Person person = linkPersonPost.getPerson();
-
-      if (person.getLinkPersonPost() == null) {
-        person.setLinkPersonPost(new LinkedHashSet<>());
-      }
-
-      person.getLinkPersonPost()
-          .remove(linkPersonPost);
-
-      linkPersonPostDeletedPublisher.publish(linkPersonPost);
+    this.linkPersonPostRepository.deleteAll(linkPersonPosts);
+    linkPersonPosts.forEach((link) -> {
+      this.refresh(link);
+      this.linkPersonPostDeletedPublisher.publish(link);
     });
   }
 
@@ -196,26 +147,40 @@ public class LinkPersonPostService implements
   public Optional<LinkPersonPost> getLink(Post post, Person person,
       LinkPersonPostType linkPersonPostType) {
 
-    return linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(post, person,
+    return this.linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(post, person,
         linkPersonPostType);
   }
 
   @Override
   public List<LinkPersonPost> getLinks(Person person) {
 
-    return linkPersonPostRepository.getLinkPersonPostByPerson(person);
+    return this.linkPersonPostRepository.getLinkPersonPostByPerson(person);
   }
 
   @Override
   public List<LinkPersonPost> getLinks(Person person, LinkPersonPostType linkPersonPostType) {
 
-    return linkPersonPostRepository.getLinkPersonPostByPersonAndLinkType(person,
+    return this.linkPersonPostRepository.getLinkPersonPostByPersonAndLinkType(person,
         linkPersonPostType);
+  }
+
+  @Override
+  public List<LinkPersonPost> getLinksByEntity(Post post, Person person) {
+
+    return this.linkPersonPostRepository.getLinkPersonPostByPostAndPerson(post, person);
+  }
+
+  @Override
+  public List<LinkPersonPost> getLinksByEntity(Post post,
+      List<LinkPersonPostType> linkPersonPostTypes) {
+
+    return this.linkPersonPostRepository.getLinkPersonPostByPostAndLinkTypeIn(post,
+        linkPersonPostTypes);
   }
 
   @Override
   public List<LinkPersonPost> getLinksByEntity(Post post) {
 
-    return linkPersonPostRepository.getLinkPersonPostByPost(post);
+    return this.linkPersonPostRepository.getLinkPersonPostByPost(post);
   }
 }

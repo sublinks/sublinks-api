@@ -26,6 +26,7 @@ import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.community.services.CommunityService;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
@@ -237,11 +238,12 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_not_moderator");
     }
 
-    final Person oldOwner = linkPersonCommunityService.getPersonsFromCommunityAndListTypes(
-            community, List.of(LinkPersonCommunityType.owner))
+    final Person oldOwner = linkPersonCommunityService.getLinksByEntity(community,
+            List.of(LinkPersonCommunityType.owner))
         .stream()
         .findFirst()
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "owner_not_found"));
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "owner_not_found"))
+        .getPerson();
     linkPersonCommunityService.createLinkPersonCommunityLink(community, oldOwner,
         LinkPersonCommunityType.moderator);
     linkPersonCommunityService.getLink(community, oldOwner, LinkPersonCommunityType.owner)
@@ -380,8 +382,11 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
           LinkPersonCommunityType.moderator);
     }
 
-    Collection<Person> moderators = linkPersonCommunityService.getPersonsFromCommunityAndListTypes(
-        community, List.of(LinkPersonCommunityType.moderator));
+    Collection<Person> moderators = linkPersonCommunityService.getLinksByEntity(community,
+            List.of(LinkPersonCommunityType.moderator))
+        .stream()
+        .map(LinkPersonCommunity::getPerson)
+        .toList();
 
     List<CommunityModeratorView> moderatorsView = moderators.stream()
         .map(moderator -> CommunityModeratorView.builder()
