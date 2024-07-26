@@ -67,8 +67,7 @@ public class LemmyCommentService {
     final int personVote = commentLikeService.getPersonCommentVote(person, comment);
 
     commentView.subscribed(subscribedType)
-        .saved(linkPersonCommentService.hasLink(comment, person,
-            LinkPersonCommentType.saved))
+        .saved(linkPersonCommentService.hasLink(comment, person, LinkPersonCommentType.saved))
         .creator_blocked(linkPersonPersonService.hasLink(person, comment.getPerson(),
             LinkPersonPersonType.blocked))
         .my_vote(personVote);
@@ -99,13 +98,20 @@ public class LemmyCommentService {
     final CommentAggregates lemmyCommentAggregates = conversionService.convert(commentAggregate,
         CommentAggregates.class);
 
-    final boolean isBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        comment.getCommunity(), LinkPersonCommunityType.banned);
-
     final boolean createIsAdmin = RolePermissionService.isAdmin(creator);
 
-    final boolean creatorIsModerator = linkPersonCommunityService.hasLink(creator,
-        comment.getCommunity(), LinkPersonCommunityType.moderator);
+    boolean creatorBannedFromCommunity = false;
+    boolean creatorIsModerator = false;
+
+    if (!createIsAdmin) {
+      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(comment.getCommunity(),
+          creator, LinkPersonCommunityType.banned);
+    }
+
+    if (!creatorBannedFromCommunity) {
+      creatorIsModerator = linkPersonCommunityService.hasLink(comment.getCommunity(), creator,
+          LinkPersonCommunityType.moderator);
+    }
 
     return CommentView.builder()
         .comment(getComment(comment, null))
@@ -113,7 +119,7 @@ public class LemmyCommentService {
         .community(lemmyCommunity)
         .post(lemmyPost)
         .counts(lemmyCommentAggregates)
-        .creator_banned_from_community(isBannedFromCommunity)
+        .creator_banned_from_community(creatorBannedFromCommunity)
         .creator_blocked(false)
         .creator_is_moderator(creatorIsModerator)
         .creator_is_admin(createIsAdmin);
