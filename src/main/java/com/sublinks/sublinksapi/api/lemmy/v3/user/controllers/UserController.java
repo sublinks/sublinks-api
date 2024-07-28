@@ -131,9 +131,9 @@ public class UserController extends AbstractLemmyApiController {
 
     return GetPersonDetailsResponse.builder()
         .person_view(lemmyPersonService.getPersonView(person))
-        .posts(lemmyPersonService.getPersonPosts(person))
+        .posts(lemmyPersonService.getPersonPosts(person, getPersonDetailsForm))
         .moderates(lemmyPersonService.getPersonModerates(person))
-        .comments(lemmyPersonService.getPersonComments(person))
+        .comments(lemmyPersonService.getPersonComments(person, getPersonDetailsForm))
         .build();
   }
 

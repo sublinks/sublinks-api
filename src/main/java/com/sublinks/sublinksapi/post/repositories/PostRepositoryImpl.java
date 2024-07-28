@@ -53,6 +53,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     if (postSearchCriteria.sortType() != null) {
       searchBuilder.setSortType(postSearchCriteria.sortType());
     }
+    searchBuilder.setSavedOnly(postSearchCriteria.isSavedOnly());
 
     Results results = postSearchQueryService.results(searchBuilder);
     results.setPerPage(postSearchCriteria.perPage());
