@@ -1,10 +1,14 @@
 package com.sublinks.sublinksapi.post.services;
 
+import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPerson;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
@@ -86,17 +90,18 @@ public class PostSearchQueryService {
 
       if (!builder.getRemovedState()
           .isEmpty()) {
-        final Expression<RemovedState> expression = builder.getPostTable()
-            .get("removedState");
-        predicates.add(expression.in(builder.getRemovedState()));
+        predicates.add(builder.getPostTable()
+            .get("removedState")
+            .in(builder.getRemovedState()));
       }
 
       builder.getCriteriaQuery()
-          .where(builder.getPredicates()
-              .toArray(new Predicate[0]));
+          .where(predicates.toArray(new Predicate[0]));
 
-      return builder.getEntityManager()
+      final TypedQuery<Post> query = builder.getEntityManager()
           .createQuery(builder.getCriteriaQuery());
+
+      return query;
     }
 
     public List<Post> getResults() {
@@ -151,6 +156,40 @@ public class PostSearchQueryService {
         final Expression<Long> expression = communityJoin.get("id");
         predicates.add(expression.in(communityIds));
       }
+      return this;
+    }
+
+    public Builder filterBlockedPosts(ListingType listingType) {
+
+      if (this.person != null && (listingType == null || !listingType.equals(
+          ListingType.ModeratorView))) {
+
+        final Join<Post, LinkPersonPost> linkPersonPostJoin = this.postTable.join("linkPersonPost",
+            JoinType.LEFT);
+
+        linkPersonPostJoin.on(
+            criteriaBuilder.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.creator));
+
+        final Join<LinkPersonPost, Person> personJoin = linkPersonPostJoin.join("person",
+            JoinType.LEFT);
+
+        final Join<Person, LinkPersonPerson> linkPersonPersonJoin = personJoin.join(
+            "linkPersonPersonTo", JoinType.LEFT);
+        linkPersonPersonJoin.on(
+            this.criteriaBuilder.equal(linkPersonPersonJoin.get("fromPerson"), this.person));
+
+        final Join<LinkPersonPerson, Person> linkToPersonPersonPersonJoin = linkPersonPersonJoin.join(
+            "fromPerson", JoinType.LEFT);
+
+        final Join<Person, Role> roleJoin = personJoin.join("role", JoinType.LEFT);
+
+        predicates.add(this.criteriaBuilder.or(
+            this.criteriaBuilder.or(linkPersonPersonJoin.isNull(),
+                this.criteriaBuilder.notEqual(linkPersonPersonJoin.get("linkType"),
+                    LinkPersonPersonType.blocked)),
+            this.criteriaBuilder.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
+      }
+
       return this;
     }
 

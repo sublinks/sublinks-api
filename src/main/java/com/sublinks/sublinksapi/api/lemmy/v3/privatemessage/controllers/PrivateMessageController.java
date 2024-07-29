@@ -118,7 +118,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
-      responseCode = "400",
+      responseCode = "404",
       description = "Recipient Not Found",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = ApiError.class))})})
@@ -160,7 +160,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
-      responseCode = "400",
+      responseCode = "404",
       description = "Private Message Not Found",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = ApiError.class))})})
@@ -196,7 +196,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
-      responseCode = "400",
+      responseCode = "404",
       description = "Private Message Not Found",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = ApiError.class))})})
@@ -231,7 +231,7 @@ public class PrivateMessageController extends AbstractLemmyApiController {
       description = "OK",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PrivateMessageResponse.class))}), @ApiResponse(
-      responseCode = "400",
+      responseCode = "404",
       description = "Private Message Not Found",
       content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = ApiError.class))})})

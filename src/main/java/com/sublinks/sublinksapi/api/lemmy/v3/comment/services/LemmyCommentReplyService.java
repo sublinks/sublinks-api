@@ -7,9 +7,14 @@ import com.sublinks.sublinksapi.api.lemmy.v3.comment.models.CommentReplyView;
 import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
+import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
+import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.core.convert.ConversionService;
@@ -22,6 +27,10 @@ public class LemmyCommentReplyService {
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
+  private final LinkPersonPostRepository linkPersonPostRepository;
+  private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final RolePermissionService rolePermissionService;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @NonNull
   public CommentReplyView createCommentReplyView(
@@ -34,7 +43,7 @@ public class LemmyCommentReplyService {
   @NonNull
   private CommentReplyView.CommentReplyViewBuilder commentReplyViewBuilder(
       final com.sublinks.sublinksapi.comment.entities.CommentReply commentReply,
-      final com.sublinks.sublinksapi.person.entities.Person Person) {
+      final com.sublinks.sublinksapi.person.entities.Person person) {
 
     final CommentReplyView.CommentReplyViewBuilder commentReplyViewBuilder = CommentReplyView.builder();
 
@@ -46,27 +55,39 @@ public class LemmyCommentReplyService {
     final Comment lemmyComment = conversionService.convert(commentReply.getComment(),
         Comment.class);
 
-    final CommentAggregates commentAggregates = conversionService.convert(
-        commentReply.getComment().getCommentAggregate(), CommentAggregates.class);
+    final CommentAggregates commentAggregates = conversionService.convert(commentReply.getComment()
+        .getCommentAggregate(), CommentAggregates.class);
 
-    final Post lemmyPost = conversionService.convert(commentReply.getComment().getPost(),
-        Post.class);
+    final Post lemmyPost = conversionService.convert(commentReply.getComment()
+        .getPost(), Post.class);
 
-    final Community lemmyCommunity = conversionService.convert(
-        commentReply.getComment().getCommunity(), Community.class);
+    final Community lemmyCommunity = conversionService.convert(commentReply.getComment()
+        .getCommunity(), Community.class);
 
-    final int personVote = commentLikeService.getPersonCommentVote(Person,
+    final int personVote = commentLikeService.getPersonCommentVote(person,
         commentReply.getComment());
 
+    final boolean creatorIsAdmin = RolePermissionService.isAdmin(creator);
+    boolean creatorIsModerator = false;
+    boolean creatorBannedFromCommunity = false;
+    boolean creatorIsBlocked = false;
+    if (!creatorIsAdmin) {
+      creatorIsBlocked = linkPersonPersonService.hasLink(creator, person,
+          LinkPersonPersonType.blocked);
+      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
+          commentReply.getComment()
+              .getCommunity(), LinkPersonCommunityType.banned);
+
+    }
+    if (!creatorBannedFromCommunity) {
+      creatorIsModerator = linkPersonCommunityService.hasLink(creator, commentReply.getComment()
+          .getCommunity(), LinkPersonCommunityType.moderator);
+    }
     final CommentReply lemmyCommentReply = conversionService.convert(commentReply,
         CommentReply.class);
 
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        commentReply.getComment().getCommunity(), LinkPersonCommunityType.banned);
-
-    //@todo: Check if comment is saved or blocked
-    return commentReplyViewBuilder
-        .comment_reply(lemmyCommentReply)
+    //@todo: Check if comment is saved
+    return commentReplyViewBuilder.comment_reply(lemmyCommentReply)
         .creator(lemmyCreator)
         .comment(lemmyComment)
         .counts(commentAggregates)
@@ -74,12 +95,12 @@ public class LemmyCommentReplyService {
         .community(lemmyCommunity)
         .my_vote(personVote)
         .recipient(conversionService.convert(commentReply.getRecipient(), Person.class))
-        .subscribed(linkPersonCommunityService.hasLink(Person,
-            commentReply.getComment().getCommunity(), LinkPersonCommunityType.follower))
+        .subscribed(linkPersonCommunityService.hasLink(person, commentReply.getComment()
+            .getCommunity(), LinkPersonCommunityType.follower))
         .creator_banned_from_community(creatorBannedFromCommunity)
-        .creator_is_moderator(false) // @todo: Check if creator is moderator
-        .creator_is_admin(false) // @todo: Check if creator is admin
-        .creator_blocked(false)
+        .creator_is_moderator(creatorIsModerator)
+        .creator_is_admin(creatorIsAdmin)
+        .creator_blocked(creatorIsBlocked)
         .saved(false);
 
   }

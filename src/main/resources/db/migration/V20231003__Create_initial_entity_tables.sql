@@ -855,6 +855,18 @@ CREATE TABLE email_person_recipients
   email_id  BIGINT NOT NULL
 );
 
+/**
+  Link Person Person Table
+ */
+CREATE TABLE link_person_person
+(
+  id             BIGSERIAL PRIMARY KEY,
+  from_person_id BIGINT       NOT NULL,
+  to_person_id   BIGINT       NOT NULL,
+  link_type      VARCHAR(255) NOT NULL,
+  created_at     TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+);
+
 -- Add a trigger for every updated_at column ( yes i know its hacky but it works ;) )
 
 DO

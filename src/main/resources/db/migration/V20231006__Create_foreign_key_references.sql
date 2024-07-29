@@ -252,3 +252,9 @@ ALTER TABLE comment_saves
  */
 ALTER TABLE announcements
   ADD FOREIGN KEY (creator_id) REFERENCES people (id) ON DELETE CASCADE;
+/**
+  Link Person Person Table
+ */
+ALTER TABLE link_person_person
+  ADD FOREIGN KEY (from_person_id) REFERENCES people (id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (to_person_id) REFERENCES people (id) ON DELETE CASCADE;

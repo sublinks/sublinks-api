@@ -66,7 +66,7 @@ public class CommunityController extends AbstractLemmyApiController {
   @Operation(summary = "Get / fetch a community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = GetCommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Community Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @GetMapping
   public GetCommunityResponse show(@Valid final GetCommunity getCommunityForm,
@@ -149,7 +149,7 @@ public class CommunityController extends AbstractLemmyApiController {
   @Operation(summary = "Follow / subscribe to a community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = CommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Community Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("follow")
   CommunityResponse follow(@Valid @RequestBody final FollowCommunity followCommunityForm,
@@ -184,7 +184,7 @@ public class CommunityController extends AbstractLemmyApiController {
   @Operation(summary = "Block a community.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
       @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = BlockCommunityResponse.class))}),
-      @ApiResponse(responseCode = "400", description = "Community Not Found", content = {
+      @ApiResponse(responseCode = "404", description = "Community Not Found", content = {
           @Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("block")
   BlockCommunityResponse block(@Valid @RequestBody final BlockCommunity blockCommunityForm,

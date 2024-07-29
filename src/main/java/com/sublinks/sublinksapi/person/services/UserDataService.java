@@ -8,12 +8,12 @@ import com.sublinks.sublinksapi.person.events.UserDataInvalidationEventPublisher
 import com.sublinks.sublinksapi.person.events.UserDataUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.UserDataRepository;
 import jakarta.annotation.Nullable;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
@@ -37,13 +37,13 @@ public class UserDataService {
       @Nullable String userAgent)
   {
 
-    boolean saveUserIps = userDataConfig.isSaveUserData();
+    boolean saveUserData = userDataConfig.isSaveUserData();
     Optional<PersonMetaData> foundData = getActiveUserDataByPersonAndToken(person, token);
 
     if (foundData.isPresent()) {
 
       PersonMetaData personMetaData = foundData.get();
-      if (saveUserIps) {
+      if (saveUserData) {
         personMetaData.setIpAddress(ipAddress);
         if (userAgent != null) {
           personMetaData.setUserAgent(userAgent);
@@ -56,8 +56,8 @@ public class UserDataService {
     }
     PersonMetaData personMetaData = PersonMetaData.builder()
         .person(person)
-        .ipAddress(saveUserIps ? ipAddress : null)
-        .userAgent(saveUserIps ? userAgent : null)
+        .ipAddress(saveUserData ? ipAddress : null)
+        .userAgent(saveUserData ? userAgent : null)
         .token(token)
         .active(true)
         .build();

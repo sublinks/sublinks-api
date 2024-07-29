@@ -38,12 +38,14 @@ import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.PersonMention;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
+import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.person.models.PersonMentionSearchCriteria;
 import com.sublinks.sublinksapi.person.repositories.PersonMentionRepository;
 import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.privatemessages.models.MarkAllAsReadResponse;
 import com.sublinks.sublinksapi.privatemessages.repositories.PrivateMessageRepository;
@@ -99,6 +101,7 @@ public class UserController extends AbstractLemmyApiController {
   private final LinkPersonCommunityService linkPersonCommunityService;
   private final PrivateMessageService privateMessageService;
   private final RoleService roleService;
+  private final LinkPersonPersonService linkPersonPersonService;
 
   @Operation(summary = "Get the details for a person.")
   @ApiResponses(value = {@ApiResponse(responseCode = "200",
@@ -582,7 +585,7 @@ public class UserController extends AbstractLemmyApiController {
     // Ignore email to not "leak" it
     settings_builder.email("");
 
-    // @todo Add Blocklist for communities, User and Instnaces
+    // @todo Add Blocklist for Instnaces
 
     List<String> blocked_community = new ArrayList<>();
     linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.blocked)
@@ -590,8 +593,15 @@ public class UserController extends AbstractLemmyApiController {
             linkPersonCommunity -> blocked_community.add(linkPersonCommunity.getActivityPubId()));
 
     builder.blocked_communities(blocked_community);
-    // @todo Add Blocklist for User and Instances
-    builder.blocked_users(new ArrayList<>());
+
+    List<String> blocked_users = new ArrayList<>();
+    linkPersonPersonService.getLinkPersonPersonByFromPersonAndLinkType(person,
+            LinkPersonPersonType.blocked)
+        .forEach(linkPersonPerson -> blocked_users.add(linkPersonPerson.getToPerson()
+            .getActivityPubId()));
+
+    builder.blocked_users(blocked_users);
+    // @todo Add Blocklist for Instances
     builder.blocked_instances(new ArrayList<>());
 
     builder.settings(settings_builder.build());
