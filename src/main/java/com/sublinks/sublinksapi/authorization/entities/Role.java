@@ -56,7 +56,7 @@ public class Role {
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
+
   @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")
   private Date updatedAt;

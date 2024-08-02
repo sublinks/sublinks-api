@@ -47,8 +47,7 @@ public class SublinksCommunityService {
   public CommunityResponse show(String key, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.READ_COMMUNITY,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_community"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)
         .orElseThrow(
@@ -67,8 +66,7 @@ public class SublinksCommunityService {
   public List<CommunityResponse> index(IndexCommunity indexCommunityForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.READ_COMMUNITY,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_communities"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType sortType = indexCommunityForm.sortType();
 
@@ -137,7 +135,7 @@ public class SublinksCommunityService {
     }
 
     if (rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.CREATE_COMMUNITY)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_create_community");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     Community community = Community.builder()
@@ -167,8 +165,8 @@ public class SublinksCommunityService {
    * @throws ResponseStatusException If the community is not found, or the person is not authorized
    *                                 to perform the update.
    */
-  public CommunityResponse updateCommunity(String key, UpdateCommunity updateCommunityForm,
-      Person person)
+  public CommunityResponse updateCommunity(String key, final UpdateCommunity updateCommunityForm,
+      final Person person)
   {
 
     String domain = ActorIdUtils.getActorDomain(key);
@@ -185,7 +183,7 @@ public class SublinksCommunityService {
         && rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.UPDATE_COMMUNITY))
         && !rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.ADMIN_UPDATE_COMMUNITY)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_community");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     if (updateCommunityForm.description() != null) {
@@ -220,8 +218,7 @@ public class SublinksCommunityService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_community_moderators"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Community community = communityRepository.findCommunityByTitleSlug(key)
         .orElseThrow(
@@ -265,7 +262,7 @@ public class SublinksCommunityService {
         && rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.MODERATOR_BAN_USER)) && !rolePermissionService.isPermitted(
         person, RolePermissionCommunityTypes.ADMIN_BAN_USER)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_person");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     if (!communityBanPersonForm.ban()) {
@@ -301,7 +298,7 @@ public class SublinksCommunityService {
 
     if (!rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.ADMIN_REMOVE_COMMUNITY)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_remove_community");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     community.setRemoved(removeComment.remove() != null ? removeComment.remove() : true);
@@ -332,7 +329,7 @@ public class SublinksCommunityService {
     if (!(linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
         List.of(LinkPersonCommunityType.owner)) && rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.MODERATOR_REMOVE_COMMUNITY))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_remove_community");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     community.setDeleted(
@@ -357,8 +354,7 @@ public class SublinksCommunityService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.READ_COMMUNITY_AGGREGATION,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_community_aggregation"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Community community = communityRepository.findCommunityByTitleSlug(communityKey)
         .orElseThrow(

@@ -123,7 +123,7 @@ public class SublinksPersonService {
   public List<PersonResponse> index(final IndexPerson indexPerson, final Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_USERS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_read_persons"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     if (indexPerson.search() == null) {
       if (indexPerson.listingType() == SublinksListingType.Local) {
@@ -170,7 +170,7 @@ public class SublinksPersonService {
   public PersonResponse show(final String key, final Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_USER,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_read_person"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final PersonIdentity ids = getPersonIdentifiersFromKey(key);
 
@@ -299,10 +299,10 @@ public class SublinksPersonService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_LOGIN,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_login"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     if (!rolePermissionService.isPermitted(person, RolePermissionPersonTypes.USER_LOGIN)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_login");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     if (person.isDeleted()) {
@@ -357,7 +357,7 @@ public class SublinksPersonService {
   public PersonResponse updatePerson(Person person, UpdatePerson updatePersonForm) {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.UPDATE_USER_SETTINGS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_update_person"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     if (person.isDeleted()) {
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_deleted");
@@ -413,7 +413,7 @@ public class SublinksPersonService {
   {
 
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_READ,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_person"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
     Optional<Role> bannedRole = roleService.getBannedRole();
 
     if (bannedRole.isEmpty()) {
@@ -440,7 +440,7 @@ public class SublinksPersonService {
     PersonIdentity ids = getPersonIdentifiersFromKey(banPersonForm.key());
 
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_BAN_USER,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_person"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     Person bannedPerson = personRepository.findOneByNameAndInstance_Domain(ids.name(), ids.domain())
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_not_found"));
@@ -471,7 +471,7 @@ public class SublinksPersonService {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_community_aggregation"));
+            "unauthorized"));
 
     final PersonIdentity personIdentity = getPersonIdentifiersFromKey(key);
 
@@ -503,7 +503,7 @@ public class SublinksPersonService {
   {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.DELETE_USER, () -> {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_delete_person");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     });
 
     final PersonIdentity ids = getPersonIdentifiersFromKey(key);
@@ -554,7 +554,7 @@ public class SublinksPersonService {
         && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.READ_USER_METADATAS)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "not_authorized_to_read_person_metadata");
+          "unauthorized");
     }
 
     final List<PersonMetaData> personMetaData = userDataRepository.findAllByPerson(target);
@@ -592,7 +592,7 @@ public class SublinksPersonService {
         .equals(person)) && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.READ_USER_METADATAS)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "not_authorized_to_read_person_metadatas");
+          "unauthorized");
     }
 
     return PersonSessionDataResponse.builder()
@@ -626,7 +626,7 @@ public class SublinksPersonService {
         .equals(person)) && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "not_authorized_to_invalidate_person_metadata");
+          "unauthorized");
     }
 
     userDataService.invalidate(personMetaData);
@@ -655,7 +655,7 @@ public class SublinksPersonService {
         && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "not_authorized_to_invalidate_person_metadata");
+          "unauthorized");
     }
 
     userDataService.invalidateAllUserData(target);
@@ -680,7 +680,7 @@ public class SublinksPersonService {
         .equals(person) && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.DELETE_USER_METADATA)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "not_authorized_to_delete_person_metadata");
+          "unauthorized");
     }
 
     userDataRepository.delete(personMetaData);
@@ -707,7 +707,7 @@ public class SublinksPersonService {
         && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.DELETE_USER_METADATA)) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "not_authorized_to_invalidate_person_metadata");
+          "unauthorized");
     }
     userDataRepository.deleteAll(userDataRepository.findAllByPerson(target));
   }

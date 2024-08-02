@@ -179,7 +179,7 @@ public class SublinksPostService {
 
     if (createPostForm.featuredLocal()) {
       if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
     }
     if (createPostForm.featuredCommunity()) {
@@ -187,7 +187,7 @@ public class SublinksPostService {
           && linkPersonCommunityService.hasAnyLink(person, community,
           List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))
           && !rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
     }
 
@@ -306,7 +306,7 @@ public class SublinksPostService {
 
     if (updatePostForm.featuredLocal() != null) {
       if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
 
       post.setFeatured(updatePostForm.featuredLocal());
@@ -316,7 +316,7 @@ public class SublinksPostService {
           && linkPersonCommunityService.hasAnyLink(person, post.getCommunity(),
           List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))
           && !rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "feature_post_permission_denied");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
 
       post.setFeatured(updatePostForm.featuredCommunity());
@@ -406,7 +406,7 @@ public class SublinksPostService {
         rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_REMOVE_POST)
             && linkPersonCommunityService.hasAnyLink(person, post.getCommunity(),
             List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "remove_post_permission_denied");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     post.setRemovedState(removePostForm.remove() ? RemovedState.REMOVED : RemovedState.NOT_REMOVED);
@@ -438,7 +438,7 @@ public class SublinksPostService {
         && postService.getPostCreator(post)
         .getId()
         .equals(person.getId()) && !post.isRemoved())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "delete_post_permission_denied");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     post.setDeleted(deletePostForm.remove());
@@ -461,8 +461,7 @@ public class SublinksPostService {
   public AggregatePostResponse aggregate(String postKey, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.READ_POST_AGGREGATE,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "aggregate_post_permission_denied"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     return postAggregateRepository.findByPost_TitleSlug(postKey)
         .map(postAggregate -> conversionService.convert(postAggregate, AggregatePostResponse.class))
@@ -475,7 +474,7 @@ public class SublinksPostService {
   {
 
     rolePermissionService.isPermitted(person, RolePermissionPostTypes.FAVORITE_POST,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "favorite_post_permission_denied"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Post post = postRepository.findByTitleSlug(postKey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
@@ -509,7 +508,7 @@ public class SublinksPostService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
 
     if (!rolePermissionService.isPermitted(person, RolePermissionPostTypes.ADMIN_PIN_POST)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "pin_post_permission_denied");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     post.setFeatured(pinPostForm.pin() != null ? pinPostForm.pin() : !post.isFeatured());
@@ -539,8 +538,7 @@ public class SublinksPostService {
         rolePermissionService.isPermitted(person, RolePermissionPostTypes.MODERATOR_PIN_POST)
             && !linkPersonCommunityService.hasAnyLink(person, post.getCommunity(),
             List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner)))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "instance_pin_post_permission_denied");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     post.setFeaturedInCommunity(pinPostForm.pin());

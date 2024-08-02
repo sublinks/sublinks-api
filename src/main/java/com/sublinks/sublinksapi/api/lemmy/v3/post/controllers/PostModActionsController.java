@@ -104,7 +104,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
               post.getCommunity(), LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_a_moderator");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
     }
 
@@ -160,7 +160,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
               post.getCommunity(), LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_a_moderator");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
     }
 
@@ -209,7 +209,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
               post.getCommunity(), LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
-        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_a_moderator");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
       }
     }
     switch (featurePostForm.feature_type()) {
@@ -218,7 +218,7 @@ public class PostModActionsController extends AbstractLemmyApiController {
         break;
       case Local:
         if (!isAdmin) {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_a_admin");
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
         }
         post.setFeatured(featurePostForm.featured());
         break;

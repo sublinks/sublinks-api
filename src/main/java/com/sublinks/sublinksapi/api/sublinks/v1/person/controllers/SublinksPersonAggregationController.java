@@ -48,7 +48,7 @@ public class SublinksPersonAggregationController extends AbstractSublinksApiCont
     rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_community_aggregation"));
+            "unauthorized"));
 
     return conversionService.convert(sublinksPersonService.showAggregate(key, person.orElse(null)),
         PersonAggregateResponse.class);

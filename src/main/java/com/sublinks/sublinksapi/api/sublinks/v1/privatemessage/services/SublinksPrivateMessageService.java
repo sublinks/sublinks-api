@@ -50,7 +50,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_read_private_messages"));
+            "unauthorized"));
 
     return privateMessageRepository.allPrivateMessagesBySearchCriteria(
             PrivateMessageSearchCriteria.builder()
@@ -82,7 +82,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_read_private_messages"));
+            "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -113,7 +113,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.CREATE_PRIVATE_MESSAGE)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_send_private_messages"));
+            "unauthorized"));
 
     final PrivateMessage privateMessage = PrivateMessage.builder()
         .recipient(person)
@@ -144,7 +144,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.UPDATE_PRIVATE_MESSAGE)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_update_private_messages"));
+            "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(
             Long.parseLong(updatePrivateMessageForm.privateMessageKey()))
@@ -181,7 +181,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.DELETE_PRIVATE_MESSAGE)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_delete_private_messages"));
+            "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(
@@ -208,7 +208,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.MARK_PRIVATE_MESSAGE_AS_READ)
         .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed_to_mark_as_read"));
+            () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     List<PrivateMessage> privateMessages = privateMessageRepository.findByRecipientAndReadIsFalse(
         person);
@@ -235,7 +235,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.MARK_PRIVATE_MESSAGE_AS_READ)
         .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed_to_mark_as_read"));
+            () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(
@@ -243,7 +243,7 @@ public class SublinksPrivateMessageService {
 
     if (!privateMessage.getRecipient()
         .equals(person)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed_to_mark_as_read");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     privateMessage.setRead(markAsReadPrivateMessageForm.read());
@@ -266,7 +266,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGE)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_delete_private_messages"));
+            "unauthorized"));
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(
@@ -297,7 +297,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGES)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_delete_private_messages"));
+            "unauthorized"));
 
     return privateMessageRepository.findAllById(ids.stream()
             .map(Long::parseLong)
@@ -321,7 +321,7 @@ public class SublinksPrivateMessageService {
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGE)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_allowed_to_delete_private_messages"));
+            "unauthorized"));
 
     return privateMessageService.deleteAllPrivateMessagesByPerson(person, true)
         .stream()

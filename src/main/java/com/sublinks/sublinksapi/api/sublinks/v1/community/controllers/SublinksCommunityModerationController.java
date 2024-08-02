@@ -93,7 +93,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
     rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS, () -> {
           throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              "not_authorized_to_read_moderators");
+              "unauthorized");
         });
 
     return sublinksCommunityService.getCommunityModerators(key, person.orElse(null))
@@ -123,7 +123,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
         RolePermissionCommunityTypes.MODERATOR_ADD_MODERATOR))
         && !rolePermissionService.isPermitted(person,
         RolePermissionCommunityTypes.ADMIN_ADD_COMMUNITY_MODERATOR)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_add_moderator");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     final Person newModerator = personRepository.findOneByNameIgnoreCase(personKey)
@@ -160,7 +160,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
 
     if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_remove_moderator");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.moderator);
@@ -188,7 +188,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
 
     if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_authorized_to_ban_user");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     final Person bannedPerson = sublinksCommunityService.banPerson(key, personKey, person,

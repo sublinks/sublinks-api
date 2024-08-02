@@ -48,7 +48,7 @@ public class SublinksAnnouncementService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENTS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "forbidden_to_read_announcements"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final List<Announcement> announcements = this.announcementRepository.findAll(
             PageRequest.of(indexAnnouncementForm.page() - 1, indexAnnouncementForm.perPage(), Sort.by(
@@ -77,7 +77,7 @@ public class SublinksAnnouncementService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "forbidden_to_read_announcement"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     try {
       final Announcement announcement = this.announcementRepository.getReferenceById(key);
@@ -103,7 +103,7 @@ public class SublinksAnnouncementService {
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_CREATE_ANNOUNCEMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "forbidden_to_create_announcement"));
+            "unauthorized"));
 
     final Announcement announcement = Announcement.builder()
         .content(createAnnouncementForm.content())
@@ -133,7 +133,7 @@ public class SublinksAnnouncementService {
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_UPDATE_ANNOUNCEMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "forbidden_to_update_announcement"));
+            "unauthorized"));
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 
@@ -162,7 +162,7 @@ public class SublinksAnnouncementService {
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_DELETE_ANNOUNCEMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "forbidden_to_delete_announcement"));
+            "unauthorized"));
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 
@@ -185,7 +185,7 @@ public class SublinksAnnouncementService {
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_DELETE_ANNOUNCEMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "forbidden_to_delete_announcement"));
+            "unauthorized"));
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 

@@ -69,7 +69,7 @@ public class SublinksInstanceService {
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENT,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_read_instance_config"));
+            "unauthorized"));
 
     return conversionService.convert(instanceConfigRepository.findByInstance_Domain(key)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "instance_not_found")),
@@ -82,7 +82,7 @@ public class SublinksInstanceService {
 
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_UPDATE_SETTINGS,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "not_authorized_to_update_instance_config"));
+            "unauthorized"));
 
     final InstanceConfig config = instanceConfigRepository.findByInstance_Domain(key)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "instance_not_found"));

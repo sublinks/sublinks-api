@@ -6,7 +6,6 @@ import lombok.Builder;
 
 @Builder
 public record UpdateComment(
-    String commentKey,
     String body,
     @Schema(description = "The language key of the comment",
         defaultValue = "und",

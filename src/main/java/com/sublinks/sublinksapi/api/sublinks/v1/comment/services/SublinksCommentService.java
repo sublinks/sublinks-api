@@ -69,7 +69,7 @@ public class SublinksCommentService {
   public List<CommentResponse> index(final IndexComment indexCommentForm, final Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENTS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_update_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     Optional<Comment> parentComment = Optional.empty();
     if (indexCommentForm.postKey() != null) {
@@ -140,7 +140,7 @@ public class SublinksCommentService {
   public CommentResponse show(String key, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_view_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     return commentRepository.findByPath(key)
         .map(comment -> conversionService.convert(comment, CommentResponse.class))
@@ -161,7 +161,7 @@ public class SublinksCommentService {
   public CommentResponse createComment(CreateComment createComment, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.CREATE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_create_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Post parentPost = postRepository.findByTitleSlugAndRemovedStateIs(createComment.postKey(),
             RemovedState.NOT_REMOVED)
@@ -193,27 +193,29 @@ public class SublinksCommentService {
   }
 
   /**
-   * Updates a comment based on the provided form and person.
+   * Updates a comment based on the provided comment key, UpdateComment form, and user.
    *
-   * @param updateCommentForm The UpdateComment object representing the updated data for the
-   *                          comment.
-   * @param person            The Person object representing the person performing the update.
+   * @param commentKey        The key of the comment to be updated.
+   * @param updateCommentForm The UpdateComment object representing the updated comment data.
+   * @param person            The Person object representing the user performing the update.
    * @return A CommentResponse object representing the updated comment.
-   * @throws ResponseStatusException If the user does not have permission to update the comment, the
+   * @throws ResponseStatusException If the user is not authorized to update the comment, the
    *                                 comment is not found, or the language is not found.
    */
-  public CommentResponse updateComment(UpdateComment updateCommentForm, Person person) {
+  public CommentResponse updateComment(final String commentKey, UpdateComment updateCommentForm,
+      Person person)
+  {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.UPDATE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_update_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
-    Comment comment = commentRepository.findByPath(updateCommentForm.commentKey())
+    Comment comment = commentRepository.findByPath(commentKey)
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
 
     if (!Objects.equals(comment.getPerson()
         .getId(), person.getId())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_update_not_permitted");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     if (updateCommentForm.featured() != null) {
@@ -250,7 +252,7 @@ public class SublinksCommentService {
   public CommentResponse remove(String key, RemoveComment removeCommentForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.REMOVE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_remove_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
@@ -278,7 +280,7 @@ public class SublinksCommentService {
   public CommentResponse delete(String key, DeleteComment deleteCommentForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.DELETE_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
@@ -286,7 +288,7 @@ public class SublinksCommentService {
 
     if (!Objects.equals(comment.getPerson()
         .getId(), person.getId())) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_delete_not_permitted");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     comment.setDeleted(deleteCommentForm.remove());
@@ -310,14 +312,14 @@ public class SublinksCommentService {
   public CommentResponse pin(String key, PinComment pinCommentForm, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.MODERATOR_PIN_COMMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     Comment comment = commentRepository.findByPath(key)
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
     if (linkPersonCommunityService.hasAnyLinkOrAdmin(person, comment.getCommunity(),
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_highlight_not_permitted");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     comment.setFeatured(
@@ -339,7 +341,7 @@ public class SublinksCommentService {
   public AggregateCommentResponse aggregate(String commentKey, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENT_AGGREGATE,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "comment_view_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     return commentAggregateRepository.findByComment_Path(commentKey)
         .map(commentAggregate -> conversionService.convert(commentAggregate,

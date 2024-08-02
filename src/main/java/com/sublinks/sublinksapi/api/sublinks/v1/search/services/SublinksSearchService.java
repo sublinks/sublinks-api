@@ -49,7 +49,7 @@ public class SublinksSearchService {
 
     rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionInstanceTypes.INSTANCE_SEARCH,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "search_not_permitted"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final String search = searchForm.search();
 

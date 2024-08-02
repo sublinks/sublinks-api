@@ -5,9 +5,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSubli
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.InstanceConfigResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.UpdateInstanceConfig;
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.service.SublinksInstanceService;
-import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
-import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
-import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,11 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Instance Config", description = "Instance Config API")
 public class SublinksInstanceConfigController extends AbstractSublinksApiController {
 
-  private final InstanceConfigService instanceConfigService;
-  private final InstanceService instanceService;
-  private final InstanceRepository instanceRepository;
   private final SublinksInstanceService sublinksInstanceService;
-  private final ConversionService conversionService;
 
   @Operation(summary = "Get a specific instance config")
   @GetMapping

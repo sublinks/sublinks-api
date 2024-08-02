@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.models;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.Role;
+import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.PersonRoleResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import lombok.Builder;
@@ -21,7 +21,7 @@ public record PersonResponse(
         requiredMode = RequiredMode.NOT_REQUIRED) String banExpiresAt,
     Boolean isDeleted,
     Boolean isBotAccount,
-    Role role,
+    PersonRoleResponse personRoleResponse,
     String createdAt,
     String updatedAt) {
 

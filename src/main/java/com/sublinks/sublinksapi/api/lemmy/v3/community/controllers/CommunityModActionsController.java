@@ -176,7 +176,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     if (!linkPersonCommunityService.hasAnyLink(person, community,
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     community.setRemoved(removeCommunityForm.removed());
@@ -221,7 +221,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
     if (!linkPersonCommunityService.hasLinkOrAdmin(person, community,
         LinkPersonCommunityType.owner)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     final Person newOwner = personRepository.findById((long) transferCommunityForm.person_id())
@@ -273,7 +273,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
     final Person person = getPersonOrThrowUnauthorized(principal);
 
     rolePermissionService.isPermitted(person, RolePermissionCommunityTypes.MODERATOR_BAN_USER,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_allowed"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final Community community = communityRepository.findById((long) banPersonForm.community_id())
         .orElseThrow(
@@ -281,7 +281,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
 
     if (!linkPersonCommunityService.hasAnyLinkOrAdmin(person, community,
         List.of(LinkPersonCommunityType.moderator, LinkPersonCommunityType.owner))) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     final Person personToBan = personRepository.findById((long) banPersonForm.person_id())
@@ -360,7 +360,7 @@ public class CommunityModActionsController extends AbstractLemmyApiController {
         LinkPersonCommunityType.owner);
 
     if (!isAllowed) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "not_allowed");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     final Person personToAdd = personRepository.findById((long) addModToCommunityForm.person_id())

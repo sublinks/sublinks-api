@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonSessionData;
-import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksRoleMapper;
+import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksPersonRoleMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
 import com.sublinks.sublinksapi.person.entities.PersonMetaData;
 import org.mapstruct.Mapper;
@@ -10,7 +10,7 @@ import org.mapstruct.MappingConstants;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksRoleMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksPersonRoleMapper.class})
 public abstract class SublinksPersonMetaDataMapper implements
     Converter<PersonMetaData, PersonSessionData> {
 
