@@ -64,7 +64,7 @@ public class RolePermissionService {
     if (person == null || person.getRole() == null) {
       return false;
     }
-    return linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.banned);
+    return linkPersonCommunityService.hasLink(community, person, LinkPersonCommunityType.banned);
   }
 
   public boolean isBannedInCommunity(final Person person, final Long communityId) {

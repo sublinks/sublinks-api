@@ -217,7 +217,7 @@ public class PersonService {
     person.setBannerImageUrl("");
     person.setAvatarImageUrl("");
 
-    personDeletedPublisher.publish(personRepository.save(person));
+    personDeletedPublisher.publish(personRepository.save(person), deleteContent);
   }
 
   public void updatePassword(Person person, String newPassword) {

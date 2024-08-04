@@ -1,15 +1,15 @@
 package com.sublinks.sublinksapi.person.services;
 
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.common.interfaces.ILinkingService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonCommunityDeletedPublisher;
+import com.sublinks.sublinksapi.person.events.LinkPersonCommunityUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonCommunityRepository;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -20,10 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class LinkPersonCommunityService {
+public class LinkPersonCommunityService implements
+    ILinkingService<LinkPersonCommunity, Community, Person, LinkPersonCommunityType> {
 
   private final LinkPersonCommunityRepository linkPersonCommunityRepository;
   private final LinkPersonCommunityCreatedPublisher linkPersonCommunityCreatedPublisher;
+  private final LinkPersonCommunityUpdatedPublisher linkPersonCommunityUpdatedPublisher;
   private final LinkPersonCommunityDeletedPublisher linkPersonCommunityDeletedPublisher;
 
   public boolean hasLinkOrAdmin(Person person, Community community, LinkPersonCommunityType type) {
@@ -55,14 +57,17 @@ public class LinkPersonCommunityService {
 
 
   @Transactional
-  public void addLink(Person person, Community community, LinkPersonCommunityType type) {
+  public void createLinkPersonCommunityLink(Community community, Person person,
+      LinkPersonCommunityType type)
+  {
 
-    addLink(person, community, type, null);
+    createLinkPersonCommunityLink(community, person, type, null);
   }
 
   @Transactional
-  public void addLink(Person person, Community community, LinkPersonCommunityType type,
-      Date expireAt) {
+  public void createLinkPersonCommunityLink(Community community, Person person,
+      LinkPersonCommunityType type, Date expireAt)
+  {
 
     final LinkPersonCommunity newLink = LinkPersonCommunity.builder()
         .community(community)
@@ -70,30 +75,106 @@ public class LinkPersonCommunityService {
         .linkType(type)
         .expireAt(expireAt)
         .build();
-    person.getLinkPersonCommunity()
-        .add(newLink);
-    community.getLinkPersonCommunity()
-        .add(newLink);
-    linkPersonCommunityRepository.save(newLink);
-    linkPersonCommunityCreatedPublisher.publish(newLink);
+
+    this.createLink(newLink);
+  }
+
+  @Override
+  public boolean hasLink(Community community, Person person,
+      LinkPersonCommunityType linkPersonCommunityType)
+  {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
+            community, person, linkPersonCommunityType)
+        .isPresent();
+  }
+
+  @Override
+  public boolean hasAnyLink(Community community, Person person,
+      List<LinkPersonCommunityType> linkPersonCommunityTypes)
+  {
+
+    return !this.linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIn(
+            community, linkPersonCommunityTypes)
+        .isEmpty();
   }
 
   @Transactional
-  public void removeLink(Person person, Community community, LinkPersonCommunityType type) {
+  @Override
+  public void createLink(LinkPersonCommunity link) {
 
-    final Optional<LinkPersonCommunity> linkPersonCommunity = linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
-        community, person, type);
-    if (linkPersonCommunity.isEmpty()) {
-      return;
-    }
-    person.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
-            .getId()));
-    community.getLinkPersonCommunity()
-        .removeIf(l -> Objects.equals(l.getId(), linkPersonCommunity.get()
-            .getId()));
-    linkPersonCommunityRepository.delete(linkPersonCommunity.get());
-    linkPersonCommunityDeletedPublisher.publish(linkPersonCommunity.get());
+    this.linkPersonCommunityRepository.saveAndFlush(link);
+
+    this.linkPersonCommunityCreatedPublisher.publish(link);
+  }
+
+  @Transactional
+  @Override
+  public void createLinks(List<LinkPersonCommunity> linkPersonCommunities) {
+
+    this.linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities)
+        .forEach(this.linkPersonCommunityCreatedPublisher::publish);
+  }
+
+  @Transactional
+  @Override
+  public void updateLink(LinkPersonCommunity link) {
+
+    this.linkPersonCommunityRepository.saveAndFlush(link);
+
+    this.linkPersonCommunityUpdatedPublisher.publish(link);
+
+  }
+
+  @Transactional
+  @Override
+  public void updateLinks(List<LinkPersonCommunity> linkPersonCommunities) {
+
+    this.linkPersonCommunityRepository.saveAllAndFlush(linkPersonCommunities)
+        .forEach(this.linkPersonCommunityUpdatedPublisher::publish);
+  }
+
+  @Transactional
+  @Override
+  public void deleteLink(LinkPersonCommunity link) {
+
+    this.linkPersonCommunityRepository.delete(link);
+    this.linkPersonCommunityDeletedPublisher.publish(link);
+  }
+
+  @Transactional
+  @Override
+  public void deleteLink(Community community, Person person,
+      LinkPersonCommunityType linkPersonCommunityType)
+  {
+
+    final Optional<LinkPersonCommunity> linkOptional = this.getLink(community, person,
+        linkPersonCommunityType);
+
+    linkOptional.ifPresent((link) -> {
+      this.linkPersonCommunityRepository.delete(link);
+      this.linkPersonCommunityDeletedPublisher.publish(link);
+    });
+  }
+
+
+  @Transactional
+  @Override
+  public void deleteLinks(List<LinkPersonCommunity> linkPersonCommunities) {
+
+    this.linkPersonCommunityRepository.deleteAll(linkPersonCommunities);
+
+    linkPersonCommunities.forEach(this.linkPersonCommunityDeletedPublisher::publish);
+
+  }
+
+  @Override
+  public Optional<LinkPersonCommunity> getLink(Community community, Person person,
+      LinkPersonCommunityType linkPersonCommunityType)
+  {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunityByCommunityAndPersonAndLinkType(
+        community, person, linkPersonCommunityType);
   }
 
   public void removeAnyLink(Person person, Community community, List<LinkPersonCommunityType> types)
@@ -115,28 +196,41 @@ public class LinkPersonCommunityService {
     });
   }
 
-  public Collection<Community> getPersonLinkByType(Person person, LinkPersonCommunityType type) {
+  @Override
+  public List<LinkPersonCommunity> getLinks(Person person) {
 
-    Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository.getLinkPersonCommunitiesByPersonAndLinkType(
-        person, type);
-
-    Collection<Community> communities = new ArrayList<>();
-    for (LinkPersonCommunity linkPersonCommunity : linkPersonCommunities) {
-      communities.add(linkPersonCommunity.getCommunity());
-    }
-    return communities;
+    return this.linkPersonCommunityRepository.getLinkPersonCommunitiesByPerson(person);
   }
 
-  public Collection<Person> getPersonsFromCommunityAndListTypes(Community community,
-      List<LinkPersonCommunityType> types)
+  @Override
+  public List<LinkPersonCommunity> getLinks(Person person, List<LinkPersonCommunityType> types) {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunityByPersonAndLinkTypeIn(person,
+        types);
+  }
+
+  @Override
+  public List<LinkPersonCommunity> getLinks(Person person, LinkPersonCommunityType type) {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunityByPersonAndLinkType(person,
+        type);
+  }
+
+  @Override
+  public List<LinkPersonCommunity> getLinksByEntity(Community community, Person person)
   {
 
-    Collection<LinkPersonCommunity> linkPersonCommunities = linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
-        community, types);
+    return this.linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndPerson(
+        community, person);
+  }
 
-    return linkPersonCommunities.stream()
-        .map(LinkPersonCommunity::getPerson)
-        .toList();
+  @Override
+  public List<LinkPersonCommunity> getLinksByEntity(Community community,
+      List<LinkPersonCommunityType> linkPersonCommunityType)
+  {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIn(
+        community, linkPersonCommunityType);
   }
 
   public Collection<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
@@ -145,5 +239,10 @@ public class LinkPersonCommunityService {
 
     return linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
         community, types);
+  }
+  @Override
+  public List<LinkPersonCommunity> getLinksByEntity(Community community) {
+
+    return this.linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunity(community);
   }
 }

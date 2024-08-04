@@ -57,8 +57,13 @@ public class PostLikeService {
 
   private void createPostLike(final Post post, final Person person, final int score) {
 
-    final PostLike postLike = PostLike.builder().post(post).person(person).isUpVote(score == 1)
-        .isDownVote(score == -1).score(score).build();
+    final PostLike postLike = PostLike.builder()
+        .post(post)
+        .person(person)
+        .isUpVote(score == 1)
+        .isDownVote(score == -1)
+        .score(score)
+        .build();
     postLikeRepository.save(postLike);
     postLikeCreatedPublisher.publish(postLike);
   }
@@ -95,7 +100,10 @@ public class PostLikeService {
 
   public List<PostLike> getPostLikes(final Post post, final int page, final int perPage) {
 
-    return postLikeRepository.allPostLikesBySearchCriteria(
-        PostLikeSearchCriteria.builder().postId(post.getId()).perPage(perPage).page(page).build());
+    return postLikeRepository.allPostLikesBySearchCriteria(PostLikeSearchCriteria.builder()
+        .postId(post.getId())
+        .perPage(perPage)
+        .page(page)
+        .build());
   }
 }

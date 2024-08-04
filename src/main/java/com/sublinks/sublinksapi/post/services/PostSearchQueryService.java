@@ -283,6 +283,20 @@ public class PostSearchQueryService {
       return setSorter(sortFactory.createSort(sortType));
     }
 
+    public Builder setSavedOnly(final Boolean savedOnly) {
+
+      if (savedOnly != null && savedOnly && this.person != null) {
+
+        final Join<Post, LinkPersonPost> linkPersonPostJoin = this.postTable.join("linkPersonPost",
+            JoinType.LEFT);
+
+        linkPersonPostJoin.on(
+            criteriaBuilder.equal(linkPersonPostJoin.get("linkType"), LinkPersonPostType.saved));
+        predicates.add(this.criteriaBuilder.equal(linkPersonPostJoin.get("person"), this.person));
+      }
+      return this;
+    }
+
     public Builder setCursor(final String cursor) {
 
       byte[] decodedBytes = Base64.getDecoder()

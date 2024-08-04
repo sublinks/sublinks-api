@@ -39,8 +39,8 @@ public class LemmyCommentReportService {
     final CommentReport lemmyCommentReport = conversionService.convert(commentReport,
         CommentReport.class);
 
-    final Person lemmyCommentCreator = conversionService.convert(
-        commentReport.getComment().getPerson(), Person.class);
+    final Person lemmyCommentCreator = conversionService.convert(commentReport.getComment()
+        .getPerson(), Person.class);
     final Person lemmyResolver = conversionService.convert(commentReport.getResolver(),
         Person.class);
 
@@ -50,20 +50,21 @@ public class LemmyCommentReportService {
     final Comment lemmyComment = conversionService.convert(commentReport.getComment(),
         Comment.class);
 
-    final CommentAggregates commentAggregates = conversionService.convert(
-        commentReport.getComment().getCommentAggregate(), CommentAggregates.class);
+    final CommentAggregates commentAggregates = conversionService.convert(commentReport.getComment()
+        .getCommentAggregate(), CommentAggregates.class);
 
-    final Post lemmyPost = conversionService.convert(commentReport.getComment().getPost(),
-        Post.class);
+    final Post lemmyPost = conversionService.convert(commentReport.getComment()
+        .getPost(), Post.class);
 
-    final Community lemmyCommunity = conversionService.convert(
-        commentReport.getComment().getCommunity(), Community.class);
+    final Community lemmyCommunity = conversionService.convert(commentReport.getComment()
+        .getCommunity(), Community.class);
 
     final int personVote = commentLikeService.getPersonCommentVote(Person,
         commentReport.getComment());
 
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        commentReport.getComment().getCommunity(), LinkPersonCommunityType.banned);
+    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(
+        commentReport.getComment()
+            .getCommunity(), creator, LinkPersonCommunityType.banned);
 
     return CommentReportView.builder()
         .creator(lemmyCreator)
@@ -72,7 +73,8 @@ public class LemmyCommentReportService {
         .comment_report(lemmyCommentReport)
         .comment_creator(lemmyCommentCreator)
         .community(lemmyCommunity)
-        .my_vote(personVote).resolver(lemmyResolver)
+        .my_vote(personVote)
+        .resolver(lemmyResolver)
         .counts(commentAggregates)
         .creator_banned_from_community(creatorBannedFromCommunity);
   }

@@ -8,11 +8,11 @@ import com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community;
 import com.sublinks.sublinksapi.api.lemmy.v3.post.models.Post;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.comment.services.CommentLikeService;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
-import com.sublinks.sublinksapi.person.repositories.LinkPersonPostRepository;
+import com.sublinks.sublinksapi.person.services.LinkPersonCommentService;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import lombok.AllArgsConstructor;
@@ -27,10 +27,8 @@ public class LemmyCommentReplyService {
   private final ConversionService conversionService;
   private final CommentLikeService commentLikeService;
   private final LinkPersonCommunityService linkPersonCommunityService;
-  private final LinkPersonPostRepository linkPersonPostRepository;
-  private final LinkPersonPersonRepository linkPersonPersonRepository;
-  private final RolePermissionService rolePermissionService;
   private final LinkPersonPersonService linkPersonPersonService;
+  private final LinkPersonCommentService linkPersonCommentService;
 
   @NonNull
   public CommentReplyView createCommentReplyView(
@@ -74,14 +72,13 @@ public class LemmyCommentReplyService {
     if (!creatorIsAdmin) {
       creatorIsBlocked = linkPersonPersonService.hasLink(creator, person,
           LinkPersonPersonType.blocked);
-      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-          commentReply.getComment()
-              .getCommunity(), LinkPersonCommunityType.banned);
+      creatorBannedFromCommunity = linkPersonCommunityService.hasLink(commentReply.getComment()
+          .getCommunity(), creator, LinkPersonCommunityType.banned);
 
     }
     if (!creatorBannedFromCommunity) {
-      creatorIsModerator = linkPersonCommunityService.hasLink(creator, commentReply.getComment()
-          .getCommunity(), LinkPersonCommunityType.moderator);
+      creatorIsModerator = linkPersonCommunityService.hasLink(commentReply.getComment()
+          .getCommunity(), creator, LinkPersonCommunityType.moderator);
     }
     final CommentReply lemmyCommentReply = conversionService.convert(commentReply,
         CommentReply.class);
@@ -95,13 +92,14 @@ public class LemmyCommentReplyService {
         .community(lemmyCommunity)
         .my_vote(personVote)
         .recipient(conversionService.convert(commentReply.getRecipient(), Person.class))
-        .subscribed(linkPersonCommunityService.hasLink(person, commentReply.getComment()
-            .getCommunity(), LinkPersonCommunityType.follower))
+        .subscribed(linkPersonCommunityService.hasLink(commentReply.getComment()
+            .getCommunity(), person, LinkPersonCommunityType.follower))
         .creator_banned_from_community(creatorBannedFromCommunity)
         .creator_is_moderator(creatorIsModerator)
         .creator_is_admin(creatorIsAdmin)
         .creator_blocked(creatorIsBlocked)
-        .saved(false);
+        .saved(linkPersonCommentService.hasLink(commentReply.getComment(), person,
+            LinkPersonCommentType.saved));
 
   }
 }

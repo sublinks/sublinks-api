@@ -36,6 +36,7 @@ import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
+import com.sublinks.sublinksapi.person.entities.LinkPersonPost;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPostType;
@@ -49,7 +50,6 @@ import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
 import com.sublinks.sublinksapi.post.services.PostReadService;
 import com.sublinks.sublinksapi.post.services.PostReportService;
-import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.sorts.SortFactory;
 import com.sublinks.sublinksapi.post.sorts.SortingTypeInterface;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
@@ -95,7 +95,7 @@ public class PostController extends AbstractLemmyApiController {
   private final LemmyCommunityService lemmyCommunityService;
   private final LemmyPostService lemmyPostService;
   private final PostLikeService postLikeService;
-  private final PostSaveService postSaveService;
+  private final LinkPersonPostService linkPersonPostService;
   private final CommunityRepository communityRepository;
   private final PostRepository postRepository;
   private final UrlUtil urlUtil;
@@ -107,7 +107,6 @@ public class PostController extends AbstractLemmyApiController {
   private final LocalInstanceContext localInstanceContext;
   private final RolePermissionService rolePermissionService;
   private final SortFactory sortFactory;
-  private final LinkPersonPostService linkPersonPostService;
   private final CommentRepository commentRepository;
 
   @Operation(summary = "Get / fetch a post.")
@@ -453,9 +452,11 @@ public class PostController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
     if (savePostForm.save()) {
-      postSaveService.createPostSave(post, person);
+      linkPersonPostService.createPostLink(post, person, LinkPersonPostType.saved);
     } else {
-      postSaveService.deletePostSave(post, person);
+      final Optional<LinkPersonPost> linkPersonPost = linkPersonPostService.getLink(post, person,
+          LinkPersonPostType.saved);
+      linkPersonPost.ifPresent(linkPersonPostService::deleteLink);
     }
     return PostResponse.builder()
         .post_view(lemmyPostService.postViewFromPost(post, person))

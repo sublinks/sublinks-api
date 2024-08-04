@@ -53,7 +53,7 @@ public class LemmyPersonMentionService {
             com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
         .my_vote(commentLike == null ? 0 : commentLike.getScore())
         .creator_banned_from_community(
-            linkPersonCommunityService.hasLink(creator, comment.getCommunity(),
+            linkPersonCommunityService.hasLink(comment.getCommunity(), creator,
                 LinkPersonCommunityType.banned))
         .subscribed(
             lemmyCommunityService.getPersonCommunitySubscribeType(creator, comment.getCommunity()))

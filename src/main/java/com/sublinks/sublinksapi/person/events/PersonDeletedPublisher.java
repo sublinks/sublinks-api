@@ -14,9 +14,9 @@ public class PersonDeletedPublisher {
     this.applicationEventPublisher = applicationEventPublisher;
   }
 
-  public void publish(Person person) {
+  public void publish(Person person, Boolean deleteContent) {
 
-    PersonDeletedEvent personDeletedEvent = new PersonDeletedEvent(this, person);
+    PersonDeletedEvent personDeletedEvent = new PersonDeletedEvent(this, person, deleteContent);
     applicationEventPublisher.publishEvent(personDeletedEvent);
   }
 }

@@ -25,7 +25,8 @@ public class PersonEmailVerificationService {
 
     PersonEmailVerification personEmailVerification = new PersonEmailVerification();
     personEmailVerification.setPerson(person);
-    personEmailVerification.setToken(UUID.randomUUID().toString());
+    personEmailVerification.setToken(UUID.randomUUID()
+        .toString());
     personEmailVerification.setIpAddress(userDataConfig.isSaveUserData() ? ipAddress : null);
     personEmailVerification.setUserAgent(userDataConfig.isSaveUserData() ? userAgent : null);
     personEmailVerification.setActive(true);

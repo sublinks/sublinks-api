@@ -21,6 +21,7 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -75,11 +76,13 @@ public class PostModActionsController extends AbstractLemmyApiController {
   private final ModerationLogService moderationLogService;
 
   @Operation(summary = "A moderator pin for a post.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+      @ApiResponse(responseCode = "404",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("remove")
   PostResponse remove(@Valid @RequestBody final ModRemovePost modRemovePostForm,
@@ -98,10 +101,9 @@ public class PostModActionsController extends AbstractLemmyApiController {
         RolePermissionPostTypes.REMOVE_POST);
 
     if (!isAdmin) {
-      final boolean moderatesCommunity =
-          linkPersonCommunityService.hasLink(person, post.getCommunity(),
-              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
-              post.getCommunity(), LinkPersonCommunityType.owner);
+      final boolean moderatesCommunity = linkPersonCommunityService.hasLink(post.getCommunity(),
+          person, LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(
+          post.getCommunity(), person, LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
@@ -134,15 +136,18 @@ public class PostModActionsController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "A moderator lock for a post.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ResponseStatusException.class))}),
-      @ApiResponse(responseCode = "403", description = "Forbidden", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ResponseStatusException.class))})})
+      @ApiResponse(responseCode = "404",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ResponseStatusException.class))}), @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ResponseStatusException.class))})})
   @PostMapping("lock")
   PostResponse lock(@Valid @RequestBody final ModLockPost modLockPostForm, JwtPerson principal) {
 
@@ -154,10 +159,9 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final boolean isAdmin = RolePermissionService.isAdmin(person);
 
     if (!isAdmin) {
-      final boolean moderatesCommunity =
-          linkPersonCommunityService.hasLink(person, post.getCommunity(),
-              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
-              post.getCommunity(), LinkPersonCommunityType.owner);
+      final boolean moderatesCommunity = linkPersonCommunityService.hasLink(post.getCommunity(),
+          person, LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(
+          post.getCommunity(), person, LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
@@ -186,11 +190,13 @@ public class PostModActionsController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "A moderator feature for a post (Sticky).")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+      @ApiResponse(responseCode = "404",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
               schema = @Schema(implementation = ApiError.class))})})
   @PostMapping("feature")
   PostResponse feature(@Valid @RequestBody FeaturePost featurePostForm, JwtPerson principal) {
@@ -203,10 +209,9 @@ public class PostModActionsController extends AbstractLemmyApiController {
     final boolean isAdmin = RolePermissionService.isAdmin(person);
 
     if (!isAdmin) {
-      final boolean moderatesCommunity =
-          linkPersonCommunityService.hasLink(person, post.getCommunity(),
-              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
-              post.getCommunity(), LinkPersonCommunityType.owner);
+      final boolean moderatesCommunity = linkPersonCommunityService.hasLink(post.getCommunity(),
+          person, LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(
+          post.getCommunity(), person, LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
@@ -248,15 +253,18 @@ public class PostModActionsController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "Resolve a post report. Only a mod can do this.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
           schema = @Schema(implementation = PostReportResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ResponseStatusException.class))}),
-      @ApiResponse(responseCode = "403", description = "Forbidden", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ResponseStatusException.class))})})
+      @ApiResponse(responseCode = "404",
+          description = "Post Not Found",
+          content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+              schema = @Schema(implementation = ResponseStatusException.class))}), @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ResponseStatusException.class))})})
   @PutMapping("report/resolve")
   PostReportResponse reportResolve(
       @Valid @RequestBody final ResolvePostReport resolvePostReportForm,
@@ -271,12 +279,10 @@ public class PostModActionsController extends AbstractLemmyApiController {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
     if (!isAdmin) {
-      final boolean moderatesCommunity =
-          linkPersonCommunityService.hasLink(person, postReport.getPost()
-                  .getCommunity(),
-              LinkPersonCommunityType.moderator) || linkPersonCommunityService.hasLink(person,
-              postReport.getPost()
-                  .getCommunity(), LinkPersonCommunityType.owner);
+      final boolean moderatesCommunity = linkPersonCommunityService.hasLink(postReport.getPost()
+          .getCommunity(), person, LinkPersonCommunityType.moderator)
+          || linkPersonCommunityService.hasLink(postReport.getPost()
+          .getCommunity(), person, LinkPersonCommunityType.owner);
 
       if (!moderatesCommunity) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
@@ -295,15 +301,18 @@ public class PostModActionsController extends AbstractLemmyApiController {
   }
 
   @Operation(summary = "List post reports.")
-  @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "OK", content = {
-      @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-          schema = @Schema(implementation = ListPostReportsResponse.class))}),
-      @ApiResponse(responseCode = "404", description = "Post Not Found", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ResponseStatusException.class))}),
-      @ApiResponse(responseCode = "403", description = "Forbidden", content = {
-          @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-              schema = @Schema(implementation = ResponseStatusException.class))})})
+  @ApiResponses(value = {@ApiResponse(responseCode = "200",
+      description = "OK",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ListPostReportsResponse.class))}), @ApiResponse(
+      responseCode = "404",
+      description = "Post Not Found",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ResponseStatusException.class))}), @ApiResponse(
+      responseCode = "403",
+      description = "Forbidden",
+      content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
+          schema = @Schema(implementation = ResponseStatusException.class))})})
   @GetMapping("report/list")
   ListPostReportsResponse reportList(@Valid final ListPostReports listPostReportsForm,
       final JwtPerson principal) {
@@ -319,11 +328,17 @@ public class PostModActionsController extends AbstractLemmyApiController {
 
     if (!isAdmin) {
       final List<Community> moderatingCommunities = new ArrayList<>();
-      moderatingCommunities.addAll(
-          linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
+      moderatingCommunities.addAll(linkPersonCommunityService.getLinks(person,
+              LinkPersonCommunityType.owner)
+          .stream()
+          .map(LinkPersonCommunity::getCommunity)
+          .toList());
 
-      moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
-          LinkPersonCommunityType.moderator));
+      moderatingCommunities.addAll(linkPersonCommunityService.getLinks(person,
+              LinkPersonCommunityType.moderator)
+          .stream()
+          .map(LinkPersonCommunity::getCommunity)
+          .toList());
 
       postReports.addAll(postReportRepository.allPostReportsBySearchCriteria(
           PostReportSearchCriteria.builder()

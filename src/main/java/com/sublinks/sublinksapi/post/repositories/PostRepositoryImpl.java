@@ -60,6 +60,7 @@ public class PostRepositoryImpl implements PostRepositorySearch {
     if (postSearchCriteria.sortType() != null) {
       searchBuilder.setSortType(postSearchCriteria.sortType());
     }
+    searchBuilder.setSavedOnly(postSearchCriteria.isSavedOnly());
 
     if (localInstanceContext.instance() != null && !localInstanceContext.instance()
         .getInstanceConfig()

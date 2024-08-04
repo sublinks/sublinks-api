@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -68,6 +69,9 @@ public class Comment implements Serializable, AclEntityInterface {
 
   @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL)
   private List<CommentLike> likes;
+
+  @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private Set<LinkPersonComment> linkPersonComment;
 
   @ManyToOne
   @JoinColumn(name = "language_id")
