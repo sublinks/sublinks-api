@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortOrder;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.CreateRole;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.IndexRole;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.RoleResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.UpdateRole;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionRoleTypes;
@@ -11,6 +12,7 @@ import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
 import com.sublinks.sublinksapi.authorization.services.AclService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.person.entities.Person;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
@@ -76,12 +78,14 @@ public class SublinksRoleService {
                 .permission(permission)
                 .build())
             .collect(Collectors.toSet()))
+        .expiresAt(createRoleForm.expiresAt() != null ? new Date(createRoleForm.expiresAt() * 1000L)
+            : null)
         .build();
 
     return conversionService.convert(roleService.createRole(role), RoleResponse.class);
   }
 
-  public RoleResponse update(final String key, final UpdateRole createRoleForm, final Person person)
+  public RoleResponse update(final String key, final UpdateRole updateRoleForm, final Person person)
   {
 
     aclService.canPerson(person)
@@ -91,9 +95,26 @@ public class SublinksRoleService {
     final Role role = roleRepository.findFirstByName(key)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "role_not_found"));
 
-    role.setName(createRoleForm.name());
-    role.setDescription(createRoleForm.description());
-    role.setActive(createRoleForm.active());
+    if (updateRoleForm.name() != null) {
+      role.setName(updateRoleForm.name());
+    }
+    if (updateRoleForm.description() != null) {
+      role.setDescription(updateRoleForm.description());
+    }
+    if (updateRoleForm.active() != null) {
+      role.setActive(updateRoleForm.active());
+    }
+    if (updateRoleForm.permissions() != null) {
+      role.setRolePermissions(updateRoleForm.permissions()
+          .stream()
+          .map(permission -> RolePermissions.builder()
+              .permission(permission)
+              .build())
+          .collect(Collectors.toSet()));
+    }
+    if (updateRoleForm.expiresAt() != null) {
+      role.setExpiresAt(new Date(updateRoleForm.expiresAt() * 1000L));
+    }
 
     return conversionService.convert(roleService.updateRole(role), RoleResponse.class);
   }

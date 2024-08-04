@@ -716,7 +716,7 @@ CREATE TABLE acl_roles
   updated_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
-CREATE UNIQUE INDEX IDX_ACL_ROLES_NAME_EXPIRES_AT ON acl_roles (name);
+CREATE UNIQUE INDEX IDX_ACL_ROLES_NAME ON acl_roles (name);
 
 /**
   Role permissions table

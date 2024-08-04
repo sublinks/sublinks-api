@@ -10,6 +10,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.FavoriteP
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PinPost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.RemovePost;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
+import com.sublinks.sublinksapi.authorization.services.AclService;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
@@ -40,6 +41,7 @@ import com.sublinks.sublinksapi.slurfilter.services.SlurFilterService;
 import com.sublinks.sublinksapi.utils.SiteMetadataUtil;
 import com.sublinks.sublinksapi.utils.UrlUtil;
 import java.util.List;
+import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpStatus;
@@ -66,6 +68,7 @@ public class SublinksPostService {
   private final PostAggregateRepository postAggregateRepository;
   private final LinkPersonPostService linkPersonPostService;
   private final LinkPersonPostRepository linkPersonPostRepository;
+  private final AclService aclService;
 
   /**
    * Retrieves a list of PostResponse objects based on the provided search criteria.
@@ -75,6 +78,10 @@ public class SublinksPostService {
    * @return A list of PostResponse objects matching the search criteria.
    */
   public List<PostResponse> index(final IndexPost indexPostForm, final Person person) {
+
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionPostTypes.READ_POSTS)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final List<Community> communities = indexPostForm.communityKeys() == null ? null
         : communityRepository.findCommunityByTitleSlugIn(indexPostForm.communityKeys());
@@ -143,6 +150,10 @@ public class SublinksPostService {
    *                                 denied.
    */
   public PostResponse create(final CreatePost createPostForm, final Person person) {
+
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionPostTypes.CREATE_POST)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Community community = communityRepository.findCommunityByTitleSlug(
             createPostForm.communityKey())
@@ -273,6 +284,12 @@ public class SublinksPostService {
     final Post post = postRepository.findByTitleSlug(postKey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
     final Community community = post.getCommunity();
+
+    aclService.canPerson(person)
+        .onCommunity(community)
+        .performTheAction(RolePermissionPostTypes.UPDATE_POST)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+
     if (updatePostForm.languageKey() != null && !updatePostForm.languageKey()
         .isEmpty()) {
 
@@ -386,14 +403,14 @@ public class SublinksPostService {
   }
 
   /**
-   * Removes a post.
+   * Removes a post from the system.
    *
-   * @param postKey        The key of the post to pin.
-   * @param removePostForm The RemovePost object containing additional parameters for the removal.
-   * @param person         The Person object representing the user performing the removal.
+   * @param postKey        The key of the post to be removed.
+   * @param removePostForm The RemovePost object containing the removal information.
+   * @param person         The Person object representing the user removing the post.
    * @return The PostResponse object for the removed post.
-   * @throws ResponseStatusException If the post is not found or the user is not permitted to pin
-   *                                 the post.
+   * @throws ResponseStatusException If the post is not found, the user is unauthorized, or an error
+   *                                 occurs during the removal process.
    */
   public PostResponse remove(final String postKey, final RemovePost removePostForm,
       final Person person)
@@ -434,10 +451,11 @@ public class SublinksPostService {
     final Post post = postRepository.findByTitleSlug(postKey)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
 
-    if (!(rolePermissionService.isPermitted(person, RolePermissionPostTypes.DELETE_POST)
-        && postService.getPostCreator(post)
-        .getId()
-        .equals(person.getId()) && !post.isRemoved())) {
+    if (!(aclService.canPerson(person)
+        .onCommunity(post.getCommunity())
+        .performTheAction(RolePermissionPostTypes.DELETE_POST)
+        .isPermitted() && !Objects.equals(postService.getPostCreator(post)
+        .getId(), person.getId()) && !post.isRemoved())) {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
