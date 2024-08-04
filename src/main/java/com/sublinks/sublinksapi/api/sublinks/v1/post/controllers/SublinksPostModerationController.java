@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PinPost;

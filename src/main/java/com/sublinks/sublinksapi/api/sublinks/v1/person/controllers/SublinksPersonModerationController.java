@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;

@@ -6,7 +6,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PinCom
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PurgeComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.RemoveComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.RequestResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
