@@ -4,6 +4,7 @@ import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
 import com.sublinks.sublinksapi.comment.entities.CommentLike;
+import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.language.entities.Language;
 import com.sublinks.sublinksapi.person.enums.ListingType;
@@ -11,7 +12,6 @@ import com.sublinks.sublinksapi.person.enums.PostListingMode;
 import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.entities.PostRead;
-import com.sublinks.sublinksapi.post.entities.PostSave;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -65,6 +65,9 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
   Set<LinkPersonPost> linkPersonPost;
 
+  @OneToMany(mappedBy = "person", fetch = FetchType.LAZY)
+  Set<LinkPersonComment> linkPersonComment;
+
   @OneToMany(mappedBy = "fromPerson", fetch = FetchType.LAZY)
   Set<LinkPersonPerson> linkPersonPerson;
 
@@ -85,6 +88,9 @@ public class Person implements UserDetails, Principal {
   private LinkPersonInstance linkPersonInstance;
 
   @OneToMany(mappedBy = "person")
+  private List<LinkPersonCommunity> linkPersonCommunities;
+
+  @OneToMany(mappedBy = "person")
   private List<PersonMetaData> personMetaData;
 
   @OneToMany(fetch = FetchType.LAZY, mappedBy = "person")
@@ -98,10 +104,6 @@ public class Person implements UserDetails, Principal {
   @OneToMany(mappedBy = "person")
   @PrimaryKeyJoinColumn
   private List<CommentLike> commentReads;
-
-  @OneToMany(mappedBy = "person")
-  @PrimaryKeyJoinColumn
-  private List<PostSave> postSaves;
 
   @OneToMany(mappedBy = "person")
   @PrimaryKeyJoinColumn

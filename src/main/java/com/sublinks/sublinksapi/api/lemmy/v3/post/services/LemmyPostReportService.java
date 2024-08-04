@@ -10,8 +10,6 @@ import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.entities.PostLike;
 import com.sublinks.sublinksapi.post.entities.PostReport;
 import com.sublinks.sublinksapi.post.services.PostLikeService;
-import com.sublinks.sublinksapi.post.services.PostReportService;
-import com.sublinks.sublinksapi.post.services.PostSaveService;
 import com.sublinks.sublinksapi.post.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
@@ -22,8 +20,6 @@ import org.springframework.stereotype.Service;
 public class LemmyPostReportService {
 
   private final PostService postService;
-  private final PostReportService postReportService;
-  private final PostSaveService postSaveService;
   private final PostLikeService postLikeService;
   private final ConversionService conversionService;
   private final LinkPersonCommunityService linkPersonCommunityService;
@@ -51,25 +47,33 @@ public class LemmyPostReportService {
     final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person resolver = conversionService.convert(
         postReport.getResolver(), com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class);
 
-    final Community community = conversionService.convert(postReport.getPost().getCommunity(),
-        Community.class);
+    final Community community = conversionService.convert(postReport.getPost()
+        .getCommunity(), Community.class);
 
     final com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person lemmyPostCreator = conversionService.convert(
         postService.getPostCreator(postReport.getPost()),
         com.sublinks.sublinksapi.api.lemmy.v3.user.models.Person.class);
 
     final int personVote = postLikeService.getPostLike(postReport.getPost(), person)
-        .map(PostLike::getScore).orElse(0);
+        .map(PostLike::getScore)
+        .orElse(0);
 
-    final PostAggregates counts = conversionService.convert(postReport.getPost().getPostAggregate(),
-        PostAggregates.class);
+    final PostAggregates counts = conversionService.convert(postReport.getPost()
+        .getPostAggregate(), PostAggregates.class);
 
-    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(creator,
-        postReport.getPost().getCommunity(), LinkPersonCommunityType.banned);
+    final boolean creatorBannedFromCommunity = linkPersonCommunityService.hasLink(
+        postReport.getPost()
+            .getCommunity(), creator, LinkPersonCommunityType.banned);
 
-    return PostReportView.builder().post(lemmyPost).creator(lemmyCreator).community(community)
-        .post_report(lemmyPostReport).post_creator(lemmyPostCreator).my_vote(personVote)
-        .resolver(resolver).counts(counts)
+    return PostReportView.builder()
+        .post(lemmyPost)
+        .creator(lemmyCreator)
+        .community(community)
+        .post_report(lemmyPostReport)
+        .post_creator(lemmyPostCreator)
+        .my_vote(personVote)
+        .resolver(resolver)
+        .counts(counts)
         .creator_banned_from_community(creatorBannedFromCommunity);
   }
 }

@@ -29,6 +29,7 @@ import com.sublinks.sublinksapi.comment.services.CommentService;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.community.repositories.CommunityRepository;
 import com.sublinks.sublinksapi.moderation.entities.ModerationLog;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
@@ -204,11 +205,10 @@ public class CommentModActionsController extends AbstractLemmyApiController {
         RolePermissionInstanceTypes.REPORT_INSTANCE_RESOLVE);
 
     if (!isAdmin) {
-      final boolean isModerator = linkPersonCommunityService.hasLink(person,
-          commentReport.getComment()
-              .getCommunity(), LinkPersonCommunityType.moderator)
-          || linkPersonCommunityService.hasLink(person, commentReport.getComment()
-          .getCommunity(), LinkPersonCommunityType.owner);
+      final boolean isModerator = linkPersonCommunityService.hasLink(commentReport.getComment()
+          .getCommunity(), person, LinkPersonCommunityType.moderator)
+          || linkPersonCommunityService.hasLink(commentReport.getComment()
+          .getCommunity(), person, LinkPersonCommunityType.owner);
       if (!isModerator) {
         throw new ResponseStatusException(HttpStatus.FORBIDDEN);
       }
@@ -260,17 +260,23 @@ public class CommentModActionsController extends AbstractLemmyApiController {
 
       if (listCommentReportsForm.community_id() == null) {
 
-        moderatingCommunities.addAll(
-            linkPersonCommunityService.getPersonLinkByType(person, LinkPersonCommunityType.owner));
-        moderatingCommunities.addAll(linkPersonCommunityService.getPersonLinkByType(person,
-            LinkPersonCommunityType.moderator));
+        moderatingCommunities.addAll(linkPersonCommunityService.getLinks(person,
+                LinkPersonCommunityType.owner)
+            .stream()
+            .map(LinkPersonCommunity::getCommunity)
+            .toList());
+        moderatingCommunities.addAll(linkPersonCommunityService.getLinks(person,
+                LinkPersonCommunityType.moderator)
+            .stream()
+            .map(LinkPersonCommunity::getCommunity)
+            .toList());
       } else {
         Community community = communityRepository.findById(
                 (long) listCommentReportsForm.community_id())
             .orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
-        if (!linkPersonCommunityService.hasLink(person, community, LinkPersonCommunityType.owner)
-            && !linkPersonCommunityService.hasLink(person, community,
+        if (!linkPersonCommunityService.hasLink(community, person, LinkPersonCommunityType.owner)
+            && !linkPersonCommunityService.hasLink(community, person,
             LinkPersonCommunityType.moderator)) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }

@@ -243,10 +243,17 @@ ALTER TABLE email_person_recipients
 /**
   Comment Saves table
  */
-ALTER TABLE comment_saves
+ALTER TABLE link_person_comments
   ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE,
   ADD FOREIGN KEY (comment_id) REFERENCES comments (id) ON DELETE CASCADE;
 
+
+/**
+  Person Post Link table
+ */
+ALTER TABLE link_person_posts
+  ADD FOREIGN KEY (person_id) REFERENCES people (id) ON DELETE CASCADE,
+  ADD FOREIGN KEY (post_id) REFERENCES posts (id) ON DELETE CASCADE;
 /**
   Link Person Person Table
  */

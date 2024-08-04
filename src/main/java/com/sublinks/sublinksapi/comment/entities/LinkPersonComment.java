@@ -1,8 +1,11 @@
-package com.sublinks.sublinksapi.post.entities;
+package com.sublinks.sublinksapi.comment.entities;
 
+import com.sublinks.sublinksapi.comment.enums.LinkPersonCommentType;
 import com.sublinks.sublinksapi.person.entities.Person;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +21,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SourceType;
-import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.proxy.HibernateProxy;
 
 @Getter
@@ -27,15 +29,15 @@ import org.hibernate.proxy.HibernateProxy;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "post_saves")
-public class PostSave {
+@Table(name = "link_person_comments")
+public class LinkPersonComment {
 
   /**
    * Relationships.
    */
   @ManyToOne
-  @JoinColumn(name = "post_id")
-  private Post post;
+  @JoinColumn(name = "comment_id")
+  private Comment comment;
 
   @ManyToOne
   @JoinColumn(name = "person_id")
@@ -48,14 +50,14 @@ public class PostSave {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @Column(nullable = false, name = "link_type")
+  @Enumerated(EnumType.STRING)
+  private LinkPersonCommentType linkType;
+
   @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
 
-  
-  @UpdateTimestamp(source = SourceType.DB)
-  @Column(updatable = false, name = "updated_at")
-  private Date updatedAt;
 
   @Override
   public final boolean equals(Object o) {
@@ -75,14 +77,15 @@ public class PostSave {
     if (thisEffectiveClass != objectEffectiveClass) {
       return false;
     }
-    PostSave postSave = (PostSave) o;
-    return getId() != null && Objects.equals(getId(), postSave.getId());
+    LinkPersonComment that = (LinkPersonComment) o;
+    return getId() != null && Objects.equals(getId(), that.getId());
   }
 
   @Override
   public final int hashCode() {
 
     return this instanceof HibernateProxy ? ((HibernateProxy) this).getHibernateLazyInitializer()
-        .getPersistentClass().hashCode() : getClass().hashCode();
+        .getPersistentClass()
+        .hashCode() : getClass().hashCode();
   }
 }

@@ -66,7 +66,8 @@ public class PersonService {
       final Community community) {
 
     for (Language language : person.getLanguages()) {
-      if (community.getLanguages().contains(language)) {
+      if (community.getLanguages()
+          .contains(language)) {
         return Optional.of(language);
       }
     }
@@ -104,14 +105,16 @@ public class PersonService {
     person.setLocal(true);
     person.setEmail(person.getEmail());
     // @todo: add email verification and send verification email on registration
-    person.setEmailVerified(localInstanceContext.instance().getInstanceConfig() == null
-        || !localInstanceContext.instance().getInstanceConfig().isRequireEmailVerification());
+    person.setEmailVerified(localInstanceContext.instance()
+        .getInstanceConfig() == null || !localInstanceContext.instance()
+        .getInstanceConfig()
+        .isRequireEmailVerification());
 
-    Role role = localInstanceContext.instance().getDomain().isEmpty() ? roleService.getAdminRole(
-        () -> new RuntimeException("No Admin role found.")
-    ) : roleService.getDefaultRegisteredRole(
-        () -> new RuntimeException("No Registered role found.")
-    );
+    Role role = localInstanceContext.instance()
+        .getDomain()
+        .isEmpty() ? roleService.getAdminRole(() -> new RuntimeException("No Admin role found."))
+        : roleService.getDefaultRegisteredRole(
+            () -> new RuntimeException("No Registered role found."));
     person.setRole(role);
 
     final String userActorId = baseUrlUtil.getBaseUrl() + "/u/" + person.getName();
@@ -122,12 +125,14 @@ public class PersonService {
         .person(person)
         .build());
 
-    final List<Language> languages = new ArrayList<>(
-        localInstanceContext.instance().getLanguages());
+    final List<Language> languages = new ArrayList<>(localInstanceContext.instance()
+        .getLanguages());
     person.setLanguages(languages);
     personRepository.save(person);
 
-    final PersonAggregate personAggregate = PersonAggregate.builder().person(person).build();
+    final PersonAggregate personAggregate = PersonAggregate.builder()
+        .person(person)
+        .build();
     personAggregateRepository.save(personAggregate);
     person.setPersonAggregate(personAggregate);
 
@@ -211,6 +216,6 @@ public class PersonService {
     person.setBannerImageUrl("");
     person.setAvatarImageUrl("");
 
-    personDeletedPublisher.publish(personRepository.save(person));
+    personDeletedPublisher.publish(personRepository.save(person), deleteContent);
   }
 }

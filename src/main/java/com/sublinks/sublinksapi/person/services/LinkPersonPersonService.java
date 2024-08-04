@@ -1,9 +1,12 @@
 package com.sublinks.sublinksapi.person.services;
 
+import com.sublinks.sublinksapi.common.interfaces.ILinkingService;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPerson;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
+import com.sublinks.sublinksapi.person.events.LinkPersonPersonCreatedPublisher;
 import com.sublinks.sublinksapi.person.events.LinkPersonPersonDeletedPublisher;
+import com.sublinks.sublinksapi.person.events.LinkPersonPersonUpdatedPublisher;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import java.util.List;
 import java.util.Optional;
@@ -14,70 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class LinkPersonPersonService {
+public class LinkPersonPersonService implements
+    ILinkingService<LinkPersonPerson, Person, Person, LinkPersonPersonType> {
 
 
   private final LinkPersonPersonRepository linkPersonPersonRepository;
+  private final LinkPersonPersonCreatedPublisher linkPersonPersonCreatedPublisher;
+  private final LinkPersonPersonUpdatedPublisher linkPersonPersonUpdatedPublisher;
   private final LinkPersonPersonDeletedPublisher linkPersonPersonDeletedPublisher;
 
-  @Transactional
-  public void createLink(final Person fromPerson, final Person toPerson,
-      final LinkPersonPersonType type) {
-
-    Optional<LinkPersonPerson> linkPersonPerson = linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndToPersonAndLinkType(
-        fromPerson, toPerson, type);
-
-    if (linkPersonPerson.isPresent()) {
-      linkPersonPerson.get()
-          .setLinkType(type);
-
-      fromPerson.getLinkPersonPerson()
-          .removeIf(link -> link.equals(linkPersonPerson.get()));
-      fromPerson.getLinkPersonPerson()
-          .add(linkPersonPerson.get());
-      toPerson.getLinkPersonPerson()
-          .removeIf(link -> link.equals(linkPersonPerson.get()));
-      toPerson.getLinkPersonPerson()
-          .add(linkPersonPerson.get());
-
-      linkPersonPersonRepository.save(linkPersonPerson.get());
-      return;
-    }
-
-    final LinkPersonPerson newLink = LinkPersonPerson.builder()
-        .fromPerson(fromPerson)
-        .toPerson(toPerson)
-        .linkType(type)
-        .build();
-
-    fromPerson.getLinkPersonPerson()
-        .add(newLink);
-    toPerson.getLinkPersonPerson()
-        .add(newLink);
-    linkPersonPersonRepository.save(newLink);
-
-  }
-
-  @Transactional
-  public void removeLink(final Person fromPerson, final Person toPerson,
-      LinkPersonPersonType type) {
-
-    Optional<LinkPersonPerson> linkPersonPerson = linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndToPersonAndLinkType(
-        fromPerson, toPerson, type);
-
-    if (linkPersonPerson.isEmpty()) {
-      return;
-    }
-
-    LinkPersonPerson link = linkPersonPerson.get();
-    fromPerson.getLinkPersonPerson()
-        .remove(link);
-    toPerson.getLinkPersonPerson()
-        .remove(link);
-    linkPersonPersonRepository.delete(link);
-    linkPersonPersonDeletedPublisher.publish(link);
-  }
-
+  @Override
   public Optional<LinkPersonPerson> getLink(Person fromPerson, Person toPerson,
       LinkPersonPersonType linkType) {
 
@@ -88,26 +37,131 @@ public class LinkPersonPersonService {
         fromPerson, toPerson, linkType);
   }
 
+  @Override
+  public List<LinkPersonPerson> getLinks(Person person) {
+
+    return linkPersonPersonRepository.getLinkPersonPeopleByFromPerson(person);
+  }
+
+  @Override
+  public List<LinkPersonPerson> getLinks(Person person, LinkPersonPersonType linkPersonPersonType) {
+
+    return linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndLinkType(person,
+        linkPersonPersonType);
+  }
+
+  @Override
+  public List<LinkPersonPerson> getLinks(Person person,
+      List<LinkPersonPersonType> linkPersonPersonTypes) {
+
+    return linkPersonPersonRepository.getLinkPersonPeopleByFromPersonAndLinkTypeIn(person,
+        linkPersonPersonTypes);
+  }
+
+  @Override
+  public List<LinkPersonPerson> getLinksByEntity(Person fromPerson, Person toPerson) {
+
+    return this.linkPersonPersonRepository.getLinkPersonPeopleByFromPersonAndToPerson(fromPerson,
+        toPerson);
+  }
+
+  @Override
+  public List<LinkPersonPerson> getLinksByEntity(Person fromPerson,
+      List<LinkPersonPersonType> linkPersonPersonTypes) {
+
+    return linkPersonPersonRepository.getLinkPersonPeopleByToPersonAndLinkTypeIn(fromPerson,
+        linkPersonPersonTypes);
+  }
+
+  @Override
+  public List<LinkPersonPerson> getLinksByEntity(Person person) {
+
+    return linkPersonPersonRepository.getLinkPersonPeopleByToPerson(person);
+  }
+
+  @Override
   public boolean hasLink(Person fromPerson, Person toPerson, LinkPersonPersonType linkType) {
 
     return getLink(fromPerson, toPerson, linkType).isPresent();
   }
 
-  public boolean hasAllLinks(Person fromPerson, Person toPerson,
-      List<LinkPersonPersonType> linkTypes) {
+  @Override
+  public boolean hasAnyLink(Person fromPerson, Person toPerson,
+      List<LinkPersonPersonType> linkPersonPersonTypes) {
 
-    for (LinkPersonPersonType linkType : linkTypes) {
-      if (!hasLink(fromPerson, toPerson, linkType)) {
-        return false;
-      }
-    }
-    return true;
+    return this.linkPersonPersonRepository.getLinkPersonPeopleByFromPersonAndToPersonAndLinkTypeIn(
+            fromPerson, toPerson, linkPersonPersonTypes)
+        .isPresent();
   }
 
-  public List<LinkPersonPerson> getLinkPersonPersonByFromPersonAndLinkType(Person fromPerson,
-      LinkPersonPersonType linkType) {
+  public LinkPersonPerson createPersonLink(final Person fromPerson, final Person toPerson,
+      final LinkPersonPersonType type) {
 
-    return linkPersonPersonRepository.getLinkPersonPersonByFromPersonAndLinkType(fromPerson,
-        linkType);
+    final LinkPersonPerson link = LinkPersonPerson.builder()
+        .fromPerson(fromPerson)
+        .toPerson(toPerson)
+        .linkType(type)
+        .build();
+
+    this.createLink(link);
+    return link;
+  }
+
+  @Override
+  public void createLink(LinkPersonPerson link) {
+
+    linkPersonPersonRepository.saveAndFlush(link);
+    linkPersonPersonCreatedPublisher.publish(link);
+  }
+
+  @Override
+  public void createLinks(List<LinkPersonPerson> links) {
+
+    linkPersonPersonRepository.saveAllAndFlush(links)
+        .forEach(linkPersonPersonCreatedPublisher::publish);
+  }
+
+  @Override
+  public void updateLink(LinkPersonPerson link) {
+
+    this.linkPersonPersonRepository.saveAndFlush(link);
+
+    this.linkPersonPersonUpdatedPublisher.publish(link);
+
+  }
+
+  @Override
+  public void updateLinks(List<LinkPersonPerson> links) {
+
+    this.linkPersonPersonRepository.saveAllAndFlush(links)
+        .forEach(linkPersonPersonUpdatedPublisher::publish);
+  }
+
+  @Override
+  public void deleteLink(LinkPersonPerson link) {
+
+    linkPersonPersonRepository.delete(link);
+    linkPersonPersonDeletedPublisher.publish(link);
+  }
+
+  @Override
+  public void deleteLink(Person fromPerson, Person toPerson,
+      LinkPersonPersonType linkPersonPersonType) {
+
+    final Optional<LinkPersonPerson> linkPersonPersonOptional = linkPersonPersonRepository.deleteLinkPersonPersonByFromPersonAndToPersonAndLinkType(
+        fromPerson, toPerson, linkPersonPersonType);
+    linkPersonPersonOptional.ifPresent(linkPersonPersonDeletedPublisher::publish);
+  }
+
+  @Override
+  public void deleteLinks(List<LinkPersonPerson> linkPersonPeople) {
+
+    linkPersonPeople.forEach(link -> {
+
+      linkPersonPersonRepository.delete(link);
+
+      linkPersonPersonDeletedPublisher.publish(link);
+    });
+
   }
 }

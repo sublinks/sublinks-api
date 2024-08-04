@@ -12,13 +12,15 @@ import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonAggregates;
 import com.sublinks.sublinksapi.api.lemmy.v3.user.models.PersonBlockView;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.language.entities.Language;
+import com.sublinks.sublinksapi.person.entities.LinkPersonCommunity;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.LinkPersonPersonType;
 import com.sublinks.sublinksapi.person.repositories.LinkPersonPersonRepository;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
+import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
 import java.util.ArrayList;
 import java.util.Collection;
-import com.sublinks.sublinksapi.person.services.LinkPersonPersonService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
@@ -70,8 +72,11 @@ public class MyUserInfoService {
   public Collection<CommunityFollowerView> getUserCommunityFollows(
       com.sublinks.sublinksapi.person.entities.Person person) {
 
-    Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person,
-        LinkPersonCommunityType.follower);
+    Collection<Community> communities = linkPersonCommunityService.getLinks(person,
+            LinkPersonCommunityType.follower)
+        .stream()
+        .map(LinkPersonCommunity::getCommunity)
+        .toList();
 
     Collection<CommunityFollowerView> communityFollowerViews = new ArrayList<>();
     for (Community community : communities) {
@@ -89,34 +94,32 @@ public class MyUserInfoService {
       com.sublinks.sublinksapi.person.entities.Person person) {
 
     // @todo make this a single query
-    Collection<Community> communitiesOwned = linkPersonCommunityService.getPersonLinkByType(person,
-        LinkPersonCommunityType.owner);
-    Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person,
-        LinkPersonCommunityType.moderator);
+    List<Community> moderatingCommunities = linkPersonCommunityService.getLinks(person,
+            List.of(LinkPersonCommunityType.owner, LinkPersonCommunityType.moderator))
+        .stream()
+        .map(LinkPersonCommunity::getCommunity)
+        .toList();
 
     Collection<CommunityModeratorView> communityModeratorViews = new ArrayList<>();
-    for (Community community : communitiesOwned) {
+    for (Community community : moderatingCommunities) {
       communityModeratorViews.add(CommunityModeratorView.builder()
           .moderator(conversionService.convert(person, Person.class))
           .community(conversionService.convert(community,
               com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
           .build());
     }
-    for (Community community : communities) {
-      communityModeratorViews.add(CommunityModeratorView.builder()
-          .moderator(conversionService.convert(person, Person.class))
-          .community(conversionService.convert(community,
-              com.sublinks.sublinksapi.api.lemmy.v3.community.models.Community.class))
-          .build());
-    }
+
     return communityModeratorViews;
   }
 
   public Collection<CommunityBlockView> getUserCommunitiesBlocked(
       com.sublinks.sublinksapi.person.entities.Person person) {
 
-    Collection<Community> communities = linkPersonCommunityService.getPersonLinkByType(person,
-        LinkPersonCommunityType.blocked);
+    List<Community> communities = linkPersonCommunityService.getLinks(person,
+            LinkPersonCommunityType.blocked)
+        .stream()
+        .map(LinkPersonCommunity::getCommunity)
+        .toList();
 
     Collection<CommunityBlockView> communityBlockViews = new ArrayList<>();
     for (Community community : communities) {
@@ -132,8 +135,7 @@ public class MyUserInfoService {
   public Collection<PersonBlockView> getUserPeopleBlocked(
       com.sublinks.sublinksapi.person.entities.Person person) {
 
-    return linkPersonPersonService.getLinkPersonPersonByFromPersonAndLinkType(person,
-            LinkPersonPersonType.blocked)
+    return linkPersonPersonService.getLinksByEntity(person, List.of(LinkPersonPersonType.blocked))
         .stream()
         .map(link -> PersonBlockView.builder()
             .target(conversionService.convert(link.getToPerson(), Person.class))

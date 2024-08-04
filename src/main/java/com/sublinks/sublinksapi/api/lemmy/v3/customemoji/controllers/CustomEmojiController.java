@@ -58,7 +58,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     rolePermissionService.isPermitted(person,
         RolePermissionEmojiTypes.CREATE_EMOJI,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     final var customEmoji = CustomEmoji.builder()
         .altText(createCustomEmojiForm.alt_text())
@@ -93,7 +93,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     rolePermissionService.isPermitted(person,
         RolePermissionEmojiTypes.UPDATE_EMOJI,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     var emojiId = (long) editCustomEmojiForm.id();
     var customEmojiOptional = customEmojiRepository.findById(emojiId);
@@ -131,7 +131,7 @@ public class CustomEmojiController extends AbstractLemmyApiController {
 
     rolePermissionService.isPermitted(person,
         RolePermissionEmojiTypes.DELETE_EMOJI,
-        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not_an_admin"));
+        () -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     var emojiId = (long) deleteCustomEmojiForm.id();
     var exists = customEmojiRepository.existsById(emojiId);

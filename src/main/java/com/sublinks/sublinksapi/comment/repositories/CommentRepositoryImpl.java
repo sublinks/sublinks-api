@@ -5,6 +5,7 @@ import static com.sublinks.sublinksapi.utils.PaginationUtils.applyPagination;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.comment.entities.Comment;
+import com.sublinks.sublinksapi.comment.entities.LinkPersonComment;
 import com.sublinks.sublinksapi.comment.models.CommentSearchCriteria;
 import com.sublinks.sublinksapi.community.entities.Community;
 import com.sublinks.sublinksapi.person.entities.LinkPersonPerson;
@@ -82,6 +83,14 @@ public class CommentRepositoryImpl implements CommentRepositorySearch {
       predicates.add(cb.or(cb.or(linkPersonPersonJoin.isNull(),
               cb.notEqual(linkPersonPersonJoin.get("linkType"), LinkPersonPersonType.blocked)),
           cb.equal(roleJoin.get("name"), RoleTypes.ADMIN.toString())));
+    }
+
+    if (commentSearchCriteria.savedOnly() != null && commentSearchCriteria.savedOnly()) {
+
+      final Join<Comment, LinkPersonComment> linkPersonCommentJoin = commentTable.join(
+          "linkPersonComment", JoinType.LEFT);
+
+      predicates.add(cb.equal(linkPersonCommentJoin.get("person"), commentSearchCriteria.person()));
     }
 
     cq.where(predicates.toArray(new Predicate[0]));
