@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-ubi9-minimal
+FROM eclipse-temurin:21-jre-ubi9-minimal
 LABEL maintainer="Sublinks Core Developers <hello@sublinks.org>"
 LABEL description="Backend API service for Sublinks"
 
