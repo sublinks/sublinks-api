@@ -52,16 +52,14 @@ public class InitialRoleSetupService {
    * @param role            the role for which the permissions are being saved
    * @param rolePermissions the set of role permissions to be saved
    */
-  protected Role savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
+  protected void savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
     role.setRolePermissions(rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder()
+        .map(rolePermission -> rolePermissionsRepository.saveAndFlush(RolePermissions.builder()
             .role(role)
             .permission(rolePermission.toString())
             .build()))
         .collect(Collectors.toSet()));
-
-    return roleRepository.saveAndFlush(role);
   }
 
   /**
@@ -98,10 +96,11 @@ public class InitialRoleSetupService {
   protected void createAdminRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
-    Role adminRole = roleRepository.save(Role.builder()
+    Role adminRole = roleRepository.saveAndFlush(Role.builder()
         .inheritsFrom(inheritedRole)
         .description("Admin role for admins")
         .name(RoleTypes.ADMIN.toString())
+        .rolePermissions(new HashSet<>())
         .isActive(true)
         .build());
 
@@ -115,14 +114,16 @@ public class InitialRoleSetupService {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
 
-    Role defaultUserRole = roleRepository.save(Role.builder()
+    Role defaultUserRole = roleRepository.saveAndFlush(Role.builder()
         .inheritsFrom(inheritedRole)
         .description("Default role for all users")
         .name(RoleTypes.GUEST.toString())
+        .rolePermissions(new HashSet<>())
         .isActive(true)
         .build());
 
-    return savePermissions(defaultUserRole, rolePermissions);
+    savePermissions(defaultUserRole, rolePermissions);
+    return defaultUserRole;
   }
 
   /**
@@ -133,13 +134,15 @@ public class InitialRoleSetupService {
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
     applyCommonPermissions(rolePermissions);
 
-    Role bannedRole = roleRepository.save(Role.builder()
+    Role bannedRole = roleRepository.saveAndFlush(Role.builder()
         .description("Banned role for banned users")
         .name(RoleTypes.BANNED.toString())
+        .rolePermissions(new HashSet<>())
         .isActive(true)
         .build());
 
-    return savePermissions(bannedRole, rolePermissions);
+    savePermissions(bannedRole, rolePermissions);
+    return bannedRole;
   }
 
   /**
@@ -217,13 +220,15 @@ public class InitialRoleSetupService {
     rolePermissions.add(RolePermissionCommunityTypes.REPORT_COMMUNITY_RESOLVE);
     rolePermissions.add(RolePermissionCommunityTypes.REPORT_COMMUNITY_READ);
 
-    Role registeredUserRole = roleRepository.save(Role.builder()
+    Role registeredUserRole = roleRepository.saveAndFlush(Role.builder()
         .description("Default Role for all registered users")
         .inheritsFrom(inheritedRole)
+        .rolePermissions(new HashSet<>())
         .name(RoleTypes.REGISTERED.toString())
         .isActive(true)
         .build());
 
-    return savePermissions(registeredUserRole, rolePermissions);
+    savePermissions(registeredUserRole, rolePermissions);
+    return registeredUserRole;
   }
 }
