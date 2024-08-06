@@ -14,12 +14,12 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessage
 import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsRepository;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
-import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for generating the initial roles for the application.
@@ -34,7 +34,7 @@ public class InitialRoleSetupService {
   /**
    * Generates the initial roles for the application.
    */
-  @Transactional
+  @Transactional()
   public void generateInitialRoles() {
 
     if (roleRepository.findAll()
@@ -52,7 +52,6 @@ public class InitialRoleSetupService {
    * @param role            the role for which the permissions are being saved
    * @param rolePermissions the set of role permissions to be saved
    */
-  @Transactional
   protected Role savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
     role.setRolePermissions(rolePermissions.stream()
@@ -62,7 +61,7 @@ public class InitialRoleSetupService {
             .build()))
         .collect(Collectors.toSet()));
 
-    return roleRepository.save(role);
+    return roleRepository.saveAndFlush(role);
   }
 
   /**
@@ -70,7 +69,6 @@ public class InitialRoleSetupService {
    *
    * @param rolePermissions the set of role permissions to which common permissions will be added
    */
-  @Transactional
   protected void applyCommonPermissions(Set<RolePermissionInterface> rolePermissions) {
 
     rolePermissions.add(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGE);
@@ -97,7 +95,6 @@ public class InitialRoleSetupService {
   /**
    * Creates the admin role with the specified permissions.
    */
-  @Transactional
   protected void createAdminRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
@@ -114,7 +111,6 @@ public class InitialRoleSetupService {
   /**
    * Creates the guest role with all associated permissions.
    */
-  @Transactional
   protected Role createGuestRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
@@ -132,7 +128,6 @@ public class InitialRoleSetupService {
   /**
    * Creates the banned role with all associated permissions.
    */
-  @Transactional
   protected Role createBannedRole() {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
@@ -150,7 +145,6 @@ public class InitialRoleSetupService {
   /**
    * Creates the registered role with all associated permissions.
    */
-  @Transactional
   protected Role createRegisteredRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
