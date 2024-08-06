@@ -233,13 +233,14 @@ public class LinkPersonCommunityService implements
         community, linkPersonCommunityType);
   }
 
-  public Collection<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
+  public List<LinkPersonCommunity> getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
       Community community, List<LinkPersonCommunityType> types)
   {
 
-    return linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIsIn(
-        community, types);
+    return linkPersonCommunityRepository.getLinkPersonCommunitiesByCommunityAndLinkTypeIn(community,
+        types);
   }
+
   @Override
   public List<LinkPersonCommunity> getLinksByEntity(Community community) {
 

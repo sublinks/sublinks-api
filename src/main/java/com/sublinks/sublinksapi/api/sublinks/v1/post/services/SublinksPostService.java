@@ -501,10 +501,10 @@ public class SublinksPostService {
       if (linkPersonPostRepository.getLinkPersonPostByPostAndPersonAndLinkType(post, person,
               LinkPersonPostType.follower)
           .isEmpty()) {
-        linkPersonPostService.createLink(person, post, LinkPersonPostType.follower);
+        linkPersonPostService.createPostLink(post, person, LinkPersonPostType.follower);
       }
     } else {
-      linkPersonPostService.removeLink(person, post, LinkPersonPostType.follower);
+      linkPersonPostService.deleteLink(post, person, LinkPersonPostType.follower);
     }
 
     return conversionService.convert(post, PostResponse.class);

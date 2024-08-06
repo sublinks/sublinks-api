@@ -1,7 +1,7 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksPersonRoleMapper;
+import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksRoleMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.PersonKeyUtils;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksPersonRoleMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksRoleMapper.class})
 public abstract class SublinksPersonMapper implements Converter<Person, PersonResponse> {
 
   @Autowired

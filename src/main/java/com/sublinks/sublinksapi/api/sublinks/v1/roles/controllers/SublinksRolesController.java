@@ -37,14 +37,13 @@ public class SublinksRolesController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<RoleResponse> index(final Optional<IndexRole> indexRoleForm,
+  public List<RoleResponse> index(@Valid final IndexRole indexRoleForm,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    return sublinksRoleService.indexRole(indexRoleForm.orElse(IndexRole.builder()
-        .build()), person.orElse(null));
+    return sublinksRoleService.indexRole(indexRoleForm, person.orElse(null));
   }
 
   @Operation(summary = "Get a specific role")

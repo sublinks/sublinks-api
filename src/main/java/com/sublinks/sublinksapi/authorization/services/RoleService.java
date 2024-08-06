@@ -24,7 +24,6 @@ public class RoleService {
   private final RoleCreatedPublisher roleCreatedEventPublisher;
   private final RoleUpdatedPublisher roleUpdatedEventPublisher;
   private final RoleDeletedPublisher roleDeletedEventPublisher;
-  private final RolePermissionService rolePermissionService;
 
 
   /**

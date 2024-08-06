@@ -15,13 +15,13 @@ public record PersonResponse(
     String bio,
     String matrixUserId,
     String actorId,
+    PersonRoleResponse role,
     Boolean isLocal,
     Boolean isBanned,
     @Schema(description = "The date and time the users ban expires at",
         requiredMode = RequiredMode.NOT_REQUIRED) String banExpiresAt,
     Boolean isDeleted,
     Boolean isBotAccount,
-    PersonRoleResponse personRoleResponse,
     String createdAt,
     String updatedAt) {
 

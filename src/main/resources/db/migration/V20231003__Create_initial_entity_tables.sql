@@ -678,16 +678,18 @@ CREATE INDEX IDX_CUSTOM_EMOJI_KEYWORD_CUSTOM_EMOJI_ID ON custom_emoji_keywords (
  */
 CREATE TABLE acl_roles
 (
-  id          BIGSERIAL PRIMARY KEY,
-  name        VARCHAR(255)                              NOT NULL,
-  description TEXT                                      NOT NULL,
-  is_active   BOOL                                      NOT NULL DEFAULT true,
-  expires_at  TIMESTAMP(3)                              NULL,
-  created_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
-  updated_at  TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
+  id            BIGSERIAL PRIMARY KEY,
+  name          VARCHAR(255)                              NOT NULL,
+  description   TEXT                                      NOT NULL,
+  inherits_from BIGINT                                    NULL,
+  is_active     BOOL                                      NOT NULL DEFAULT true,
+  expires_at    TIMESTAMP(3)                              NULL,
+  created_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL,
+  updated_at    TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP(3) NOT NULL
 );
 
 CREATE UNIQUE INDEX IDX_ACL_ROLES_NAME ON acl_roles (name);
+CREATE INDEX IDX_ACL_ROLES_INHERITS_FROM ON acl_roles (inherits_from);
 
 /**
   Role permissions table

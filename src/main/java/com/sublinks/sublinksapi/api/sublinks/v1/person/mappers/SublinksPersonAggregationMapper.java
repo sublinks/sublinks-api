@@ -1,7 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonAggregateResponse;
-import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksPersonRoleMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.PersonKeyUtils;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.entities.PersonAggregate;
@@ -14,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksPersonRoleMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 @NoArgsConstructor
 public abstract class SublinksPersonAggregationMapper implements
     Converter<PersonAggregate, PersonAggregateResponse> {
@@ -34,6 +33,6 @@ public abstract class SublinksPersonAggregationMapper implements
   String mapPersonKey(Person person) {
 
     return personKeyUtils.getPersonKey(person);
-
   }
+
 }

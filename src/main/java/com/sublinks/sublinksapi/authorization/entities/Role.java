@@ -7,6 +7,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Date;
@@ -32,8 +34,15 @@ public class Role {
   @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
   Set<RolePermissions> rolePermissions;
 
+  @ManyToOne
+  @JoinColumn(name = "inherits_from", referencedColumnName = "id", nullable = true)
+  Role inheritsFrom;
+
+  @OneToMany(mappedBy = "inheritsFrom", fetch = FetchType.LAZY)
+  Set<Role> inheritedRoles;
+
   @OneToMany(mappedBy = "role")
-  private Set<Person> persons;
+  Set<Person> persons;
 
 
   @Id
@@ -55,7 +64,6 @@ public class Role {
   @CreationTimestamp(source = SourceType.DB)
   @Column(updatable = false, nullable = false, name = "created_at")
   private Date createdAt;
-
 
   @UpdateTimestamp(source = SourceType.DB)
   @Column(updatable = false, name = "updated_at")

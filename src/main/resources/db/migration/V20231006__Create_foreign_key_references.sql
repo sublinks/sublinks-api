@@ -196,6 +196,11 @@ ALTER TABLE custom_emoji_keywords
 ALTER TABLE acl_role_permissions
   ADD FOREIGN KEY (role_id) REFERENCES acl_roles (id) ON DELETE CASCADE;
 
+/**
+  Role Table
+ */
+ALTER TABLE acl_roles
+  ADD FOREIGN KEY (inherits_from) REFERENCES acl_roles (id) ON DELETE SET NULL;
 
 /**
   People table

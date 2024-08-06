@@ -266,13 +266,14 @@ public class SublinksCommunityService {
     }
 
     if (!communityBanPersonForm.ban()) {
-      linkPersonCommunityService.removeLink(personToBan, community, LinkPersonCommunityType.banned);
+      linkPersonCommunityService.deleteLink(community, personToBan, LinkPersonCommunityType.banned);
     } else {
       linkPersonCommunityService.removeAnyLink(personToBan, community,
           List.of(LinkPersonCommunityType.owner, LinkPersonCommunityType.moderator,
               LinkPersonCommunityType.follower, LinkPersonCommunityType.pending_follow));
 
-      linkPersonCommunityService.addLink(personToBan, community, LinkPersonCommunityType.banned);
+      linkPersonCommunityService.createLinkPersonCommunityLink(community, personToBan,
+          LinkPersonCommunityType.banned);
     }
     // @todo: Modlog
 

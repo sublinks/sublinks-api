@@ -39,12 +39,29 @@ public class SublinksRoleService {
         .performTheAction(RolePermissionRoleTypes.ROLE_READ)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
-    return roleRepository.findAllByNameIsLikeIgnoreCase(indexRoleForm.search(),
-            PageRequest.of(indexRoleForm.page(), indexRoleForm.limit(), indexRoleForm.sort()
-                .equals(SortOrder.Asc) ? Sort.by("name")
-                .ascending() : Sort.by("name")
-                .descending()))
-        .stream()
+    final List<Role> roles = new java.util.ArrayList<>();
+
+    final int page = indexRoleForm.page() != null ? Math.max(indexRoleForm.page(), 0) : 0;
+    final int limit = indexRoleForm.limit() != null ? Math.max(Math.min(indexRoleForm.limit(), 20),
+        0) : 20;
+
+    if (indexRoleForm.search() != null) {
+      roles.addAll(roleRepository.findAllByNameIsLikeIgnoreCase(indexRoleForm.search(),
+          PageRequest.of(page, limit, indexRoleForm.sort() != null && indexRoleForm.sort()
+              .equals(SortOrder.Desc) ? Sort.by("name")
+              .descending() : Sort.by("name")
+              .ascending())));
+    } else {
+      roles.addAll(roleRepository.findAll(PageRequest.of(page, limit,
+              indexRoleForm.sort() != null && indexRoleForm.sort()
+                  .equals(SortOrder.Desc) ? Sort.by("name")
+                  .ascending() : Sort.by("name")
+                  .descending()))
+          .stream()
+          .toList());
+    }
+
+    return roles.stream()
         .map(role -> conversionService.convert(role, RoleResponse.class))
         .toList();
   }

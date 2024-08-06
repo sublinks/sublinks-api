@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.community.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.CommunityResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.CommunityBanPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.community.models.moderation.CommunityModeratorResponse;
@@ -92,8 +92,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
 
     rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionCommunityTypes.READ_COMMUNITY_MODERATORS, () -> {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-              "unauthorized");
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
         });
 
     return sublinksCommunityService.getCommunityModerators(key, person.orElse(null))
@@ -134,7 +133,8 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
       throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "person_already_moderator");
     }
 
-    linkPersonCommunityService.addLink(newModerator, community, LinkPersonCommunityType.moderator);
+    linkPersonCommunityService.createLinkPersonCommunityLink(community, newModerator,
+        LinkPersonCommunityType.moderator);
 
     return sublinksCommunityService.getCommunityModerators(key, person)
         .stream()
@@ -163,7 +163,7 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
-    linkPersonCommunityService.removeLink(person, community, LinkPersonCommunityType.moderator);
+    linkPersonCommunityService.deleteLink(community, person, LinkPersonCommunityType.moderator);
 
     return sublinksCommunityService.getCommunityModerators(key, person)
         .stream()
@@ -208,8 +208,8 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
-    return linkPersonCommunityService.getPersonsFromCommunityAndListTypes(community,
-            List.of(LinkPersonCommunityType.banned))
+    return linkPersonCommunityService.getLinkPersonCommunitiesByCommunityAndPersonAndLinkTypeIsIn(
+            community, List.of(LinkPersonCommunityType.banned))
         .stream()
         .map(person -> conversionService.convert(person, PersonResponse.class))
         .toList();

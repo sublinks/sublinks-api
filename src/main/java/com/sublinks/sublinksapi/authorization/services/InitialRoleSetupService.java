@@ -14,6 +14,7 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessage
 import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsRepository;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
+import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,14 +34,15 @@ public class InitialRoleSetupService {
   /**
    * Generates the initial roles for the application.
    */
+  @Transactional
   public void generateInitialRoles() {
 
     if (roleRepository.findAll()
         .isEmpty()) {
-      createAdminRole();
-      createBannedRole();
-      createGuestRole();
-      createRegisteredRole();
+      final Role bannedRole = createBannedRole();
+      final Role guestRole = createGuestRole(bannedRole);
+      final Role registeredRole = createRegisteredRole(guestRole);
+      createAdminRole(registeredRole);
     }
   }
 
@@ -50,7 +52,8 @@ public class InitialRoleSetupService {
    * @param role            the role for which the permissions are being saved
    * @param rolePermissions the set of role permissions to be saved
    */
-  private void savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
+  @Transactional
+  protected Role savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
     role.setRolePermissions(rolePermissions.stream()
         .map(rolePermission -> rolePermissionsRepository.save(RolePermissions.builder()
@@ -58,6 +61,8 @@ public class InitialRoleSetupService {
             .permission(rolePermission.toString())
             .build()))
         .collect(Collectors.toSet()));
+
+    return roleRepository.save(role);
   }
 
   /**
@@ -65,7 +70,8 @@ public class InitialRoleSetupService {
    *
    * @param rolePermissions the set of role permissions to which common permissions will be added
    */
-  private void applyCommonPermissions(Set<RolePermissionInterface> rolePermissions) {
+  @Transactional
+  protected void applyCommonPermissions(Set<RolePermissionInterface> rolePermissions) {
 
     rolePermissions.add(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGE);
     rolePermissions.add(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES);
@@ -91,10 +97,12 @@ public class InitialRoleSetupService {
   /**
    * Creates the admin role with the specified permissions.
    */
-  private void createAdminRole() {
+  @Transactional
+  protected void createAdminRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
     Role adminRole = roleRepository.save(Role.builder()
+        .inheritsFrom(inheritedRole)
         .description("Admin role for admins")
         .name(RoleTypes.ADMIN.toString())
         .isActive(true)
@@ -106,24 +114,26 @@ public class InitialRoleSetupService {
   /**
    * Creates the guest role with all associated permissions.
    */
-  private void createGuestRole() {
+  @Transactional
+  protected Role createGuestRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
-    applyCommonPermissions(rolePermissions);
 
     Role defaultUserRole = roleRepository.save(Role.builder()
+        .inheritsFrom(inheritedRole)
         .description("Default role for all users")
         .name(RoleTypes.GUEST.toString())
         .isActive(true)
         .build());
 
-    savePermissions(defaultUserRole, rolePermissions);
+    return savePermissions(defaultUserRole, rolePermissions);
   }
 
   /**
    * Creates the banned role with all associated permissions.
    */
-  private void createBannedRole() {
+  @Transactional
+  protected Role createBannedRole() {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
     applyCommonPermissions(rolePermissions);
@@ -134,13 +144,14 @@ public class InitialRoleSetupService {
         .isActive(true)
         .build());
 
-    savePermissions(bannedRole, rolePermissions);
+    return savePermissions(bannedRole, rolePermissions);
   }
 
   /**
    * Creates the registered role with all associated permissions.
    */
-  private void createRegisteredRole() {
+  @Transactional
+  protected Role createRegisteredRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
     applyCommonPermissions(rolePermissions);
@@ -214,10 +225,11 @@ public class InitialRoleSetupService {
 
     Role registeredUserRole = roleRepository.save(Role.builder()
         .description("Default Role for all registered users")
+        .inheritsFrom(inheritedRole)
         .name(RoleTypes.REGISTERED.toString())
         .isActive(true)
         .build());
 
-    savePermissions(registeredUserRole, rolePermissions);
+    return savePermissions(registeredUserRole, rolePermissions);
   }
 }
