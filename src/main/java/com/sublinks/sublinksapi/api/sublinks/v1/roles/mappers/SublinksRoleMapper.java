@@ -12,19 +12,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
-    uses = {RolePermissionService.class, SublinksPermissionInterfaceMapper.class})
+    uses = {RolePermissionService.class})
 public abstract class SublinksRoleMapper implements Converter<Role, RoleResponse> {
 
-  @Autowired
-  public SublinksPermissionInterfaceMapper sublinksPermissionInterfaceMapper;
-
-  @Autowired
-  public RolePermissionService rolePermissionService;
+  protected RolePermissionService rolePermissionService;
 
   @Override
   @Mapping(target = "key", source = "role.name")
@@ -32,8 +27,7 @@ public abstract class SublinksRoleMapper implements Converter<Role, RoleResponse
   @Mapping(target = "description", source = "role.description")
   @Mapping(target = "permissions", source = "role", qualifiedByName = "map_permissions")
   @Mapping(target = "inheritedPermissions",
-      source = "role",
-      qualifiedByName = "map_inherited_permissions")
+      expression = "java(rolePermissionService.getRolePermissions(role))")
   @Mapping(target = "inheritsFrom", source = "role.inheritsFrom.name")
   @Mapping(target = "isActive", source = "role.active")
   @Mapping(target = "isExpired", source = "role", qualifiedByName = "is_expired")
@@ -62,13 +56,8 @@ public abstract class SublinksRoleMapper implements Converter<Role, RoleResponse
 
     return role.getRolePermissions()
         .stream()
-        .map((permission) -> sublinksPermissionInterfaceMapper.convert(permission.getPermission()))
+        .map((permission) -> new SublinksPermissionInterfaceMapper().convert(
+            permission.getPermission()))
         .collect(Collectors.toSet());
-  }
-
-  @Named("map_inherited_permissions")
-  Set<RolePermissionInterface> mapInheritedPermissions(Role role) {
-
-    return rolePermissionService.getRolePermissions(role);
   }
 }

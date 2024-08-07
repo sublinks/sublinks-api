@@ -14,12 +14,13 @@ import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessage
 import com.sublinks.sublinksapi.authorization.enums.RoleTypes;
 import com.sublinks.sublinksapi.authorization.repositories.RolePermissionsRepository;
 import com.sublinks.sublinksapi.authorization.repositories.RoleRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service class for generating the initial roles for the application.
@@ -30,11 +31,12 @@ public class InitialRoleSetupService {
 
   private final RoleRepository roleRepository;
   private final RolePermissionsRepository rolePermissionsRepository;
+  private final EntityManager entityManager;
 
   /**
    * Generates the initial roles for the application.
    */
-  @Transactional()
+  @Transactional
   public void generateInitialRoles() {
 
     if (roleRepository.findAll()
@@ -54,12 +56,14 @@ public class InitialRoleSetupService {
    */
   protected void savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
-    role.setRolePermissions(rolePermissions.stream()
+    entityManager.merge(role);
+    Set<RolePermissions> rolePermissionsSet = rolePermissions.stream()
         .map(rolePermission -> rolePermissionsRepository.saveAndFlush(RolePermissions.builder()
             .role(role)
             .permission(rolePermission.toString())
             .build()))
-        .collect(Collectors.toSet()));
+        .collect(Collectors.toSet());
+
   }
 
   /**

@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.authorization.entities;
 
 import com.sublinks.sublinksapi.person.entities.Person;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -12,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,18 +33,18 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "acl_roles")
 public class Role {
 
-  @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
-  Set<RolePermissions> rolePermissions;
+  @OneToMany(mappedBy = "role", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private Set<RolePermissions> rolePermissions;
 
-  @ManyToOne
+  @ManyToOne(targetEntity = Role.class, fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "inherits_from", referencedColumnName = "id", nullable = true)
-  Role inheritsFrom;
+  private Role inheritsFrom;
 
-  @OneToMany(mappedBy = "inheritsFrom", fetch = FetchType.LAZY)
-  Set<Role> inheritedRoles;
+  @OneToMany(mappedBy = "inheritsFrom", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  private Set<Role> inheritedRoles;
 
   @OneToMany(mappedBy = "role")
-  Set<Person> persons;
+  private Set<Person> persons;
 
 
   @Id
