@@ -3,9 +3,10 @@ package com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers;
 import com.sublinks.sublinksapi.api.lemmy.v3.utils.DateUtils;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.RoleResponse;
 import com.sublinks.sublinksapi.authorization.entities.Role;
+import com.sublinks.sublinksapi.authorization.entities.RolePermissions;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInterface;
-import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.mapstruct.Mapper;
@@ -15,11 +16,8 @@ import org.mapstruct.Named;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
-    uses = {RolePermissionService.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public abstract class SublinksRoleMapper implements Converter<Role, RoleResponse> {
-
-  protected RolePermissionService rolePermissionService;
 
   @Override
   @Mapping(target = "key", source = "role.name")
@@ -27,7 +25,8 @@ public abstract class SublinksRoleMapper implements Converter<Role, RoleResponse
   @Mapping(target = "description", source = "role.description")
   @Mapping(target = "permissions", source = "role", qualifiedByName = "map_permissions")
   @Mapping(target = "inheritedPermissions",
-      expression = "java(rolePermissionService.getRolePermissions(role))")
+      source = "role",
+      qualifiedByName = "map_inherited_permissions")
   @Mapping(target = "inheritsFrom", source = "role.inheritsFrom.name")
   @Mapping(target = "isActive", source = "role.active")
   @Mapping(target = "isExpired", source = "role", qualifiedByName = "is_expired")
@@ -51,11 +50,30 @@ public abstract class SublinksRoleMapper implements Converter<Role, RoleResponse
     return new Date().after(role.getExpiresAt());
   }
 
+  // @code-duplication TODO: Improve the following two methods as i didnt knew any better way to do inject those dependencies
   @Named("map_permissions")
   Set<RolePermissionInterface> mapPermissions(Role role) {
 
     return role.getRolePermissions()
         .stream()
+        .map((permission) -> new SublinksPermissionInterfaceMapper().convert(
+            permission.getPermission()))
+        .collect(Collectors.toSet());
+  }
+
+  @Named("map_inherited_permissions")
+  Set<RolePermissionInterface> mapInheritedPermissions(Role role) {
+
+    final Set<RolePermissions> rolePermissions = new HashSet<>();
+
+    Role currentRole = role;
+
+    while (currentRole != null) {
+      rolePermissions.addAll(currentRole.getRolePermissions());
+      currentRole = currentRole.getInheritsFrom();
+    }
+
+    return rolePermissions.stream()
         .map((permission) -> new SublinksPermissionInterfaceMapper().convert(
             permission.getPermission()))
         .collect(Collectors.toSet());

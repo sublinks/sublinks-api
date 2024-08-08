@@ -18,7 +18,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -57,12 +56,12 @@ public class InitialRoleSetupService {
   protected void savePermissions(Role role, Set<RolePermissionInterface> rolePermissions) {
 
     entityManager.merge(role);
-    Set<RolePermissions> rolePermissionsSet = rolePermissions.stream()
-        .map(rolePermission -> rolePermissionsRepository.saveAndFlush(RolePermissions.builder()
+    rolePermissionsRepository.saveAllAndFlush(rolePermissions.stream()
+        .map(rolePermission -> RolePermissions.builder()
             .role(role)
             .permission(rolePermission.toString())
-            .build()))
-        .collect(Collectors.toSet());
+            .build())
+        .toList());
 
   }
 
@@ -155,7 +154,6 @@ public class InitialRoleSetupService {
   protected Role createRegisteredRole(final Role inheritedRole) {
 
     Set<RolePermissionInterface> rolePermissions = new HashSet<>();
-    applyCommonPermissions(rolePermissions);
 
     rolePermissions.add(RolePermissionMediaTypes.CREATE_MEDIA);
 

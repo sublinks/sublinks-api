@@ -11,11 +11,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {SublinksRoleMapper.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
+    uses = {SublinksRoleMapper.class},
+    unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class SublinksPersonMapper implements Converter<Person, PersonResponse> {
 
   @Autowired
