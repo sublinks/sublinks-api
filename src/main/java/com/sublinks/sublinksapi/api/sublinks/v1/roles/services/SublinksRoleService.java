@@ -45,18 +45,18 @@ public class SublinksRoleService {
     final int limit = indexRoleForm.limit() != null ? Math.max(Math.min(indexRoleForm.limit(), 20),
         0) : 20;
 
+    Sort sortOrder = indexRoleForm.sort() != null && indexRoleForm.sort()
+        .equals(SortOrder.Desc) ? Sort.by("name")
+        .descending() : Sort.by("name")
+        .ascending();
+
+    PageRequest pageRequest = PageRequest.of(page, limit, sortOrder);
+
     if (indexRoleForm.search() != null) {
-      roles.addAll(roleRepository.findAllByNameIsLikeIgnoreCase(indexRoleForm.search(),
-          PageRequest.of(page, limit, indexRoleForm.sort() != null && indexRoleForm.sort()
-              .equals(SortOrder.Desc) ? Sort.by("name")
-              .descending() : Sort.by("name")
-              .ascending())));
+      roles.addAll(
+          roleRepository.findAllByNameIsLikeIgnoreCase(indexRoleForm.search(), pageRequest));
     } else {
-      roles.addAll(roleRepository.findAll(PageRequest.of(page, limit,
-              indexRoleForm.sort() != null && indexRoleForm.sort()
-                  .equals(SortOrder.Desc) ? Sort.by("name")
-                  .ascending() : Sort.by("name")
-                  .descending()))
+      roles.addAll(roleRepository.findAll(pageRequest)
           .stream()
           .toList());
     }
