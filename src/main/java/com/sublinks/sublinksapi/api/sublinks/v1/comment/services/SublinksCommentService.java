@@ -8,8 +8,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.IndexComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.PinComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.RemoveComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.UpdateComment;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SortType;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.enums.SublinksListingType;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionCommentTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.comment.entities.Comment;
@@ -27,6 +25,7 @@ import com.sublinks.sublinksapi.language.services.LanguageService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import com.sublinks.sublinksapi.person.enums.LinkPersonCommunityType;
 import com.sublinks.sublinksapi.person.enums.ListingType;
+import com.sublinks.sublinksapi.person.enums.SortType;
 import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
@@ -88,24 +87,24 @@ public class SublinksCommentService {
       post = postRepository.findByTitleSlug(indexCommentForm.postKey());
     }
 
-    SortType sortType = indexCommentForm.sortType();
-    if (sortType == null) {
-      if (person.getDefaultSortType() != null) {
-        sortType = conversionService.convert(person.getDefaultSortType(), SortType.class);
-      } else {
-        sortType = SortType.New;
-      }
+    com.sublinks.sublinksapi.person.enums.SortType sortType;
+    if (indexCommentForm.sortType() != null) {
+      sortType = conversionService.convert(indexCommentForm.sortType(), SortType.class);
+    } else if (person != null && person.getDefaultSortType() != null) {
+      sortType = person.getDefaultSortType();
+    } else {
+      sortType = SortType.New;
     }
 
-    SublinksListingType sublinksListingType = indexCommentForm.listingType();
+    ListingType sublinksListingType;
 
-    if (sublinksListingType == null) {
-      if (person.getDefaultListingType() != null) {
-        sublinksListingType = conversionService.convert(person.getDefaultListingType(),
-            SublinksListingType.class);
-      } else {
-        sublinksListingType = SublinksListingType.Local;
-      }
+    if (indexCommentForm.listingType() != null) {
+      sublinksListingType = conversionService.convert(indexCommentForm.listingType(),
+          ListingType.class);
+    } else if (person != null && person.getDefaultListingType() != null) {
+      sublinksListingType = person.getDefaultListingType();
+    } else {
+      sublinksListingType = ListingType.Local;
     }
 
     CommentSearchCriteria.CommentSearchCriteriaBuilder commentSearchCriteria = CommentSearchCriteria.builder()
@@ -114,7 +113,7 @@ public class SublinksCommentService {
         .commentSortType(conversionService.convert(sortType, CommentSortType.class))
         .perPage(indexCommentForm.perPage())
         .savedOnly(indexCommentForm.savedOnly())
-        .listingType(conversionService.convert(sublinksListingType, ListingType.class))
+        .listingType(sublinksListingType)
         .community(community.orElse(null))
         .parent(parentComment.orElse(null))
         .post(post.orElse(null))

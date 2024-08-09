@@ -33,6 +33,4 @@ public abstract class SublinksCommentMapper implements Converter<Comment, Commen
       dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
   @Mapping(target = "replies", ignore = true)
   public abstract CommentResponse convert(@Nullable Comment comment);
-
-
 }
