@@ -70,7 +70,7 @@ public class PostSearchQueryService {
 
     public Results setPage(final Integer page) {
 
-      int p = Math.max(Math.abs(page), 0);
+      int p = Math.max(Math.abs(page), 1);
       getQuery().setFirstResult((p - 1) * this.getPerPage());
       return this;
     }
