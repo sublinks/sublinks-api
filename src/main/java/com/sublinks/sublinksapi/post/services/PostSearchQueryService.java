@@ -70,7 +70,7 @@ public class PostSearchQueryService {
 
     public Results setPage(final Integer page) {
 
-      int p = Math.max(Math.abs(page), 0);
+      int p = Math.max(Math.abs(page), 1);
       getQuery().setFirstResult((p - 1) * this.getPerPage());
       return this;
     }
@@ -138,7 +138,8 @@ public class PostSearchQueryService {
     private Set<RemovedState> removedState;
 
     public Builder(EntityManager entityManager, CriteriaBuilder criteriaBuilder,
-        SortFactory sortFactory) {
+        SortFactory sortFactory)
+    {
 
       this.entityManager = entityManager;
       this.criteriaBuilder = criteriaBuilder;
@@ -307,6 +308,25 @@ public class PostSearchQueryService {
     public Builder setPerson(Person person) {
 
       this.person = person;
+      return this;
+    }
+
+    public Builder setShowNsfw(Boolean isShowNsfw) {
+
+      if (!isShowNsfw) {
+        predicates.add(criteriaBuilder.isFalse(postTable.get("isNsfw")));
+      }
+      return this;
+    }
+
+    public Builder addSearch(String search) {
+
+      if (search != null && !search.isBlank()) {
+
+        predicates.add(criteriaBuilder.equal(
+            criteriaBuilder.function("fn_search_vector_is_same", Boolean.class,
+                postTable.get("searchVector"), criteriaBuilder.literal(search)), true));
+      }
       return this;
     }
   }

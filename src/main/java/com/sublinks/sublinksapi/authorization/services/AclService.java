@@ -107,7 +107,8 @@ public class AclService {
      * @param aclRepository the repository for accessing and manipulating ACL entities
      */
     public EntityPolicy(final ActionType actionType, final AclRepository aclRepository,
-        final RolePermissionService rolePermissionService, RoleService roleService) {
+        final RolePermissionService rolePermissionService, RoleService roleService)
+    {
 
       this.roleService = roleService;
 
@@ -127,7 +128,8 @@ public class AclService {
      */
     public EntityPolicy(final Person person, final ActionType actionType,
         final AclRepository aclRepository, RolePermissionService rolePermissionService,
-        RoleService roleService) {
+        RoleService roleService)
+    {
 
       this.person = person;
       this.actionType = actionType;
@@ -201,8 +203,8 @@ public class AclService {
      * @param <X>               the type of exception to be thrown
      * @throws X the thrown exception if the condition is not satisfied
      */
-    public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier)
-        throws X {
+    public <X extends Throwable> void orElseThrow(Supplier<? extends X> exceptionSupplier) throws X
+    {
 
       execute();
       if (!isPermitted) {
@@ -248,7 +250,6 @@ public class AclService {
           this.isPermitted = this.authorizedActions.stream()
               .allMatch(permission -> rolePermissionService.isPermitted(this.person, permission,
                   community.getId()));
-
         } else {
           this.isPermitted = this.authorizedActions.stream()
               .allMatch(permission -> rolePermissionService.isPermitted(this.person, permission));
