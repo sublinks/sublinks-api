@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -66,7 +67,7 @@ public class SublinksRoleService {
         .toList();
   }
 
-  public RoleResponse show(final String key, final Person person)
+  public RoleResponse show(@NonNull final String key, final Person person)
   {
 
     aclService.canPerson(person)
@@ -78,7 +79,17 @@ public class SublinksRoleService {
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "role not found"));
   }
 
-  public RoleResponse create(final CreateRole createRoleForm, final Person person)
+  /**
+   * Creates a new role with the provided information.
+   *
+   * @param createRoleForm The CreateRole object containing the details of the role to be created.
+   *                       Must not be null.
+   * @param person         The Person object representing the user performing the action. Must not
+   *                       be null.
+   * @return The RoleResponse object representing the newly created role.
+   * @throws ResponseStatusException if the user is not authorized to perform the action.
+   */
+  public RoleResponse create(@NonNull final CreateRole createRoleForm, final Person person)
   {
 
     aclService.canPerson(person)
@@ -102,7 +113,20 @@ public class SublinksRoleService {
     return conversionService.convert(roleService.createRole(role), RoleResponse.class);
   }
 
-  public RoleResponse update(final String key, final UpdateRole updateRoleForm, final Person person)
+  /**
+   * Updates an existing role with the provided information.
+   *
+   * @param key            The key of the role to be updated. Must not be null.
+   * @param updateRoleForm The UpdateRole object containing the updated details of the role. Must
+   *                       not be null.
+   * @param person         The Person object representing the user performing the action. Must not
+   *                       be null.
+   * @return The RoleResponse object representing the updated role.
+   * @throws ResponseStatusException if the user is not authorized to perform the action or if the
+   *                                 role is not found.
+   */
+  public RoleResponse update(final String key, @NonNull final UpdateRole updateRoleForm,
+      final Person person)
   {
 
     aclService.canPerson(person)
@@ -136,6 +160,9 @@ public class SublinksRoleService {
     return conversionService.convert(roleService.updateRole(role), RoleResponse.class);
   }
 
+  /**
+   *
+   */
   public void delete(final String key, final Person person)
   {
 

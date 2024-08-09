@@ -567,6 +567,16 @@ public class SublinksPostService {
     return conversionService.convert(post, PostResponse.class);
   }
 
+  /**
+   * Removes a post from the system.
+   *
+   * @param postKey       The key of the post to be removed.
+   * @param purgePostForm The PurgePost object containing the removal information.
+   * @param person        The Person object representing the user removing the post.
+   * @return The RequestResponse object indicating the result of the purge operation.
+   * @throws ResponseStatusException If the post is not found, the user is unauthorized, or an error
+   *                                 occurs during the removal process.
+   */
   public RequestResponse purge(final String postKey, final PurgePost purgePostForm,
       final Person person)
   {
