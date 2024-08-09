@@ -567,7 +567,7 @@ public class SublinksPostService {
     return conversionService.convert(post, PostResponse.class);
   }
 
-  public RequestResponse purge(final String postKey, final PurgePost removePostForm,
+  public RequestResponse purge(final String postKey, final PurgePost purgePostForm,
       final Person person)
   {
 
