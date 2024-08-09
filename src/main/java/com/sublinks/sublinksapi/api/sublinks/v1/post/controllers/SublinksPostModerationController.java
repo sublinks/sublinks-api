@@ -1,10 +1,11 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PinPost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PurgePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.RemovePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.services.SublinksPostService;
 import com.sublinks.sublinksapi.person.entities.Person;
@@ -66,24 +67,19 @@ public class SublinksPostModerationController extends AbstractSublinksApiControl
     return sublinksPostService.pinCommunity(key, pinPostForm, person);
   }
 
-
   @Operation(summary = "Purge a post")
   @PostMapping("/purge")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public RequestResponse delete(@PathVariable final String key,
-      @RequestBody final RemovePost removePostForm, final SublinksJwtPerson sublinksJwtPerson)
+      @RequestBody final PurgePost purgePostForm, final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    // @todo: implement
-
-    return RequestResponse.builder()
-        .success(false)
-        .error("not_implemented")
-        .build();
+    return sublinksPostService.purge(key, purgePostForm != null ? purgePostForm
+        : PurgePost.builder()
+            .build(), person);
 
   }
-
 }

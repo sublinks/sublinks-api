@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.services;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.AggregatePostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.DeletePost;
@@ -8,6 +9,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.post.models.PostResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.UpdatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.FavoritePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PinPost;
+import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.PurgePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.moderation.RemovePost;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPostTypes;
 import com.sublinks.sublinksapi.authorization.services.AclService;
@@ -563,5 +565,23 @@ public class SublinksPostService {
     postService.updatePost(post);
 
     return conversionService.convert(post, PostResponse.class);
+  }
+
+  public RequestResponse purge(final String postKey, final PurgePost removePostForm,
+      final Person person)
+  {
+
+    final Post post = postRepository.findByTitleSlug(postKey)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "post_not_found"));
+
+    aclService.canPerson(person)
+        .onCommunity(post.getCommunity())
+        .performTheAction(RolePermissionPostTypes.PURGE_POST)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+
+    return RequestResponse.builder()
+        .success(false)
+        .error("not_implemented")
+        .build();
   }
 }
