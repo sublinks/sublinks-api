@@ -25,8 +25,7 @@ public class PaginationUtils {
    * @param page  The page number to retrieve.
    * @param size  The number of records per page.
    */
-  public static <T> void applyPagination(TypedQuery<T> query, @Nullable Integer page,
-      Integer size)
+  public static <T> void applyPagination(TypedQuery<T> query, @Nullable Integer page, Integer size)
   {
 
     if (page != null) {
@@ -39,4 +38,25 @@ public class PaginationUtils {
 
     return Math.min(Math.max(value, min), max);
   }
+
+  public static <T extends Integer> int getPage(T value) {
+
+    return Clamp(value, 1, Integer.MAX_VALUE);
+  }
+
+  public static <T extends Integer> int getPerPage(T value, T min, T max) {
+
+    return Clamp(value, min, max);
+  }
+
+  public static <T extends Integer> int getPerPage(T value, T max) {
+
+    return getPerPage(value, 1, max);
+  }
+
+  public static <T extends Integer> int getPerPage(T value) {
+
+    return getPerPage(value, 1, 20);
+  }
+
 }

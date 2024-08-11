@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,15 +36,15 @@ public class SublinksCommentController extends AbstractSublinksApiController {
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<CommentResponse> index(
-      @RequestParam(required = false) Optional<IndexComment> indexCommentParam,
+  public List<CommentResponse> index(IndexComment indexCommentParam,
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
 
-    return sublinksCommentService.index(indexCommentParam.orElse(IndexComment.builder()
-        .build()), person.orElse(null));
+    return sublinksCommentService.index(indexCommentParam != null ? indexCommentParam
+        : IndexComment.builder()
+            .build(), person.orElse(null));
   }
 
   @Operation(summary = "Get a specific comment")

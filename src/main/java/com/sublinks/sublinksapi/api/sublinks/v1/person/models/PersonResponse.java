@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.models;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.InstanceResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.models.PersonRoleResponse;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
@@ -23,6 +24,7 @@ public record PersonResponse(
     Boolean isDeleted,
     Boolean isBotAccount,
     String createdAt,
+    InstanceResponse instance,
     String updatedAt) {
 
 }

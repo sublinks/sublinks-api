@@ -1,5 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.mappers;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.instance.mappers.SublinksInstanceMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.roles.mappers.SublinksPersonRoleMapper;
 import com.sublinks.sublinksapi.api.sublinks.v1.utils.DateUtils;
@@ -17,7 +18,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING,
-    uses = {SublinksPersonRoleMapper.class},
+    uses = {SublinksPersonRoleMapper.class, SublinksInstanceMapper.class},
     unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public abstract class SublinksPersonMapper implements Converter<Person, PersonResponse> {
 
@@ -37,6 +38,7 @@ public abstract class SublinksPersonMapper implements Converter<Person, PersonRe
   @Mapping(target = "role", source = "person.role")
   @Mapping(target = "bio", source = "person.biography")
   @Mapping(target = "isLocal", source = "person.local")
+  @Mapping(target = "instance", source = "person.instance")
   @Mapping(target = "createdAt",
       source = "person.createdAt",
       dateFormat = DateUtils.FRONT_END_DATE_FORMAT)

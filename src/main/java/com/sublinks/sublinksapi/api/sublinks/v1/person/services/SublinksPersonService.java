@@ -22,6 +22,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.utils.PersonKeyUtils;
 import com.sublinks.sublinksapi.authorization.entities.Role;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPersonTypes;
+import com.sublinks.sublinksapi.authorization.services.AclService;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.authorization.services.RoleService;
 import com.sublinks.sublinksapi.comment.services.CommentReportService;
@@ -87,14 +88,13 @@ public class SublinksPersonService {
   private final UserDataRepository userDataRepository;
   private final PersonKeyUtils personKeyUtils;
   private final UrlUtil urlUtil;
+  private final AclService aclService;
 
   /**
-   * Retrieves the name and domain identifiers of a person from the given key.
+   * Retrieves the person identifiers from the given key.
    *
-   * @param key The key containing the person's information. If the key contains "@", it is split
-   *            into name and domain using "@" as the separator. Otherwise, the name is set as the
-   *            key and the domain is obtained from the local instance context.
-   * @return The PersonIdentity object containing the name and domain identifiers of the person.
+   * @param key the key used to retrieve the person identifiers
+   * @return the person identity object containing the name and domain
    */
   public PersonIdentity getPersonIdentifiersFromKey(String key) {
 
@@ -114,45 +114,74 @@ public class SublinksPersonService {
   }
 
   /**
-   * Retrieves a list of PersonResponse objects based on the search criteria.
+   * Retrieves a list of {@link PersonResponse} objects based on the provided search criteria.
    *
-   * @param indexPerson The object containing the search criteria for the persons.
-   * @return A list of PersonResponse objects representing the persons that match the search
-   * criteria.
+   * @param indexPerson A {@link IndexPerson} object containing the search parameters.
+   * @param person      A {@link Person} object representing the authenticated user.
+   * @return A list of {@link PersonResponse} objects that match the search criteria.
+   * @throws ResponseStatusException If the authenticated user does not have permission to perform
+   *                                 the action.
    */
   public List<PersonResponse> index(final IndexPerson indexPerson, final Person person) {
 
-    rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_USERS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionPersonTypes.READ_USER)
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+
+    final int page = PaginationUtils.getPage(indexPerson.page() == null ? 0 : indexPerson.page())
+        - 1;
+    final int perPage = PaginationUtils.getPerPage(
+        indexPerson.perPage() == null ? 20 : indexPerson.perPage()) - 1;
 
     if (indexPerson.search() == null) {
-      if (indexPerson.listingType() == SublinksListingType.Local) {
-        return personRepository.findAllByIsLocal(true,
-                PageRequest.of(Math.max(indexPerson.page(), 0),
-                    PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
-            .stream()
-            .map(p -> conversionService.convert(p, PersonResponse.class))
-            .toList();
-      }
-      return personRepository.findAll(PageRequest.of(Math.max(indexPerson.page(), 1),
-              PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
+      return handleNullSearch(indexPerson, page, perPage);
+    }
+
+    return handleNonNullSearch(indexPerson, page, perPage);
+  }
+
+  /**
+   * Handles a null search for person records based on the specified index person, page number, and
+   * items per page.
+   *
+   * @param indexPerson the index person used for determining the type of listing
+   * @param page        the page number for pagination
+   * @param perPage     the number of items per page
+   * @return a list of {@code PersonResponse} objects based on the search query
+   */
+  private List<PersonResponse> handleNullSearch(IndexPerson indexPerson, int page, int perPage) {
+
+    if (indexPerson.listingType() == SublinksListingType.Local) {
+      return personRepository.findAllByIsLocal(true, PageRequest.of(page, perPage))
           .stream()
           .map(p -> conversionService.convert(p, PersonResponse.class))
           .toList();
     }
+    return personRepository.findAll(PageRequest.of(page, perPage))
+        .stream()
+        .map(p -> conversionService.convert(p, PersonResponse.class))
+        .toList();
+  }
+
+  /**
+   * Handles a non-null search for persons in the index.
+   *
+   * @param indexPerson the IndexPerson object containing the search parameters
+   * @param page        the page number for pagination
+   * @param perPage     the number of results per page for pagination
+   * @return a List of PersonResponse objects that match the search criteria
+   */
+  private List<PersonResponse> handleNonNullSearch(IndexPerson indexPerson, int page, int perPage) {
 
     if (indexPerson.listingType() == SublinksListingType.Local) {
       return personRepository.findAllByNameAndBiographyAndLocal(indexPerson.search(), true,
-              PageRequest.of(Math.max(indexPerson.page(), 1),
-                  PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
+              PageRequest.of(page, perPage))
           .stream()
           .map(p -> conversionService.convert(p, PersonResponse.class))
           .toList();
     }
-
     return personRepository.findAllByNameAndBiography(indexPerson.search(),
-            PageRequest.of(Math.max(indexPerson.page(), 1),
-                PaginationUtils.Clamp(indexPerson.perPage(), 1, 20)))
+            PageRequest.of(page, perPage))
         .stream()
         .map(p -> conversionService.convert(p, PersonResponse.class))
         .toList();

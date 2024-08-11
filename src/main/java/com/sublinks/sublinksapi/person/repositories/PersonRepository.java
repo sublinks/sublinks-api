@@ -29,18 +29,18 @@ public interface PersonRepository extends JpaRepository<Person, Long> {
 
   List<Person> findAllByIsLocal(Boolean local, Pageable pageable);
 
-  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword)",
+  @Query(value = "SELECT p.*, i.id as link_instance_id, i.instance_id FROM people p JOIN link_person_instances i ON p.id = i.person_id WHERE p.search_vector @@ to_tsquery('english', :keyword)",
       countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)",
       nativeQuery = true)
   List<Person> findAllByNameAndBiography(@Param("keyword") String keyword, Pageable pageable);
 
-  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword) AND p.is_local = :local",
+  @Query(value = "SELECT p.*, i.id as link_instance_id, i.instance_id FROM people p JOIN link_person_instances i ON p.id = i.person_id WHERE p.search_vector @@ to_tsquery('english', :keyword) AND p.is_local = :local",
       countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword)",
       nativeQuery = true)
   List<Person> findAllByNameAndBiographyAndLocal(@Param("keyword") String keyword,
       @Param("local") Boolean local, Pageable pageable);
 
-  @Query(value = "SELECT p FROM people p WHERE p.search_vector @@ to_tsquery('keyword', :keyword) AND p.role_id = :role",
+  @Query(value = "SELECT p.*, i.id as link_instance_id, i.instance_id FROM people p JOIN link_person_instances i ON p.id = i.person_id WHERE p.search_vector @@ to_tsquery('english', :keyword) AND p.role_id = :role",
       countQuery = "SELECT COUNT(p.id) FROM people p WHERE p.search_vector @@ to_tsquery('english', :keyword) AND p.role_id = :role",
       nativeQuery = true)
   List<Person> findAllByNameAndBiographyAndRole(@Param("keyword") String keyword,

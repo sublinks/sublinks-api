@@ -11,7 +11,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.UpdatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.services.SublinksPersonService;
 import com.sublinks.sublinksapi.person.entities.Person;
-import com.sublinks.sublinksapi.person.repositories.PersonRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -21,14 +20,12 @@ import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -37,22 +34,21 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 public class SublinksPersonController extends AbstractSublinksApiController {
 
-  private final PersonRepository personRepository;
   private final SublinksPersonService sublinksPersonService;
-  private final ConversionService conversionService;
 
   @Operation(summary = "Get a list of persons")
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public List<PersonResponse> index(@RequestParam(required = false) final IndexPerson indexPerson,
+  public List<PersonResponse> index(final IndexPerson indexPersonParam,
       final SublinksJwtPerson principal)
   {
 
     final Optional<Person> person = getOptionalPerson(principal);
 
-    return sublinksPersonService.index(indexPerson == null ? IndexPerson.builder()
-        .build() : indexPerson, person.orElse(null));
+    return sublinksPersonService.index(indexPersonParam != null ? indexPersonParam
+        : IndexPerson.builder()
+            .build(), person.orElse(null));
   }
 
   @Operation(summary = "Get a specific person")
