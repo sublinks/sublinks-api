@@ -31,6 +31,5 @@ public abstract class SublinksCommentMapper implements Converter<Comment, Commen
   @Mapping(target = "updatedAt",
       source = "comment.updatedAt",
       dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "replies", expression = "java(new java.util.ArrayList<>())")
   public abstract CommentResponse convert(@Nullable Comment comment);
 }
