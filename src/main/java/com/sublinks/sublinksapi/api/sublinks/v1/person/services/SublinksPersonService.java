@@ -470,8 +470,7 @@ public class SublinksPersonService {
   public PersonAggregateResponse showAggregate(final String key, final Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final PersonIdentity personIdentity = getPersonIdentifiersFromKey(key);
 
@@ -530,10 +529,7 @@ public class SublinksPersonService {
   /**
    * Retrieves the meta data of a person's sessions based on the provided target key and person.
    *
-   * @param targetKey The key containing the target person's information. If the key contains "@",
-   *                  it is split into name and domain using "@" as the separator. Otherwise, the
-   *                  name is set as the key and the domain is obtained from the local instance
-   *                  context.
+   * @param targetKey The key containing the target person's information.
    * @param person    The Person object representing the person making the request.
    * @return The PersonSessionDataResponse object containing the meta data of the target person's
    * sessions.
@@ -553,8 +549,7 @@ public class SublinksPersonService {
         RolePermissionPersonTypes.READ_USER_OWN_METADATAS) && person.equals(target))
         && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.READ_USER_METADATAS)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "unauthorized");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     final List<PersonMetaData> personMetaData = userDataRepository.findAllByPerson(target);
@@ -578,12 +573,12 @@ public class SublinksPersonService {
    *                                 or if the person does not have permission to read the session's
    *                                 meta data or if the session is not found.
    */
-  public PersonSessionDataResponse getOneMetaData(final String targetsessionKey,
+  public PersonSessionDataResponse getOneMetaData(final String targetSessionKey,
       final Person person)
   {
 
     final PersonMetaData personMetaData = userDataRepository.findById(
-            Long.parseLong(targetsessionKey))
+            Long.parseLong(targetSessionKey))
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_metadata_not_found"));
 
@@ -591,8 +586,7 @@ public class SublinksPersonService {
         RolePermissionPersonTypes.READ_USER_OWN_METADATAS) && personMetaData.getPerson()
         .equals(person)) && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.READ_USER_METADATAS)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "unauthorized");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     return PersonSessionDataResponse.builder()
@@ -625,8 +619,7 @@ public class SublinksPersonService {
         RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA) && personMetaData.getPerson()
         .equals(person)) && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "unauthorized");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     userDataService.invalidate(personMetaData);
@@ -654,8 +647,7 @@ public class SublinksPersonService {
         RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA) && target.equals(person))
         && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "unauthorized");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     userDataService.invalidateAllUserData(target);
@@ -679,8 +671,7 @@ public class SublinksPersonService {
         RolePermissionPersonTypes.DELETE_USER_OWN_METADATA) && !personMetaData.getPerson()
         .equals(person) && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.DELETE_USER_METADATA)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "unauthorized");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
     userDataRepository.delete(personMetaData);
@@ -706,8 +697,7 @@ public class SublinksPersonService {
         RolePermissionPersonTypes.DELETE_USER_OWN_METADATA) && target.equals(person))
         && !rolePermissionService.isPermitted(person,
         RolePermissionPersonTypes.DELETE_USER_METADATA)) {
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-          "unauthorized");
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
     userDataRepository.deleteAll(userDataRepository.findAllByPerson(target));
   }

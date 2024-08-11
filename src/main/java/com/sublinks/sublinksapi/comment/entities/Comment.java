@@ -110,7 +110,7 @@ public class Comment implements Serializable, AclEntityInterface {
   @Column(nullable = false)
   private String path;
 
-  @Column(nullable = false, name = "search_vector")
+  @Column(nullable = true, updatable = false, insertable = false, name = "search_vector")
   private String searchVector;
 
   @CreationTimestamp(source = SourceType.DB)

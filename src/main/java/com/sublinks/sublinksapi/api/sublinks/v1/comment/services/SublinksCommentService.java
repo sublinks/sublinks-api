@@ -121,7 +121,8 @@ public class SublinksCommentService {
             Math.min(indexCommentForm.maxDepth() != null ? indexCommentForm.maxDepth() : 3, 5), 0))
         .person(person);
 
-    return commentRepository.allCommentsBySearchCriteria(commentSearchCriteria.build())
+    return commentRepository.allCommentsBySearchCriteria(
+            commentSearchCriteria.build())
         .stream()
         .map(comment -> conversionService.convert(comment, CommentResponse.class))
         .toList();

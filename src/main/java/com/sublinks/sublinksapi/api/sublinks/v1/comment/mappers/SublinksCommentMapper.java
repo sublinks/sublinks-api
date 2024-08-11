@@ -22,7 +22,7 @@ public abstract class SublinksCommentMapper implements Converter<Comment, Commen
   @Mapping(target = "isLocal", source = "comment.local")
   @Mapping(target = "isDeleted", source = "comment.deleted")
   @Mapping(target = "isFeatured", source = "comment.featured")
-  @Mapping(target = "isRemoved", expression = "java(comment.isRemoved())")
+  @Mapping(target = "isRemoved", expression = "java(comment != null && comment.isRemoved())")
   // @Mapping(target = "creator", expression = "java(personMapper.convert(comment.getPerson()))")
   @Mapping(target = "creator", source = "comment.person")
   @Mapping(target = "createdAt",
@@ -31,6 +31,6 @@ public abstract class SublinksCommentMapper implements Converter<Comment, Commen
   @Mapping(target = "updatedAt",
       source = "comment.updatedAt",
       dateFormat = DateUtils.FRONT_END_DATE_FORMAT)
-  @Mapping(target = "replies", ignore = true)
+  @Mapping(target = "replies", expression = "java(new java.util.ArrayList<>())")
   public abstract CommentResponse convert(@Nullable Comment comment);
 }

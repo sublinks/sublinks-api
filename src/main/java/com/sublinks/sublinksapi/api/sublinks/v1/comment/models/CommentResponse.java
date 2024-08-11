@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
 import java.util.List;
 import lombok.Builder;
 
-@Builder
+@Builder(toBuilder = true)
 public record CommentResponse(
     String key,
     String activityPubId,

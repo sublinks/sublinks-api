@@ -38,7 +38,8 @@ public class CommentService {
    * @return A string representing the ActivityPub ID.
    */
   public String generateActivityPubId(
-      final com.sublinks.sublinksapi.comment.entities.Comment comment) {
+      final com.sublinks.sublinksapi.comment.entities.Comment comment)
+  {
 
     String domain = localInstanceContext.instance()
         .getDomain();
@@ -75,9 +76,9 @@ public class CommentService {
   @Transactional
   public void createComment(final Comment comment) {
 
+    commentRepository.saveAndFlush(comment);
     if (comment.getPath() == null || comment.getPath()
         .isBlank()) {
-      commentRepository.saveAndFlush(comment);
       comment.setPath(String.format("0.%d", comment.getId()));
     }
     comment.setActivityPubId(generateActivityPubId(comment));
@@ -195,11 +196,12 @@ public class CommentService {
    */
   @Transactional
   public void removeAllCommentsFromCommunityAndUser(final Community community, final Person person,
-      final boolean removed) {
+      final boolean removed)
+  {
 
     commentRepository.allCommentsByCommunityAndPersonAndRemoved(community, person,
-        List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_COMMUNITY)).forEach(
-        comment -> {
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_COMMUNITY))
+        .forEach(comment -> {
           comment.setRemovedState(
               removed ? RemovedState.REMOVED_BY_COMMUNITY : RemovedState.NOT_REMOVED);
           commentRepository.save(comment);
@@ -216,8 +218,8 @@ public class CommentService {
   public void removeAllCommentsFromUser(final Person person, final boolean removed) {
 
     commentRepository.allCommentsByPersonAndRemoved(person,
-        List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_INSTANCE)).forEach(
-        comment -> {
+            List.of(removed ? RemovedState.NOT_REMOVED : RemovedState.REMOVED_BY_INSTANCE))
+        .forEach(comment -> {
           comment.setRemovedState(
               removed ? RemovedState.REMOVED_BY_INSTANCE : RemovedState.NOT_REMOVED);
           commentRepository.save(comment);
