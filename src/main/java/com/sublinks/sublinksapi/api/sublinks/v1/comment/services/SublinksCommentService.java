@@ -355,6 +355,9 @@ public class SublinksCommentService {
   /**
    * Builds a tree structure of comment replies based on the provided list of CommentResponse
    * objects.
+   * <p>
+   * If a comment has not been replied to or its parent is missing, it will be placed at the end of
+   * the list.
    *
    * @param commentResponses The list of CommentResponse objects representing the comments.
    * @return A list of CommentResponse objects representing the comments organized in a tree
