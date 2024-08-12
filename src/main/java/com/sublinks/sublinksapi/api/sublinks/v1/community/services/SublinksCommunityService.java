@@ -361,6 +361,7 @@ public class SublinksCommunityService {
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "community_not_found"));
 
-    return conversionService.convert(community, CommunityAggregateResponse.class);
+    return conversionService.convert(community.getCommunityAggregate(),
+        CommunityAggregateResponse.class);
   }
 }

@@ -30,6 +30,7 @@ import com.sublinks.sublinksapi.person.services.LinkPersonCommunityService;
 import com.sublinks.sublinksapi.post.entities.Post;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.shared.RemovedState;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -121,10 +122,10 @@ public class SublinksCommentService {
             Math.min(indexCommentForm.maxDepth() != null ? indexCommentForm.maxDepth() : 3, 5), 0))
         .person(person);
 
-    return commentRepository.allCommentsBySearchCriteria(commentSearchCriteria.build())
+    return buildReplies(commentRepository.allCommentsBySearchCriteria(commentSearchCriteria.build())
         .stream()
         .map(comment -> conversionService.convert(comment, CommentResponse.class))
-        .toList();
+        .toList());
   }
 
   /**
@@ -347,5 +348,65 @@ public class SublinksCommentService {
             AggregateCommentResponse.class))
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
+  }
+
+  // @todo refactor this fine piece of code.
+
+  /**
+   * Builds a tree structure of comment replies based on the provided list of CommentResponse
+   * objects.
+   *
+   * @param commentResponses The list of CommentResponse objects representing the comments.
+   * @return A list of CommentResponse objects representing the comments organized in a tree
+   * structure.
+   */
+  public List<CommentResponse> buildReplies(List<CommentResponse> commentResponses) {
+
+    List<CommentResponse> rootComments = commentResponses.stream()
+        .filter(
+            commentResponse -> commentResponse.getParentKey() == null || commentResponses.stream()
+                .noneMatch(commentResponse1 -> commentResponse1.key()
+                    .equals(commentResponse.getParentKey())))
+        .toList();
+
+    List<CommentResponse> commentTree = new ArrayList<>(rootComments.stream()
+        .map(commentResponse -> buildTree(commentResponse, commentResponses))
+        .toList());
+
+    List<CommentResponse> leftOverComments = commentResponses.stream()
+        .filter(commentResponse -> rootComments.stream()
+            .noneMatch(commentResponse1 -> commentResponse1.key()
+                .equals(commentResponse.key())))
+        .toList();
+
+    commentTree.addAll(leftOverComments);
+
+    return commentTree;
+  }
+
+  /**
+   * Builds a tree structure of comment replies based on the provided list of CommentResponse
+   * objects.
+   *
+   * @param commentResponse  The CommentResponse object representing the root comment.
+   * @param commentResponses The list of CommentResponse objects representing all the comments.
+   * @return A CommentResponse object representing the root comment with its replies organized in a
+   * tree structure.
+   */
+  private CommentResponse buildTree(final CommentResponse commentResponse,
+      List<CommentResponse> commentResponses)
+  {
+
+    List<CommentResponse> replies = commentResponses.stream()
+        .filter(commentResponse1 -> Objects.equals(commentResponse1.getParentKey(),
+            commentResponse.key()))
+        .toList();
+
+    return commentResponse.toBuilder()
+        .replies(replies.stream()
+            .map(commentResponse1 -> buildTree(commentResponse1, commentResponses))
+            .toList())
+        .build();
+
   }
 }

@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class SublinksCommentAggerateController extends AbstractSublinksApiController {
 
   private final SublinksCommentService sublinksCommentService;
-  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Aggregate a comment")
   @GetMapping

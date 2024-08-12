@@ -25,7 +25,6 @@ import org.springframework.web.server.ResponseStatusException;
 @AllArgsConstructor
 public class SublinksLanguageController extends AbstractSublinksApiController {
 
-  private final LanguageService languageService;
   private final LocalInstanceContext localInstanceContext;
   private final ConversionService conversionService;
 
