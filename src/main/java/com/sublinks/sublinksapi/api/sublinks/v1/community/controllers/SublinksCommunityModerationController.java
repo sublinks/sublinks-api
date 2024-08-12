@@ -39,7 +39,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/community/{key}/moderation")
-@Tag(name = "Community Moderation", description = "Community Moderation API")
+@Tag(name = "Sublinks Community Moderation", description = "Community Moderation API")
 public class SublinksCommunityModerationController extends AbstractSublinksApiController {
 
   private final LinkPersonCommunityService linkPersonCommunityService;
@@ -50,11 +50,11 @@ public class SublinksCommunityModerationController extends AbstractSublinksApiCo
   private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Remove a community")
-  @GetMapping("/remove")
+  @PostMapping("/remove")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommunityResponse remove(@PathVariable final String key,
-      @RequestBody @Valid RemoveCommunity removeCommunityForm, SublinksJwtPerson sublinksJwtPerson)
+      @RequestBody RemoveCommunity removeCommunityForm, SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);

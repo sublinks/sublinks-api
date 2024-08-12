@@ -13,7 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 /**
  * The AclService class provides methods for handling Access Control List (ACL) policies.
@@ -360,6 +362,22 @@ public class AclService {
           acl.setPermitted(true);
           aclRepository.saveAndFlush(acl);
         }
+      }
+    }
+
+    public void orThrowUnauthorized() {
+
+      execute();
+      if (!isPermitted) {
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+      }
+    }
+
+    public void orThrowBadRequest() {
+
+      execute();
+      if (!isPermitted) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "bad_request");
       }
     }
   }

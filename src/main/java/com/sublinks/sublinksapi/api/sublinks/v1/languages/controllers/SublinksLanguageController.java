@@ -4,7 +4,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSubli
 import com.sublinks.sublinksapi.api.sublinks.v1.languages.models.LanguageResponse;
 import com.sublinks.sublinksapi.instance.models.LocalInstanceContext;
 import com.sublinks.sublinksapi.language.entities.Language;
-import com.sublinks.sublinksapi.language.services.LanguageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -21,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api/v1/languages")
-@Tag(name = "Languages", description = "Languages API")
+@Tag(name = "Sublinks Languages", description = "Languages API")
 @AllArgsConstructor
 public class SublinksLanguageController extends AbstractSublinksApiController {
 

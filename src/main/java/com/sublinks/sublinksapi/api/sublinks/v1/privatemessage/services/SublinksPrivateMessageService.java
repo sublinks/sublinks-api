@@ -1,14 +1,20 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.services;
 
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonIdentity;
+import com.sublinks.sublinksapi.api.sublinks.v1.person.services.SublinksPersonService;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.CreatePrivateMessage;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.DeletePrivateMessage;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.IndexPrivateMessages;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.MarkAsReadPrivateMessage;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.PrivateMessageResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.UpdatePrivateMessage;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.moderation.PurgePrivateMessage;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessageTypes;
 import com.sublinks.sublinksapi.authorization.services.AclService;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.person.repositories.PersonRepository;
+import com.sublinks.sublinksapi.person.services.PersonService;
 import com.sublinks.sublinksapi.post.repositories.PostRepository;
 import com.sublinks.sublinksapi.privatemessages.entities.PrivateMessage;
 import com.sublinks.sublinksapi.privatemessages.models.PrivateMessageSearchCriteria;
@@ -32,6 +38,9 @@ public class SublinksPrivateMessageService {
   private final PostRepository postRepository;
   private final AclService aclService;
   private final PrivateMessageService privateMessageService;
+  private final PersonRepository personRepository;
+  private final PersonService personService;
+  private final SublinksPersonService sublinksPersonService;
 
   /**
    * Retrieves a list of private messages based on the given search criteria.
@@ -49,8 +58,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     return privateMessageRepository.allPrivateMessagesBySearchCriteria(
             PrivateMessageSearchCriteria.builder()
@@ -81,8 +89,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.READ_PRIVATE_MESSAGES)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
@@ -112,8 +119,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.CREATE_PRIVATE_MESSAGE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     final PrivateMessage privateMessage = PrivateMessage.builder()
         .recipient(person)
@@ -143,8 +149,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.UPDATE_PRIVATE_MESSAGE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(
             Long.parseLong(updatePrivateMessageForm.privateMessageKey()))
@@ -180,8 +185,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.DELETE_PRIVATE_MESSAGE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(
@@ -207,8 +211,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.MARK_PRIVATE_MESSAGE_AS_READ)
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     List<PrivateMessage> privateMessages = privateMessageRepository.findByRecipientAndReadIsFalse(
         person);
@@ -234,8 +237,7 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.MARK_PRIVATE_MESSAGE_AS_READ)
-        .orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(
@@ -253,20 +255,23 @@ public class SublinksPrivateMessageService {
   }
 
   /**
-   * Purge a specific private message belonging to a person.
+   * Purges a private message.
    *
-   * @param person The person who owns the private message.
-   * @param id     The ID of the private message to purge.
-   * @return The response after purging the private message or null if the person is not authorized.
-   * @throws ResponseStatusException If the person is not allowed to delete private messages or if
-   *                                 the private message is not found.
+   * @param id                  The ID of the private message to be purged.
+   * @param purgePrivateMessage The purge details for the private message.
+   * @param person              The person performing the purge.
+   * @return The response of the operation as a PrivateMessageResponse object, or null if the person
+   * is not authorized.
+   * @throws ResponseStatusException If the person is not authorized or if the private message is
+   *                                 not found.
    */
-  public PrivateMessageResponse purgePrivateMessage(final Person person, final String id) {
+  public RequestResponse purgePrivateMessage(final String id,
+      final PurgePrivateMessage purgePrivateMessage, final Person person)
+  {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     final PrivateMessage privateMessage = privateMessageRepository.findById(Long.parseLong(id))
         .orElseThrow(
@@ -280,24 +285,27 @@ public class SublinksPrivateMessageService {
 
     privateMessageService.deletePrivateMessage(privateMessage);
 
-    return conversionService.convert(privateMessage, PrivateMessageResponse.class);
+    // @todo: Modlog
+
+    return RequestResponse.builder()
+        .success(true)
+        .build();
   }
 
   /**
-   * Purges a list of private messages belonging to a specific person.
+   * Purges private messages based on the provided IDs and person performing the purge.
    *
-   * @param ids    The list of IDs of the private messages to purge.
-   * @param person The person who owns the private messages.
+   * @param ids    The IDs of the private messages to be purged.
+   * @param person The person performing the purge.
    * @return A list of PrivateMessageResponse objects representing the purged private messages.
-   * @throws ResponseStatusException If the person is not allowed to delete private messages or if
-   *                                 any of the private messages specified by the IDs are not found.
+   * @throws ResponseStatusException If the person is not authorized or if any of the private
+   *                                 messages are not found.
    */
   public List<PrivateMessageResponse> purgePrivateMessages(List<String> ids, final Person person) {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGES)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     return privateMessageRepository.findAllById(ids.stream()
             .map(Long::parseLong)
@@ -320,13 +328,32 @@ public class SublinksPrivateMessageService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        .orThrowUnauthorized();
 
     return privateMessageService.deleteAllPrivateMessagesByPerson(person, true)
         .stream()
         .map(privateMessage -> conversionService.convert(privateMessage,
             PrivateMessageResponse.class))
         .collect(Collectors.toList());
+  }
+
+  public void purgeAllPrivateMessages(final String key,
+      final PurgePrivateMessage purgePrivateMessageForm, final Person person)
+  {
+
+    aclService.canPerson(person)
+        .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGES)
+        .orThrowUnauthorized();
+
+    final PersonIdentity personToPurgeIdentity = sublinksPersonService.getPersonIdentifiersFromKey(
+        key);
+
+    final Person personToPurge = personRepository.findOneByNameAndInstance_Domain(
+            personToPurgeIdentity.name(), personToPurgeIdentity.domain())
+        .orElseThrow();
+
+    // @todo: Modlog
+
+    privateMessageService.deleteAllPrivateMessagesByPerson(personToPurge, true);
   }
 }

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/community/{key}/aggregate")
-@Tag(name = "Community Aggregation", description = "Community Aggregation API")
+@Tag(name = "Sublinks Community Aggregation", description = "Community Aggregation API")
 public class SublinksCommunityAggregationController extends AbstractSublinksApiController {
 
   private final CommunityAggregateRepository communityAggregateRepository;

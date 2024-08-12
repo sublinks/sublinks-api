@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/session/")
-@Tag(name = "Person Moderation", description = "Person Session API")
+@Tag(name = "Sublinks  Person Session", description = "Person Session API")
 @AllArgsConstructor
 public class SublinksPersonSessionController extends AbstractSublinksApiController {
 

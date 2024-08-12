@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/search")
-@Tag(name = "Search", description = "Search API")
+@Tag(name = "Sublinks Search", description = "Search API")
 public class SublinksSearchController extends AbstractSublinksApiController {
 
   private final SublinksSearchService sublinksSearchService;

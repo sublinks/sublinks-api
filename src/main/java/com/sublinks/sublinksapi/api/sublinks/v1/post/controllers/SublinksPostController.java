@@ -1,8 +1,8 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.post.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.CreatePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.DeletePost;
 import com.sublinks.sublinksapi.api.sublinks.v1.post.models.IndexPost;
@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/post")
-@Tag(name = "Post", description = "Post API")
+@Tag(name = "Sublinks Post", description = "Post API")
 @AllArgsConstructor
 public class SublinksPostController extends AbstractSublinksApiController {
 
@@ -87,13 +87,13 @@ public class SublinksPostController extends AbstractSublinksApiController {
   @DeleteMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public RequestResponse delete(@PathVariable final String key,
-      @RequestBody final DeletePost deletePostForm, final SublinksJwtPerson sublinksJwtPerson)
+  public RequestResponse delete(@PathVariable final String key, final DeletePost deletePostParam,
+      final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    sublinksPostService.delete(key, deletePostForm, person);
+    sublinksPostService.delete(key, deletePostParam, person);
 
     return RequestResponse.builder()
         .success(true)

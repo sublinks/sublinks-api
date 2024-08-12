@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("api/v1/comment")
-@Tag(name = "Comment", description = "Comment API")
+@Tag(name = "Sublinks Comment", description = "Comment API")
 public class SublinksCommentController extends AbstractSublinksApiController {
 
   private final SublinksCommentService sublinksCommentService;

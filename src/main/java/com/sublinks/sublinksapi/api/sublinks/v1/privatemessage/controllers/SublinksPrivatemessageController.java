@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
-import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/privatemessage")
-@Tag(name = "Privatemessage", description = "Privatemessage API")
+@Tag(name = "Sublinks Private Messages", description = "Private Messages API")
 public class SublinksPrivatemessageController extends AbstractSublinksApiController {
 
   private final SublinksPrivateMessageService sublinksPrivateMessageService;
@@ -39,9 +38,9 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
-    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksPrivateMessageService.index(indexPrivateMessagesForm, person.orElse(null));
+    return sublinksPrivateMessageService.index(indexPrivateMessagesForm, person);
   }
 
   @Operation(summary = "Get a specific privatemessage")
@@ -52,9 +51,9 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
-    final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksPrivateMessageService.show(key, person.orElse(null));
+    return sublinksPrivateMessageService.show(key, person);
   }
 
   @Operation(summary = "Create a new privatemessage")
@@ -65,7 +64,7 @@ public class SublinksPrivatemessageController extends AbstractSublinksApiControl
       final SublinksJwtPerson sublinksJwtPerson)
   {
 
-    final Person person = getPersonOrThrowBadRequest(sublinksJwtPerson);
+    final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
     return sublinksPrivateMessageService.create(createPrivateMessageForm, person);
   }

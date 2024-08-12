@@ -126,7 +126,7 @@ public class SublinksPersonService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPersonTypes.READ_USER)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final int page = PaginationUtils.getPage(indexPerson.page() == null ? 0 : indexPerson.page())
         - 1;

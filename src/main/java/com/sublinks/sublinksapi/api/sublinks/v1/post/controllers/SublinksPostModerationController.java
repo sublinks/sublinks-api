@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/post/{key}/moderation")
-@Tag(name = "Post Moderation", description = "Post Moderation API")
+@Tag(name = "Sublinks Post Moderation", description = "Post Moderation API")
 @AllArgsConstructor
 public class SublinksPostModerationController extends AbstractSublinksApiController {
 

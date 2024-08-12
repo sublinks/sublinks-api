@@ -38,7 +38,7 @@ public class SublinksRoleService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionRoleTypes.ROLE_READ)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final List<Role> roles = new java.util.ArrayList<>();
 
@@ -72,7 +72,7 @@ public class SublinksRoleService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionRoleTypes.ROLE_READ)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     return roleRepository.findFirstByName(key)
         .map(role -> conversionService.convert(role, RoleResponse.class))
@@ -94,7 +94,7 @@ public class SublinksRoleService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionRoleTypes.ROLE_CREATE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final Role role = Role.builder()
         .name(createRoleForm.name())
@@ -131,7 +131,7 @@ public class SublinksRoleService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionRoleTypes.ROLE_UPDATE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final Role role = roleRepository.findFirstByName(key)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "role_not_found"));
@@ -168,7 +168,7 @@ public class SublinksRoleService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionRoleTypes.ROLE_DELETE)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final Role role = roleRepository.findFirstByName(key)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "role_not_found"));

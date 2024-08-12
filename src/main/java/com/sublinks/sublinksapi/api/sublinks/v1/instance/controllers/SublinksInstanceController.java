@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/instance")
-@Tag(name = "Instance", description = "Instance API")
+@Tag(name = "Sublinks Instance", description = "Instance API")
 public class SublinksInstanceController extends AbstractSublinksApiController {
 
   private final SublinksInstanceService sublinksInstanceService;

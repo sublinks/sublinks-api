@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/instance/{key}/config")
-@Tag(name = "Instance Config", description = "Instance Config API")
+@Tag(name = "Sublinks Instance Config", description = "Instance Config API")
 public class SublinksInstanceConfigController extends AbstractSublinksApiController {
 
   private final SublinksInstanceService sublinksInstanceService;

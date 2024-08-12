@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/roles")
-@Tag(name = "Roles", description = "Roles API")
+@Tag(name = "Sublinks Roles", description = "Roles API")
 public class SublinksRolesController extends AbstractSublinksApiController {
 
   private final SublinksRoleService sublinksRoleService;

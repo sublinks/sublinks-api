@@ -2,13 +2,15 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 @Builder
 public record BanPerson(
-    String key,
+    @Schema(description = "The person key",
+        requiredMode = RequiredMode.REQUIRED) @NotNull() String key,
     @Schema(description = "The reason for the ban",
         requiredMode = RequiredMode.NOT_REQUIRED) String reason,
     @Schema(description = "Ban the user",

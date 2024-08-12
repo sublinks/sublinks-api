@@ -1,11 +1,12 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.person.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.PersonResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.moderation.BanPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.services.SublinksPersonService;
+import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.models.moderation.PurgePrivateMessage;
 import com.sublinks.sublinksapi.api.sublinks.v1.privatemessage.services.SublinksPrivateMessageService;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionPrivateMessageTypes;
 import com.sublinks.sublinksapi.authorization.services.AclService;
@@ -25,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/person/{key}/moderation")
-@Tag(name = "Person Moderation", description = "Person Moderation API")
+@Tag(name = "Sublinks Person Moderation", description = "Person Moderation API")
 @AllArgsConstructor
 public class SublinksPersonModerationController extends AbstractSublinksApiController {
 
@@ -37,7 +38,7 @@ public class SublinksPersonModerationController extends AbstractSublinksApiContr
   @GetMapping("/ban")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public PersonResponse ban(@RequestBody @Valid BanPerson banPersonForm,
+  public PersonResponse ban(@PathVariable String key, @RequestBody @Valid BanPerson banPersonForm,
       final SublinksJwtPerson jwtPerson)
   {
 
@@ -63,15 +64,18 @@ public class SublinksPersonModerationController extends AbstractSublinksApiContr
   @DeleteMapping("/purge/privatemessages")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public RequestResponse purgeAll(@PathVariable String key, final SublinksJwtPerson jwtPerson)
+  public RequestResponse purgeAll(@PathVariable String key,
+      @RequestBody final PurgePrivateMessage purgePrivateMessageForm,
+      final SublinksJwtPerson jwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(jwtPerson);
 
     aclService.canPerson(person)
-        .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGES);
+        .performTheAction(RolePermissionPrivateMessageTypes.PURGE_PRIVATE_MESSAGES)
+        .orThrowUnauthorized();
 
-    sublinksPrivateMessageService.purgeAllPrivateMessages(person);
+    sublinksPrivateMessageService.purgeAllPrivateMessages(key, purgePrivateMessageForm, person);
 
     return RequestResponse.builder()
         .success(true)

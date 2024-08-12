@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/v1/community")
-@Tag(name = "Community", description = "Community API")
+@Tag(name = "Sublinks Community", description = "Community API")
 public class SublinksCommunityController extends AbstractSublinksApiController {
 
   private final SublinksCommunityService sublinksCommunityService;
@@ -93,12 +93,12 @@ public class SublinksCommunityController extends AbstractSublinksApiController {
   @DeleteMapping("/{key}")
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public CommunityResponse delete(@RequestBody final DeleteCommunity deleteCommunityForm,
-      @PathVariable final String key, final SublinksJwtPerson sublinksJwtPerson)
+  public CommunityResponse delete(@PathVariable final String key,
+      final DeleteCommunity deleteCommunityParam, final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Person person = getPersonOrThrowUnauthorized(sublinksJwtPerson);
 
-    return sublinksCommunityService.delete(key, deleteCommunityForm, person);
+    return sublinksCommunityService.delete(key, deleteCommunityParam, person);
   }
 }

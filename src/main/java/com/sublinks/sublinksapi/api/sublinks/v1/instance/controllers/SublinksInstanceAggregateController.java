@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("api/v1/instance/{key}/aggregate")
-@Tag(name = "Instance Aggregate", description = "Instance Aggretate API")
+@Tag(name = "Sublinks Instance Aggregate", description = "Instance Aggretate API")
 public class SublinksInstanceAggregateController extends AbstractSublinksApiController {
 
   private final SublinksInstanceService sublinksInstanceService;

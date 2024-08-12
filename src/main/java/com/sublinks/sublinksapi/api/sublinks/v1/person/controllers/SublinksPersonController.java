@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/person")
-@Tag(name = "Person", description = "Person API")
+@Tag(name = "Sublinks Person", description = "Person API")
 @AllArgsConstructor
 public class SublinksPersonController extends AbstractSublinksApiController {
 

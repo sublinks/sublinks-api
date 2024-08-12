@@ -25,7 +25,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("api/v1/person/{key}/aggregation")
-@Tag(name = "Person Aggegation", description = "Person Aggregation API")
+@Tag(name = "Sublinks Person Aggegation", description = "Person Aggregation API")
 @AllArgsConstructor
 public class SublinksPersonAggregationController extends AbstractSublinksApiController {
 
@@ -47,8 +47,7 @@ public class SublinksPersonAggregationController extends AbstractSublinksApiCont
 
     rolePermissionService.isPermitted(person.orElse(null),
         RolePermissionPersonTypes.READ_PERSON_AGGREGATION,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     return conversionService.convert(sublinksPersonService.showAggregate(key, person.orElse(null)),
         PersonAggregateResponse.class);

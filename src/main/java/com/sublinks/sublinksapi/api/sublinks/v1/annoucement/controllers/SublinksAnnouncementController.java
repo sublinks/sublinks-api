@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("api/v1/announcement")
-@Tag(name = "Announcement", description = "Announcement API")
+@Tag(name = "Sublinks Announcement", description = "Announcement API")
 @AllArgsConstructor
 public class SublinksAnnouncementController extends AbstractSublinksApiController {
 

@@ -83,7 +83,7 @@ public class SublinksPostService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPostTypes.READ_POSTS)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final List<Community> communities = indexPostForm.communityKeys() == null ? null
         : communityRepository.findCommunityByTitleSlugIn(indexPostForm.communityKeys());
@@ -155,7 +155,7 @@ public class SublinksPostService {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionPostTypes.CREATE_POST)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     final Community community = communityRepository.findCommunityByTitleSlug(
             createPostForm.communityKey())
@@ -290,7 +290,7 @@ public class SublinksPostService {
     aclService.canPerson(person)
         .onCommunity(community)
         .performTheAction(RolePermissionPostTypes.UPDATE_POST)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     if (updatePostForm.languageKey() != null && !updatePostForm.languageKey()
         .isEmpty()) {
@@ -587,7 +587,7 @@ public class SublinksPostService {
     aclService.canPerson(person)
         .onCommunity(post.getCommunity())
         .performTheAction(RolePermissionPostTypes.PURGE_POST)
-        .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
+        .orThrowUnauthorized();
 
     // @todo: implement
 
