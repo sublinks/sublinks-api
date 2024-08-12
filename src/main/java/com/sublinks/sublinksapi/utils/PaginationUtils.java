@@ -1,6 +1,7 @@
 package com.sublinks.sublinksapi.utils;
 
 import jakarta.persistence.TypedQuery;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 public class PaginationUtils {
@@ -34,29 +35,29 @@ public class PaginationUtils {
     query.setMaxResults(Math.abs(size));
   }
 
-  public static <T extends Integer> int Clamp(T value, T min, T max) {
+  public static <T extends Integer> int Clamp(@NonNull final T value, final T min, final T max) {
 
     return Math.min(Math.max(value, min), max);
   }
 
-  public static <T extends Integer> int getPage(T value) {
+  public static <T extends Integer> int getPage(final T value) {
 
-    return Clamp(value, 1, Integer.MAX_VALUE);
+    return Clamp(value == null ? 0 : value, 0, Integer.MAX_VALUE);
   }
 
-  public static <T extends Integer> int getPerPage(T value, T min, T max) {
+  public static <T extends Integer> int getPerPage(final T value, final T min, final T max) {
 
-    return Clamp(value, min, max);
+    return Clamp(value == null ? max : value, min, max);
   }
 
-  public static <T extends Integer> int getPerPage(T value, T max) {
+  public static <T extends Integer> int getPerPage(final T value, final T max) {
 
-    return getPerPage(value, 1, max);
+    return getPerPage(value == null ? max : value, 1, max);
   }
 
-  public static <T extends Integer> int getPerPage(T value) {
+  public static <T extends Integer> int getPerPage(final T value) {
 
-    return getPerPage(value, 1, 20);
+    return getPerPage(value == null ? 20 : value, 1, 20);
   }
 
 }

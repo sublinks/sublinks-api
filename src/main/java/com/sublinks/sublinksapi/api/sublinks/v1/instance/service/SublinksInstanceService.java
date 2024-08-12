@@ -7,6 +7,7 @@ import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.InstanceResponse
 import com.sublinks.sublinksapi.api.sublinks.v1.instance.models.UpdateInstanceConfig;
 import com.sublinks.sublinksapi.authorization.enums.RolePermissionInstanceTypes;
 import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
+import com.sublinks.sublinksapi.instance.entities.Instance;
 import com.sublinks.sublinksapi.instance.entities.InstanceConfig;
 import com.sublinks.sublinksapi.instance.repositories.InstanceAggregateRepository;
 import com.sublinks.sublinksapi.instance.repositories.InstanceConfigRepository;
@@ -14,8 +15,8 @@ import com.sublinks.sublinksapi.instance.repositories.InstanceRepository;
 import com.sublinks.sublinksapi.instance.services.InstanceConfigService;
 import com.sublinks.sublinksapi.instance.services.InstanceService;
 import com.sublinks.sublinksapi.person.entities.Person;
+import com.sublinks.sublinksapi.utils.PaginationUtils;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.PageRequest;
@@ -37,19 +38,26 @@ public class SublinksInstanceService {
 
   public List<InstanceResponse> index(final IndexInstance indexInstance) {
 
+    PageRequest pageRequest = PageRequest.of(PaginationUtils.getPage(indexInstance.page()),
+        PaginationUtils.getPerPage(indexInstance.perPage()));
+    List<Instance> instances;
+
     if (indexInstance.search() == null) {
-      return instanceRepository.findAll(
-              PageRequest.of(indexInstance.page(), indexInstance.perPage()))
-          .stream()
-          .map(instance -> conversionService.convert(instance, InstanceResponse.class))
-          .collect(Collectors.toList());
+      instances = instanceRepository.findAll(pageRequest)
+          .getContent();
+    } else {
+      instances = instanceRepository.findInstancesByDomainOrDescriptionOrSidebar(
+          indexInstance.search(), pageRequest);
     }
 
-    return instanceRepository.findInstancesByDomainOrDescriptionOrSidebar(indexInstance.search(),
-            PageRequest.of(indexInstance.page(), indexInstance.perPage()))
-        .stream()
+    return convertToInstanceResponses(instances);
+  }
+
+  private List<InstanceResponse> convertToInstanceResponses(List<Instance> instances) {
+
+    return instances.stream()
         .map(instance -> conversionService.convert(instance, InstanceResponse.class))
-        .collect(Collectors.toList());
+        .toList();
   }
 
   public InstanceResponse show(final String key) {
@@ -68,8 +76,7 @@ public class SublinksInstanceService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_READ_ANNOUNCEMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     return conversionService.convert(instanceConfigRepository.findByInstance_Domain(key)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "instance_not_found")),
@@ -81,8 +88,7 @@ public class SublinksInstanceService {
   {
 
     rolePermissionService.isPermitted(person, RolePermissionInstanceTypes.INSTANCE_UPDATE_SETTINGS,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final InstanceConfig config = instanceConfigRepository.findByInstance_Domain(key)
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "instance_not_found"));

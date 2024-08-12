@@ -53,9 +53,8 @@ public class SublinksSearchService {
 
     final String search = searchForm.search();
 
-    final Integer page = searchForm.page() == null ? 1 : Math.max(searchForm.page(), 1);
-    final Integer perPage = searchForm.perPage() == null ? 20 : PaginationUtils.Clamp(
-        searchForm.perPage(), 1, 20);
+    final int page = PaginationUtils.getPage(searchForm.page());
+    final int perPage = PaginationUtils.getPerPage(searchForm.perPage());
 
     final SearchResponse.SearchResponseBuilder searchResponseBuilder = SearchResponse.builder();
 
@@ -123,8 +122,6 @@ public class SublinksSearchService {
           .perPage(perPage)
           .build()));
     }
-
-
 
     return searchResponseBuilder.build();
   }
