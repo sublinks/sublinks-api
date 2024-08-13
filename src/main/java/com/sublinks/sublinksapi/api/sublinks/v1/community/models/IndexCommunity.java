@@ -19,10 +19,12 @@ public record IndexCommunity(
         requiredMode = RequiredMode.NOT_REQUIRED) SublinksListingType listingType,
     @Schema(description = "Show NSFW",
         example = "false",
+        defaultValue = "false",
         requiredMode = RequiredMode.NOT_REQUIRED) Boolean showNsfw,
     Integer perPage,
     @Schema(description = "Page",
         example = "1",
+        defaultValue = "1",
         requiredMode = RequiredMode.NOT_REQUIRED) Integer page) {
 
   @Override
