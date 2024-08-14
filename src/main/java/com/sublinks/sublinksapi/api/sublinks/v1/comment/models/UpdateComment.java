@@ -6,13 +6,13 @@ import lombok.Builder;
 
 @Builder
 public record UpdateComment(
-    String body,
+    @Schema(description = "The new content of the comment",
+        requiredMode = RequiredMode.REQUIRED) String body,
     @Schema(description = "The language key of the comment",
         defaultValue = "und",
         example = "und",
         requiredMode = RequiredMode.NOT_REQUIRED) String languageKey,
     @Schema(description = "Whether the comment is featured ( Requires Moderator or Admin )",
-        defaultValue = "false",
         example = "false",
         requiredMode = RequiredMode.NOT_REQUIRED) Boolean featured) {
 
