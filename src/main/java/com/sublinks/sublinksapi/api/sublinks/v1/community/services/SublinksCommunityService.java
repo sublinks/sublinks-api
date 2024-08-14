@@ -186,6 +186,9 @@ public class SublinksCommunityService {
       throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
     }
 
+    if (updateCommunityForm.title() != null) {
+      community.setTitle(updateCommunityForm.title());
+    }
     if (updateCommunityForm.description() != null) {
       community.setDescription(updateCommunityForm.description());
     }

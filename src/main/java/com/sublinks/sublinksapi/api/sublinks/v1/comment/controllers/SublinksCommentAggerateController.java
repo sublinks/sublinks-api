@@ -1,10 +1,9 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.comment.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.AggregateCommentResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
-import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -29,7 +28,7 @@ public class SublinksCommentAggerateController extends AbstractSublinksApiContro
   @GetMapping
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
-  public AggregateCommentResponse aggregate(@PathVariable final String key,
+  public CommentAggregateResponse aggregate(@PathVariable final String key,
                                             final SublinksJwtPerson sublinksJwtPerson)
   {
 

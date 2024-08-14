@@ -1,6 +1,6 @@
 package com.sublinks.sublinksapi.api.sublinks.v1.comment.services;
 
-import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.AggregateCommentResponse;
+import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentAggregateResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CommentResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.CreateComment;
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.DeleteComment;
@@ -331,21 +331,21 @@ public class SublinksCommentService {
   }
 
   /**
-   * Retrieves a {@link AggregateCommentResponse} based on the provided comment key and person.
+   * Retrieves a {@link CommentAggregateResponse} based on the provided comment key and person.
    *
    * @param commentKey The key of the comment to retrieve the aggregate for.
    * @param person     The {@link Person} object representing the user performing the operation.
-   * @return A {@link AggregateCommentResponse} object representing the retrieved comment aggregate.
+   * @return A {@link CommentAggregateResponse} object representing the retrieved comment aggregate.
    * @throws ResponseStatusException If the comment is not found.
    */
-  public AggregateCommentResponse aggregate(String commentKey, Person person) {
+  public CommentAggregateResponse aggregate(String commentKey, Person person) {
 
     rolePermissionService.isPermitted(person, RolePermissionCommentTypes.READ_COMMENT_AGGREGATE,
         () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     return commentAggregateRepository.findByComment_Path(commentKey)
         .map(commentAggregate -> conversionService.convert(commentAggregate,
-            AggregateCommentResponse.class))
+            CommentAggregateResponse.class))
         .orElseThrow(
             () -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "comment_not_found"));
   }
