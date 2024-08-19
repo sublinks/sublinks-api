@@ -35,8 +35,8 @@ dependencies {
   implementation 'org.springframework.boot:spring-boot-starter-amqp'
   testImplementation 'org.springframework.amqp:spring-rabbit-test'
 
-  annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.5.2.Final"
-  implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.8.1'
+  annotationProcessor "org.hibernate:hibernate-jpamodelgen:6.6.0.Final"
+  implementation 'io.hypersistence:hypersistence-utils-hibernate-63:3.8.2'
   // Springdoc for Swagger API Docs
   implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
 
@@ -58,13 +58,13 @@ dependencies {
   implementation 'org.thymeleaf:thymeleaf:3.1.2.RELEASE'
   implementation 'org.thymeleaf:thymeleaf-spring6:3.1.2.RELEASE'
 
-  implementation "org.mapstruct:mapstruct:1.5.5.Final"
+  implementation "org.mapstruct:mapstruct:1.6.0"
   compileOnly 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-  compileOnly 'org.mapstruct:mapstruct:1.5.5.Final'
+  compileOnly 'org.mapstruct:mapstruct:1.6.0'
   compileOnly 'org.mapstruct.extensions.spring:mapstruct-spring-annotations:1.1.1'
   compileOnly 'org.projectlombok:lombok'
   annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
-  annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.5.Final'
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.0'
   annotationProcessor 'org.projectlombok:lombok'
   annotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
   testAnnotationProcessor 'org.mapstruct.extensions.spring:mapstruct-spring-extensions:1.1.1'
@@ -73,7 +73,7 @@ dependencies {
   runtimeOnly 'org.postgresql:postgresql:42.7.3'
   testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-  testImplementation 'org.junit.jupiter:junit-jupiter:5.10.3'
+  testImplementation 'org.junit.jupiter:junit-jupiter:5.11.0'
   testImplementation 'org.mockito:mockito-core:5.+'
 }
 
