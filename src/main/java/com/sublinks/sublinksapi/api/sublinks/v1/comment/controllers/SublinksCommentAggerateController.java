@@ -29,7 +29,7 @@ public class SublinksCommentAggerateController extends AbstractSublinksApiContro
   @ApiResponses(value = {
       @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
   public CommentAggregateResponse aggregate(@PathVariable final String key,
-                                            final SublinksJwtPerson sublinksJwtPerson)
+      final SublinksJwtPerson sublinksJwtPerson)
   {
 
     final Optional<Person> person = getOptionalPerson(sublinksJwtPerson);
