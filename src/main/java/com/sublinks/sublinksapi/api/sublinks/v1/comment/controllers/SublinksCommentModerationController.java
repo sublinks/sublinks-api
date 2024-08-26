@@ -8,7 +8,6 @@ import com.sublinks.sublinksapi.api.sublinks.v1.comment.models.Moderation.Remove
 import com.sublinks.sublinksapi.api.sublinks.v1.comment.services.SublinksCommentService;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
-import com.sublinks.sublinksapi.authorization.services.RolePermissionService;
 import com.sublinks.sublinksapi.person.entities.Person;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -30,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class SublinksCommentModerationController extends AbstractSublinksApiController {
 
   private final SublinksCommentService sublinksCommentService;
-  private final RolePermissionService rolePermissionService;
 
   @Operation(summary = "Remove a comment")
   @PostMapping("/remove")
