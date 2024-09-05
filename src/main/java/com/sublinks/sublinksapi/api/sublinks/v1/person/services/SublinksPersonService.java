@@ -730,4 +730,29 @@ public class SublinksPersonService {
     }
     userDataRepository.deleteAll(userDataRepository.findAllByPerson(target));
   }
+
+  /**
+   * Invalidates the user data associated with a specific token.
+   *
+   * @param token  The token associated with the user data.
+   * @param person The person performing the operation.
+   * @throws ResponseStatusException If the user data is not found or the person is not authorized
+   *                                 to invalidate it.
+   */
+  public void invalidateUserDataByToken(final String token, final Person person) {
+
+    final PersonMetaData personMetaData = userDataRepository.findByToken(token)
+        .orElseThrow(
+            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "person_metadata_not_found"));
+
+    if (!(rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.INVALIDATE_USER_OWN_METADATA) && personMetaData.getPerson()
+        .equals(person)) && !rolePermissionService.isPermitted(person,
+        RolePermissionPersonTypes.INVALIDATE_USER_METADATA)) {
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized");
+    }
+
+    userDataService.invalidate(personMetaData);
+  }
+
 }

@@ -15,11 +15,10 @@ public interface UserDataRepository extends JpaRepository<PersonMetaData, Long> 
   List<PersonMetaData> findFirstByPersonAndIpAddress(Person person, String ipAddress);
 
   Optional<PersonMetaData> findFirstByPersonAndIpAddressAndUserAgentAndActiveIsTrue(Person person,
-      String ipAddress,
-      String userAgent);
+      String ipAddress, String userAgent);
 
-  Optional<PersonMetaData> findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(Person person,
-      String token, String ipAddress, String userAgent);
+  Optional<PersonMetaData> findFirstByPersonAndTokenAndIpAddressAndUserAgentAndActiveIsTrue(
+      Person person, String token, String ipAddress, String userAgent);
 
   Optional<PersonMetaData> findFirstByPersonAndTokenAndIpAddressAndActiveIsTrue(Person person,
       String token, String ipAddress);
@@ -36,4 +35,12 @@ public interface UserDataRepository extends JpaRepository<PersonMetaData, Long> 
   @Modifying
   @Query("update PersonMetaData u set u.active = false where u.person = :person")
   void updateAllByPersonSetActiveToFalse(@Param(value = "person") Person person);
+
+  @Modifying
+  @Query(
+      "update PersonMetaData u set u.active = false where u.token = :token")
+  void updateAllByPersonAndIpAddressSetActiveToFalse(@Param(value = "token") String token);
+
+  Optional<PersonMetaData> findByToken(String token);
 }
+

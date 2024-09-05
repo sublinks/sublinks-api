@@ -2,6 +2,7 @@ package com.sublinks.sublinksapi.api.sublinks.v1.person.controllers;
 
 import com.sublinks.sublinksapi.api.sublinks.v1.authentication.SublinksJwtPerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.common.controllers.AbstractSublinksApiController;
+import com.sublinks.sublinksapi.api.sublinks.v1.common.models.RequestResponse;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.CreatePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.DeletePerson;
 import com.sublinks.sublinksapi.api.sublinks.v1.person.models.IndexPerson;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class SublinksPersonController extends AbstractSublinksApiController {
 
   private final SublinksPersonService sublinksPersonService;
+  private final SublinksPersonSessionController sublinksPersonSessionController;
 
   @Operation(summary = "Get a list of persons")
   @GetMapping
@@ -85,6 +87,17 @@ public class SublinksPersonController extends AbstractSublinksApiController {
     return sublinksPersonService.login(loginPerson, request.getRemoteAddr(),
         request.getHeader("User-Agent"));
   }
+
+  @Operation(summary = "Log out of a user ( Alias for invalidating the current session with /api/v1/session/invalidate )")
+  @PostMapping("/logout")
+  @ApiResponses(value = {
+      @ApiResponse(responseCode = "200", description = "OK", useReturnTypeSchema = true)})
+  public RequestResponse logout(final SublinksJwtPerson principal)
+  {
+
+    return sublinksPersonSessionController.invalidateCurrentSession(principal);
+  }
+
 
   @Operation(summary = "Update an person")
   @PostMapping("/{key}")

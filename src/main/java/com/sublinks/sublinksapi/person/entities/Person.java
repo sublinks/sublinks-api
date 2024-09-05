@@ -350,4 +350,9 @@ public class Person implements UserDetails, Principal {
         .getPersistentClass()
         .hashCode() : getClass().hashCode();
   }
+
+  public String getKey() {
+
+    return name + "@" + instance.getDomain();
+  }
 }
