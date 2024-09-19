@@ -102,8 +102,7 @@ public class SublinksAnnouncementService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_CREATE_ANNOUNCEMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Announcement announcement = Announcement.builder()
         .content(createAnnouncementForm.content())
@@ -132,15 +131,14 @@ public class SublinksAnnouncementService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_UPDATE_ANNOUNCEMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 
-    if(updateAnnouncementForm.content() != null){
+    if (updateAnnouncementForm.content() != null) {
       announcement.setContent(updateAnnouncementForm.content());
     }
-    if(updateAnnouncementForm.active() != null){
+    if (updateAnnouncementForm.active() != null) {
       announcement.setActive(updateAnnouncementForm.active());
     }
     this.announcementRepository.save(announcement);
@@ -161,8 +159,7 @@ public class SublinksAnnouncementService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_DELETE_ANNOUNCEMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 
@@ -184,8 +181,7 @@ public class SublinksAnnouncementService {
 
     rolePermissionService.isPermitted(person,
         RolePermissionInstanceTypes.INSTANCE_DELETE_ANNOUNCEMENT,
-        () -> new ResponseStatusException(HttpStatus.FORBIDDEN,
-            "unauthorized"));
+        () -> new ResponseStatusException(HttpStatus.FORBIDDEN, "unauthorized"));
 
     final Announcement announcement = this.announcementRepository.getReferenceById(id);
 
