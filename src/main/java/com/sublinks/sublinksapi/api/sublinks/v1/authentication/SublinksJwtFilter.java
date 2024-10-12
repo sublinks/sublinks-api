@@ -78,7 +78,7 @@ public class SublinksJwtFilter extends OncePerRequestFilter {
             request.getHeader("User-Agent"));
         final SublinksJwtPerson authenticationToken = new SublinksJwtPerson(person.get(),
             person.get()
-                .getAuthorities());
+                .getAuthorities(), token);
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext()
             .setAuthentication(authenticationToken);
