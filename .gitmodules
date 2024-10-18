@@ -1,3 +1,3 @@
 [submodule "docker"]
 	path = docker
-	url = git@github.com:sublinks/sublinks-docker.git
+	url = https://github.com/Pdzly/clubsall-docker.git
