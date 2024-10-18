@@ -153,7 +153,6 @@ public class AdminController extends AbstractLemmyApiController {
 
     aclService.canPerson(person)
         .performTheAction(RolePermissionInstanceTypes.INSTANCE_REMOVE_ADMIN)
-
         .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "unauthorized"));
 
     return GetUnreadRegistrationApplicationCountResponse.builder()
