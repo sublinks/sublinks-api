@@ -233,7 +233,9 @@ public class SublinksPersonService {
       }
     }
 
+    // Password gets encrypted inside .createPerson
     final Person.PersonBuilder personBuilder = Person.builder()
+        .password(createPersonForm.password())
         .name(createPersonForm.name())
         .displayName(createPersonForm.displayName())
         .avatarImageUrl(createPersonForm.avatarImageUrl())
